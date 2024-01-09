@@ -4,7 +4,7 @@
 @endphp
 @extends('tastvn/layouts/layoutMaster')
 
-@section('title', 'TastVN Forgot Password?')
+@section('title', 'TasteVN Forgot Password?')
 
 @section('vendor-style')
   <!-- Vendor -->

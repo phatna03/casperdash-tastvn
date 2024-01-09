@@ -42,7 +42,7 @@ return [
     |
     */
 
-  'debug' => (bool) env('APP_DEBUG', false),
+  'debug' => (bool)env('APP_DEBUG', false),
 
   /*
     |--------------------------------------------------------------------------
@@ -169,6 +169,10 @@ return [
     App\Providers\EventServiceProvider::class,
     App\Providers\RouteServiceProvider::class,
     App\Providers\MenuServiceProvider::class,
+
+    //tastvn
+    Aws\Laravel\AwsServiceProvider::class,
+
   ])->toArray(),
 
   /*
@@ -185,6 +189,10 @@ return [
   'aliases' => Facade::defaultAliases()->merge([
     // 'Example' => App\Facades\Example::class,
     'Helper' => App\Helpers\Helpers::class,
+
+    //tastvn
+    'AWS' => Aws\Laravel\AwsFacade::class,
+
   ])->toArray(),
 
 ];

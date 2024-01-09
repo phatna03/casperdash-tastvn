@@ -5,3 +5,11 @@
 .text-right {
   text-align: right;
 }
+
+.clearfix {
+  clear: both;
+}
+
+.float-right {
+  float: right;
+}

@@ -4,7 +4,7 @@ return [
 
   "creatorName" => "Casperdash",
   "creatorUrl" => "https://casperdash.io/",
-  "templateName" => "TastVN",
+  "templateName" => "TasteVN",
 
   "templateSuffix" => "Materialize - Bootstrap 5 HTML Laravel Admin Template",
   "templateVersion" => "1.3.0",

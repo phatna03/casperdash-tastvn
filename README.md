@@ -25,3 +25,4 @@
     + https://github.com/snowfire/Beautymail
     + composer require snowfire/beautymail
   + aws
+    + https://github.com/aws/aws-sdk-php-laravel

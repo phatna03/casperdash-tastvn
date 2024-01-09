@@ -5,7 +5,7 @@ $customizerHidden = 'customizer-hide';
 
 @extends('tastvn/layouts/layoutMaster')
 
-@section('title', 'TastVN Authentication')
+@section('title', 'TasteVN Authentication')
 
 @section('vendor-style')
 <!-- Vendor -->

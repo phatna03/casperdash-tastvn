@@ -5,7 +5,7 @@
 
 @extends('tastvn/layouts/layoutMaster')
 
-@section('title', 'TastVN Reset Password')
+@section('title', 'TasteVN Reset Password')
 
 @section('vendor-style')
   <!-- Vendor -->
