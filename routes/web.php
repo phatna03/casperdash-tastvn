@@ -157,11 +157,7 @@ use App\Http\Controllers\charts\ApexCharts;
 use App\Http\Controllers\charts\ChartJs;
 use App\Http\Controllers\maps\Leaflet;
 
-//tastvn
-use App\Http\Controllers\tastvn\Login;
-use App\Http\Controllers\tastvn\Error;
-use App\Http\Controllers\tastvn\Admin;
-
+//======================================================================================================================
 //cache
 Route::get('/cc', function () {
   Artisan::call('cache:clear');
@@ -172,20 +168,322 @@ Route::get('/cc', function () {
   die('cache clear ok...');
 });
 
-Route::get('/login', [Login::class, 'index'])->name('login');
-Route::get('/forgot/email', [Login::class, 'forgot_email']);
-Route::get('/forgot/code', [Login::class, 'forgot_code']);
+//======================================================================================================================
+//tastevn
+use Illuminate\Http\Request;
+use App\Http\Controllers\tastevn\api\AuthController;
+use App\Http\Controllers\tastevn\api\TesterController;
+use App\Http\Controllers\tastevn\api\RoboflowController;
+use App\Http\Controllers\tastevn\api\SettingController;
+use App\Http\Controllers\tastevn\api\UserController;
+use App\Http\Controllers\tastevn\api\RestaurantController;
+use App\Http\Controllers\tastevn\api\FoodController;
+use App\Http\Controllers\tastevn\api\IngredientController;
+use App\Http\Controllers\tastevn\api\FoodCategoryController;
+use App\Http\Controllers\tastevn\view\GuestController;
+use App\Http\Controllers\tastevn\view\DashboardController;
 
-Route::get('/error', [Error::class, 'index']);
-Route::get('/tester', [Error::class, 'tester']);
+use App\Api\SysCore;
 
-Route::get('/', [Admin::class, 'index']);
-Route::get('/admin', [Admin::class, 'index']);
-Route::get('/admin/users', [Admin::class, 'users']);
-Route::get('/admin/restaurant/info', [Admin::class, 'restaurant_info']);
+Route::get('/login', [GuestController::class, 'login'])->name('logout');
+Route::get('/login', [GuestController::class, 'login'])->name('login');
+Route::post('/auth/login', [AuthController::class, 'login']);
+Route::post('/auth/send-code', [AuthController::class, 'send_code']);
+Route::post('/auth/update-pwd', [AuthController::class, 'update_pwd']);
+Route::post('/auth/logout', [AuthController::class, 'logout']);
 
-//themeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+Route::get('/', [DashboardController::class, 'index']);
+Route::get('/admin', [DashboardController::class, 'index']);
 
+Route::get('/admin/notifications', [DashboardController::class, 'notification']);
+Route::post('/admin/notification/read', [DashboardController::class, 'notification_read']);
+Route::post('/admin/notification/read/all', [DashboardController::class, 'notification_read_all']);
+Route::post('/admin/notification/latest', [DashboardController::class, 'notification_latest']);
+Route::post('/admin/notification/newest', [DashboardController::class, 'notification_newest']);
+
+Route::get('/printer', [GuestController::class, 'printer']);
+Route::get('/page_not_found', [GuestController::class, 'page_not_found']);
+Route::get('/tester', [TesterController::class, 'index']);
+
+Route::get('/admin/settings', [SettingController::class, 'index']);
+Route::post('/admin/setting/update', [SettingController::class, 'update']);
+
+Route::get('/admin/users', [UserController::class, 'index']);
+Route::post('/admin/user/store', [UserController::class, 'store']);
+Route::post('/admin/user/update', [UserController::class, 'update']);
+Route::post('/admin/user/delete', [UserController::class, 'delete']);
+Route::post('/admin/user/restore', [UserController::class, 'restore']);
+Route::get('/datatable/user', function(Request $request) {
+  $values = $request->all();
+
+  $select = App\Models\User::query()
+    ->select('id', 'name', 'email', 'phone', 'status', 'note', 'updated_at', 'access_full', 'access_ids', 'access_texts')
+    ->where('deleted', 0)
+    ->where('role', '<>', 'superadmin') //superadmin
+    ->orderBy('updated_at', 'desc')
+    ->orderBy('id', 'desc')
+  ;
+
+  if (count($values)) {
+    if (isset($values['name']) && !empty($values['name'])) {
+      $select->where('name', 'LIKE', '%' . $values['name'] . '%');
+    }
+  }
+
+  return DataTables::of($select)->addIndexColumn()->toJson();
+});
+
+Route::get('/admin/restaurants', [RestaurantController::class, 'index']);
+Route::post('/admin/restaurant/store', [RestaurantController::class, 'store']);
+Route::post('/admin/restaurant/update', [RestaurantController::class, 'update']);
+Route::post('/admin/restaurant/delete', [RestaurantController::class, 'delete']);
+Route::post('/admin/restaurant/restore', [RestaurantController::class, 'restore']);
+Route::post('/admin/restaurant/selectize', [RestaurantController::class, 'selectize']);
+Route::post('/admin/restaurant/stats', [RestaurantController::class, 'stats']);
+Route::get('/admin/restaurant/info/{id}', [RestaurantController::class, 'show']);
+Route::post('/admin/restaurant/food/add', [RestaurantController::class, 'food_add']);
+Route::post('/admin/restaurant/food/delete', [RestaurantController::class, 'food_delete']);
+Route::post('/admin/restaurant/food/scan', [RestaurantController::class, 'food_scan']);
+Route::post('/admin/restaurant/food/scan/delete', [RestaurantController::class, 'food_scan_delete']);
+Route::post('/admin/restaurant/food/scan/info', [RestaurantController::class, 'food_scan_info']);
+Route::post('/admin/restaurant/food/scan/update', [RestaurantController::class, 'food_scan_update']);
+Route::post('/admin/restaurant/food/scan/error', [RestaurantController::class, 'food_scan_error']);
+Route::get('/datatable/restaurant', function(Request $request) {
+  $values = $request->all();
+
+  $user = \Illuminate\Support\Facades\Auth::user();
+
+  $select = App\Models\Restaurant::query("restaurants")
+    ->select("restaurants.id", "restaurants.s3_bucket_name", "restaurants.s3_bucket_address",
+      "restaurants.name", "restaurants.count_foods", "restaurants.updated_at")
+    ->where('restaurants.deleted', 0)
+    ->orderBy('restaurants.updated_at', 'desc')
+    ->orderBy('restaurants.id', 'desc')
+  ;
+
+  if ($user && $user->role == 'moderator' && !$user->access_full) {
+    $select->whereIn('id', function ($q) use ($user) {
+      $q->select('restaurant_id')
+        ->from('restaurant_access')
+        ->where('user_id', $user->id);
+    });
+  }
+
+  if (count($values)) {
+    if (isset($values['name']) && !empty($values['name'])) {
+      $select->where('restaurants.name', 'LIKE', '%' . $values['name'] . '%');
+    }
+  }
+
+  return DataTables::of($select)->addIndexColumn()->toJson();
+});
+Route::get('/datatable/restaurant-foods', function(Request $request) {
+  $values = $request->all();
+  $restaurant = isset($values['restaurant']) ? (int)$values['restaurant'] : 0;
+
+  $select = App\Models\RestaurantFood::query("restaurant_foods")
+    ->select("restaurant_foods.food_id", "food_categories.name as category_name",
+      "foods.name as food_name", "foods.photo as food_photo", "restaurant_foods.updated_at")
+    ->leftJoin("foods", "restaurant_foods.food_id", "=", "foods.id")
+    ->leftJoin("food_categories", "restaurant_foods.food_category_id", "=", "food_categories.id")
+    ->where('restaurant_foods.deleted', 0)
+    ->orderBy('restaurant_foods.updated_at', 'desc')
+    ->orderBy('restaurant_foods.id', 'desc')
+  ;
+
+  if ($restaurant) {
+    $select->where("restaurant_foods.restaurant_id", $restaurant);
+  }
+
+  if (count($values)) {
+    if (isset($values['name']) && !empty($values['name'])) {
+      $select->where('foods.name', 'LIKE', '%' . $values['name'] . '%');
+    }
+  }
+
+  return DataTables::of($select)->addIndexColumn()->toJson();
+});
+Route::get('/datatable/restaurant-food-scans', function(Request $request) {
+  $values = $request->all();
+  $api_core = new SysCore();
+
+  $restaurant = isset($values['restaurant']) ? (int)$values['restaurant'] : 0;
+  $food_catetories = isset($values['categories']) ? (array)$values['categories'] : [];
+  $foods = isset($values['foods']) ? (array)$values['foods'] : [];
+  $time_upload = isset($values['time_upload']) && !empty($values['time_upload']) ? $values['time_upload'] : NULL;
+  $time_scan = isset($values['time_scan']) && !empty($values['time_scan']) ? $values['time_scan'] : NULL;
+
+  $select = App\Models\RestaurantFoodScan::query("restaurant_food_scans")
+    ->select("restaurant_food_scans.id", "restaurant_food_scans.photo_url", "restaurant_food_scans.confidence",
+      "restaurant_food_scans.time_scan", "restaurant_food_scans.time_photo", "restaurant_food_scans.missing_texts",
+      "restaurant_food_scans.status", "restaurant_food_scans.found_by", "restaurant_food_scans.note",
+      "restaurant_food_scans.food_id", "restaurant_food_scans.food_category_id", "restaurant_food_scans.rbf_retrain",
+      "foods.name as food_name", "food_categories.name as category_name",
+    )
+    ->leftJoin("foods", "restaurant_food_scans.food_id", "=", "foods.id")
+    ->leftJoin("food_categories", "restaurant_food_scans.food_category_id", "=", "food_categories.id")
+
+    ->where("restaurant_food_scans.deleted", 0)
+
+    ->orderBy('restaurant_food_scans.updated_at', 'desc')
+    ->orderBy('restaurant_food_scans.id', 'desc')
+  ;
+
+  if ($restaurant) {
+    $select->where("restaurant_food_scans.restaurant_id", $restaurant);
+  }
+  if (count($food_catetories)) {
+    $select->whereIn("restaurant_food_scans.food_category_id", $food_catetories);
+  }
+  if (count($foods)) {
+    $select->whereIn("restaurant_food_scans.food_id", $foods);
+  }
+  if (!empty($time_scan)) {
+    $times = $api_core->parse_date_range($time_scan);
+    if (!empty($times['time_from'])) {
+      $select->where('restaurant_food_scans.time_scan', '>=', $times['time_from']);
+    }
+    if (!empty($times['time_to'])) {
+      $select->where('restaurant_food_scans.time_scan', '<=', $times['time_to']);
+    }
+  }
+  if (!empty($time_upload)) {
+    $times = $api_core->parse_date_range($time_upload);
+    if (!empty($times['time_from'])) {
+      $select->where('restaurant_food_scans.time_photo', '>=', $times['time_from']);
+    }
+    if (!empty($times['time_to'])) {
+      $select->where('restaurant_food_scans.time_photo', '<=', $times['time_to']);
+    }
+  }
+
+  return DataTables::of($select)->addIndexColumn()->toJson();
+});
+Route::get('/datatable/restaurant-food-scan-errors', function(Request $request) {
+  $values = $request->all();
+  $api_core = new SysCore();
+
+  $restaurant = isset($values['restaurant']) ? (int)$values['restaurant'] : 0;
+  $food_catetories = isset($values['categories']) ? (array)$values['categories'] : [];
+  $foods = isset($values['foods']) ? (array)$values['foods'] : [];
+  $time_upload = isset($values['time_upload']) && !empty($values['time_upload']) ? $values['time_upload'] : NULL;
+  $time_scan = isset($values['time_scan']) && !empty($values['time_scan']) ? $values['time_scan'] : NULL;
+
+  $select = App\Models\RestaurantFoodScan::query('restaurant_food_scans')
+    ->leftJoin('foods', 'foods.id', '=', 'restaurant_food_scans.food_id')
+    ->leftJoin('food_categories', 'food_categories.id', '=', 'restaurant_food_scans.food_category_id')
+    ->select('restaurant_food_scans.food_id', 'restaurant_food_scans.missing_ids', 'restaurant_food_scans.missing_texts', 'foods.name as food_name', 'food_categories.name as food_category_name')
+    ->selectRaw('COUNT(restaurant_food_scans.id) as total_error')
+    ->groupBy(['restaurant_food_scans.food_id', 'restaurant_food_scans.missing_ids', 'restaurant_food_scans.missing_texts', 'foods.name', 'food_categories.name'])
+    ->orderBy('total_error', 'desc');
+
+  if ($restaurant) {
+    $select->where("restaurant_food_scans.restaurant_id", $restaurant);
+  }
+  if (count($food_catetories)) {
+    $select->whereIn("restaurant_food_scans.food_category_id", $food_catetories);
+  }
+  if (count($foods)) {
+    $select->whereIn("restaurant_food_scans.food_id", $foods);
+  }
+  if (!empty($time_scan)) {
+    $times = $api_core->parse_date_range($time_scan);
+    if (!empty($times['time_from'])) {
+      $select->where('restaurant_food_scans.time_scan', '>=', $times['time_from']);
+    }
+    if (!empty($times['time_to'])) {
+      $select->where('restaurant_food_scans.time_scan', '<=', $times['time_to']);
+    }
+  }
+  if (!empty($time_upload)) {
+    $times = $api_core->parse_date_range($time_upload);
+    if (!empty($times['time_from'])) {
+      $select->where('restaurant_food_scans.time_photo', '>=', $times['time_from']);
+    }
+    if (!empty($times['time_to'])) {
+      $select->where('restaurant_food_scans.time_photo', '<=', $times['time_to']);
+    }
+  }
+
+  return DataTables::of($select)->addIndexColumn()->toJson();
+});
+
+Route::get('/admin/foods', [FoodController::class, 'index']);
+Route::post('/admin/food/get', [FoodController::class, 'get']);
+Route::post('/admin/food/ingredient/html', [FoodController::class, 'ingredient_html']);
+Route::post('/admin/food/store', [FoodController::class, 'store']);
+Route::post('/admin/food/update', [FoodController::class, 'update']);
+Route::post('/admin/food/selectize', [FoodController::class, 'selectize']);
+Route::get('/datatable/foods', function(Request $request) {
+  $values = $request->all();
+
+  $select = App\Models\Food::query()
+    ->orderBy('updated_at', 'desc')
+    ->orderBy('id', 'desc')
+  ;
+
+  if (count($values)) {
+    if (isset($values['name']) && !empty($values['name'])) {
+      $select->where('name', 'LIKE', '%' . $values['name'] . '%');
+    }
+  }
+
+  return DataTables::of($select)->addIndexColumn()->toJson();
+});
+
+Route::get('/admin/ingredients', [IngredientController::class, 'index']);
+Route::post('/admin/ingredient/store', [IngredientController::class, 'store']);
+Route::post('/admin/ingredient/update', [IngredientController::class, 'update']);
+Route::post('/admin/ingredient/create', [IngredientController::class, 'create']);
+Route::post('/admin/ingredient/selectize', [IngredientController::class, 'selectize']);
+Route::get('/datatable/ingredients', function(Request $request) {
+  $values = $request->all();
+
+  $select = App\Models\Ingredient::query()
+    ->orderBy('updated_at', 'desc')
+    ->orderBy('id', 'desc')
+  ;
+
+  if (count($values)) {
+    if (isset($values['name']) && !empty($values['name'])) {
+      $select->where(function ($q) use ($values) {
+        $q->where('name', 'LIKE', '%' . $values['name'] . '%')
+          ->orWhere('name_vi', 'LIKE', '%' . $values['name'] . '%');
+      });
+    }
+  }
+
+  return DataTables::of($select)->addIndexColumn()->toJson();
+});
+
+Route::get('/admin/food-categories', [FoodCategoryController::class, 'index']);
+Route::post('/admin/food-category/store', [FoodCategoryController::class, 'store']);
+Route::post('/admin/food-category/update', [FoodCategoryController::class, 'update']);
+Route::post('/admin/food-category/create', [FoodCategoryController::class, 'create']);
+Route::post('/admin/food-category/selectize', [FoodCategoryController::class, 'selectize']);
+Route::get('/datatable/food-categories', function(Request $request) {
+  $values = $request->all();
+
+  $select = App\Models\FoodCategory::query()
+    ->orderBy('updated_at', 'desc')
+    ->orderBy('id', 'desc')
+  ;
+
+  if (count($values)) {
+    if (isset($values['name']) && !empty($values['name'])) {
+      $select->where('name', 'LIKE', '%' . $values['name'] . '%');
+    }
+  }
+
+  return DataTables::of($select)->addIndexColumn()->toJson();
+});
+
+Route::get('/admin/roboflow', [RoboflowController::class, 'index']);
+Route::post('/admin/roboflow/detect', [RoboflowController::class, 'detect']);
+Route::post('/admin/roboflow/retrain', [RoboflowController::class, 'retrain']);
+
+//======================================================================================================================
+//theme material ui
 // Main Page Route
 //custome
 //Route::get('/', [Analytics::class, 'index'])->name('dashboard-analytics');

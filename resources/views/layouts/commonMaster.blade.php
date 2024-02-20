@@ -22,9 +22,9 @@ $contentLayout = (isset($container) ? (($container === 'container-xxl') ? "layou
   <!-- Canonical SEO -->
   <link rel="canonical" href="{{ config('variables.productPage') ? config('variables.productPage') : '' }}">
   <!-- Favicon -->
-  <link rel="icon" type="image/x-icon" href="{{ asset('assets/img/favicon/favicon.ico') }}" />
+  <link rel="icon" type="image/x-icon" href="{{ url('favicon.ico') }}" />
 
-  
+
 
   <!-- Include Styles -->
   <!-- $isFront is used to append the front layout styles only on the front layout otherwise the variable will be blank -->
@@ -36,13 +36,13 @@ $contentLayout = (isset($container) ? (($container === 'container-xxl') ? "layou
 </head>
 
 <body>
-  
+
 
   <!-- Layout Content -->
   @yield('layoutContent')
   <!--/ Layout Content -->
 
-  
+
 
   <!-- Include Scripts -->
   <!-- $isFront is used to append the front layout scripts only on the front layout otherwise the variable will be blank -->

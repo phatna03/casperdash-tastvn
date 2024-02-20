@@ -30,5 +30,8 @@ return [
       'layoutNavbarOptions',
       'themes',
     ], // To show/hide customizer options
+
+    'pageMockup' => false,
+    'pageAuth' => false,
   ],
 ];

@@ -1,0 +1,46 @@
+{
+  "menu": [
+    {
+      "name": "Dashboard",
+      "icon": "menu-icon tf-icons mdi mdi-home-outline",
+      "url": "admin",
+      "slug": "admin"
+    },
+    {
+      "name": "Users",
+      "icon": "menu-icon tf-icons mdi mdi-account-group no_moderator",
+      "url": "admin/users",
+      "slug": "admin-users"
+    },
+    {
+      "name": "Categories",
+      "icon": "menu-icon tf-icons mdi mdi-list-box",
+      "url": "admin/food-categories",
+      "slug": "admin-food-categories"
+    },
+    {
+      "name": "Dishes",
+      "icon": "menu-icon tf-icons mdi mdi-food",
+      "url": "admin/foods",
+      "slug": "admin-foods"
+    },
+    {
+      "name": "Ingredients",
+      "icon": "menu-icon tf-icons mdi mdi-food-outline",
+      "url": "admin/ingredients",
+      "slug": "admin-ingredients"
+    },
+    {
+      "name": "Settings",
+      "icon": "menu-icon tf-icons mdi mdi-cogs no_moderator no_admin",
+      "url": "admin/settings",
+      "slug": "admin-settings"
+    },
+    {
+      "name": "Roboflow API",
+      "icon": "menu-icon tf-icons mdi mdi-robot-angry",
+      "url": "admin/roboflow",
+      "slug": "admin-roboflow"
+    }
+  ]
+}

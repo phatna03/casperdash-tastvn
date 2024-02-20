@@ -27,12 +27,12 @@ class MenuServiceProvider extends ServiceProvider
     // Share all menuData to all the views
     \View::share('menuData', [$verticalMenuData, $horizontalMenuData]);
 
-    //tastvn
-    $verticalMenuJson = file_get_contents(base_path('resources/menu/tastvn/verticalMenu.json'));
+    //tastevn
+    $verticalMenuJson = file_get_contents(base_path('resources/menu/tastevn/verticalMenu.json'));
     $verticalMenuData = json_decode($verticalMenuJson);
-    $horizontalMenuJson = file_get_contents(base_path('resources/menu/tastvn/horizontalMenu.json'));
+    $horizontalMenuJson = file_get_contents(base_path('resources/menu/tastevn/horizontalMenu.json'));
     $horizontalMenuData = json_decode($horizontalMenuJson);
 
-    \View::share('tastvnMenuData', [$verticalMenuData, $horizontalMenuData]);
+    \View::share('tastevnMenuData', [$verticalMenuData, $horizontalMenuData]);
   }
 }

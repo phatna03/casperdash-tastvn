@@ -12,7 +12,6 @@ class Helpers
 
     $data = config('custom.custom');
 
-
     // default data array
     $DefaultData = [
       'myLayout' => 'vertical',
@@ -33,15 +32,19 @@ class Helpers
       // 'menuOffcanvas' => false,
       'customizerControls' => [
         'rtl',
-      'style',
-      'headerType',
-      'contentLayout',
-      'layoutCollapsed',
-      'showDropdownOnHover',
-      'layoutNavbarOptions',
-      'themes',
+        'style',
+        'headerType',
+        'contentLayout',
+        'layoutCollapsed',
+        'showDropdownOnHover',
+        'layoutNavbarOptions',
+        'themes',
       ],
-      //   'defaultLanguage'=>'en',
+//   'defaultLanguage'=>'en',
+
+      'pageMockup' => false,
+      'pageAuth' => false,
+      'views' => [],
     ];
 
     // if any key missing of array from custom.php file it will be merge and set a default value from dataDefault array and store in data variable
@@ -119,6 +122,11 @@ class Helpers
       'footerFixed' => $data['footerFixed'],
       'menuFlipped' => $data['menuFlipped'],
       'customizerControls' => $data['customizerControls'],
+
+      //custome
+      'pageMockup' => $data['pageMockup'],
+      'pageAuth' => $data['pageAuth'],
+      'views' => $data['views'],
     ];
 
     // sidebar Collapsed

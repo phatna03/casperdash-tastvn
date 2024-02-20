@@ -170,8 +170,10 @@ return [
     App\Providers\RouteServiceProvider::class,
     App\Providers\MenuServiceProvider::class,
 
-    //tastvn
+    //tastevn
     Aws\Laravel\AwsServiceProvider::class,
+
+    Yajra\DataTables\DataTablesServiceProvider::class,
 
   ])->toArray(),
 
@@ -190,7 +192,7 @@ return [
     // 'Example' => App\Facades\Example::class,
     'Helper' => App\Helpers\Helpers::class,
 
-    //tastvn
+    //tastevn
     'AWS' => Aws\Laravel\AwsFacade::class,
 
   ])->toArray(),
