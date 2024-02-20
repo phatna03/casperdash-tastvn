@@ -28,7 +28,7 @@ jobs:
 
     - name: Deploy to EC2
       run: |
-        ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.EC2_PUBLIC_IP }} 'cd /var/www/html && composer install --no-interaction --prefer-dist --optimize-autoloader && php artisan config:cache && php artisan route:cache'
+        ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.EC2_PUBLIC_IP }} 'cd /var/www/html && git checkout -f && git pull && composer install --no-interaction --prefer-dist --optimize-autoloader && php artisan config:cache && php artisan route:cache'
 
     - name: Clear SSH key
       run: rm ~/.ssh/id_rsa
