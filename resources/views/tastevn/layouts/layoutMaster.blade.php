@@ -44,7 +44,7 @@
 
     timeout_default: 2000,
     timeout_quick: 500,
-    timeout_notification: 8000,
+    timeout_notification: 10000,
 
     datatable_init: {
       "pageLength": 25,
