@@ -9,6 +9,9 @@
   <link rel="stylesheet" href="{{asset('assets/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.css')}}" />
   <link rel="stylesheet" href="{{asset('assets/vendor/libs/jquery-timepicker/jquery-timepicker.css')}}" />
   <link rel="stylesheet" href="{{asset('assets/vendor/libs/pickr/pickr-themes.css')}}" />
+
+  <link rel="stylesheet" href="{{url('custom/library/lightbox/lc_lightbox.css')}}" />
+  <link rel="stylesheet" href="{{url('custom/library/lightbox/minimal.css')}}" />
 @endsection
 
 @section('vendor-script')
@@ -22,6 +25,9 @@
   <script type="text/javascript" src="https://cdn.datatables.net/plug-ins/1.10.16/sorting/datetime-moment.js"></script>
   <script type="text/javascript" src="https://cdn.datatables.net/plug-ins/1.10.21/dataRender/datetime.js"></script>
   <script type="text/javascript" src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+
+  <script src="{{url('custom/library/lightbox/lc_lightbox.lite.js')}}"></script>
+  <script src="{{url('custom/library/lightbox/alloy_finger.min.js')}}"></script>
 @endsection
 
 @section('content')
@@ -111,6 +117,17 @@
             }
 
             datas.find('.load_more').removeClass('d-none');
+
+            lc_lightbox('.acm-lightbox-photo', {
+              wrap_class: 'lcl_fade_oc',
+              gallery : true,
+              thumb_attr: 'data-lcl-thumb',
+
+              skin: 'minimal',
+              radius: 0,
+              padding	: 0,
+              border_w: 0,
+            });
 
           } else {
 
