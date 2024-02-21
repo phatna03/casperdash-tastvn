@@ -31,6 +31,12 @@
       "slug": "admin-ingredients"
     },
     {
+      "name": "Album Photos",
+      "icon": "menu-icon tf-icons mdi mdi-image-album",
+      "url": "admin/photos",
+      "slug": "admin-photos"
+    },
+    {
       "name": "Settings",
       "icon": "menu-icon tf-icons mdi mdi-cogs no_moderator no_admin",
       "url": "admin/settings",

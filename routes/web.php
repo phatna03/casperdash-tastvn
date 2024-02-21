@@ -180,6 +180,7 @@ use App\Http\Controllers\tastevn\api\RestaurantController;
 use App\Http\Controllers\tastevn\api\FoodController;
 use App\Http\Controllers\tastevn\api\IngredientController;
 use App\Http\Controllers\tastevn\api\FoodCategoryController;
+use App\Http\Controllers\tastevn\api\PhotoController;
 use App\Http\Controllers\tastevn\view\GuestController;
 use App\Http\Controllers\tastevn\view\DashboardController;
 
@@ -477,6 +478,9 @@ Route::get('/datatable/food-categories', function(Request $request) {
 
   return DataTables::of($select)->addIndexColumn()->toJson();
 });
+
+Route::get('/admin/photos', [PhotoController::class, 'index']);
+Route::post('/admin/photo/get', [PhotoController::class, 'get']);
 
 Route::get('/admin/roboflow', [RoboflowController::class, 'index']);
 Route::post('/admin/roboflow/detect', [RoboflowController::class, 'detect']);

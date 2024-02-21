@@ -101,6 +101,42 @@ function bind_selectize(wrap) {
 
         select.removeClass('ajx_selectize');
 
+      } else if (value === 'restaurant') {
+
+        select.selectize({
+          valueField: 'id',
+          labelField: 'name',
+          searchField: 'name',
+          preload: true,
+          clearCache: function (template) {},
+          load: function (query, callback) {
+            $.ajax({
+              url: acmcfs.link_base_url + '/admin/restaurant/selectize',
+              type: 'post',
+              data: {
+                keyword: query,
+                _token: acmcfs.var_csrf,
+              },
+              complete: function (xhr, textStatus) {
+                var rsp = xhr.responseJSON;
+
+                if (xhr.status == 200) {
+                  select.options = rsp.items;
+                  callback(rsp.items);
+
+                  if (chosen && parseInt(chosen)) {
+                    setTimeout(function () {
+                      select.selectize()[0].selectize.setValue(chosen);
+                    }, acmcfs.timeout_quick);
+                  }
+                }
+              },
+            });
+          },
+        });
+
+        select.removeClass('ajx_selectize');
+
       }
     });
   }
@@ -190,6 +226,19 @@ function bind_picker() {
           timePicker24Hour: true,
           startDate: moment().startOf('month').format('DD/MM/YYYY HH:mm'),
           endDate: moment().endOf('month').format('DD/MM/YYYY HH:mm'),
+        });
+
+      } else if (value && value == 'current_day') {
+
+        bind.daterangepicker({
+          timePicker: true,
+          timePickerIncrement: 30,
+          locale: {
+            format: 'DD/MM/YYYY HH:mm',
+          },
+          timePicker24Hour: true,
+          startDate: moment().startOf('day').format('DD/MM/YYYY HH:mm'),
+          endDate: moment().endOf('day').format('DD/MM/YYYY HH:mm'),
         });
 
       } else {
