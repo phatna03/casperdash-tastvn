@@ -4,7 +4,7 @@ if (!count($items)) {
 }
 foreach ($items as $item):
 @endphp
-<div class="col-md-4 col-lg-3 p-0">
+<div class="col-md-4 col-lg-3 p-0 item_photo" data-itd="{{$item->id}}">
   <div class="card p-1 m-1">
     <img class="card-img-top" src="{{$item->photo_url}}" alt="{{$item->photo_url}}" />
     <div class="card-body p-1 clearfix position-relative">

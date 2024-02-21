@@ -79,16 +79,23 @@
 
     function form_photos_filter(load_more = false) {
       var datas = $('#wrap-datas');
-      var form = datas.find('form');
+      var form_search = datas.find('form');
+      var form_datas = datas.find('#wrap-data-body');
 
       var existed = [];
       if (load_more) {
         datas.find('.load_more').addClass('d-none');
+
+        if (form_datas.find('.item_photo').length) {
+          form_datas.find('.item_photo').each(function (k, v) {
+            existed.push(v.attr('data-itd'));
+          });
+        }
       }
 
       axios.post('/admin/photo/get', {
-        restaurants: form.find('select[name=restaurants]').val(),
-        time_upload: form.find('input[name=time_upload]').val(),
+        restaurants: form_search.find('select[name=restaurants]').val(),
+        time_upload: form_search.find('input[name=time_upload]').val(),
         existed: existed,
       })
         .then(response => {
@@ -98,9 +105,9 @@
           if (response.data.html && response.data.html !== '') {
 
             if (load_more) {
-              datas.find('#wrap-data-body').append(response.data.html);
+              form_datas.append(response.data.html);
             } else {
-              datas.find('#wrap-data-body').empty().append(response.data.html);
+              form_datas.empty().append(response.data.html);
             }
 
             datas.find('.load_more').removeClass('d-none');
@@ -108,7 +115,7 @@
           } else {
 
             if (!load_more) {
-              datas.find('#wrap-data-body').empty().append('<div class="col-12"><span class="badge bg-info">No photo found</span></div>');
+              form_datas.empty().append('<div class="col-12"><span class="badge bg-info">No photo found</span></div>');
             }
           }
 
