@@ -57,7 +57,7 @@ class PhotoController extends Controller
       ->select('restaurant_food_scans.id', 'restaurant_food_scans.photo_url', 'restaurant_food_scans.time_photo', 'restaurants.name as restaurant_name')
       ->leftJoin('restaurants', 'restaurant_food_scans.restaurant_id', '=', 'restaurants.id')
       ->orderBy('restaurant_food_scans.id', 'desc')
-      ->limit(1)
+      ->limit(24)
     ;
 
     if (count($existed)) {
