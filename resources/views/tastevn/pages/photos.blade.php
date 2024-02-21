@@ -88,7 +88,7 @@
 
         if (form_datas.find('.item_photo').length) {
           form_datas.find('.item_photo').each(function (k, v) {
-            existed.push(v.attr('data-itd'));
+            existed.push($(v).attr('data-itd'));
           });
         }
       }

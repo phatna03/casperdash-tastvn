@@ -11,7 +11,7 @@ foreach ($items as $item):
       <div class="acm-float-right">
         <small>{{date('d/m/Y H:i:s', strtotime($item->time_photo))}}</small>
       </div>
-      <h6 class="card-title m-0 overflow-hidden">{{$item->restaurant_name}}</h6>
+      <h6 class="card-title m-0 mt-1 overflow-hidden">{{$item->restaurant_name}}</h6>
     </div>
   </div>
 </div>
