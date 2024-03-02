@@ -611,6 +611,7 @@ class RestaurantController extends Controller
   public function food_scan_error(Request $request)
   {
     $values = $request->all();
+    $api_core = new SysCore();
 
     $validator = Validator::make($values, [
       'item' => 'required',
@@ -633,17 +634,41 @@ class RestaurantController extends Controller
       ], 422);
     }
 
-    $rows = RestaurantFoodScan::select('photo_url')
+    $time_upload = isset($values['time_upload']) && !empty($values['time_upload']) ? $values['time_upload'] : NULL;
+    $time_scan = isset($values['time_scan']) && !empty($values['time_scan']) ? $values['time_scan'] : NULL;
+
+    $select = RestaurantFoodScan::select('id', 'photo_url')
+      ->distinct()
       ->where('restaurant_id', $row->id)
       ->where('food_id', $food->id)
-      ->where('missing_ids', 'LIKE', $values['missing_ids'])
-      ->get();
+      ->where('deleted', 0)
+      ->where('missing_ids', '<>', NULL)
+      ->where('missing_ids', '=', $values['missing_ids']);
+
+    if (!empty($time_scan)) {
+      $times = $api_core->parse_date_range($time_scan);
+      if (!empty($times['time_from'])) {
+        $select->where('time_scan', '>=', $times['time_from']);
+      }
+      if (!empty($times['time_to'])) {
+        $select->where('time_scan', '<=', $times['time_to']);
+      }
+    }
+    if (!empty($time_upload)) {
+      $times = $api_core->parse_date_range($time_upload);
+      if (!empty($times['time_from'])) {
+        $select->where('time_photo', '>=', $times['time_from']);
+      }
+      if (!empty($times['time_to'])) {
+        $select->where('time_photo', '<=', $times['time_to']);
+      }
+    }
 
     //info
     $html_info = view('tastevn.htmls.item_food_scan_error')
       ->with('restaurant', $row)
       ->with('food', $food)
-      ->with('rows', $rows)
+      ->with('rows', $select->get())
       ->render();
 
     return response()->json([

@@ -217,6 +217,20 @@ class Food extends Model
           ];
         }
       }
+
+    } else {
+
+      if (count($ingredients)) {
+        foreach ($ingredients as $ingredient) {
+          $arr[] = [
+            'id' => $ingredient->id,
+            'quantity' => $ingredient->ingredient_quantity,
+            'name' => $ingredient->name,
+            'name_vi' => $ingredient->name_vi,
+            'type' => $ingredient->ingredient_type,
+          ];
+        }
+      }
     }
 
     return $arr;

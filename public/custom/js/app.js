@@ -1195,6 +1195,8 @@ function restaurant_food_scan_error_info(ele) {
     item: tr.attr('data-restaurant_id'),
     food: tr.attr('data-food_id'),
     missing_ids: tr.attr('data-missing_ids'),
+    time_upload: $('#datatable-listing-error .wrap-search-form form input[name=time_upload]').val(),
+    time_scan: $('#datatable-listing-error .wrap-search-form form input[name=time_scan]').val(),
   })
     .then(response => {
 

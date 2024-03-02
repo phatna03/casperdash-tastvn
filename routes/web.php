@@ -375,6 +375,9 @@ Route::get('/datatable/restaurant-food-scan-errors', function(Request $request) 
     ->leftJoin('food_categories', 'food_categories.id', '=', 'restaurant_food_scans.food_category_id')
     ->select('restaurant_food_scans.food_id', 'restaurant_food_scans.missing_ids', 'restaurant_food_scans.missing_texts', 'foods.name as food_name', 'food_categories.name as food_category_name')
     ->selectRaw('COUNT(restaurant_food_scans.id) as total_error')
+    ->where('restaurant_food_scans.deleted', 0)
+    ->where('restaurant_food_scans.food_id', '>', 0)
+    ->where('restaurant_food_scans.missing_ids', '<>', NULL)
     ->groupBy(['restaurant_food_scans.food_id', 'restaurant_food_scans.missing_ids', 'restaurant_food_scans.missing_texts', 'foods.name', 'food_categories.name'])
     ->orderBy('total_error', 'desc');
 

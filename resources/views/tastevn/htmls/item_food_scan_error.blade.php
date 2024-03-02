@@ -10,7 +10,7 @@
         <div class="col-6 mb-1">
           <div class="text-center w-auto p-1">
             <div class="text-uppercase fw-bold text-dark">photo standard</div>
-            <img class="w-100 acm-height-300-max" src="{{$food->photo}}" />
+            <img class="w-100 acm-height-300-max" src="{{$food->get_photo()}}" />
           </div>
         </div>
         <div class="col-6 mb-1">
@@ -26,7 +26,7 @@
                   foreach($rows as $row):
                   $count++;
                 @endphp
-                <div class="carousel-item @if($count == 1) active @endif">
+                <div class="carousel-item item-{{$row->id}} @if($count == 1) active @endif">
                   <img src="{{$row->photo_url}}" alt="{{$row->photo_url}}">
                 </div>
                 @endforeach
