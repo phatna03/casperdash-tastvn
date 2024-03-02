@@ -629,6 +629,10 @@
         {
           targets: 2,
           render: function (data, type, full, meta) {
+
+            var food_name = !full['food_name'] || full['food_name'] === 'null' ? 'Không xác định...'
+              : full['food_name'];
+
             return (
               '<div class="cursor-pointer" onclick="restaurant_food_scan_result_info(' + full['id'] + ')">' +
               '<span>' +
@@ -636,7 +640,7 @@
               '<span class="mdi mdi-eye"></span>' +
               '</button>' +
               '</span>' +
-              '<span>' + full['food_name'] + '</span>' +
+              '<span>' + food_name + '</span>' +
               '</div>'
             );
           }

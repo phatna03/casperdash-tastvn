@@ -118,6 +118,9 @@ class RestaurantFoodScan extends Model
           'rbf_confidence' => (int)($prediction['confidence'] * 100),
           'found_by' => 'rbf',
           'rbf_predict' => $food->id,
+
+          'sys_predict' => 0,
+          'sys_confidence' => 0,
         ]);
       } else {
         //system predict
