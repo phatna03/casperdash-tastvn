@@ -188,12 +188,22 @@
           searchable: false,
           orderable: false,
           render: function (data, type, full, meta) {
+
+            var user_role = $('#acmcfs_user_role').val();
+
+            var html = '';
+            var html_delete = '<a class="dropdown-item" href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#modal_delete_item" onclick="restaurant_delete_confirm(this)"><i class="mdi mdi-trash-can-outline me-1"></i> Delete</a>';
+
+            if (user_role == 'moderator') {
+              html_delete = '';
+            }
+
             return (
               '<div class="dropdown">' +
               '<button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown"><i class="mdi mdi-dots-vertical"></i></button>' +
               '<div class="dropdown-menu">' +
               '<a class="dropdown-item" href="javascript:void(0);" data-bs-toggle="offcanvas" data-bs-target="#offcanvas_edit_item" onclick="restaurant_edit_prepare(this)"><i class="mdi mdi-pencil-outline me-1"></i> Edit</a>' +
-              '<a class="dropdown-item" href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#modal_delete_item" onclick="restaurant_delete_confirm(this)"><i class="mdi mdi-trash-can-outline me-1"></i> Delete</a>' +
+              html_delete +
               '</div>' +
               '</div>'
             );

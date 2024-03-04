@@ -85,13 +85,13 @@ class UserController extends Controller
       'password' => Hash::make('cspr'),
       'phone' => $values['phone'],
       'status' => $values['status'],
-      'role' => 'moderator',
+      'role' => !empty($values['role']) && $values['role'] == 'admin' ? 'admin' : 'moderator',
       'note' => $values['note'],
       'creator_id' => $viewer->id,
-      'access_full' => (int)$values['access_full']
+      'access_full' => !empty($values['role']) && $values['role'] == 'admin' ? 1 : (int)$values['access_full'],
     ]);
 
-    if (!(int)$values['access_full'] && count($values['access_restaurants'])) {
+    if (count($values['access_restaurants']) && $values['role'] != 'admin') {
       foreach ($values['access_restaurants'] as $restaurant_id) {
         RestaurantAccess::create([
           'user_id' => $row->id,
@@ -170,14 +170,15 @@ class UserController extends Controller
       'email' => trim($values['email']),
       'phone' => $values['phone'],
       'status' => $values['status'],
+      'role' => !empty($values['role']) && $values['role'] == 'admin' ? 'admin' : 'moderator',
       'note' => $values['note'],
-      'access_full' => (int)$values['access_full']
+      'access_full' => !empty($values['role']) && $values['role'] == 'admin' ? 1 : (int)$values['access_full'],
     ]);
 
     RestaurantAccess::where('user_id', $row->id)
       ->delete();
 
-    if (!(int)$values['access_full'] && count($values['access_restaurants'])) {
+    if (count($values['access_restaurants']) && $values['role'] != 'admin') {
       foreach ($values['access_restaurants'] as $restaurant_id) {
         RestaurantAccess::create([
           'user_id' => $row->id,

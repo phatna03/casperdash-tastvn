@@ -255,6 +255,10 @@ $navbarDetached = ($navbarDetached ?? '');
                     <span class="fw-medium d-block">
                       @if (Auth::check())
                       {{ Auth::user()->name }}
+
+                        <input type="hidden" id="acmcfs_user_id" name="user_id" value="{{Auth::user()->id}}" />
+                        <input type="hidden" id="acmcfs_user_role" name="user_role" value="{{Auth::user()->role}}" />
+
                       @else
                       Casperdash
                       @endif

@@ -28,7 +28,7 @@
           <th></th>
           <th>Name</th>
           <th>Email / Phone</th>
-          <th>Status</th>
+          <th>Role / Status</th>
           <th>Restaurants</th>
           <th>Note</th>
           <th>Latest updated</th>
@@ -75,6 +75,23 @@
             </span>
           </div>
           <label for="add-item-status">Status</label>
+        </div>
+        <div class="form-floating form-floating-outline mb-4">
+          <div class="form-control text-center" id="add-item-role">
+            <span class="form-check d-inline-block acm-mr-px-10">
+              <input name="role" class="form-check-input" type="radio" value="admin" id="add-item-radio-admin" onchange="user_role(this)" />
+              <label class="form-check-label" for="add-item-radio-admin">
+                admin
+              </label>
+            </span>
+            <span class="form-check d-inline-block">
+              <input name="role" class="form-check-input" type="radio" value="moderator" id="add-item-radio-moderator" onchange="user_role(this)" checked />
+              <label class="form-check-label" for="add-item-radio-moderator">
+                moderator
+              </label>
+            </span>
+          </div>
+          <label for="add-item-role">Role</label>
         </div>
         <div class="form-floating form-floating-outline mb-4">
           <textarea class="form-control h-px-100" id="add-item-note" name="note"></textarea>
@@ -140,6 +157,23 @@
             </span>
           </div>
           <label for="edit-item-status">Status</label>
+        </div>
+        <div class="form-floating form-floating-outline mb-4">
+          <div class="form-control text-center" id="edit-item-role">
+            <span class="form-check d-inline-block acm-mr-px-10">
+              <input name="role" class="form-check-input" type="radio" value="admin" id="edit-item-radio-admin" onchange="user_role(this)" />
+              <label class="form-check-label" for="edit-item-radio-admin">
+                admin
+              </label>
+            </span>
+            <span class="form-check d-inline-block">
+              <input name="role" class="form-check-input" type="radio" value="moderator" id="edit-item-radio-moderator" checked onchange="user_role(this)" />
+              <label class="form-check-label" for="edit-item-radio-moderator">
+                moderator
+              </label>
+            </span>
+          </div>
+          <label for="edit-item-role">Role</label>
         </div>
         <div class="form-floating form-floating-outline mb-4">
           <textarea class="form-control h-px-100" id="edit-item-note" name="note"></textarea>
@@ -265,6 +299,7 @@
         $(row).attr('data-email', data.email);
         $(row).attr('data-phone', data.phone);
         $(row).attr('data-status', data.status);
+        $(row).attr('data-role', data.role);
         $(row).attr('data-note', data.note);
         $(row).attr('data-access-full', data.access_full);
         $(row).attr('data-access-ids', data.access_ids);
@@ -302,19 +337,30 @@
         {
           targets: 3,
           render: function (data, type, full, meta) {
-            if (full['status'] == 'active') {
-              return (
-                '<div>' +
-                '<span class="badge bg-success">' + full['status'] + '</span>' +
-                '</div>'
-              );
+
+            var html = '';
+
+            if (full['role'] == 'admin') {
+              html = '<div>' +
+                '<span class="badge bg-danger">' + full['role'] + '</span>' +
+                '</div>';
             } else {
-              return (
-                '<div>' +
-                '<span class="badge bg-warning">' + full['status'] + '</span>' +
-                '</div>'
-              );
+              html = '<div>' +
+                '<span class="badge bg-secondary">' + full['role'] + '</span>' +
+                '</div>';
             }
+
+            if (full['status'] == 'active') {
+              html += '<div class="mt-1">' +
+                '<span class="badge bg-success">' + full['status'] + '</span>' +
+                '</div>';
+            } else {
+              html += '<div class="mt-1">' +
+                '<span class="badge bg-warning">' + full['status'] + '</span>' +
+                '</div>';
+            }
+
+            return (html);
           }
         },
         {
@@ -328,15 +374,41 @@
           searchable: false,
           orderable: false,
           render: function (data, type, full, meta) {
-            return (
-              '<div class="dropdown">' +
-              '<button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown"><i class="mdi mdi-dots-vertical"></i></button>' +
-              '<div class="dropdown-menu">' +
-              '<a class="dropdown-item" href="javascript:void(0);" data-bs-toggle="offcanvas" data-bs-target="#offcanvas_edit_item" onclick="user_edit_prepare(this)"><i class="mdi mdi-pencil-outline me-1"></i> Edit</a>' +
-              '<a class="dropdown-item" href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#modal_delete_item" onclick="user_delete_confirm(this)"><i class="mdi mdi-trash-can-outline me-1"></i> Delete</a>' +
-              '</div>' +
-              '</div>'
-            );
+
+            var user_id = parseInt($('#acmcfs_user_id').val());
+            var user_role = $('#acmcfs_user_role').val();
+
+            var html = '';
+            var html_edit = '';
+            var html_delete = '';
+            var todo = false;
+
+            if (user_role == 'superadmin') {
+              todo = true;
+            } else if (user_role == 'admin') {
+              if (user_id == parseInt(full['id'])) {
+                todo = true;
+              }
+            }
+
+            if (todo) {
+              html_edit = '<a class="dropdown-item" href="javascript:void(0);" data-bs-toggle="offcanvas" data-bs-target="#offcanvas_edit_item" onclick="user_edit_prepare(this)"><i class="mdi mdi-pencil-outline me-1"></i> Edit</a>';
+              html_delete = '<a class="dropdown-item" href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#modal_delete_item" onclick="user_delete_confirm(this)"><i class="mdi mdi-trash-can-outline me-1"></i> Delete</a>';
+
+              if (user_id == parseInt(full['id'])) {
+                html_delete = '';
+              }
+
+              html = '<div class="dropdown">' +
+                '<button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown"><i class="mdi mdi-dots-vertical"></i></button>' +
+                '<div class="dropdown-menu">' +
+                html_edit +
+                html_delete +
+                '</div>' +
+                '</div>';
+            }
+
+            return (html);
           }
         }
       ],

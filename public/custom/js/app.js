@@ -602,6 +602,7 @@ function user_clear(frm) {
   form.find('input[name=email]').val('');
   form.find('input[name=phone]').val('');
   form.find('input[name=status][value=active]').prop('checked', true);
+  form.find('input[name=role][value=moderator]').prop('checked', true);
   form.find('textarea[name=note]').val('');
 }
 function user_add(evt, frm) {
@@ -613,6 +614,7 @@ function user_add(evt, frm) {
     email: form.find('input[name=email]').val(),
     phone: form.find('input[name=phone]').val(),
     status: form.find('input[name=status]:checked').val(),
+    role: form.find('input[name=role]:checked').val(),
     note: form.find('textarea[name=note]').val(),
     access_full: form.find('input[name=access_full]').is(':checked') ? 1 : 0,
     access_restaurants: form.find('select[name=access_restaurants]').val(),
@@ -657,6 +659,13 @@ function user_add(evt, frm) {
 function user_full_restaurants(ele) {
   var bind = $(ele);
   var form = bind.closest('form');
+  var role = form.find('input[name=role]:checked').val();
+
+  if (role == 'admin') {
+    form.find('input[name=access_full]').prop('checked', true);
+    form.find('.access-restaurants').addClass('d-none');
+    return false;
+  }
 
   if (bind.is(':checked')) {
     form.find('.access-restaurants').addClass('d-none');
@@ -673,6 +682,7 @@ function user_edit_prepare(ele) {
   form.find('input[name=email]').val(tr.attr('data-email'));
   form.find('input[name=phone]').val(tr.attr('data-phone'));
   form.find('input[name=status][value=' + tr.attr('data-status') + ']').prop('checked', true);
+  form.find('input[name=role][value=' + tr.attr('data-role') + ']').prop('checked', true);
   form.find('textarea[name=note]').val(tr.attr('data-note'));
 
   var access_full = parseInt(tr.attr('data-access-full'));
@@ -704,6 +714,7 @@ function user_edit(evt, frm) {
     email: form.find('input[name=email]').val(),
     phone: form.find('input[name=phone]').val(),
     status: form.find('input[name=status]:checked').val(),
+    role: form.find('input[name=role]:checked').val(),
     note: form.find('textarea[name=note]').val(),
     access_full: form.find('input[name=access_full]').is(':checked') ? 1 : 0,
     access_restaurants: form.find('select[name=access_restaurants]').val(),
@@ -797,6 +808,16 @@ function user_restore(ele) {
     });
 
   return false;
+}
+function user_role(ele) {
+  var form = $(ele).closest('form');
+  var role = form.find('input[name=role]:checked').val();
+  if (role == 'admin') {
+    if (!form.find('input[name=access_full]').is(':checked')) {
+      form.find('input[name=access_full]').prop('checked', true);
+      form.find('.access-restaurants').addClass('d-none');
+    }
+  }
 }
 
 function restaurant_add(evt, frm) {

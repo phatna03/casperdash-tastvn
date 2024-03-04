@@ -218,7 +218,7 @@ Route::get('/datatable/user', function(Request $request) {
   $values = $request->all();
 
   $select = App\Models\User::query()
-    ->select('id', 'name', 'email', 'phone', 'status', 'note', 'updated_at', 'access_full', 'access_ids', 'access_texts')
+    ->select('id', 'name', 'email', 'phone', 'status', 'role', 'note', 'updated_at', 'access_full', 'access_ids', 'access_texts')
     ->where('deleted', 0)
     ->where('role', '<>', 'superadmin') //superadmin
     ->orderBy('updated_at', 'desc')
