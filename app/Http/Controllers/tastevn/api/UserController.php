@@ -7,9 +7,15 @@ use Illuminate\Http\Request;
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Notification;
+
+use App\Notifications\ForgotPassword;
+use App\Api\SysCore;
+
 use Validator;
 use App\Models\User;
 use App\Models\RestaurantAccess;
+use App\Models\PasswordResetToken;
 
 class UserController extends Controller
 {
@@ -28,7 +34,8 @@ class UserController extends Controller
   public function index(Request $request)
   {
     $user = Auth::user();
-    if ($user->role == 'moderator') {
+    $invalid_roles = ['moderator', 'user'];
+    if (in_array($user->role, $invalid_roles)) {
       return redirect('page_not_found');
     }
 
@@ -85,13 +92,13 @@ class UserController extends Controller
       'password' => Hash::make('cspr'),
       'phone' => $values['phone'],
       'status' => $values['status'],
-      'role' => !empty($values['role']) && $values['role'] == 'admin' ? 'admin' : 'moderator',
+      'role' => $values['role'],
       'note' => $values['note'],
       'creator_id' => $viewer->id,
-      'access_full' => !empty($values['role']) && $values['role'] == 'admin' ? 1 : (int)$values['access_full'],
+      'access_full' => $values['role'] == 'admin' ? 1 : (int)$values['access_full'],
     ]);
 
-    if (count($values['access_restaurants']) && $values['role'] != 'admin') {
+    if (count($values['access_restaurants']) && $values['role'] == 'moderator') {
       foreach ($values['access_restaurants'] as $restaurant_id) {
         RestaurantAccess::create([
           'user_id' => $row->id,
@@ -170,15 +177,15 @@ class UserController extends Controller
       'email' => trim($values['email']),
       'phone' => $values['phone'],
       'status' => $values['status'],
-      'role' => !empty($values['role']) && $values['role'] == 'admin' ? 'admin' : 'moderator',
+      'role' => $values['role'],
       'note' => $values['note'],
-      'access_full' => !empty($values['role']) && $values['role'] == 'admin' ? 1 : (int)$values['access_full'],
+      'access_full' => $values['role'] == 'admin' ? 1 : (int)$values['access_full'],
     ]);
 
     RestaurantAccess::where('user_id', $row->id)
       ->delete();
 
-    if (count($values['access_restaurants']) && $values['role'] != 'admin') {
+    if (count($values['access_restaurants']) && $values['role'] == 'moderator') {
       foreach ($values['access_restaurants'] as $restaurant_id) {
         RestaurantAccess::create([
           'user_id' => $row->id,
@@ -261,6 +268,126 @@ class UserController extends Controller
     return response()->json([
       'status' => true,
       'item' => $row->name,
+    ], 200);
+  }
+
+  public function profile(Request $request)
+  {
+    $user = Auth::user();
+
+    $pageConfigs = [
+      'myLayout' => 'horizontal',
+      'hasCustomizer' => false,
+
+    ];
+
+    return view('tastevn.pages.profile', ['pageConfigs' => $pageConfigs]);
+  }
+
+  public function profile_update(Request $request)
+  {
+    $values = $request->all();
+    $viewer = Auth::user();
+    //required
+    $validator = Validator::make($values, [
+//      'item' => 'required',
+      'name' => 'required|string',
+      'email' => 'required|email',
+    ]);
+    if ($validator->fails()) {
+      return response()->json($validator->errors(), 422);
+    }
+    //invalid
+    $row = Auth::user();
+    if (!$row) {
+      return response()->json([
+        'error' => 'Invalid item'
+      ], 422);
+    }
+    //restore
+    $row1 = User::where('email', trim($values['email']))
+      ->where('id', '<>', $row->id)
+      ->first();
+    if ($row1) {
+      return response()->json([
+        'error' => 'Email existed'
+      ], 422);
+    }
+
+    $row->update([
+      'name' => trim($values['name']),
+      'email' => trim($values['email']),
+      'phone' => $values['phone'],
+      'ips_printer' => $values['ips_printer'],
+    ]);
+
+    return response()->json([
+      'status' => true,
+      'item' => $row->name,
+    ], 200);
+  }
+
+  public function profile_pwd_code(Request $request)
+  {
+    $values = $request->all();
+    $api_core = new SysCore();
+
+    $user = Auth::user();
+
+    //token
+    $token = strtoupper($api_core->random_str(6));
+
+    $row = PasswordResetToken::where('email', $user->email)
+      ->first();
+    if ($row) {
+      $row->update([
+        'token' => $token,
+      ]);
+    } else {
+      PasswordResetToken::create([
+        'email' => $user->email,
+        'token' => $token,
+      ]);
+    }
+
+    //mail
+    Notification::send($user, new ForgotPassword([
+      'email' => $user->email,
+      'code' => $token,
+    ]));
+
+    return response()->json([
+      'status' => true,
+      'user' => $token,
+    ], 200);
+  }
+
+  public function profile_pwd_update(Request $request)
+  {
+    $values = $request->all();
+
+    $validator = Validator::make($values, [
+      'code' => 'required',
+      'password' => 'min:8|required_with:password_confirmation|same:password_confirmation',
+      'password_confirmation' => 'min:8'
+    ]);
+
+    if ($validator->fails()) {
+      return response()->json($validator->errors(), 422);
+    }
+
+    $user = Auth::user();
+
+    $user->update([
+      'password' => Hash::make($values['password']),
+    ]);
+
+    PasswordResetToken::where('email', $user->email)
+      ->delete();
+
+    return response()->json([
+      'status' => true,
+      'user' => $user->name,
     ], 200);
   }
 }

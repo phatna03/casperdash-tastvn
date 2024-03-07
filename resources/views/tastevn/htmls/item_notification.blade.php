@@ -11,7 +11,11 @@ if (!isset($notifications) || !count($notifications)) {
 @endphp
 <div
   class="acm-itm-notify position-relative m-1 p-1 @if(!empty($notification->read_at)) @else bg-primary-subtle @endif "
-  onclick="notification_read(this); restaurant_food_scan_result_info({{$notification->data['restaurant_food_scan_id']}})"
+  @if($viewer->role == 'user')
+    onclick="notification_read(this);"
+  @else
+    onclick="notification_read(this); restaurant_food_scan_result_info({{$notification->data['restaurant_food_scan_id']}})"
+  @endif
   data-itd="{{$notification->id}}"
 >
   <div class="acm-float-right">

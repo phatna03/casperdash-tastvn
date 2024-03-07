@@ -2,31 +2,31 @@
   "menu": [
     {
       "name": "Dashboard",
-      "icon": "menu-icon tf-icons mdi mdi-home-outline",
+      "icon": "menu-icon tf-icons mdi mdi-home-outline no_user",
       "url": "admin",
       "slug": "admin"
     },
     {
       "name": "Users",
-      "icon": "menu-icon tf-icons mdi mdi-account-group no_moderator",
+      "icon": "menu-icon tf-icons mdi mdi-account-group no_moderator no_user",
       "url": "admin/users",
       "slug": "admin-users"
     },
     {
       "name": "Categories",
-      "icon": "menu-icon tf-icons mdi mdi-list-box",
+      "icon": "menu-icon tf-icons mdi mdi-list-box no_user",
       "url": "admin/food-categories",
       "slug": "admin-food-categories"
     },
     {
       "name": "Dishes",
-      "icon": "menu-icon tf-icons mdi mdi-food",
+      "icon": "menu-icon tf-icons mdi mdi-food no_user",
       "url": "admin/foods",
       "slug": "admin-foods"
     },
     {
       "name": "Ingredients",
-      "icon": "menu-icon tf-icons mdi mdi-food-outline",
+      "icon": "menu-icon tf-icons mdi mdi-food-outline no_user",
       "url": "admin/ingredients",
       "slug": "admin-ingredients"
     },
@@ -38,13 +38,13 @@
     },
     {
       "name": "Settings",
-      "icon": "menu-icon tf-icons mdi mdi-cogs no_moderator no_admin",
+      "icon": "menu-icon tf-icons mdi mdi-cogs no_moderator no_admin no_user",
       "url": "admin/settings",
       "slug": "admin-settings"
     },
     {
       "name": "Roboflow API",
-      "icon": "menu-icon tf-icons mdi mdi-robot-angry",
+      "icon": "menu-icon tf-icons mdi mdi-robot-angry no_user",
       "url": "admin/roboflow",
       "slug": "admin-roboflow"
     }

@@ -85,9 +85,15 @@
               </label>
             </span>
             <span class="form-check d-inline-block">
-              <input name="role" class="form-check-input" type="radio" value="moderator" id="add-item-radio-moderator" onchange="user_role(this)" checked />
+              <input name="role" class="form-check-input" type="radio" value="moderator" id="add-item-radio-moderator" onchange="user_role(this)" />
               <label class="form-check-label" for="add-item-radio-moderator">
                 moderator
+              </label>
+            </span>
+            <span class="form-check d-inline-block">
+              <input name="role" class="form-check-input" type="radio" value="user" id="add-item-radio-user" onchange="user_role(this)" checked />
+              <label class="form-check-label" for="add-item-radio-user">
+                end-user
               </label>
             </span>
           </div>
@@ -167,9 +173,15 @@
               </label>
             </span>
             <span class="form-check d-inline-block">
-              <input name="role" class="form-check-input" type="radio" value="moderator" id="edit-item-radio-moderator" checked onchange="user_role(this)" />
+              <input name="role" class="form-check-input" type="radio" value="moderator" id="edit-item-radio-moderator" onchange="user_role(this)" />
               <label class="form-check-label" for="edit-item-radio-moderator">
                 moderator
+              </label>
+            </span>
+            <span class="form-check d-inline-block">
+              <input name="role" class="form-check-input" type="radio" value="user" id="edit-item-radio-user" checked onchange="user_role(this)" />
+              <label class="form-check-label" for="edit-item-radio-user">
+                end-user
               </label>
             </span>
           </div>
@@ -389,6 +401,10 @@
               if (user_id == parseInt(full['id'])) {
                 todo = true;
               }
+            }
+
+            if (full['role'] == 'moderator' || full['role'] == 'user') {
+              todo = true;
             }
 
             if (todo) {

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Storage;
 
 use App\Api\SysCore;
 
@@ -14,6 +15,12 @@ use App\Models\User;
 use App\Models\RestaurantFoodScan;
 use App\Models\Food;
 use App\Models\Ingredient;
+
+//printer
+//require __DIR__ . '/vendor/autoload.php';
+use Mike42\Escpos\PrintConnectors\NetworkPrintConnector;
+use Mike42\Escpos\PrintConnectors\MultiplePrintConnector;
+use Mike42\Escpos\Printer;
 
 class GuestController extends Controller
 {
@@ -56,6 +63,7 @@ class GuestController extends Controller
     }
 
     $datas = [];
+    $escpos = '';
 
     foreach ($ids as $id) {
 
@@ -68,15 +76,62 @@ class GuestController extends Controller
         'restaurant' => $row->get_restaurant(),
         'item' => $row,
       ];
+
+      //escpos
+      $escpos .= "\n" . $row->get_restaurant()->name . " - " . $row->created_at . "\nMissing Ingredients:\n";
+
+      $texts = array_filter(explode('&nbsp', $row->missing_texts));
+      if(!empty($row->missing_texts) && count($texts)) {
+        foreach($texts as $text) {
+          if (!empty(trim($text))) {
+            $escpos .= "+ " . trim($text) . "\n";
+          }
+        }
+      }
+
+      $escpos .= "\n\n";
     }
 
-    $pageConfigs = [
-      'myLayout' => 'horizontal',
-      'hasCustomizer' => false,
+    //auto print
+    $printers = array_filter(explode(';', Auth::user()->ips_printer));
+//    echo '<pre>';var_dump($printers, $escpos);die;
+    $file_log_path = 'public/logs/printer.log';
 
-      'datas' => $datas,
-    ];
+    if (count($printers)) {
+      //multi
+      foreach ($printers as $printer) {
+        try {
 
-    return view('tastevn.pages.print_food_scan', ['pageConfigs' => $pageConfigs]);
+          $connector = new NetworkPrintConnector($printer, 9100);
+          $printer = new Printer($connector);
+
+          $printer->text($escpos);
+          $printer->cut();
+          $printer->close();
+
+        } catch (\Exception $e) {
+//          var_dump($e->getMessage());
+          Storage::prepend($file_log_path, 'MESSAGE_' . $e->getMessage());
+        }
+      }
+
+      return view('tastevn.pages.printer', []);
+
+    } else {
+
+      //default
+      die('please configure your printer IP...');
+    }
+
+
+    //old
+//    $pageConfigs = [
+//      'myLayout' => 'horizontal',
+//      'hasCustomizer' => false,
+//
+//      'datas' => $datas,
+//    ];
+//
+//    return view('tastevn.pages.print_food_scan', ['pageConfigs' => $pageConfigs]);
   }
 }

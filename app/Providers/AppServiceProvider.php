@@ -2,8 +2,11 @@
 
 namespace App\Providers;
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
+
+use App\Api\SysCore;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -20,7 +23,17 @@ class AppServiceProvider extends ServiceProvider
    */
   public function boot(): void
   {
-    //
+    //custome
+    $api_core = new SysCore();
+
+    //viewer
+    view()->composer('*', function($view) {
+      if (Auth::check()) {
+        $view->with('viewer', Auth::user());
+      } else {
+        $view->with('viewer', null);
+      }
+    });
 
     View::share('baseURL', url(''));
   }

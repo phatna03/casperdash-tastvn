@@ -225,6 +225,7 @@ function bind_picker() {
           },
           timePicker24Hour: true,
           startDate: moment().startOf('month').format('DD/MM/YYYY HH:mm'),
+          // startDate: moment().subtract(1, 'months').startOf('month').format('DD/MM/YYYY HH:mm'),
           endDate: moment().endOf('month').format('DD/MM/YYYY HH:mm'),
         });
 
@@ -478,16 +479,6 @@ function auth_form_reset(evt, frm) {
   var pwd1 = form.find('input[name=pwd1]').val();
   var pwd2 = form.find('input[name=pwd2]').val();
 
-  if (!pwd1 || pwd1.length < 8) {
-    message_from_toast('error', acmcfs.message_title_error, "Your password must be at least 8 characters", true);
-    return false;
-  }
-
-  if (pwd1 !== pwd2) {
-    message_from_toast('error', acmcfs.message_title_error, "Password doesn\'t match confirmation", true);
-    return false;
-  }
-
   var formForgot= $('#formForgot');
 
   form_loading(frm);
@@ -495,6 +486,7 @@ function auth_form_reset(evt, frm) {
   axios.post('/auth/update-pwd', {
     email: formForgot.find('input[name=email]').val(),
     password: pwd1,
+    password_confirmation: pwd2,
   })
     .then(response => {
       console.log('===THEN===');
@@ -602,7 +594,7 @@ function user_clear(frm) {
   form.find('input[name=email]').val('');
   form.find('input[name=phone]').val('');
   form.find('input[name=status][value=active]').prop('checked', true);
-  form.find('input[name=role][value=moderator]').prop('checked', true);
+  form.find('input[name=role][value=user]').prop('checked', true);
   form.find('textarea[name=note]').val('');
 }
 function user_add(evt, frm) {
@@ -818,6 +810,98 @@ function user_role(ele) {
       form.find('.access-restaurants').addClass('d-none');
     }
   }
+}
+
+function user_profile_confirm(evt, frm) {
+  evt.preventDefault();
+  var popup = $('#modal_confirm_profile');
+  popup.modal('show');
+  return false;
+}
+function user_profile() {
+  var form = $('#frm-profile');
+
+  axios.post('/admin/profile/update', {
+    name: form.find('input[name=info_name]').val(),
+    email: form.find('input[name=info_email]').val(),
+    phone: form.find('input[name=info_phone]').val(),
+    ips_printer: form.find('input[name=info_ips_printer]').val(),
+  })
+    .then(response => {
+
+      message_from_toast('success', acmcfs.message_title_success, acmcfs.message_description_success_update, true);
+
+    })
+    .catch(error => {
+
+      if (error.response.data && Object.values(error.response.data).length) {
+        Object.values(error.response.data).forEach(function (v, k) {
+          message_from_toast('error', acmcfs.message_title_error, v);
+        });
+      }
+
+    });
+
+  return false;
+}
+function user_code_confirm() {
+  var popup = $('#modal_confirm_code');
+  popup.modal('show');
+  return false;
+}
+function user_code() {
+  axios.post('/admin/profile/pwd/code', {})
+    .then(response => {
+
+      message_from_toast('success', acmcfs.message_title_success, 'Your verify code has been sent successfully!', true);
+
+    })
+    .catch(error => {
+
+      if (error.response.data && Object.values(error.response.data).length) {
+        Object.values(error.response.data).forEach(function (v, k) {
+          message_from_toast('error', acmcfs.message_title_error, v);
+        });
+      }
+
+    });
+
+  return false;
+}
+function user_pwd_confirm(evt, frm) {
+  evt.preventDefault();
+  var popup = $('#modal_confirm_pwd');
+  popup.modal('show');
+  return false;
+}
+function user_pwd() {
+  var form = $('#frm-pwd');
+
+  axios.post('/admin/profile/pwd/update', {
+    code: form.find('input[name=pwd_code]').val(),
+    password: form.find('input[name=pwd_pwd1]').val(),
+    password_confirmation: form.find('input[name=pwd_pwd2]').val(),
+  })
+    .then(response => {
+
+      message_from_toast('success', acmcfs.message_title_success, acmcfs.message_description_success_update, true);
+      page_reload();
+
+    })
+    .catch(error => {
+
+      if (error.response.data && Object.values(error.response.data).length) {
+        Object.values(error.response.data).forEach(function (v, k) {
+          message_from_toast('error', acmcfs.message_title_error, v);
+        });
+      }
+
+    });
+
+  return false;
+}
+function user_test_printer() {
+  page_open(acmcfs.link_base_url + '/printer?ids=1,2,3');
 }
 
 function restaurant_add(evt, frm) {
@@ -1784,7 +1868,9 @@ function notification_newest() {
           message_from_toast('info', v.restaurant_name, html_toast, true);
         });
 
-        page_open(acmcfs.link_base_url + '/printer?ids=' + response.data.ids.toString());
+        if (parseInt(acmcfs.printer_ok)) {
+          page_open(acmcfs.link_base_url + '/printer?ids=' + response.data.ids.toString());
+        }
       }
 
       if (response.data.role) {

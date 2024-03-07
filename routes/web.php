@@ -209,6 +209,11 @@ Route::get('/tester', [TesterController::class, 'index']);
 Route::get('/admin/settings', [SettingController::class, 'index']);
 Route::post('/admin/setting/update', [SettingController::class, 'update']);
 
+Route::get('/admin/profile', [UserController::class, 'profile']);
+Route::post('/admin/profile/update', [UserController::class, 'profile_update']);
+Route::post('/admin/profile/pwd/code', [UserController::class, 'profile_pwd_code']);
+Route::post('/admin/profile/pwd/update', [UserController::class, 'profile_pwd_update']);
+
 Route::get('/admin/users', [UserController::class, 'index']);
 Route::post('/admin/user/store', [UserController::class, 'store']);
 Route::post('/admin/user/update', [UserController::class, 'update']);

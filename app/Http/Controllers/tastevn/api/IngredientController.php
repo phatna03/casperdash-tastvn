@@ -25,6 +25,12 @@ class IngredientController extends Controller
    */
   public function index(Request $request)
   {
+    $user = Auth::user();
+    $invalid_roles = ['user'];
+    if (in_array($user->role, $invalid_roles)) {
+      return redirect('page_not_found');
+    }
+
     $pageConfigs = [
       'myLayout' => 'horizontal',
       'hasCustomizer' => false,

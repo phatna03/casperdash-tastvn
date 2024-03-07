@@ -55,10 +55,15 @@ class AuthController extends Controller
 
     $user = Auth::user();
 
+    $redirect_url = Redirect::getIntendedUrl();
+    if ($user->role == 'user') {
+      $redirect_url = url('admin/photos');
+    }
+
     return response()->json([
       'status' => true,
       'user' => $user->info_public(),
-      'redirect' => Redirect::getIntendedUrl(),
+      'redirect' => $redirect_url,
     ], 200);
   }
 
@@ -148,7 +153,8 @@ class AuthController extends Controller
 
     $validator = Validator::make($values, [
       'email' => 'required|email',
-      'password' => 'required|string',
+      'password' => 'min:8|required_with:password_confirmation|same:password_confirmation',
+      'password_confirmation' => 'min:8',
     ]);
 
     if ($validator->fails()) {

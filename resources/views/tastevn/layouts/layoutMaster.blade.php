@@ -26,12 +26,20 @@
 <script src="{{url('custom/library/selectize/selectize.min.js')}}"></script>
 <script src="{{url('custom/js/app.js')}}"></script>
 <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+@php
+  $printers = [];
+  if ($viewer) {
+    $printers = array_filter(explode(';', $viewer->ips_printer));
+  }
+@endphp
 <script type="text/javascript">
   //tastevn
   //configs
   var acmcfs = {
     link_base_url: '{{url('')}}',
     var_csrf: '{{csrf_token()}}',
+    printer_ok: '{{count($printers) ? 1 : 0}}',
 
     message_title_info: '{{config('tastevn.message_title_info')}}',
     message_title_success: '{{config('tastevn.message_title_success')}}',

@@ -28,6 +28,7 @@ return new class extends Migration {
         $table->longText('access_texts')->default('All');
         $table->dateTime('time_notification')->nullable();
         $table->text('note')->nullable();
+        $table->text('ips_printer')->nullable();
         $table->bigInteger('creator_id')->default(0);
         $table->bigInteger('deleted')->default(0);
         $table->rememberToken();

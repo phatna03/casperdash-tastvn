@@ -30,6 +30,8 @@ class User extends Authenticatable
     'access_full',
     'access_ids',
     'access_texts',
+
+    'ips_printer',
   ];
 
   protected $hidden = [
@@ -83,7 +85,9 @@ class User extends Authenticatable
       'access_texts' => '',
     ]);
 
-    if ($this->access_full) {
+    $roles = ['superadmin', 'admin', 'user'];
+
+    if ($this->access_full || in_array($this->role, $roles)) {
 
       $this->update([
         'access_ids' => null,
