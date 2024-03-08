@@ -76,81 +76,17 @@ class GuestController extends Controller
         'restaurant' => $row->get_restaurant(),
         'item' => $row,
       ];
-
-      //escpos
-      $escpos .= "\n" . $row->get_restaurant()->name . " - " . $row->created_at . "\nMissing Ingredients:\n";
-
-      $texts = array_filter(explode('&nbsp', $row->missing_texts));
-      if(!empty($row->missing_texts) && count($texts)) {
-        foreach($texts as $text) {
-          if (!empty(trim($text))) {
-            $escpos .= "+ " . trim($text) . "\n";
-          }
-        }
-      }
-
-      $escpos .= "\n\n";
     }
 
-    //auto print
-    $printers = array_filter(explode(';', Auth::user()->ips_printer));
-//    echo '<pre>';var_dump($printers, $escpos);die;
-    $file_log_path = 'public/logs/printer.log';
-    $printed = true;
-
-    if (count($printers)) {
-      //multi
-      foreach ($printers as $printer) {
-        try {
-
-          $connector = new NetworkPrintConnector($printer, 9100);
-          $printer = new Printer($connector);
-
-          $printer->text($escpos);
-          $printer->cut();
-          $printer->close();
-
-        } catch (\Exception $e) {
-//          var_dump($e->getMessage());
-          Storage::prepend($file_log_path, 'PRINT_WITH_IP');
-          Storage::prepend($file_log_path, 'MESSAGE_' . $e->getMessage());
-          $printed = false;
-        }
-      }
-
-    } else {
-
-      //default
-      try {
-
-        $connector = new FilePrintConnector("php://stdout");
-        $printer = new Printer($connector);
-        $printer->text($escpos);
-        $printer->cut();
-        $printer->close();
-
-      } catch (\Exception $e) {
-//          var_dump($e->getMessage());
-        Storage::prepend($file_log_path, 'PRINT_WITH_DEFAULT_PRINTER');
-        Storage::prepend($file_log_path, 'MESSAGE_' . $e->getMessage());
-        $printed = false;
-      }
-    }
-
-    if ($printed) {
-      return view('tastevn.pages.printer', []);
-    }
-
-    die('please configure your printer...');
 
     //old
-//    $pageConfigs = [
-//      'myLayout' => 'horizontal',
-//      'hasCustomizer' => false,
-//
-//      'datas' => $datas,
-//    ];
-//
-//    return view('tastevn.pages.print_food_scan', ['pageConfigs' => $pageConfigs]);
+    $pageConfigs = [
+      'myLayout' => 'horizontal',
+      'hasCustomizer' => false,
+
+      'datas' => $datas,
+    ];
+
+    return view('tastevn.pages.print_food_scan', ['pageConfigs' => $pageConfigs]);
   }
 }
