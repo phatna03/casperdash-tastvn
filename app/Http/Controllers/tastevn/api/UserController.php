@@ -318,7 +318,6 @@ class UserController extends Controller
       'name' => trim($values['name']),
       'email' => trim($values['email']),
       'phone' => $values['phone'],
-      'ips_printer' => $values['ips_printer'],
     ]);
 
     return response()->json([
@@ -388,6 +387,22 @@ class UserController extends Controller
     return response()->json([
       'status' => true,
       'user' => $user->name,
+    ], 200);
+  }
+
+  public function profile_setting_update(Request $request)
+  {
+    $values = $request->all();
+    $viewer = Auth::user();
+
+    $viewer->update([
+      'allow_printer' => isset($values['printer']) && $values['printer'] == 'yes' ? 1 : 0,
+      'ips_printer' => $values['ips_printer'],
+    ]);
+
+    return response()->json([
+      'status' => true,
+      'item' => $viewer->name,
     ], 200);
   }
 }

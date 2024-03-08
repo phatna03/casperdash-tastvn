@@ -31,6 +31,7 @@ class User extends Authenticatable
     'access_ids',
     'access_texts',
 
+    'allow_printer',
     'ips_printer',
   ];
 

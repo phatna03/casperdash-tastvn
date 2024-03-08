@@ -19,7 +19,7 @@ use App\Models\Ingredient;
 //printer
 //require __DIR__ . '/vendor/autoload.php';
 use Mike42\Escpos\PrintConnectors\NetworkPrintConnector;
-use Mike42\Escpos\PrintConnectors\MultiplePrintConnector;
+use Mike42\Escpos\PrintConnectors\FilePrintConnector;
 use Mike42\Escpos\Printer;
 
 class GuestController extends Controller
@@ -96,6 +96,7 @@ class GuestController extends Controller
     $printers = array_filter(explode(';', Auth::user()->ips_printer));
 //    echo '<pre>';var_dump($printers, $escpos);die;
     $file_log_path = 'public/logs/printer.log';
+    $printed = true;
 
     if (count($printers)) {
       //multi
@@ -111,18 +112,36 @@ class GuestController extends Controller
 
         } catch (\Exception $e) {
 //          var_dump($e->getMessage());
+          Storage::prepend($file_log_path, 'PRINT_WITH_IP');
           Storage::prepend($file_log_path, 'MESSAGE_' . $e->getMessage());
+          $printed = false;
         }
       }
-
-      return view('tastevn.pages.printer', []);
 
     } else {
 
       //default
-      die('please configure your printer IP...');
+      try {
+
+        $connector = new FilePrintConnector("php://stdout");
+        $printer = new Printer($connector);
+        $printer->text($escpos);
+        $printer->cut();
+        $printer->close();
+
+      } catch (\Exception $e) {
+//          var_dump($e->getMessage());
+        Storage::prepend($file_log_path, 'PRINT_WITH_DEFAULT_PRINTER');
+        Storage::prepend($file_log_path, 'MESSAGE_' . $e->getMessage());
+        $printed = false;
+      }
     }
 
+    if ($printed) {
+      return view('tastevn.pages.printer', []);
+    }
+
+    die('please configure your printer...');
 
     //old
 //    $pageConfigs = [

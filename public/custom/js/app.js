@@ -825,7 +825,6 @@ function user_profile() {
     name: form.find('input[name=info_name]').val(),
     email: form.find('input[name=info_email]').val(),
     phone: form.find('input[name=info_phone]').val(),
-    ips_printer: form.find('input[name=info_ips_printer]').val(),
   })
     .then(response => {
 
@@ -886,6 +885,36 @@ function user_pwd() {
 
       message_from_toast('success', acmcfs.message_title_success, acmcfs.message_description_success_update, true);
       page_reload();
+
+    })
+    .catch(error => {
+
+      if (error.response.data && Object.values(error.response.data).length) {
+        Object.values(error.response.data).forEach(function (v, k) {
+          message_from_toast('error', acmcfs.message_title_error, v);
+        });
+      }
+
+    });
+
+  return false;
+}
+function user_setting_confirm(evt, frm) {
+  evt.preventDefault();
+  var popup = $('#modal_confirm_setting');
+  popup.modal('show');
+  return false;
+}
+function user_setting() {
+  var form = $('#frm-setting');
+
+  axios.post('/admin/profile/setting/update', {
+    printer: form.find('input[name=setting_printer]:checked').val(),
+    ips_printer: form.find('input[name=setting_ips_printer]').val(),
+  })
+    .then(response => {
+
+      message_from_toast('success', acmcfs.message_title_success, acmcfs.message_description_success_update, true);
 
     })
     .catch(error => {
