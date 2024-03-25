@@ -43,7 +43,13 @@
       "slug": "admin-settings"
     },
     {
-      "name": "Roboflow API",
+      "name": "Texts",
+      "icon": "menu-icon tf-icons mdi mdi-list-box-outline no_user",
+      "url": "admin/texts",
+      "slug": "admin-texts"
+    },
+    {
+      "name": "Modal Testing",
       "icon": "menu-icon tf-icons mdi mdi-robot-angry no_user",
       "url": "admin/roboflow",
       "slug": "admin-roboflow"

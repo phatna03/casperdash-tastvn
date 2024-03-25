@@ -484,4 +484,10 @@ class SysCore
     return $arr;
   }
 
+  public function get_notifications()
+  {
+    return [
+      'missing_ingredient'
+    ];
+  }
 }

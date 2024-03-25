@@ -47,6 +47,11 @@ class RestaurantFoodScan extends Model
     'deleted',
   ];
 
+  public function get_type()
+  {
+    return 'restaurant_food_scan';
+  }
+
   public function get_food()
   {
     return Food::find($this->food_id);
@@ -196,11 +201,14 @@ class RestaurantFoodScan extends Model
         $users = $this->get_restaurant()->get_users();
         if (count($users)) {
           foreach ($users as $user) {
-            Notification::send($user, new IngredientMissing([
-              'type' => 'ingredient_missing',
-              'restaurant_food_scan_id' => $this->id,
-              'user' => $user,
-            ]));
+            if ((int)$user->get_setting('missing_ingredient_receive')) {
+              //user_setting
+              Notification::send($user, new IngredientMissing([
+                'type' => 'ingredient_missing',
+                'restaurant_food_scan_id' => $this->id,
+                'user' => $user,
+              ]));
+            }
           }
         }
       }
@@ -236,5 +244,55 @@ class RestaurantFoodScan extends Model
     ]);
   }
 
+  public function get_comment($user = null)
+  {
+    $text = '';
 
+    if ($user) {
+      $row = Comment::where('deleted', 0)
+        ->where('user_id', $user->id)
+        ->where('object_id', $this->id)
+        ->where('object_type', $this->get_type())
+        ->first();
+      if ($row) {
+        $text = $row->content;
+      }
+    }
+
+    return $text;
+  }
+
+  public function get_comments($pars = [])
+  {
+    $select = Comment::where('deleted', 0)
+      ->where('object_id', $this->id)
+      ->where('object_type', $this->get_type());
+
+    if (count($pars) && isset($pars['order'])) {
+
+    } else {
+      $select->orderBy('id', 'asc');
+    }
+
+    return $select->get();
+  }
+
+  public function get_texts($pars = [])
+  {
+    $select = RestaurantFoodScanText::query('restaurant_food_scan_texts')
+      ->where('restaurant_food_scan_texts.restaurant_food_scan_id', $this->id);
+
+    if (count($pars)) {
+      if (isset($pars['id_only'])) {
+        $select->select('restaurant_food_scan_texts.id');
+      }
+
+      if (isset($pars['text_only'])) {
+        $select->select('texts.name')
+          ->leftJoin('texts', 'texts.id', '=', 'restaurant_food_scan_texts.text_id');
+      }
+    }
+
+    return $select->get();
+  }
 }

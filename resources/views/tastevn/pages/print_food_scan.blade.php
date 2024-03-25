@@ -27,7 +27,7 @@
     if(!empty($item->missing_texts) && count($texts)):
 @endphp
 <div>
-  <div>Missing Ingredients:</div>
+  <div>Ingredients Missing:</div>
   @foreach($texts as $text)
     @if(!empty(trim($text)))
       <div>- {{$text}}</div>

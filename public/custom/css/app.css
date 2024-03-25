@@ -150,6 +150,30 @@
   top: 10px;
 }
 
+.acm-top-px--10 {
+  top: -10px;
+}
+
+.acm-top-0 {
+  top: 0;
+}
+
+.acm-right-0 {
+  right: 0;
+}
+
+.acm-bottom-0 {
+  bottom: 0;
+}
+
+.acm-left-0 {
+  left: 0;
+}
+
+.acm-right-10px {
+  right: 10px;
+}
+
 .acm-fs-11 {
   font-size: 11px;
 }
@@ -168,6 +192,18 @@
 
 .acm-fs-15 {
   font-size: 15px;
+}
+
+.acm-fs-16 {
+  font-size: 16px;
+}
+
+.acm-fs-17 {
+  font-size: 17px;
+}
+
+.acm-fs-18 {
+  font-size: 18px;
 }
 
 .acm-line-height-1 {
@@ -197,6 +233,10 @@
   min-height: 40px;
 }
 
+.acm-height-50-max {
+  max-height: 50px;
+}
+
 .acm-height-100-max {
   max-height: 100px;
 }
@@ -209,8 +249,50 @@
   max-height: 300px;
 }
 
+.acm-height-400-max {
+  max-height: 400px;
+}
+
 .acm-height-px-auto {
   height: auto !important;
+}
+
+.acm-width-max-100 {
+  max-width: 100%;
+}
+
+.acm-width-250-max {
+  max-width: 250px;
+}
+
+.acm-width-100-min {
+  min-width: 100px;
+}
+
+.acm-width-200-min {
+  min-width: 200px;
+}
+
+.acm-width-250-min {
+  min-width: 250px;
+}
+
+.acm-overflow-y-auto {
+  overflow-y: auto;
+}
+
+.acm-overflow-y-scroll {
+  overflow-y: scroll;
+}
+
+.acm-lbl-highlight {
+  color: #fa0000 !important;
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.acm-text-black {
+  color: #000 !important;
 }
 
 .acm-itm-notify {
@@ -235,6 +317,52 @@
   border: none;
   background: none;
   box-shadow: none;
+}
+
+.acm-modal-xxl {
+  max-width: 90%;
+}
+
+.acm-modal-arrow {
+  position: absolute;
+  top: 45%;
+  opacity: 0.5;
+  cursor: pointer;
+}
+
+.acm-modal-arrow:hover {
+  opacity: 1;
+}
+
+.acm-modal-arrow img {
+  width: 55px;
+  z-index: 99999999;
+  background: #111;
+  border-radius: 50%;
+  padding: 5px;
+}
+
+.acm-modal-arrow-prev {
+  left: -55px;
+}
+
+.acm-modal-arrow-next {
+  right: -55px;
+}
+
+.acm-max-line-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 42px;
+}
+
+.acm-lbl-dark {
+  text-transform: uppercase;
+  font-weight: bold;
+  font-size: 13px;
+  color: #111;
 }
 
 #custCarousel .carousel-indicators {
@@ -269,6 +397,15 @@
   background-color: #000;
 }
 
+#custCarousel .custom-arrow {
+  width: 55px;
+  z-index: 999;
+  opacity: 1;
+  background: #111;
+  border-radius: 50%;
+  padding: 5px;
+}
+
 .carousel-item img {
   width: 100%;
 }
@@ -277,4 +414,105 @@
 .btn[class*=btn-]:not([class*=btn-label-]):not([class*=btn-outline-]):not([class*=btn-text-]):not(.btn-icon).disabled {
   background: #aaa !important;
   color: #fff !important;
+}
+
+.dataTables_wrapper table td {
+  padding: 5px;
+}
+
+.lcl_icon.lcl_prev {
+  position: fixed;
+  top: 50%;
+  z-index: 1000;
+  left: -50px;
+}
+
+.lcl_icon.lcl_next {
+  position: fixed;
+  top: 50%;
+  z-index: 1000;
+  right: -50px;
+}
+
+.lcl_icon.lcl_prev:before,
+.lcl_icon.lcl_next:before {
+  font-size: 50px;
+  color: white;
+}
+
+.light-style #toast-container {
+  z-index: 9999999999;
+}
+
+.dataTables_wrapper .dataTables_info {
+  color: #636578 !important;
+  font-weight: bold;
+}
+
+.dataTables_wrapper .dataTables_paginate ul li a {
+  font-weight: bold;
+}
+
+.dataTables_wrapper .acm-filter-left div {
+  display: inline-block;
+}
+
+.dataTables_wrapper .dt-action-buttons {
+  margin-top: 1rem;
+}
+
+.cmt-wrapper {
+  display: none;
+
+  position: absolute;
+  top: 0;
+  background-color: #e7e7ff;
+  width: 500px;
+  left: -485px;
+  padding: 10px;
+  border: 1px solid;
+  border-radius: 3px;
+  max-height: 600px;
+  overflow-y: auto;
+  z-index: 10;
+}
+
+.sensor-wrapper:hover .cmt-wrapper {
+  display: block;
+}
+
+.cmt-wrapper .cmt-itm {
+  margin-bottom: 10px;
+}
+
+.sensor-wrapper .cmt-count {
+  position: absolute;
+  top: -20px;
+  left: 55%;
+}
+
+.btn-close {
+  background: #aaa var(--bs-btn-close-bg) center/1rem auto no-repeat;
+  opacity: 1;
+}
+
+.form-floating > label {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.selectize-control.multi .selectize-input > div {
+  font-size: 15px;
+  padding: 5px 8px;
+}
+
+.card-title {
+  margin-bottom: 10px;
+}
+
+/*modal 2*/
+.layout-navbar-fixed body:not(.modal-open) .layout-navbar-full .layout-navbar,
+.layout-menu-fixed body:not(.modal-open) .layout-navbar-full .layout-navbar,
+.layout-menu-fixed-offcanvas body:not(.modal-open) .layout-navbar-full .layout-navbar {
+  z-index: 10;
 }

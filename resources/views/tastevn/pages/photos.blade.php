@@ -32,20 +32,22 @@
 
 @section('content')
 
-  <h4 class="py-3 mb-4"><span class="text-muted fw-light">Admin /</span> Album Photos</h4>
+  <h4 class="mb-2"><span class="text-muted fw-light">Admin /</span> Album Photos</h4>
 
   <div class="card" id="wrap-datas">
     <div class="card-header border-bottom wrap-search-form">
       <h5 class="card-title">Search Conditions</h5>
 
       <form onsubmit="event.preventDefault(); return form_photos_filter();">
-        <div class="d-flex justify-content-between align-items-center row py-3 gap-3 gap-md-0">
+        <div class="d-flex justify-content-between align-items-center row py-1 gap-3 gap-md-0">
           <div class="col-md-6 mb-2">
             <div class="form-floating form-floating-outline">
               <div class="form-control acm-wrap-selectize" id="filter-search-restaurants">
                 <select class="ajx_selectize"
                         data-value="restaurant"
-                        name="restaurants" multiple onchange="form_photos_filter()"></select>
+                        name="restaurants" multiple onchange="form_photos_filter()">
+                  <option value="">All</option>
+                </select>
               </div>
               <label for="filter-search-restaurants">Restaurants</label>
             </div>
@@ -53,7 +55,7 @@
           <div class="col-md-6 mb-2">
             <div class="form-floating form-floating-outline">
               <input type="text" class="form-control text-center date_time_picker" name="time_upload"
-                     id="filter-search-time-upload" autocomplete="off" data-value="current_day"
+                     id="filter-search-time-upload" autocomplete="off" data-value="last_and_current_day"
                      onchange="form_photos_filter()" />
               <label for="filter-search-time-upload">Time upload</label>
             </div>
@@ -79,7 +81,6 @@
   <script type="text/javascript">
     var $ = jQuery.noConflict();
     $(document).ready(function() {
-
 
     });
 
@@ -120,13 +121,7 @@
 
             lc_lightbox('.acm-lightbox-photo', {
               wrap_class: 'lcl_fade_oc',
-              gallery : true,
               thumb_attr: 'data-lcl-thumb',
-
-              skin: 'minimal',
-              radius: 0,
-              padding	: 0,
-              border_w: 0,
             });
 
           } else {

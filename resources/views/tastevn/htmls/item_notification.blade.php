@@ -11,11 +11,7 @@ if (!isset($notifications) || !count($notifications)) {
 @endphp
 <div
   class="acm-itm-notify position-relative m-1 p-1 @if(!empty($notification->read_at)) @else bg-primary-subtle @endif "
-  @if($viewer->role == 'user')
-    onclick="notification_read(this);"
-  @else
-    onclick="notification_read(this); restaurant_food_scan_result_info({{$notification->data['restaurant_food_scan_id']}})"
-  @endif
+  onclick="notification_read(this); restaurant_food_scan_result_info({{$notification->data['restaurant_food_scan_id']}})"
   data-itd="{{$notification->id}}"
 >
   <div class="acm-float-right">
@@ -42,7 +38,7 @@ if (!isset($notifications) || !count($notifications)) {
           if(!empty($item->missing_texts) && count($texts)):
       @endphp
       <div class="text-dark">
-        <div>Missing Ingredients:</div>
+        <div>Ingredients Missing:</div>
         @foreach($texts as $text)
           @if(!empty(trim($text)))
             <div>- {{$text}}</div>

@@ -3,7 +3,7 @@
 @section('title', 'Admin Notifications')
 
 @section('content')
-  <h4 class="py-3 mb-4"><span class="text-muted fw-light">Admin /</span> Notifications</h4>
+  <h4 class="mb-2"><span class="text-muted fw-light">Admin /</span> Notifications</h4>
 
   <div class="card">
     <div class="card-body p-1">
@@ -22,21 +22,31 @@
               <div class="demo-inline-spacing acm-float-right">
                 <nav aria-label="Page navigation">
                   <ul class="pagination pagination-rounded pagination-outline-primary">
-                    @if($pageConfigs['currentPage'] > 1)
-                    <li class="page-item prev">
-                      <a class="page-link" href="{{url('admin/notifications?page=' . ($pageConfigs['currentPage'] - 1))}}"><i class="tf-icon mdi mdi-chevron-left"></i></a>
-                    </li>
-                    @endif
-                    @for($i=1;$i<=$pageConfigs['totalPages'];$i++)
-                    <li class="page-item @if($pageConfigs['currentPage'] == $i) active @endif">
-                      <a class="page-link @if($pageConfigs['currentPage'] == $i) bg-primary text-white @endif"
-                         href="{{url('admin/notifications?page=' . $i)}}">{{$i}}</a>
-                    </li>
-                    @endfor
-                    @if($pageConfigs['currentPage'] < $pageConfigs['totalPages'])
-                    <li class="page-item next">
-                      <a class="page-link" href="{{url('admin/notifications?page=' . ($pageConfigs['currentPage'] + 1))}}"><i class="tf-icon mdi mdi-chevron-right"></i></a>
-                    </li>
+                    @if($pageConfigs['totalPages'] < 6)
+                      @if($pageConfigs['currentPage'] > 1)
+                      <li class="page-item prev">
+                        <a class="page-link" href="{{url('admin/notifications?page=' . ($pageConfigs['currentPage'] - 1))}}"><i class="tf-icon mdi mdi-chevron-left"></i></a>
+                      </li>
+                      @endif
+                      @for($i=1;$i<=$pageConfigs['totalPages'];$i++)
+                      <li class="page-item @if($pageConfigs['currentPage'] == $i) active @endif">
+                        <a class="page-link @if($pageConfigs['currentPage'] == $i) bg-primary text-white @endif"
+                           href="{{url('admin/notifications?page=' . $i)}}">{{$i}}</a>
+                      </li>
+                      @endfor
+                      @if($pageConfigs['currentPage'] < $pageConfigs['totalPages'])
+                      <li class="page-item next">
+                        <a class="page-link" href="{{url('admin/notifications?page=' . ($pageConfigs['currentPage'] + 1))}}"><i class="tf-icon mdi mdi-chevron-right"></i></a>
+                      </li>
+                      @endif
+                    @else
+                      <li class="page-item prev">
+                        <a class="page-link" href="{{url('admin/notifications?page=' . ($pageConfigs['currentPage'] - 1))}}"><i class="tf-icon mdi mdi-chevron-left"></i></a>
+                      </li>
+
+                      <li class="page-item next">
+                        <a class="page-link" href="{{url('admin/notifications?page=' . ($pageConfigs['currentPage'] + 1))}}"><i class="tf-icon mdi mdi-chevron-right"></i></a>
+                      </li>
                     @endif
                   </ul>
                 </nav>

@@ -14,7 +14,7 @@
 @endsection
 
 @section('content')
-  <h4 class="py-3 mb-4"><span class="text-muted fw-light">Admin /</span> Manage Users</h4>
+  <h4 class="mb-2"><span class="text-muted fw-light">Admin /</span> Manage Users</h4>
 
   <div class="card">
     <div class="card-header border-bottom">
@@ -321,7 +321,7 @@
         //stt
         {data: 'DT_RowIndex', name: 'DT_RowIndex' , orderable: false, searchable: false},
         {data: 'name', name: 'name'},
-        {data: null},
+        {data: 'email'},
         {data: 'status', name: 'status'},
         {data: 'access_texts', name: 'access_texts'},
         {data: 'note', name: 'note'},

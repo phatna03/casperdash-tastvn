@@ -390,15 +390,50 @@ class UserController extends Controller
     ], 200);
   }
 
+  public function profile_setting(Request $request)
+  {
+    $user = Auth::user();
+
+    $pageConfigs = [
+      'myLayout' => 'horizontal',
+      'hasCustomizer' => false,
+
+    ];
+
+    return view('tastevn.pages.profile_setting', ['pageConfigs' => $pageConfigs]);
+  }
+
   public function profile_setting_update(Request $request)
   {
-    $values = $request->all();
+    $values = $request->post();
     $viewer = Auth::user();
+//    echo '<pre>';var_dump($values);die;
+    $settings = isset($values['settings']) && count($values['settings']) ? $values['settings'] : [];
 
-    $viewer->update([
-      'allow_printer' => isset($values['printer']) && $values['printer'] == 'yes' ? 1 : 0,
-      'ips_printer' => $values['ips_printer'],
-    ]);
+    if (count($settings)) {
+      foreach ($settings as $key => $val) {
+        $viewer->set_setting($key, $val);
+      }
+    }
+
+    return response()->json([
+      'status' => true,
+      'item' => $viewer->name,
+    ], 200);
+  }
+
+  public function profile_setting_notify(Request $request)
+  {
+    $values = $request->post();
+    $viewer = Auth::user();
+//    echo '<pre>';var_dump($values);die;
+    $notifications = isset($values['notifications']) && count($values['notifications']) ? $values['notifications'] : [];
+
+    if (count($notifications)) {
+      foreach ($notifications as $notification) {
+        $viewer->set_setting($notification['key'], $notification['val']);
+      }
+    }
 
     return response()->json([
       'status' => true,

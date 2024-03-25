@@ -1,4 +1,5 @@
 <?php
+
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\laravel_example\UserManagement;
 use App\Http\Controllers\dashboard\Analytics;
@@ -180,7 +181,9 @@ use App\Http\Controllers\tastevn\api\RestaurantController;
 use App\Http\Controllers\tastevn\api\FoodController;
 use App\Http\Controllers\tastevn\api\IngredientController;
 use App\Http\Controllers\tastevn\api\FoodCategoryController;
+use App\Http\Controllers\tastevn\api\TextController;
 use App\Http\Controllers\tastevn\api\PhotoController;
+use App\Http\Controllers\tastevn\api\CommentController;
 use App\Http\Controllers\tastevn\view\GuestController;
 use App\Http\Controllers\tastevn\view\DashboardController;
 
@@ -213,23 +216,36 @@ Route::get('/admin/profile', [UserController::class, 'profile']);
 Route::post('/admin/profile/update', [UserController::class, 'profile_update']);
 Route::post('/admin/profile/pwd/code', [UserController::class, 'profile_pwd_code']);
 Route::post('/admin/profile/pwd/update', [UserController::class, 'profile_pwd_update']);
+
+Route::get('/admin/profile/setting', [UserController::class, 'profile_setting']);
 Route::post('/admin/profile/setting/update', [UserController::class, 'profile_setting_update']);
+Route::post('/admin/profile/setting/notify', [UserController::class, 'profile_setting_notify']);
 
 Route::get('/admin/users', [UserController::class, 'index']);
 Route::post('/admin/user/store', [UserController::class, 'store']);
 Route::post('/admin/user/update', [UserController::class, 'update']);
 Route::post('/admin/user/delete', [UserController::class, 'delete']);
 Route::post('/admin/user/restore', [UserController::class, 'restore']);
-Route::get('/datatable/user', function(Request $request) {
+Route::get('/datatable/user', function (Request $request) {
   $values = $request->all();
+
+  $order_default = true;
+  if (isset($values['order']) && count($values['order']) && isset($values['order'][0])) {
+    if (isset($values['order'][0]['column']) && (int)$values['order'][0]['column']) {
+      $order_default = false;
+    }
+  }
 
   $select = App\Models\User::query()
     ->select('id', 'name', 'email', 'phone', 'status', 'role', 'note', 'updated_at', 'access_full', 'access_ids', 'access_texts')
     ->where('deleted', 0)
     ->where('role', '<>', 'superadmin') //superadmin
-    ->orderBy('updated_at', 'desc')
-    ->orderBy('id', 'desc')
   ;
+
+  if ($order_default) {
+    $select->orderBy('updated_at', 'desc')
+      ->orderBy('id', 'desc');
+  }
 
   if (count($values)) {
     if (isset($values['name']) && !empty($values['name'])) {
@@ -253,20 +269,30 @@ Route::post('/admin/restaurant/food/delete', [RestaurantController::class, 'food
 Route::post('/admin/restaurant/food/scan', [RestaurantController::class, 'food_scan']);
 Route::post('/admin/restaurant/food/scan/delete', [RestaurantController::class, 'food_scan_delete']);
 Route::post('/admin/restaurant/food/scan/info', [RestaurantController::class, 'food_scan_info']);
+Route::post('/admin/restaurant/food/scan/get', [RestaurantController::class, 'food_scan_get']);
 Route::post('/admin/restaurant/food/scan/update', [RestaurantController::class, 'food_scan_update']);
 Route::post('/admin/restaurant/food/scan/error', [RestaurantController::class, 'food_scan_error']);
-Route::get('/datatable/restaurant', function(Request $request) {
+Route::get('/datatable/restaurant', function (Request $request) {
   $values = $request->all();
+
+  $order_default = true;
+  if (isset($values['order']) && count($values['order']) && isset($values['order'][0])) {
+    if (isset($values['order'][0]['column']) && (int)$values['order'][0]['column']) {
+      $order_default = false;
+    }
+  }
 
   $user = \Illuminate\Support\Facades\Auth::user();
 
   $select = App\Models\Restaurant::query("restaurants")
     ->select("restaurants.id", "restaurants.s3_bucket_name", "restaurants.s3_bucket_address",
       "restaurants.name", "restaurants.count_foods", "restaurants.updated_at")
-    ->where('restaurants.deleted', 0)
-    ->orderBy('restaurants.updated_at', 'desc')
-    ->orderBy('restaurants.id', 'desc')
-  ;
+    ->where('restaurants.deleted', 0);
+
+  if ($order_default) {
+    $select->orderBy('restaurants.updated_at', 'desc')
+      ->orderBy('restaurants.id', 'desc');
+  }
 
   if ($user && $user->role == 'moderator' && !$user->access_full) {
     $select->whereIn('id', function ($q) use ($user) {
@@ -284,19 +310,28 @@ Route::get('/datatable/restaurant', function(Request $request) {
 
   return DataTables::of($select)->addIndexColumn()->toJson();
 });
-Route::get('/datatable/restaurant-foods', function(Request $request) {
+Route::get('/datatable/restaurant-foods', function (Request $request) {
   $values = $request->all();
   $restaurant = isset($values['restaurant']) ? (int)$values['restaurant'] : 0;
+
+  $order_default = true;
+  if (isset($values['order']) && count($values['order']) && isset($values['order'][0])) {
+    if (isset($values['order'][0]['column']) && (int)$values['order'][0]['column']) {
+      $order_default = false;
+    }
+  }
 
   $select = App\Models\RestaurantFood::query("restaurant_foods")
     ->select("restaurant_foods.food_id", "food_categories.name as category_name",
       "foods.name as food_name", "foods.photo as food_photo", "restaurant_foods.updated_at")
     ->leftJoin("foods", "restaurant_foods.food_id", "=", "foods.id")
     ->leftJoin("food_categories", "restaurant_foods.food_category_id", "=", "food_categories.id")
-    ->where('restaurant_foods.deleted', 0)
-    ->orderBy('restaurant_foods.updated_at', 'desc')
-    ->orderBy('restaurant_foods.id', 'desc')
-  ;
+    ->where('restaurant_foods.deleted', 0);
+
+  if ($order_default) {
+    $select->orderBy('restaurant_foods.updated_at', 'desc')
+      ->orderBy('restaurant_foods.id', 'desc');
+  }
 
   if ($restaurant) {
     $select->where("restaurant_foods.restaurant_id", $restaurant);
@@ -310,11 +345,21 @@ Route::get('/datatable/restaurant-foods', function(Request $request) {
 
   return DataTables::of($select)->addIndexColumn()->toJson();
 });
-Route::get('/datatable/restaurant-food-scans', function(Request $request) {
+Route::get('/datatable/restaurant-food-scans', function (Request $request) {
   $values = $request->all();
   $api_core = new SysCore();
+//echo '<pre>';var_dump($values);die;
+
+  $order_default = true;
+  if (isset($values['order']) && count($values['order']) && isset($values['order'][0])) {
+    if (isset($values['order'][0]['column']) && (int)$values['order'][0]['column']) {
+      $order_default = false;
+    }
+  }
 
   $restaurant = isset($values['restaurant']) ? (int)$values['restaurant'] : 0;
+  $statuses = isset($values['statuses']) ? (array)$values['statuses'] : [];
+  $missing = isset($values['missing']) && !empty($values['missing']) ? $values['missing'] : NULL;
   $food_catetories = isset($values['categories']) ? (array)$values['categories'] : [];
   $foods = isset($values['foods']) ? (array)$values['foods'] : [];
   $time_upload = isset($values['time_upload']) && !empty($values['time_upload']) ? $values['time_upload'] : NULL;
@@ -329,12 +374,12 @@ Route::get('/datatable/restaurant-food-scans', function(Request $request) {
     )
     ->leftJoin("foods", "restaurant_food_scans.food_id", "=", "foods.id")
     ->leftJoin("food_categories", "restaurant_food_scans.food_category_id", "=", "food_categories.id")
+    ->where("restaurant_food_scans.deleted", 0);
 
-    ->where("restaurant_food_scans.deleted", 0)
-
-    ->orderBy('restaurant_food_scans.updated_at', 'desc')
-    ->orderBy('restaurant_food_scans.id', 'desc')
-  ;
+  if ($order_default) {
+    $select->orderBy('restaurant_food_scans.updated_at', 'desc')
+      ->orderBy('restaurant_food_scans.id', 'desc');
+  }
 
   if ($restaurant) {
     $select->where("restaurant_food_scans.restaurant_id", $restaurant);
@@ -363,12 +408,34 @@ Route::get('/datatable/restaurant-food-scans', function(Request $request) {
       $select->where('restaurant_food_scans.time_photo', '<=', $times['time_to']);
     }
   }
+  if (count($statuses)) {
+    $select->whereIn("restaurant_food_scans.status", $statuses);
+  }
+  if (!empty($missing)) {
+    switch ($missing) {
+      case 'yes':
+        $select->where("restaurant_food_scans.missing_ids", '<>', NULL);
+        break;
+
+      case 'no':
+        $select->where("restaurant_food_scans.missing_ids", NULL);
+        break;
+    }
+  }
 
   return DataTables::of($select)->addIndexColumn()->toJson();
 });
-Route::get('/datatable/restaurant-food-scan-errors', function(Request $request) {
+Route::get('/datatable/restaurant-food-scan-errors', function (Request $request) {
   $values = $request->all();
   $api_core = new SysCore();
+//echo '<pre>';var_dump($values);die;
+
+  $order_default = true;
+  if (isset($values['order']) && count($values['order']) && isset($values['order'][0])) {
+    if (isset($values['order'][0]['column']) && (int)$values['order'][0]['column']) {
+      $order_default = false;
+    }
+  }
 
   $restaurant = isset($values['restaurant']) ? (int)$values['restaurant'] : 0;
   $food_catetories = isset($values['categories']) ? (array)$values['categories'] : [];
@@ -384,8 +451,11 @@ Route::get('/datatable/restaurant-food-scan-errors', function(Request $request) 
     ->where('restaurant_food_scans.deleted', 0)
     ->where('restaurant_food_scans.food_id', '>', 0)
     ->where('restaurant_food_scans.missing_ids', '<>', NULL)
-    ->groupBy(['restaurant_food_scans.food_id', 'restaurant_food_scans.missing_ids', 'restaurant_food_scans.missing_texts', 'foods.name', 'food_categories.name'])
-    ->orderBy('total_error', 'desc');
+    ->groupBy(['restaurant_food_scans.food_id', 'restaurant_food_scans.missing_ids', 'restaurant_food_scans.missing_texts', 'foods.name', 'food_categories.name']);
+
+  if ($order_default) {
+    $select->orderBy('total_error', 'desc');
+  }
 
   if ($restaurant) {
     $select->where("restaurant_food_scans.restaurant_id", $restaurant);
@@ -423,14 +493,24 @@ Route::post('/admin/food/get', [FoodController::class, 'get']);
 Route::post('/admin/food/ingredient/html', [FoodController::class, 'ingredient_html']);
 Route::post('/admin/food/store', [FoodController::class, 'store']);
 Route::post('/admin/food/update', [FoodController::class, 'update']);
+Route::post('/admin/food/import', [FoodController::class, 'import']);
 Route::post('/admin/food/selectize', [FoodController::class, 'selectize']);
-Route::get('/datatable/foods', function(Request $request) {
+Route::get('/datatable/foods', function (Request $request) {
   $values = $request->all();
 
-  $select = App\Models\Food::query()
-    ->orderBy('updated_at', 'desc')
-    ->orderBy('id', 'desc')
-  ;
+  $order_default = true;
+  if (isset($values['order']) && count($values['order']) && isset($values['order'][0])) {
+    if (isset($values['order'][0]['column']) && (int)$values['order'][0]['column']) {
+      $order_default = false;
+    }
+  }
+
+  $select = App\Models\Food::query();
+
+  if ($order_default) {
+    $select->orderBy('updated_at', 'desc')
+      ->orderBy('id', 'desc');
+  }
 
   if (count($values)) {
     if (isset($values['name']) && !empty($values['name'])) {
@@ -446,13 +526,22 @@ Route::post('/admin/ingredient/store', [IngredientController::class, 'store']);
 Route::post('/admin/ingredient/update', [IngredientController::class, 'update']);
 Route::post('/admin/ingredient/create', [IngredientController::class, 'create']);
 Route::post('/admin/ingredient/selectize', [IngredientController::class, 'selectize']);
-Route::get('/datatable/ingredients', function(Request $request) {
+Route::get('/datatable/ingredients', function (Request $request) {
   $values = $request->all();
 
-  $select = App\Models\Ingredient::query()
-    ->orderBy('updated_at', 'desc')
-    ->orderBy('id', 'desc')
-  ;
+  $order_default = true;
+  if (isset($values['order']) && count($values['order']) && isset($values['order'][0])) {
+    if (isset($values['order'][0]['column']) && (int)$values['order'][0]['column']) {
+      $order_default = false;
+    }
+  }
+
+  $select = App\Models\Ingredient::query();
+
+  if ($order_default) {
+    $select->orderBy('updated_at', 'desc')
+      ->orderBy('id', 'desc');
+  }
 
   if (count($values)) {
     if (isset($values['name']) && !empty($values['name'])) {
@@ -471,13 +560,53 @@ Route::post('/admin/food-category/store', [FoodCategoryController::class, 'store
 Route::post('/admin/food-category/update', [FoodCategoryController::class, 'update']);
 Route::post('/admin/food-category/create', [FoodCategoryController::class, 'create']);
 Route::post('/admin/food-category/selectize', [FoodCategoryController::class, 'selectize']);
-Route::get('/datatable/food-categories', function(Request $request) {
+Route::get('/datatable/food-categories', function (Request $request) {
   $values = $request->all();
 
-  $select = App\Models\FoodCategory::query()
-    ->orderBy('updated_at', 'desc')
-    ->orderBy('id', 'desc')
-  ;
+  $order_default = true;
+  if (isset($values['order']) && count($values['order']) && isset($values['order'][0])) {
+    if (isset($values['order'][0]['column']) && (int)$values['order'][0]['column']) {
+      $order_default = false;
+    }
+  }
+
+  $select = App\Models\FoodCategory::query();
+
+  if ($order_default) {
+    $select->orderBy('updated_at', 'desc')
+      ->orderBy('id', 'desc');
+  }
+
+  if (count($values)) {
+    if (isset($values['name']) && !empty($values['name'])) {
+      $select->where('name', 'LIKE', '%' . $values['name'] . '%');
+    }
+  }
+
+  return DataTables::of($select)->addIndexColumn()->toJson();
+});
+
+Route::get('/admin/texts', [TextController::class, 'index']);
+Route::post('/admin/text/store', [TextController::class, 'store']);
+Route::post('/admin/text/update', [TextController::class, 'update']);
+Route::post('/admin/text/create', [TextController::class, 'create']);
+Route::post('/admin/text/selectize', [TextController::class, 'selectize']);
+Route::get('/datatable/texts', function (Request $request) {
+  $values = $request->all();
+
+  $order_default = true;
+  if (isset($values['order']) && count($values['order']) && isset($values['order'][0])) {
+    if (isset($values['order'][0]['column']) && (int)$values['order'][0]['column']) {
+      $order_default = false;
+    }
+  }
+
+  $select = App\Models\Text::query();
+
+  if ($order_default) {
+    $select->orderBy('updated_at', 'desc')
+      ->orderBy('id', 'desc');
+  }
 
   if (count($values)) {
     if (isset($values['name']) && !empty($values['name'])) {
@@ -490,6 +619,8 @@ Route::get('/datatable/food-categories', function(Request $request) {
 
 Route::get('/admin/photos', [PhotoController::class, 'index']);
 Route::post('/admin/photo/get', [PhotoController::class, 'get']);
+
+Route::post('/admin/comment/note', [CommentController::class, 'note']);
 
 Route::get('/admin/roboflow', [RoboflowController::class, 'index']);
 Route::post('/admin/roboflow/detect', [RoboflowController::class, 'detect']);

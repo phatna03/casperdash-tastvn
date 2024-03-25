@@ -108,14 +108,28 @@ class DashboardController extends Controller
 
     $items = [];
     $ids = [];
-    $updated = false;
+
+    $valid_types = [];
+
+    //user_setting
+    if ((int)$user->get_setting('missing_ingredient_receive')
+      && (int)$user->get_setting('missing_ingredient_alert_realtime')
+    ) {
+      $valid_types[] = 'App\Notifications\IngredientMissing';
+    }
+
+    //allow_printer
+    if ((int)$user->get_setting('allow_printer')) {
+      $valid_types[] = 'App\Notifications\IngredientMissing';
+    }
 
     if (!empty($user->time_notification)) {
 
       $notifications = $user->notifications()
+        ->whereIn('type', $valid_types)
         ->where('created_at', '>', $user->time_notification)
         ->orderBy('id', 'asc')
-        ->limit(5)
+        ->limit(1)
         ->get();
 
       if (count($notifications)) {
@@ -140,16 +154,21 @@ class DashboardController extends Controller
           ];
 
           $ids[] = $row->id;
-          $updated = true;
+
+          $user->update([
+            'time_notification' => $notification->created_at->format('Y-m-d H:i:s')
+          ]);
         }
+
+      } else {
+
+        $user->update([
+          'time_notification' => date('Y-m-d H:i:s')
+        ]);
       }
 
     } else {
 
-      $updated = true;
-    }
-
-    if ($updated) {
       $user->update([
         'time_notification' => date('Y-m-d H:i:s')
       ]);

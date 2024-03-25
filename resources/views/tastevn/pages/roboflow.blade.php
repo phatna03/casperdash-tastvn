@@ -15,7 +15,7 @@
 @endsection
 
 @section('content')
-  <h4 class="py-3 mb-4">
+  <h4 class="mb-2">
     <span class="text-muted fw-light">Admin /</span> Roboflow
   </h4>
 
@@ -241,7 +241,7 @@
               html += '<div>---</div>';
             }
 
-            html += '<div class="text-dark fw-bold mb-1 mt-1">+ Ingredients missing</div>';
+            html += '<div class="text-dark fw-bold mb-1 mt-1">+ Ingredients Missing</div>';
             if (xhr.responseJSON.data.rbf.ingredients_missing && xhr.responseJSON.data.rbf.ingredients_missing.length) {
               xhr.responseJSON.data.rbf.ingredients_missing.forEach(function (v, k) {
                 html += '<div>'
@@ -276,7 +276,7 @@
               html += '<div>---</div>';
             }
 
-            html += '<div class="text-primary fw-bold mb-1 mt-1">+ Ingredients missing</div>';
+            html += '<div class="text-primary fw-bold mb-1 mt-1">+ Ingredients Missing</div>';
             if (xhr.responseJSON.data.sys.ingredients_missing && xhr.responseJSON.data.sys.ingredients_missing.length) {
               xhr.responseJSON.data.sys.ingredients_missing.forEach(function (v, k) {
                 html += '<div>'

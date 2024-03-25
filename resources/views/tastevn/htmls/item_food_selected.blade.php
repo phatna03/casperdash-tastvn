@@ -4,7 +4,7 @@ if (!isset($ingredients) || !count($ingredients)) {
 }
 foreach($ingredients as $ing):
 @endphp
-  <div class="mb-2 @if($ing['ingredient_type'] == 'core') text-danger fw-bold @else text-dark @endif">
+  <div class="mb-2 text-dark">
     <b>{{$ing['ingredient_quantity']}}</b>
     <span>{{$ing['name'] . ' - ' . $ing['name_vi']}}</span>
   </div>

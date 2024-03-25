@@ -3,6 +3,7 @@ function bind_datad(wrap) {
   bind_number(wrap);
   bind_selectize(wrap);
 }
+
 function bind_selectize(wrap) {
   var wrapper = $(wrap);
   if (!wrapper.length) {
@@ -22,7 +23,8 @@ function bind_selectize(wrap) {
           labelField: 'name',
           searchField: 'name',
           preload: true,
-          clearCache: function (template) {},
+          clearCache: function (template) {
+          },
           load: function (query, callback) {
             $.ajax({
               url: acmcfs.link_base_url + '/admin/ingredient/selectize',
@@ -47,11 +49,11 @@ function bind_selectize(wrap) {
               },
             });
           },
-          create:function (input, callback){
+          create: function (input, callback) {
             $.ajax({
               url: acmcfs.link_base_url + '/admin/ingredient/create',
               type: 'POST',
-              data:{
+              data: {
                 name: input,
                 _token: acmcfs.var_csrf,
               },
@@ -72,7 +74,8 @@ function bind_selectize(wrap) {
           labelField: 'name',
           searchField: 'name',
           preload: true,
-          clearCache: function (template) {},
+          clearCache: function (template) {
+          },
           load: function (query, callback) {
             $.ajax({
               url: acmcfs.link_base_url + '/admin/food/selectize',
@@ -108,7 +111,8 @@ function bind_selectize(wrap) {
           labelField: 'name',
           searchField: 'name',
           preload: true,
-          clearCache: function (template) {},
+          clearCache: function (template) {
+          },
           load: function (query, callback) {
             $.ajax({
               url: acmcfs.link_base_url + '/admin/restaurant/selectize',
@@ -140,7 +144,15 @@ function bind_selectize(wrap) {
       }
     });
   }
+  if (wrapper && wrapper.find('select.opt_selectize').length) {
+    wrapper.find('select.opt_selectize').each(function (k, v) {
+      var select = $(v);
+
+      select.selectize({});
+    });
+  }
 }
+
 function bind_number(wrap) {
   var wrapper = $(wrap);
   //0= 48 //9= 57 //, = 44 //- = 45 //. = 46
@@ -191,11 +203,13 @@ function bind_number(wrap) {
     }, acmcfs.timeout_quick);
   });
 }
+
 function bind_nl2br(str, is_xhtml) {
   var breakTag = (is_xhtml || typeof is_xhtml === 'undefined') ? '<br ' + '/>' : '<br>'; // Adjust comment to avoid issue on phpjs.org display
 
   return (str + '').replace(/([^>\r\n]?)(\r\n|\n\r|\r|\n)/g, '$1' + breakTag + '$2');
 }
+
 function bind_picker() {
   //date range
   if ($('.date_picker').length) {
@@ -242,6 +256,19 @@ function bind_picker() {
           endDate: moment().endOf('day').format('DD/MM/YYYY HH:mm'),
         });
 
+      } else if (value && value == 'last_and_current_day') {
+
+        bind.daterangepicker({
+          timePicker: true,
+          timePickerIncrement: 30,
+          locale: {
+            format: 'DD/MM/YYYY HH:mm',
+          },
+          timePicker24Hour: true,
+          startDate: moment().subtract(1, 'days').startOf('day').format('DD/MM/YYYY HH:mm'),
+          endDate: moment().endOf('day').format('DD/MM/YYYY HH:mm'),
+        });
+
       } else {
 
         bind.daterangepicker({
@@ -259,10 +286,12 @@ function bind_picker() {
     });
   }
 }
+
 function bind_staff(role) {
   $('.no_' + role).closest('.menu-item').remove();
   $('.no_' + role).remove();
 }
+
 function input_number_only(value) {
   if (!value || value === '') {
     return 0;
@@ -282,6 +311,7 @@ function input_number_only(value) {
 
   return !value || value === '' ? 0 : value;
 }
+
 function input_number_min_one(ele) {
   var bind = $(ele);
   var val = bind.val().trim();
@@ -290,15 +320,18 @@ function input_number_min_one(ele) {
     bind.val(1);
   }
 }
+
 function offcanvas_close() {
   $('.offcanvas').removeClass('show');
   $('.offcanvas-backdrop').remove();
   $('body').attr('style', '');
 }
+
 function sound_play() {
   var audio = new Audio(acmcfs.link_base_url + '/sound_notification.mp3');
   audio.play();
 }
+
 function message_from_toast(type, title, body, sound = false) {
 
   toastr.options = {
@@ -319,9 +352,17 @@ function message_from_toast(type, title, body, sound = false) {
   toastr[type](body, htmlTitle);
 
   if (sound) {
-    sound_play();
+    //check user setting
+    if ($('input[name=user_setting_notify_sound]').length) {
+      if (parseInt($('input[name=user_setting_notify_sound]').val())) {
+        sound_play();
+      }
+    } else {
+      sound_play();
+    }
   }
 }
+
 function page_url(href, time_out = 0) {
   if (time_out && parseInt(time_out) > 0) {
     setTimeout(function () {
@@ -331,6 +372,7 @@ function page_url(href, time_out = 0) {
     parent.window.location.href = href;
   }
 }
+
 function page_loading(status = true) {
   if (status) {
     $("#preloader").removeClass('d-none');
@@ -338,6 +380,7 @@ function page_loading(status = true) {
     $("#preloader").addClass('d-none');
   }
 }
+
 function page_reload(time_out = 0) {
   if (time_out && parseInt(time_out) > 0) {
     setTimeout(function () {
@@ -347,6 +390,7 @@ function page_reload(time_out = 0) {
     window.location.reload(true);
   }
 }
+
 function page_open(href, time_out = 0) {
   if (time_out && parseInt(time_out) > 0) {
     setTimeout(function () {
@@ -356,17 +400,20 @@ function page_open(href, time_out = 0) {
     window.open(href, '_blank');
   }
 }
+
 function js_item_row_remove(ele) {
   var bind = $(ele);
   var row = bind.closest('.js-item-row');
 
   row.remove();
 }
+
 function datatable_refresh() {
   if (typeof datatable_listing !== "undefined") {
     datatable_listing.ajax.reload();
   }
 }
+
 function form_loading(frm, loading = true) {
   var form = $(frm);
 
@@ -379,11 +426,28 @@ function form_loading(frm, loading = true) {
   }
 }
 
+function excel_check(sender) {
+  var popup = jQuery('#modal_import');
+  var validExts = new Array(".xlsx", ".xls");
+  var fileExt = sender.value;
+
+  fileExt = fileExt.substring(fileExt.lastIndexOf('.'));
+  if (validExts.indexOf(fileExt) < 0) {
+    popup.find('input[name=file]').val('');
+
+    message_from_toast('error', acmcfs.message_title_error, "Invalid excel file");
+    return false;
+  }
+
+  return true;
+};
+
 // tastevn
 function auth_form_active(frm_id) {
   $('.wrap_form_panel').addClass('d-none');
   $('#' + frm_id).removeClass('d-none');
 }
+
 function auth_form_login(evt, frm) {
   evt.preventDefault();
   var form = $(frm);
@@ -425,6 +489,7 @@ function auth_form_login(evt, frm) {
 
   return false;
 }
+
 function auth_form_forgot(evt, frm) {
   evt.preventDefault();
   var form = $(frm);
@@ -473,13 +538,14 @@ function auth_form_forgot(evt, frm) {
 
   return false;
 }
+
 function auth_form_reset(evt, frm) {
   evt.preventDefault();
   var form = $(frm);
   var pwd1 = form.find('input[name=pwd1]').val();
   var pwd2 = form.find('input[name=pwd2]').val();
 
-  var formForgot= $('#formForgot');
+  var formForgot = $('#formForgot');
 
   form_loading(frm);
 
@@ -514,6 +580,7 @@ function auth_form_reset(evt, frm) {
 
   return false;
 }
+
 function auth_logout() {
 
   axios.post('/auth/logout', {})
@@ -549,6 +616,7 @@ function sys_setting_confirm(evt, frm) {
   popup.modal('show');
   return false;
 }
+
 function sys_setting() {
   var form = $('#frm-settings');
 
@@ -597,6 +665,7 @@ function user_clear(frm) {
   form.find('input[name=role][value=user]').prop('checked', true);
   form.find('textarea[name=note]').val('');
 }
+
 function user_add(evt, frm) {
   evt.preventDefault();
   var form = $(frm);
@@ -648,6 +717,7 @@ function user_add(evt, frm) {
 
   return false;
 }
+
 function user_full_restaurants(ele) {
   var bind = $(ele);
   var form = bind.closest('form');
@@ -665,6 +735,7 @@ function user_full_restaurants(ele) {
     form.find('.access-restaurants').removeClass('d-none');
   }
 }
+
 function user_edit_prepare(ele) {
   var tr = $(ele).closest('tr');
   var form = $('#offcanvas_edit_item form');
@@ -696,6 +767,7 @@ function user_edit_prepare(ele) {
     form.find('input[name=name]').focus();
   }, acmcfs.timeout_quick);
 }
+
 function user_edit(evt, frm) {
   evt.preventDefault();
   var form = $(frm);
@@ -745,12 +817,14 @@ function user_edit(evt, frm) {
 
   return false;
 }
+
 function user_delete_confirm(ele) {
   var tr = $(ele).closest('tr');
   var popup = $('#modal_delete_item');
 
   popup.find('input[name=item]').val(tr.attr('data-id'));
 }
+
 function user_delete(ele) {
   var popup = $(ele).closest('.modal');
 
@@ -776,6 +850,7 @@ function user_delete(ele) {
 
   return false;
 }
+
 function user_restore(ele) {
   var popup = $(ele).closest('.modal');
 
@@ -801,6 +876,7 @@ function user_restore(ele) {
 
   return false;
 }
+
 function user_role(ele) {
   var form = $(ele).closest('form');
   var role = form.find('input[name=role]:checked').val();
@@ -818,6 +894,7 @@ function user_profile_confirm(evt, frm) {
   popup.modal('show');
   return false;
 }
+
 function user_profile() {
   var form = $('#frm-profile');
 
@@ -843,11 +920,13 @@ function user_profile() {
 
   return false;
 }
+
 function user_code_confirm() {
   var popup = $('#modal_confirm_code');
   popup.modal('show');
   return false;
 }
+
 function user_code() {
   axios.post('/admin/profile/pwd/code', {})
     .then(response => {
@@ -867,12 +946,14 @@ function user_code() {
 
   return false;
 }
+
 function user_pwd_confirm(evt, frm) {
   evt.preventDefault();
   var popup = $('#modal_confirm_pwd');
   popup.modal('show');
   return false;
 }
+
 function user_pwd() {
   var form = $('#frm-pwd');
 
@@ -899,18 +980,22 @@ function user_pwd() {
 
   return false;
 }
+
 function user_setting_confirm(evt, frm) {
   evt.preventDefault();
   var popup = $('#modal_confirm_setting');
   popup.modal('show');
   return false;
 }
+
 function user_setting() {
   var form = $('#frm-setting');
 
   axios.post('/admin/profile/setting/update', {
-    printer: form.find('input[name=setting_printer]:checked').val(),
-    ips_printer: form.find('input[name=setting_ips_printer]').val(),
+    settings: {
+      notify_sound: form.find('input[name=setting_notify_sound]:checked').val() == 'yes' ? 1 : 0,
+      allow_printer: form.find('input[name=setting_allow_printer]:checked').val() == 'yes' ? 1 : 0,
+    }
   })
     .then(response => {
 
@@ -929,8 +1014,172 @@ function user_setting() {
 
   return false;
 }
+
+function user_test_sound() {
+  sound_play();
+}
+
 function user_test_printer() {
   page_open(acmcfs.link_base_url + '/printer?ids=1,2,3');
+}
+
+function user_setting_notify_confirm(evt, frm) {
+  evt.preventDefault();
+  var popup = $('#modal_confirm_setting_notify');
+  popup.modal('show');
+  return false;
+}
+
+function user_setting_notify() {
+  var form = $('#frm-setting-notify');
+  var notifications = [];
+
+  form.find('.notify_item').each(function (k, v) {
+    var bind = $(v);
+    var notify = bind.attr('data-notify');
+    var key = '';
+    var val = '';
+
+    key = notify + '_receive';
+    val = bind.find('input[name=' + key + ']').is(':checked') ? 1 : 0;
+    notifications.push({
+      key: key,
+      val: val,
+    });
+
+    key = notify + '_alert_realtime';
+    val = bind.find('input[name=' + key + ']').is(':checked') ? 1 : 0;
+    notifications.push({
+      key: key,
+      val: val,
+    });
+
+    key = notify + '_alert_email';
+    val = bind.find('input[name=' + key + ']').is(':checked') ? 1 : 0;
+    notifications.push({
+      key: key,
+      val: val,
+    });
+  });
+
+  axios.post('/admin/profile/setting/notify', {
+    notifications: notifications
+  })
+    .then(response => {
+
+      message_from_toast('success', acmcfs.message_title_success, acmcfs.message_description_success_update, true);
+
+    })
+    .catch(error => {
+
+      if (error.response.data && Object.values(error.response.data).length) {
+        Object.values(error.response.data).forEach(function (v, k) {
+          message_from_toast('error', acmcfs.message_title_error, v);
+        });
+      }
+
+    });
+
+  return false;
+}
+
+function text_add(evt, frm) {
+  evt.preventDefault();
+  var form = $(frm);
+
+  axios.post('/admin/text/store', {
+    name: form.find('input[name=name]').val(),
+  })
+    .then(response => {
+
+      message_from_toast('success', acmcfs.message_title_success, acmcfs.message_description_success_add, true);
+
+      datatable_refresh();
+      setTimeout(function () {
+        form.find('input[name=name]').focus();
+      }, acmcfs.timeout_quick);
+    })
+    .catch(error => {
+      var restoreModal = false;
+
+      if (error.response.data && Object.values(error.response.data).length) {
+        Object.values(error.response.data).forEach(function (v, k) {
+          // if (v == 'can_restored') {
+          //   restoreModal = true;
+          // } else {
+          message_from_toast('error', acmcfs.message_title_error, v);
+          // }
+        });
+      }
+
+      if (restoreModal && $('#modal_restore_item').length) {
+        $('#modal_restore_item input[name=item]').val(form.find('input[name=name]').val());
+        $('#modal_restore_item .alert').empty()
+          .append("Are you sure you want to restore item has text: <b class='text-dark'>" + form.find('input[name=name]').val() + "</b>");
+        $('#modal_restore_item').modal('show');
+      }
+
+      setTimeout(function () {
+        form.find('input[name=name]').focus();
+      }, acmcfs.timeout_quick);
+    });
+
+  return false;
+}
+
+function text_edit_prepare(ele) {
+  var tr = $(ele).closest('tr');
+  var form = $('#offcanvas_edit_item form');
+
+  form.find('input[name=item]').val(tr.attr('data-id'));
+  form.find('input[name=name]').val(tr.attr('data-name'));
+
+  setTimeout(function () {
+    form.find('input[name=name]').focus();
+  }, acmcfs.timeout_quick);
+}
+
+function text_edit(evt, frm) {
+  evt.preventDefault();
+  var form = $(frm);
+
+  axios.post('/admin/text/update', {
+    item: form.find('input[name=item]').val(),
+    name: form.find('input[name=name]').val(),
+  })
+    .then(response => {
+
+      message_from_toast('success', acmcfs.message_title_success, acmcfs.message_description_success_update, true);
+
+      datatable_refresh();
+
+    })
+    .catch(error => {
+      var restoreModal = false;
+
+      if (error.response.data && Object.values(error.response.data).length) {
+        Object.values(error.response.data).forEach(function (v, k) {
+          // if (v == 'can_restored') {
+          //   restoreModal = true;
+          // } else {
+          message_from_toast('error', acmcfs.message_title_error, v);
+          // }
+        });
+      }
+
+      if (restoreModal && $('#modal_restore_item').length) {
+        $('#modal_restore_item input[name=item]').val(form.find('input[name=name]').val());
+        $('#modal_restore_item .alert').empty()
+          .append("Are you sure you want to restore item has name: <b class='text-dark'>" + form.find('input[name=name]').val() + "</b>");
+        $('#modal_restore_item').modal('show');
+      }
+
+      setTimeout(function () {
+        form.find('input[name=name]').focus();
+      }, acmcfs.timeout_quick);
+    });
+
+  return false;
 }
 
 function restaurant_add(evt, frm) {
@@ -978,6 +1227,7 @@ function restaurant_add(evt, frm) {
 
   return false;
 }
+
 function restaurant_edit_prepare(ele) {
   var tr = $(ele).closest('tr');
   var form = $('#offcanvas_edit_item form');
@@ -991,6 +1241,7 @@ function restaurant_edit_prepare(ele) {
     form.find('input[name=name]').focus();
   }, acmcfs.timeout_quick);
 }
+
 function restaurant_edit(evt, frm) {
   evt.preventDefault();
   var form = $(frm);
@@ -1035,12 +1286,14 @@ function restaurant_edit(evt, frm) {
 
   return false;
 }
+
 function restaurant_delete_confirm(ele) {
   var tr = $(ele).closest('tr');
   var popup = $('#modal_delete_item');
 
   popup.find('input[name=item]').val(tr.attr('data-id'));
 }
+
 function restaurant_delete(ele) {
   var popup = $(ele).closest('.modal');
 
@@ -1066,6 +1319,7 @@ function restaurant_delete(ele) {
 
   return false;
 }
+
 function restaurant_restore(ele) {
   var popup = $(ele).closest('.modal');
 
@@ -1091,9 +1345,11 @@ function restaurant_restore(ele) {
 
   return false;
 }
+
 function restaurant_info(id) {
   page_url(acmcfs.link_base_url + '/admin/restaurant/info/' + id);
 }
+
 function restaurant_add_foods(evt, frm) {
   evt.preventDefault();
   var form = $(frm);
@@ -1129,12 +1385,14 @@ function restaurant_add_foods(evt, frm) {
 
   return false;
 }
+
 function restaurant_delete_food_confirm(ele) {
   var tr = $(ele).closest('tr');
   var popup = $('#modal_delete_food_out_restaurant');
 
   popup.find('input[name=food_id]').val(tr.attr('data-food_id'));
 }
+
 function restaurant_delete_food(ele) {
   var popup = $(ele).closest('.modal');
 
@@ -1163,6 +1421,7 @@ function restaurant_delete_food(ele) {
 
   return false;
 }
+
 function restaurant_get_scan_results(ele, id) {
   var parent = $(ele).closest('.dt-buttons');
 
@@ -1203,8 +1462,37 @@ function restaurant_get_scan_results(ele, id) {
 
   return false;
 }
+
 function restaurant_food_scan_result_info(id) {
   var popup = $('#modal_food_scan_info');
+  popup.find('input[name=popup_view_id_itm]').val(id);
+
+  var hidden_btns = true;
+  var table = $('#datatable-listing-scan table');
+  if (table.length) {
+    var count = 0;
+    var ids = '';
+    if (table.find('tbody tr').length) {
+      table.find('tbody tr').each(function (k, v) {
+        if (parseInt($(v).attr('data-itd'))) {
+          ids += parseInt($(v).attr('data-itd')) + ';';
+          count++;
+        }
+      });
+    }
+
+    if (ids && ids != '') {
+      popup.find('input[name=popup_view_ids]').val(ids);
+    }
+    if (count > 1) {
+      hidden_btns = false;
+    }
+  }
+
+  popup.find('.acm-modal-arrow').removeClass('d-none');
+  if (hidden_btns) {
+    popup.find('.acm-modal-arrow').addClass('d-none');
+  }
 
   popup.find('.modal-header h4').text('Loading...');
   popup.find('.modal-body').addClass('text-center').empty()
@@ -1215,17 +1503,14 @@ function restaurant_food_scan_result_info(id) {
   })
     .then(response => {
 
-      popup.find('input[name=item]').val(id);
-      popup.find('.modal-header h4').text(response.data.restaurant.name);
+      var title = response.data.restaurant.name + ' <span class="badge acm-ml-px-10 bg-primary">ID: ' + response.data.item.id + '</span>';
+      popup.find('.modal-header h4').empty().append(title);
+
       popup.find('.modal-body').removeClass('text-center').empty()
         .append(response.data.html_info);
 
       bind_datad(popup);
       popup.modal('show');
-
-      setTimeout(function () {
-        popup.find('#user-update-food select').attr('onchange', 'restaurant_food_scan_result_select(this)');
-      }, acmcfs.timeout_default);
 
     })
     .catch(error => {
@@ -1238,6 +1523,74 @@ function restaurant_food_scan_result_info(id) {
 
   return false;
 }
+
+function restaurant_food_scan_result_info_action(next = 0) {
+  var popup = $('#modal_food_scan_info');
+  var arr = popup.find('input[name=popup_view_ids]').val().split(';').filter(Boolean);
+  var view_current = parseInt(popup.find('input[name=popup_view_id_itm]').val());
+  var view_next = 0;
+
+  if (arr.length) {
+    if (next) {
+      for (var i = 0; i < arr.length; ++i) {
+        if (parseInt(arr[i]) == view_current) {
+          if (arr[i + 1]) {
+            view_next = arr[i + 1];
+          } else {
+            view_next = arr[0];
+          }
+        }
+      }
+    } else {
+      for (var i = 0; i < arr.length; ++i) {
+        if (parseInt(arr[i]) == view_current) {
+          if (arr[i - 1]) {
+            view_next = arr[i - 1];
+          } else {
+            view_next = arr[arr.length - 1];
+          }
+        }
+      }
+    }
+
+    popup.find('input[name=popup_view_id_itm]').val(view_next);
+
+    //rebind
+    restaurant_food_scan_result_info_rebind(view_next);
+  }
+}
+
+function restaurant_food_scan_result_info_rebind(id) {
+  var popup = $('#modal_food_scan_info');
+
+  popup.find('.modal-body').addClass('text-center').empty()
+    .append('<div class="m-auto">' + acmcfs.html_loading + '</div>');
+
+  axios.post('/admin/restaurant/food/scan/info', {
+    item: id,
+  })
+    .then(response => {
+
+      var title = response.data.restaurant.name + ' <span class="badge acm-ml-px-10 bg-primary">ID: ' + response.data.item.id + '</span>';
+      popup.find('.modal-header h4').empty().append(title);
+
+      popup.find('.modal-body').removeClass('text-center').empty()
+        .append(response.data.html_info);
+
+      bind_datad(popup);
+
+    })
+    .catch(error => {
+      if (error.response.data && Object.values(error.response.data).length) {
+        Object.values(error.response.data).forEach(function (v, k) {
+          message_from_toast('error', acmcfs.message_title_error, v);
+        });
+      }
+    });
+
+  return false;
+}
+
 function restaurant_food_scan_result_select(ele) {
   var bind = $(ele);
   var form = bind.closest('form');
@@ -1270,19 +1623,42 @@ function restaurant_food_scan_result_select(ele) {
 
   return false;
 }
-function restaurant_food_scan_result_rollback (ele) {
-  var bind = $(ele);
-  var form = bind.closest('form');
 
+function restaurant_food_scan_result_update_confirm() {
+  var popup = $('#modal_food_scan_info_update');
+  var view_current = parseInt($('body input[name=popup_view_id_itm]').val());
 
-  return false;
+  axios.post('/admin/restaurant/food/scan/get', {
+    item: view_current,
+  })
+    .then(response => {
+
+      popup.find('.modal-body').empty()
+        .append(response.data.html_info);
+
+      bind_datad(popup);
+      popup.modal('show');
+
+      setTimeout(function () {
+        popup.find('#user-update-food select').attr('onchange', 'restaurant_food_scan_result_select(this)');
+      }, acmcfs.timeout_default);
+
+    })
+    .catch(error => {
+      if (error.response.data && Object.values(error.response.data).length) {
+        Object.values(error.response.data).forEach(function (v, k) {
+          message_from_toast('error', acmcfs.message_title_error, v);
+        });
+      }
+    });
 }
-function restaurant_food_scan_result_update (ele) {
-  var bind = $(ele);
-  var form = bind.closest('form');
-  var popup = form.closest('.modal');
-  var missings = [];
 
+function restaurant_food_scan_result_update(evt, frm) {
+  evt.preventDefault();
+  var form = $(frm);
+  var view_current = parseInt($('body input[name=popup_view_id_itm]').val());
+
+  var missings = [];
   if (form.find('.wrap-ingredients .js-item-row').length) {
     form.find('.wrap-ingredients .js-item-row').each(function (k, v) {
       var tr = $(v);
@@ -1294,17 +1670,27 @@ function restaurant_food_scan_result_update (ele) {
     });
   }
 
+  var texts = [];
+  if (form.find('.wrap-texts .itm-text').length) {
+    form.find('.wrap-texts .itm-text').each(function (k, v) {
+      var tr = $(v);
+      if (tr.find('input').is(':checked')) {
+        texts.push(tr.find('input').attr('data-itd'));
+      }
+    });
+  }
+
   axios.post('/admin/restaurant/food/scan/update', {
-    item: popup.find('input[name=item]').val(),
+    item: view_current,
     note: form.find('textarea[name=update_note]').val(),
     food: form.find('select[name=update_food]').val(),
     missings: missings,
+    texts: texts,
   })
     .then(response => {
 
       message_from_toast('success', acmcfs.message_title_success, acmcfs.message_description_success_add, true);
-
-
+      restaurant_food_scan_result_info_rebind(view_current);
 
     })
     .catch(error => {
@@ -1317,6 +1703,7 @@ function restaurant_food_scan_result_update (ele) {
 
   return false;
 }
+
 function restaurant_food_scan_error_info(ele) {
   var tr = $(ele);
   var popup = $('#modal_food_scan_error');
@@ -1348,6 +1735,37 @@ function restaurant_food_scan_error_info(ele) {
 
   return false;
 }
+
+function restaurant_food_scan_cmt(ele) {
+  var parent = $(ele).closest('#lcl_wrap');
+  var content = parent.find('textarea[name=note]').val();
+  var object_id = parent.find('input[name=object_id]').val();
+
+  axios.post('/admin/comment/note', {
+    object_id: object_id,
+    object_type: 'restaurant_food_scan',
+    content: content,
+  })
+    .then(response => {
+
+      message_from_toast('success', acmcfs.message_title_success, acmcfs.message_description_success_add, true);
+
+      if ($('body .restaurant_food_scan_' + object_id).length) {
+        $('body .restaurant_food_scan_' + object_id).attr('data-lcl-txt', content);
+      }
+
+    })
+    .catch(error => {
+      if (error.response.data && Object.values(error.response.data).length) {
+        Object.values(error.response.data).forEach(function (v, k) {
+          message_from_toast('error', acmcfs.message_title_error, v);
+        });
+      }
+    });
+
+  return false;
+}
+
 function restaurant_search_food_scan(ele) {
   var form = $(ele).closest('form');
   if (form.length) {
@@ -1358,6 +1776,7 @@ function restaurant_search_food_scan(ele) {
     }, acmcfs.timeout_default);
   }
 }
+
 function restaurant_search_food_scan_error(ele) {
   var form = $(ele).closest('form');
   if (form.length) {
@@ -1368,12 +1787,14 @@ function restaurant_search_food_scan_error(ele) {
     }, acmcfs.timeout_default);
   }
 }
+
 function restaurant_delete_food_scan_confirm(ele) {
   var tr = $(ele).closest('tr');
   var popup = $('#modal_delete_food_scan');
 
   popup.find('input[name=itd]').val(tr.attr('data-itd'));
 }
+
 function restaurant_delete_food_scan(ele) {
   var popup = $(ele).closest('.modal');
 
@@ -1426,7 +1847,7 @@ function food_category_add(evt, frm) {
           // if (v == 'can_restored') {
           //   restoreModal = true;
           // } else {
-            message_from_toast('error', acmcfs.message_title_error, v);
+          message_from_toast('error', acmcfs.message_title_error, v);
           // }
         });
       }
@@ -1445,6 +1866,7 @@ function food_category_add(evt, frm) {
 
   return false;
 }
+
 function food_category_edit_prepare(ele) {
   var tr = $(ele).closest('tr');
   var form = $('#offcanvas_edit_item form');
@@ -1456,6 +1878,7 @@ function food_category_edit_prepare(ele) {
     form.find('input[name=name]').focus();
   }, acmcfs.timeout_quick);
 }
+
 function food_category_edit(evt, frm) {
   evt.preventDefault();
   var form = $(frm);
@@ -1479,7 +1902,7 @@ function food_category_edit(evt, frm) {
           // if (v == 'can_restored') {
           //   restoreModal = true;
           // } else {
-            message_from_toast('error', acmcfs.message_title_error, v);
+          message_from_toast('error', acmcfs.message_title_error, v);
           // }
         });
       }
@@ -1543,6 +1966,7 @@ function ingredient_add(evt, frm) {
 
   return false;
 }
+
 function ingredient_edit_prepare(ele) {
   var tr = $(ele).closest('tr');
   var form = $('#offcanvas_edit_item form');
@@ -1555,6 +1979,7 @@ function ingredient_edit_prepare(ele) {
     form.find('input[name=name]').focus();
   }, acmcfs.timeout_quick);
 }
+
 function ingredient_edit(evt, frm) {
   evt.preventDefault();
   var form = $(frm);
@@ -1605,6 +2030,7 @@ function food_clear(frm) {
   form.find('input[name=name]').val('');
   form.find('.wrap-add-item-ingredients .wrap-fetch').empty();
 }
+
 function food_item(frm) {
   var form = $(frm);
   var ingredients = [];
@@ -1629,6 +2055,7 @@ function food_item(frm) {
 
   return ingredients;
 }
+
 function food_add(evt, frm) {
   evt.preventDefault();
   var form = $(frm);
@@ -1673,6 +2100,7 @@ function food_add(evt, frm) {
 
   return false;
 }
+
 function ingredient_item_focus(ele, focus = 0) {
   var parent = $(ele).closest('.food-ingredient-item');
   parent.removeClass('acm-border-focus');
@@ -1680,6 +2108,7 @@ function ingredient_item_focus(ele, focus = 0) {
     parent.addClass('acm-border-focus');
   }
 }
+
 function ingredient_item_add(ele) {
   var form = $(ele).closest('form');
 
@@ -1696,10 +2125,12 @@ function ingredient_item_add(ele) {
 
   return false;
 }
+
 function ingredient_item_remove(ele) {
   var parent = $(ele).closest('.food-ingredient-item');
   parent.remove();
 }
+
 function food_edit_prepare(ele) {
   var tr = $(ele).closest('tr');
   var form = $('#offcanvas_edit_item form');
@@ -1742,6 +2173,7 @@ function food_edit_prepare(ele) {
       }, acmcfs.timeout_quick);
     });
 }
+
 function food_edit(evt, frm) {
   evt.preventDefault();
   var form = $(frm);
@@ -1785,6 +2217,7 @@ function food_edit(evt, frm) {
 
   return false;
 }
+
 function food_info(id) {
   var popup = $('#modal_food_info');
 
@@ -1803,6 +2236,32 @@ function food_info(id) {
 
       bind_datad(popup);
       popup.modal('show');
+
+    })
+    .catch(error => {
+      if (error.response.data && Object.values(error.response.data).length) {
+        Object.values(error.response.data).forEach(function (v, k) {
+          message_from_toast('error', acmcfs.message_title_error, v);
+        });
+      }
+    });
+
+  return false;
+}
+
+function food_import(evt, frm) {
+  evt.preventDefault();
+  var form = $(frm);
+
+  const formData = new FormData();
+  formData.append('excel', form.find('input[type=file]')[0].files[0]);
+
+  axios.post('/admin/food/import', formData)
+    .then(response => {
+
+      message_from_toast('success', acmcfs.message_title_success, acmcfs.message_description_success_add, true);
+
+      datatable_refresh();
 
     })
     .catch(error => {
@@ -1835,6 +2294,7 @@ function notification_read(ele) {
 
   return false;
 }
+
 function notification_read_all() {
   var wrap = $('#wrap-notifications');
   wrap.find('.acm-itm-notify').removeClass('bg-primary-subtle');
@@ -1849,6 +2309,7 @@ function notification_read_all() {
 
   return false;
 }
+
 function notification_navbar() {
   var wrap = $('#navbar-notifications');
 
@@ -1875,6 +2336,7 @@ function notification_navbar() {
 
   return false;
 }
+
 function notification_newest() {
   axios.post('/admin/notification/newest', {})
     .then(response => {
@@ -1918,6 +2380,7 @@ function roboflow_retraining_confirm() {
   popup.modal('show');
   return false;
 }
+
 function roboflow_retraining() {
   var tbl = $('#datatable-listing-scan');
   var ids = [];
@@ -1960,6 +2423,7 @@ function stats_clear(ele, type) {
 
   wrap.find('input[name=search_time]').val('').trigger('change');
 }
+
 function stats_total() {
   var wrap = $('#wrap-stats-total');
 

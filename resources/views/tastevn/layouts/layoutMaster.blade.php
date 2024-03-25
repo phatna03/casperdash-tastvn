@@ -33,7 +33,7 @@
   var acmcfs = {
     link_base_url: '{{url('')}}',
     var_csrf: '{{csrf_token()}}',
-    printer_ok: '{{$viewer && $viewer->allow_printer ? 1 : 0}}',
+    printer_ok: '{{$viewer && (int)$viewer->get_setting('allow_printer') ? 1 : 0}}',
 
     message_title_info: '{{config('tastevn.message_title_info')}}',
     message_title_success: '{{config('tastevn.message_title_success')}}',
@@ -46,7 +46,7 @@
 
     timeout_default: 2000,
     timeout_quick: 500,
-    timeout_notification: 10000,
+    timeout_notification: 5000,
 
     datatable_init: {
       "pageLength": 25,
@@ -55,8 +55,10 @@
 
       dom:
         '<"row mx-2"' +
-        '<"col-md-2"<"me-3"l>>' +
-        '<"col-md-10"<"dt-action-buttons text-xl-end text-lg-start text-md-end text-start d-flex align-items-center justify-content-end flex-md-row flex-column mb-3 mb-md-0 gap-3"fB>>' +
+        '<"col-md-6"<"me-3 acm-filter-left"lf>>' +
+        '<"col-md-6"<"dt-action-buttons text-xl-end text-lg-start text-md-end text-start d-flex align-items-center justify-content-end flex-md-row flex-column mb-3 mb-md-0 gap-3"B>>' +
+        '<"col-sm-12 col-md-6 mt-1 mb-2"i>' +
+        '<"col-sm-12 col-md-6 mt-1 mb-2"p>' +
         '>t' +
         '<"row mx-2"' +
         '<"col-sm-12 col-md-6"i>' +
@@ -72,14 +74,28 @@
 
   $(document).ready(function () {
 
+    //auto bind
     bind_picker();
     bind_datad();
 
     @auth
+    //notify
     notification_newest();
     setInterval(function () {
       notification_newest();
     }, acmcfs.timeout_notification);
+
+    //modal 2
+    $('.modal').on('show.bs.modal', function (event) {
+      var idx = $('.modal:visible').length;
+      $(this).css('z-index', 1040 + (10 * idx));
+    });
+    $('.modal').on('shown.bs.modal', function (event) {
+      var idx = ($('.modal:visible').length) - 1; // raise backdrop after animation.
+      $('.modal-backdrop').not('.stacked').css('z-index', 1039 + (10 * idx));
+      $('.modal-backdrop').not('.stacked').addClass('stacked');
+    });
+
     @endauth
   });
 </script>
@@ -87,6 +103,8 @@
 @yield('js_end')
 
 @auth
+  <input type="hidden" name="user_setting_notify_sound" value="{{(int)$viewer->get_setting('notify_sound')}}" />
+
   <div class="modal animate__animated animate__rollIn" id="modal_logout" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
       <div class="modal-content">
@@ -122,8 +140,8 @@
       </div>
     </div>
   </div>
-  <div class="modal animate__animated animate__rollIn" id="modal_food_scan_info" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-xl" role="document">
+  <div class="modal animate__animated animate__zoomIn" id="modal_food_scan_info" aria-hidden="true">
+    <div class="modal-dialog modal-xl acm-modal-xxl" role="document">
       <div class="modal-content">
         <div class="modal-header">
           <h4 class="modal-title text-danger fw-bold"></h4>
@@ -133,7 +151,34 @@
 
         </div>
 
-        <input type="hidden" name="item" />
+        <div class="acm-modal-arrow acm-modal-arrow-prev" onclick="restaurant_food_scan_result_info_action()">
+          <img src="{{url('custom/img/arrow_left.png')}}" />
+        </div>
+        <div class="acm-modal-arrow acm-modal-arrow-next" onclick="restaurant_food_scan_result_info_action(1)">
+          <img src="{{url('custom/img/arrow_right.png')}}" />
+        </div>
+
+        <input type="hidden" name="popup_view_ids" />
+        <input type="hidden" name="popup_view_id_itm" />
+      </div>
+    </div>
+  </div>
+  <div class="modal fade modal-second" id="modal_food_scan_info_update" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title fw-bold">Update</h4>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form onsubmit="return restaurant_food_scan_result_update(event, this);">
+          <div class="modal-body">
+
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-primary" data-bs-dismiss="modal">Confirm</button>
+          </div>
+        </form>
       </div>
     </div>
   </div>

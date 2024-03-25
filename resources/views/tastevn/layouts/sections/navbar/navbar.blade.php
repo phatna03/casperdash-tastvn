@@ -320,6 +320,12 @@
                       </a>
                     </li>
                     <li>
+                      <a class="dropdown-item" href="{{url('admin/profile/setting')}}">
+                        <i class='mdi mdi-cogs me-2'></i>
+                        <span class="align-middle">Settings</span>
+                      </a>
+                    </li>
+                    <li>
                       <a class="dropdown-item" href="javascript:void(0)"
                          data-bs-toggle="modal" data-bs-target="#modal_logout"
                       >

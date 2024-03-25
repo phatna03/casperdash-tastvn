@@ -305,7 +305,7 @@ class Restaurant extends Model
         $data['time_frame'] = count($error_time_frame_list->get());
         $data['time_frame_list'] = $error_time_frame_list->get();
 
-//        $data['sql1'] = $api_core->parse_to_query($error_time_frame);
+        $data['sql1'] = $api_core->parse_to_query($error_time_frame_list);
 //        $data['search_time_from'] = $search_time_from;
 //        $data['search_time_to'] = $search_time_to;
 

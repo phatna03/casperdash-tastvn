@@ -30,9 +30,6 @@ class User extends Authenticatable
     'access_full',
     'access_ids',
     'access_texts',
-
-    'allow_printer',
-    'ips_printer',
   ];
 
   protected $hidden = [
@@ -44,6 +41,32 @@ class User extends Authenticatable
     'email_verified_at' => 'datetime',
     'password' => 'hashed',
   ];
+
+  public function set_setting($key, $value)
+  {
+    $row = UserSetting::firstOrCreate([
+      'user_id' => $this->id,
+      'key' => $key,
+    ]);
+
+    if ($row) {
+      $row->update([
+        'value' => $value,
+      ]);
+    }
+
+    return $row;
+  }
+
+  public function get_setting($key)
+  {
+    $row = UserSetting::firstOrCreate([
+      'user_id' => $this->id,
+      'key' => $key,
+    ]);
+
+    return $row ? $row->value : NULL;
+  }
 
   public function create_restaurants()
   {

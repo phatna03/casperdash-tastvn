@@ -17,6 +17,8 @@ use App\Models\Restaurant;
 use App\Models\RestaurantFoodScan;
 use App\Models\Food;
 use App\Models\Ingredient;
+use App\Models\Text;
+use App\Models\RestaurantFoodScanText;
 
 class RestaurantController extends Controller
 {
@@ -515,12 +517,59 @@ class RestaurantController extends Controller
     $html_info = view('tastevn.htmls.item_food_scan_info')
       ->with('item', $row)
       ->with('data', $data)
+      ->with('comments', $row->get_comments())
+      ->with('texts', $row->get_texts(['text_only' => 1]))
       ->render();
 
     return response()->json([
       'item' => $row,
       'restaurant' => $row->get_restaurant(),
       'data' => $data,
+      'html_info' => $html_info,
+
+      'status' => true,
+    ], 200);
+  }
+
+  public function food_scan_get(Request $request)
+  {
+    $values = $request->all();
+    $api_core = new SysCore();
+
+    $validator = Validator::make($values, [
+      'item' => 'required',
+    ]);
+    if ($validator->fails()) {
+      return response()->json($validator->errors(), 422);
+    }
+    //invalid
+    $row = RestaurantFoodScan::findOrFail((int)$values['item']);
+    if (!$row) {
+      return response()->json([
+        'error' => 'Invalid item'
+      ], 422);
+    }
+
+    $ingredients_missing = [];
+    if ($row->get_food()) {
+      $ingredients_missing = $row->get_ingredients_missing();
+    }
+
+    $texts = Text::where('deleted', 0)
+      ->orderByRaw('TRIM(LOWER(name))')
+      ->get();
+
+    $text_ids = []; //$row->get_texts(['id_only' => 1])
+
+    //info
+    $html_info = view('tastevn.htmls.item_food_scan_get')
+      ->with('item', $row)
+      ->with('ingredients', $ingredients_missing)
+      ->with('texts', $texts)
+      ->with('text_ids', $text_ids)
+      ->render();
+
+    return response()->json([
       'html_info' => $html_info,
 
       'status' => true,
@@ -545,13 +594,11 @@ class RestaurantController extends Controller
       ], 422);
     }
 
+    $noted = isset($values['note']) ? $values['note'] : NULL;
+    $texts = isset($values['texts']) && count($values['texts']) ? (array)$values['texts'] : [];
     $ingredients_missing = isset($values['missings']) && count($values['missings']) ? (array)$values['missings'] : [];
 
     $item_old = $row->toArray();
-
-    $row->update([
-      'note' => isset($values['note']) ? $values['note'] : $row->note,
-    ]);
 
     if (isset($values['food'])) {
       $food = Food::find((int)$values['food']);
@@ -610,8 +657,20 @@ class RestaurantController extends Controller
     }
 
     $row->update([
+      'note' => $noted,
       'usr_edited' => json_encode($edited),
     ]);
+
+    RestaurantFoodScanText::where('restaurant_food_scan_id', $row->id)
+      ->delete();
+    if (count($texts)) {
+      foreach ($texts as $text) {
+        RestaurantFoodScanText::create([
+          'restaurant_food_scan_id' => $row->id,
+          'text_id' => (int)$text,
+        ]);
+      }
+    }
 
     return response()->json([
       'item' => $row,

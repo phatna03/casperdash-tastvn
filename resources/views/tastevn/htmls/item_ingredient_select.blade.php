@@ -1,8 +1,8 @@
 @if(count($ingredients))
   <div class="form-floating form-floating-outline">
-    <div class="form-control acm-height-px-auto p-1" id="user-update-ingredients">
+    <div class="form-control acm-height-px-auto p-2" id="user-update-ingredients">
       @foreach($ingredients as $ingredient)
-        <div class="mt-1 mb-1 position-relative clearfix js-item-row"
+        <div class="mt-2 position-relative clearfix js-item-row"
              data-itd="{{$ingredient->id}}"
              data-ingredient_type="{{$ingredient->ingredient_type}}"
         >
@@ -17,7 +17,7 @@
             />
           </div>
           <div
-            class="acm-text-line-one acm-fs-14 acm-line-height-1 position-relative acm-top-px-10 @if($ingredient->ingredient_type == 'core') text-danger @endif ">
+            class="acm-text-line-one acm-fs-14 acm-line-height-1 position-relative acm-top-px-10">
             @if(!empty($ingredient->name_vi))
               {{$ingredient->name . ' - ' . $ingredient->name_vi}}
             @else
@@ -27,6 +27,6 @@
         </div>
       @endforeach
     </div>
-    <label for="user-update-ingredients" class="text-danger fw-bold">Ingredients missing</label>
+    <label for="user-update-ingredients" class="text-danger fw-bold">Ingredients Missing</label>
   </div>
 @endif

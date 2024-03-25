@@ -61,6 +61,10 @@ class IngredientMissing extends Notification implements ShouldQueue
       }
     }
 
+    if (!(int)$user->get_setting('missing_ingredient_alert_email')) {
+      return false;
+    }
+
     return (new MailMessage)
       ->subject(config('tastevn.email_subject_ingredient_missing') . ': ' . $row->get_restaurant()->name)
       ->greeting('Hello ' . $user->name . '!')

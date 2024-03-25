@@ -20,7 +20,7 @@
 @endsection
 
 @section('content')
-  <h4 class="py-3 mb-4"><span class="text-muted fw-light">Admin /</span> Settings</h4>
+  <h4 class="mb-2"><span class="text-muted fw-light">Admin /</span> Settings</h4>
 
   <div class="card mb-4">
     <form class="card-body" onsubmit="return sys_setting_confirm(event, this);" id="frm-settings">

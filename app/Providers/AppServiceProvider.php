@@ -36,5 +36,6 @@ class AppServiceProvider extends ServiceProvider
     });
 
     View::share('baseURL', url(''));
+    View::share('api_core', $api_core);
   }
 }

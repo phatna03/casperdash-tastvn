@@ -34,26 +34,26 @@
 
               <!-- Left right -->
               <a class="carousel-control carousel-control-prev" href="#custCarousel" data-slide="prev">
-                <span class="carousel-control-prev-icon"></span>
+                <img class="custom-arrow" src="{{url('custom/img/arrow_left.png')}}" />
               </a>
               <a class="carousel-control carousel-control-next" href="#custCarousel" data-slide="next">
-                <span class="carousel-control-next-icon"></span>
+                <img class="custom-arrow" src="{{url('custom/img/arrow_right.png')}}" />
               </a>
 
               <!-- Thumbnails -->
-              <ol class="carousel-indicators list-inline">
-                @php
-                  $count = 0;
-                  foreach($rows as $row):
-                  $count++;
-                @endphp
-                <li class="list-inline-item cursor-pointer @if($count == 1) active @endif">
-                  <a id="carousel-selector-{{$count - 1}}" class="@if($count == 1) selected @endif" data-slide-to="{{$count - 1}}" data-target="#custCarousel">
-                    <img src="{{$row->photo_url}}" class="img-fluid">
-                  </a>
-                </li>
-                @endforeach
-              </ol>
+{{--              <ol class="carousel-indicators list-inline">--}}
+{{--                @php--}}
+{{--                  $count = 0;--}}
+{{--                  foreach($rows as $row):--}}
+{{--                  $count++;--}}
+{{--                @endphp--}}
+{{--                <li class="list-inline-item cursor-pointer @if($count == 1) active @endif">--}}
+{{--                  <a id="carousel-selector-{{$count - 1}}" class="@if($count == 1) selected @endif" data-slide-to="{{$count - 1}}" data-target="#custCarousel">--}}
+{{--                    <img src="{{$row->photo_url}}" class="img-fluid">--}}
+{{--                  </a>--}}
+{{--                </li>--}}
+{{--                @endforeach--}}
+{{--              </ol>--}}
             </div>
 
           </div>
