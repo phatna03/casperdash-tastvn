@@ -102,7 +102,7 @@ class GuestController extends Controller
 
   public function s3_photo_new()
   {
-    //log
+    //debug
     $log_path = 'public/logs/s3_callback.log';
     Storage::prepend($log_path, 'CALLBACK_AT_' . date('d_M_Y_H_i_s'));
 

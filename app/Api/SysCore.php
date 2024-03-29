@@ -117,16 +117,16 @@ class SysCore
       ->where('s3_bucket_address', '<>', NULL);
     $restaurants = $select->get();
 
-    //log
-    $log_path = 'public/logs/cron_tastevn.log';
-    Storage::prepend($log_path, 'RUN_AT_' . date('d_M_Y_H_i_s'));
+    //debug
+//    $log_path = 'public/logs/cron_tastevn.log';
+//    Storage::prepend($log_path, 'RUN_AT_' . date('d_M_Y_H_i_s'));
 
     if (count($restaurants)) {
       foreach ($restaurants as $restaurant) {
 
         dispatch(new PhotoGet($restaurant));
 
-        Storage::prepend($log_path, 'RESTAURANT - ' . $restaurant->id . ' - ' . $restaurant->name);
+//        Storage::prepend($log_path, 'RESTAURANT - ' . $restaurant->id . ' - ' . $restaurant->name);
       }
     }
   }
@@ -340,7 +340,7 @@ class SysCore
       ->where('rbf_retrain', 1)
       ->orderBy('id', 'asc');
 
-    //log
+    //debug
     $log_path = 'public/logs/cron_tastevn_rbf_retrain.log';
     Storage::prepend($log_path, 'RUN_AT_' . date('d_M_Y_H_i_s'));
 
@@ -531,7 +531,7 @@ class SysCore
     $tester = isset($pars['tester']) ? (int)$pars['tester'] : 0;
     $text_rate = isset($pars['text_rate']) && !empty($pars['text_rate']) ? $pars['text_rate'] : 'medium';
     $text_to_speak = isset($pars['text_to_speak']) && !empty($pars['text_to_speak']) ? $pars['text_to_speak'] : NULL;
-    //log
+    //debug
     $log_path = 'public/logs/s3_polly.log';
     Storage::prepend($log_path, 'RUN_AT_' . date('d_M_Y_H_i_s'));
     //configs

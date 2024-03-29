@@ -210,7 +210,6 @@ Route::get('/printer', [GuestController::class, 'printer']);
 Route::get('/printer-test', [GuestController::class, 'printer_test']);
 Route::get('/page_not_found', [GuestController::class, 'page_not_found']);
 Route::get('/tester', [TesterController::class, 'index']);
-Route::get('/s3/bucket/callback', [GuestController::class, 's3_photo_new']);
 
 Route::get('/admin/settings', [SettingController::class, 'index']);
 Route::post('/admin/setting/update', [SettingController::class, 'update']);
