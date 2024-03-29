@@ -165,7 +165,7 @@ class SysCore
         }
 
         $scan_date = date("Y-m-d");
-        $scan_hour = date('H');
+        $scan_hour = date('HH');
 
         if (count($pars) && isset($pars['scan_date'])) {
           $scan_date = $pars['scan_date'];
