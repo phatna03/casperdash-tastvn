@@ -78,8 +78,6 @@ class GuestController extends Controller
       ];
     }
 
-
-    //old
     $pageConfigs = [
       'myLayout' => 'horizontal',
       'hasCustomizer' => false,
@@ -88,5 +86,27 @@ class GuestController extends Controller
     ];
 
     return view('tastevn.pages.print_food_scan', ['pageConfigs' => $pageConfigs]);
+  }
+
+  public function printer_test(Request $request)
+  {
+    $values = $request->all();
+
+    $pageConfigs = [
+      'myLayout' => 'horizontal',
+      'hasCustomizer' => false,
+    ];
+
+    return view('tastevn.pages.printer', ['pageConfigs' => $pageConfigs]);
+  }
+
+  public function s3_photo_new()
+  {
+    //log
+    $log_path = 'public/logs/s3_callback.log';
+    Storage::prepend($log_path, 'CALLBACK_AT_' . date('d_M_Y_H_i_s'));
+
+    $api_core = new SysCore();
+    $api_core->s3_todo();
   }
 }

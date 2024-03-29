@@ -1072,6 +1072,7 @@
         // if (el.author) {
         // = id
         var acm_obj_id = el.author;
+        restaurant_food_scan_view(acm_obj_id);
         // }
 
         //custome

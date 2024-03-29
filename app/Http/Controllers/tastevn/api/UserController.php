@@ -44,6 +44,10 @@ class UserController extends Controller
       'hasCustomizer' => false,
     ];
 
+    $user->add_log([
+      'type' => 'view_listing_user',
+    ]);
+
     return view('tastevn.pages.users', ['pageConfigs' => $pageConfigs]);
   }
 
@@ -89,7 +93,7 @@ class UserController extends Controller
     $row = User::create([
       'name' => trim($values['name']),
       'email' => trim($values['email']),
-      'password' => Hash::make('cspr'),
+      'password' => Hash::make('tastevietnam'),
       'phone' => $values['phone'],
       'status' => $values['status'],
       'role' => $values['role'],
@@ -108,6 +112,13 @@ class UserController extends Controller
 
       $row->access_restaurants();
     }
+
+    $row->add_log([
+      'type' => 'add_' . $row->get_type(),
+      'user_id' => $viewer->id,
+      'item_id' => (int)$row->id,
+      'item_type' => $row->get_type(),
+    ]);
 
     return response()->json([
       'status' => true,
@@ -172,6 +183,8 @@ class UserController extends Controller
       }
     }
 
+    $diffs['before'] = $row->get_log();
+
     $row->update([
       'name' => trim($values['name']),
       'email' => trim($values['email']),
@@ -195,6 +208,18 @@ class UserController extends Controller
     }
 
     $row->access_restaurants();
+
+    $row = User::find($row->id);
+    $diffs['after'] = $row->get_log();
+    if (json_encode($diffs['before']) !== json_encode($diffs['after'])) {
+      $row->add_log([
+        'type' => 'edit_' . $row->get_type(),
+        'user_id' => $viewer->id,
+        'item_id' => (int)$row->id,
+        'item_type' => $row->get_type(),
+        'params' => json_encode($diffs),
+      ]);
+    }
 
     return response()->json([
       'status' => true,
@@ -233,6 +258,13 @@ class UserController extends Controller
       'deleted' => $viewer->id,
     ]);
 
+    $row->add_log([
+      'type' => 'delete_' . $row->get_type(),
+      'user_id' => $viewer->id,
+      'item_id' => (int)$row->id,
+      'item_type' => $row->get_type(),
+    ]);
+
     return response()->json([
       'status' => true,
       'item' => $row->name,
@@ -265,10 +297,33 @@ class UserController extends Controller
       'status' => 'active',
     ]);
 
+    $row->add_log([
+      'type' => 'restore_' . $row->get_type(),
+      'user_id' => $viewer->id,
+      'item_id' => (int)$row->id,
+      'item_type' => $row->get_type(),
+    ]);
+
     return response()->json([
       'status' => true,
       'item' => $row->name,
     ], 200);
+  }
+
+  public function selectize(Request $request)
+  {
+    $values = $request->all();
+    $keyword = isset($values['keyword']) && !empty($values['keyword']) ? $values['keyword'] : NULL;
+
+    $select = User::select('id', 'name')
+      ->where('deleted', 0);
+    if (!empty($keyword)) {
+      $select->where('name', 'LIKE', "%{$keyword}%");
+    }
+
+    return response()->json([
+      'items' => $select->get()->toArray()
+    ]);
   }
 
   public function profile(Request $request)
@@ -281,13 +336,16 @@ class UserController extends Controller
 
     ];
 
+    $user->add_log([
+      'type' => 'view_profile_info',
+    ]);
+
     return view('tastevn.pages.profile', ['pageConfigs' => $pageConfigs]);
   }
 
   public function profile_update(Request $request)
   {
     $values = $request->all();
-    $viewer = Auth::user();
     //required
     $validator = Validator::make($values, [
 //      'item' => 'required',
@@ -298,15 +356,15 @@ class UserController extends Controller
       return response()->json($validator->errors(), 422);
     }
     //invalid
-    $row = Auth::user();
-    if (!$row) {
+    $user = Auth::user();
+    if (!$user) {
       return response()->json([
         'error' => 'Invalid item'
       ], 422);
     }
     //restore
     $row1 = User::where('email', trim($values['email']))
-      ->where('id', '<>', $row->id)
+      ->where('id', '<>', $user->id)
       ->first();
     if ($row1) {
       return response()->json([
@@ -314,15 +372,37 @@ class UserController extends Controller
       ], 422);
     }
 
-    $row->update([
+    $diffs = [
+      'before' => [
+        'name' => $user->name,
+        'email' => $user->email,
+        'phone' => $user->phone,
+      ]
+    ];
+
+    $user->update([
       'name' => trim($values['name']),
       'email' => trim($values['email']),
       'phone' => $values['phone'],
     ]);
 
+    $user = User::find($user->id);
+    $diffs['after'] = [
+      'name' => $user->name,
+      'email' => $user->email,
+      'phone' => $user->phone,
+    ];
+
+    if (json_encode($diffs['before']) !== json_encode($diffs['after'])) {
+      $user->add_log([
+        'type' => 'edit_profile_info',
+        'params' => json_encode($diffs),
+      ]);
+    }
+
     return response()->json([
       'status' => true,
-      'item' => $row->name,
+      'item' => $user->name,
     ], 200);
   }
 
@@ -384,6 +464,10 @@ class UserController extends Controller
     PasswordResetToken::where('email', $user->email)
       ->delete();
 
+    $user->add_log([
+      'type' => 'edit_pwd'
+    ]);
+
     return response()->json([
       'status' => true,
       'user' => $user->name,
@@ -393,6 +477,7 @@ class UserController extends Controller
   public function profile_setting(Request $request)
   {
     $user = Auth::user();
+    $api_core = new SysCore();
 
     $pageConfigs = [
       'myLayout' => 'horizontal',
@@ -400,44 +485,88 @@ class UserController extends Controller
 
     ];
 
+    $api_core->s3_polly([
+      'tester' => 1,
+    ]);
+
+    $user->add_log([
+      'type' => 'view_profile_setting',
+    ]);
+
     return view('tastevn.pages.profile_setting', ['pageConfigs' => $pageConfigs]);
   }
 
   public function profile_setting_update(Request $request)
   {
     $values = $request->post();
-    $viewer = Auth::user();
+    $user = Auth::user();
 //    echo '<pre>';var_dump($values);die;
     $settings = isset($values['settings']) && count($values['settings']) ? $values['settings'] : [];
 
+    $diffs = [];
+    $arr = [
+      'allow_printer', 'notify_sound'
+    ];
+    foreach ($arr as $k => $v) {
+      $diffs['before'][$v] = (int)$user->get_setting($v);
+    }
+
     if (count($settings)) {
       foreach ($settings as $key => $val) {
-        $viewer->set_setting($key, $val);
+        $user->set_setting($key, $val);
       }
+    }
+
+    foreach ($arr as $k => $v) {
+      $diffs['after'][$v] = (int)$user->get_setting($v);
+    }
+    if (json_encode($diffs['before']) !== json_encode($diffs['after'])) {
+      $user->add_log([
+        'type' => 'edit_profile_setting',
+        'params' => json_encode($diffs),
+      ]);
     }
 
     return response()->json([
       'status' => true,
-      'item' => $viewer->name,
+      'item' => $user->name,
     ], 200);
   }
 
   public function profile_setting_notify(Request $request)
   {
     $values = $request->post();
-    $viewer = Auth::user();
+    $user = Auth::user();
 //    echo '<pre>';var_dump($values);die;
     $notifications = isset($values['notifications']) && count($values['notifications']) ? $values['notifications'] : [];
 
+    $diffs = [];
+    $arr = [
+      'missing_ingredient_receive', 'missing_ingredient_alert_realtime', 'missing_ingredient_alert_email',
+    ];
+    foreach ($arr as $k => $v) {
+      $diffs['before'][$v] = (int)$user->get_setting($v);
+    }
+
     if (count($notifications)) {
       foreach ($notifications as $notification) {
-        $viewer->set_setting($notification['key'], $notification['val']);
+        $user->set_setting($notification['key'], $notification['val']);
       }
+    }
+
+    foreach ($arr as $k => $v) {
+      $diffs['after'][$v] = (int)$user->get_setting($v);
+    }
+    if (json_encode($diffs['before']) !== json_encode($diffs['after'])) {
+      $user->add_log([
+        'type' => 'edit_profile_notification',
+        'params' => json_encode($diffs),
+      ]);
     }
 
     return response()->json([
       'status' => true,
-      'item' => $viewer->name,
+      'item' => $user->name,
     ], 200);
   }
 }

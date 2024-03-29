@@ -41,6 +41,10 @@ class FoodController extends Controller
       'hasCustomizer' => false,
     ];
 
+    $user->add_log([
+      'type' => 'view_listing_food',
+    ]);
+
     return view('tastevn.pages.foods', ['pageConfigs' => $pageConfigs]);
   }
 
@@ -55,7 +59,7 @@ class FoodController extends Controller
   public function store(Request $request)
   {
     $values = $request->all();
-    $viewer = Auth::user();
+    $user = Auth::user();
     //required
     $validator = Validator::make($values, [
       'name' => 'required|string',
@@ -85,10 +89,16 @@ class FoodController extends Controller
 
     $row = Food::create([
       'name' => trim($values['name']),
-      'creator_id' => $viewer->id,
+      'creator_id' => $user->id,
     ]);
 
     $row->add_ingredients($ingredients);
+
+    $user->add_log([
+      'type' => 'add_' . $row->get_type(),
+      'item_id' => (int)$row->id,
+      'item_type' => $row->get_type(),
+    ]);
 
     //photo
     $file_photo = $request->file('photo');
@@ -141,7 +151,7 @@ class FoodController extends Controller
   public function update(Request $request)
   {
     $values = $request->all();
-    $viewer = Auth::user();
+    $user = Auth::user();
     //required
     $validator = Validator::make($values, [
       'item' => 'required',
@@ -185,6 +195,8 @@ class FoodController extends Controller
       ], 422);
     }
 
+    $diffs['before'] = $row->get_log();
+
     $row->update([
       'name' => trim($values['name']),
     ]);
@@ -212,6 +224,17 @@ class FoodController extends Controller
           'photo' => $file_path . $file_name
         ]);
       }
+    }
+
+    $row = Food::find($row->id);
+    $diffs['after'] = $row->get_log();
+    if (json_encode($diffs['before']) !== json_encode($diffs['after'])) {
+      $user->add_log([
+        'type' => 'edit_' . $row->get_type(),
+        'item_id' => (int)$row->id,
+        'item_type' => $row->get_type(),
+        'params' => json_encode($diffs),
+      ]);
     }
 
     return response()->json([
@@ -279,6 +302,7 @@ class FoodController extends Controller
   public function get(Request $request)
   {
     $values = $request->all();
+    $user = Auth::user();
 
     $validator = Validator::make($values, [
       'item' => 'required',
@@ -316,6 +340,12 @@ class FoodController extends Controller
       ->with('ingredients', $row->get_ingredients())
       ->render();
 
+    $user->add_log([
+      'type' => 'view_item_' . $row->get_type(),
+      'item_id' => (int)$row->id,
+      'item_type' => $row->get_type(),
+    ]);
+
     return response()->json([
       'item' => $row,
       'item_photo' => $row->get_photo(),
@@ -336,10 +366,8 @@ class FoodController extends Controller
       ], 404);
     }
 
-    $viewer = Auth::user();
-
+    $user = Auth::user();
     $faileds = [];
-
     $temp_count = 0;
     $temps = [];
     $food_count = 0;
@@ -387,7 +415,7 @@ class FoodController extends Controller
 
             $row = Food::create([
               'name' => $temp['food'],
-              'creator_id' => $viewer->id,
+              'creator_id' => $user->id,
             ]);
 
             $ingredients = [];
@@ -409,6 +437,12 @@ class FoodController extends Controller
             }
 
             $row->add_ingredients($ingredients);
+
+            $user->add_log([
+              'type' => 'import_' . $row->get_type(),
+              'item_id' => (int)$row->id,
+              'item_type' => $row->get_type(),
+            ]);
           }
         }
       }

@@ -27,6 +27,8 @@ class RestaurantFoodScan extends Model
     'found_by',
     'status',
     'note',
+    'text_ids',
+    'text_texts',
     'time_photo',
     'time_scan',
     'total_seconds',
@@ -50,6 +52,39 @@ class RestaurantFoodScan extends Model
   public function get_type()
   {
     return 'restaurant_food_scan';
+  }
+
+  public function get_log()
+  {
+    $texts = [];
+    $arr = $this->get_texts(['text_id_only' => 1]);
+    if (count($arr)) {
+      $texts = $arr->toArray();
+      $texts = array_map('current', $texts);
+    }
+
+    $missings = [];
+    $arr = $this->get_ingredients_missing();
+    if (count($arr)) {
+      foreach ($arr as $key => $itm) {
+        $missings[] = [
+          'id' => $itm->id,
+          'quantity' => $itm->ingredient_quantity,
+        ];
+
+        $a1[$key] = $itm->id;
+        $a2[$key] = $itm->ingredient_quantity;
+      }
+
+      array_multisort($a1, SORT_ASC, $a2, SORT_DESC, $missings);
+    }
+
+    return [
+      'food_id' => $this->food_id,
+      'note' => $this->note,
+      'texts' => $texts,
+      'missings' => $missings,
+    ];
   }
 
   public function get_food()
@@ -283,16 +318,42 @@ class RestaurantFoodScan extends Model
       ->where('restaurant_food_scan_texts.restaurant_food_scan_id', $this->id);
 
     if (count($pars)) {
-      if (isset($pars['id_only'])) {
-        $select->select('restaurant_food_scan_texts.id');
+      if (isset($pars['text_id_only'])) {
+        $select->select('texts.id')
+          ->leftJoin('texts', 'texts.id', '=', 'restaurant_food_scan_texts.text_id');
       }
 
-      if (isset($pars['text_only'])) {
+      if (isset($pars['text_name_only'])) {
         $select->select('texts.name')
           ->leftJoin('texts', 'texts.id', '=', 'restaurant_food_scan_texts.text_id');
       }
     }
 
     return $select->get();
+  }
+
+  public function update_text_notes()
+  {
+    $ids = [];
+    $texts = NULL;
+
+    $select = RestaurantFoodScanText::query('restaurant_food_scan_texts')
+      ->select('texts.id', 'texts.name')
+      ->leftJoin('texts', 'texts.id', '=', 'restaurant_food_scan_texts.text_id')
+      ->where('restaurant_food_scan_texts.restaurant_food_scan_id', $this->id);
+    $notes = $select->get();
+    if (count($notes)) {
+      foreach ($notes as $note) {
+        $ids[] = (int)$note['id'];
+        $texts .= $note['name'] . ' &nbsp ';
+      }
+    }
+
+    sort($ids);
+
+    $this->update([
+      'text_ids' => count($ids) ? $ids : NULL,
+      'text_texts' => $texts,
+    ]);
   }
 }

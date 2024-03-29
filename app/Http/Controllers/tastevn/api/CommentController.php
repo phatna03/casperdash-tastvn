@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
+use App\Api\SysCore;
 use Validator;
 use App\Models\Comment;
 
@@ -26,17 +27,19 @@ class CommentController extends Controller
   public function note(Request $request)
   {
     $values = $request->post();
-//    echo '<pre>';var_dump($values);die;
     $user = Auth::user();
+    $api_core = new SysCore();
 
     $content = isset($values['content']) && !empty($values['content']) ? trim($values['content']) : NULL;
     $object_type = isset($values['object_type']) && !empty($values['object_type']) ? trim($values['object_type']) : NULL;
     $object_id = isset($values['object_id']) && !empty($values['object_id']) ? (int)$values['object_id'] : 0;
-    if (empty($content) || empty($object_type) || !$object_id) {
+    if (empty($object_type) || !$object_id) {
       return response()->json([
         'error' => 'Invalid data'
       ], 422);
     }
+
+    $item = $api_core->get_item($object_id, $object_type);
 
     $row = Comment::where('user_id', $user->id)
       ->where('object_type', $object_type)
@@ -44,17 +47,46 @@ class CommentController extends Controller
       ->first();
 
     if ($row) {
+
+      $diffs['before'] = $row->get_log();
+
       $row->update([
-        'content' => $content,
+        'content' => !empty($content) ? $content : '',
         'edited' => 1,
       ]);
+
+      $row = Comment::find($row->id);
+      $diffs['after'] = $row->get_log();
+      if (json_encode($diffs['before']) !== json_encode($diffs['after'])) {
+        $user->add_log([
+          'type' => 'edit_photo_note',
+          'restaurant_id' => $item ? (int)$item->restaurant_id : 0,
+          'item_id' => $item ? (int)$item->id : null,
+          'item_type' => $item ? $item->get_type() : null,
+          'params' => json_encode($diffs),
+        ]);
+      }
+
     } else {
-      $row = Comment::create([
-        'user_id' => $user->id,
-        'object_type' => $object_type,
-        'object_id' => $object_id,
-        'content' => $content,
-      ]);
+
+      if (!empty($content)) {
+        $row = Comment::create([
+          'user_id' => $user->id,
+          'object_type' => $object_type,
+          'object_id' => $object_id,
+          'content' => $content,
+        ]);
+
+        $user->add_log([
+          'type' => 'add_photo_note',
+          'restaurant_id' => $item ? (int)$item->restaurant_id : 0,
+          'item_id' => $item ? (int)$item->id : null,
+          'item_type' => $item ? $item->get_type() : null,
+          'params' => json_encode([
+            'content' => $content,
+          ])
+        ]);
+      }
     }
 
     return response()->json([

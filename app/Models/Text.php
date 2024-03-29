@@ -17,4 +17,15 @@ class Text extends Model
     'deleted',
   ];
 
+  public function get_type()
+  {
+    return 'text';
+  }
+
+  public function get_log()
+  {
+    return [
+      'name' => $this->name
+    ];
+  }
 }

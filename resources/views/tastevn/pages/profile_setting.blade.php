@@ -88,6 +88,7 @@
     <form class="card-body" onsubmit="return user_setting_notify_confirm(event, this);" id="frm-setting-notify">
       <div class="acm-clearfix">
         <div class="acm-float-right ml-2">
+          <button type="button" class="btn btn-secondary me-1" onclick="user_test_speaker()">Test Text-to-speech</button>
           <button type="submit" class="btn btn-primary me-1">Submit</button>
         </div>
 
@@ -101,11 +102,18 @@
             <div class="form-floating form-floating-outline">
               <div class="form-control" id="setting-notify-{{$notify}}">
                 <div class="row">
-                  <div class="col-md-6">
+                  <div class="col-md-3">
                     <div class="form-check">
                       <input class="form-check-input" type="checkbox" name="{{$notify . '_receive'}}" id="setting-notify-receive-{{$notify}}"
                              @if($viewer->get_setting($notify . '_receive')) checked @endif />
                       <label class="form-check-label" for="setting-notify-receive-{{$notify}}">Receive alert notification</label>
+                    </div>
+                  </div>
+                  <div class="col-md-3">
+                    <div class="form-check">
+                      <input class="form-check-input" type="checkbox" name="{{$notify . '_alert_speaker'}}" id="setting-notify-speaker-{{$notify}}"
+                             @if($viewer->get_setting($notify . '_alert_speaker')) checked @endif />
+                      <label class="form-check-label" for="setting-notify-speaker-{{$notify}}">Text-to-speech alert?</label>
                     </div>
                   </div>
                   <div class="col-md-3">

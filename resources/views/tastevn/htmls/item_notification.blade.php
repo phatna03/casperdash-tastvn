@@ -10,9 +10,10 @@ if (!isset($notifications) || !count($notifications)) {
   }
 @endphp
 <div
-  class="acm-itm-notify position-relative m-1 p-1 @if(!empty($notification->read_at)) @else bg-primary-subtle @endif "
+  class="acm-itm-notify itm_notify_{{$notification->data['restaurant_food_scan_id']}} position-relative m-1 p-1 @if(!empty($notification->read_at)) @else bg-primary-subtle @endif "
   onclick="notification_read(this); restaurant_food_scan_result_info({{$notification->data['restaurant_food_scan_id']}})"
   data-itd="{{$notification->id}}"
+  data-rfs-id="{{$notification->data['restaurant_food_scan_id']}}"
 >
   <div class="acm-float-right">
     <small>{{date('d/m/Y H:i:s', strtotime($notification->created_at))}}</small>

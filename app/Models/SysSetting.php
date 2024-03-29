@@ -16,4 +16,8 @@ class SysSetting extends Model
     'value',
   ];
 
+  public function get_type()
+  {
+    return 'setting';
+  }
 }

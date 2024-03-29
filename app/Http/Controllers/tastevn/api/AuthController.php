@@ -7,7 +7,6 @@ use Illuminate\Http\Request;
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-
 use Illuminate\Support\Facades\Redirect;
 
 use Validator;
@@ -54,6 +53,10 @@ class AuthController extends Controller
     }
 
     $user = Auth::user();
+
+    $user->add_log([
+      'type' => 'login'
+    ]);
 
     $redirect_url = Redirect::getIntendedUrl();
     if ($user->role == 'user') {
@@ -171,6 +174,10 @@ class AuthController extends Controller
       ], 422);
     }
 
+    $user->add_log([
+      'type' => 'edit_pwd'
+    ]);
+
     $user->update([
       'password' => Hash::make($credentials['password']),
     ]);
@@ -183,7 +190,15 @@ class AuthController extends Controller
 
   public function logout(Request $request)
   {
-    Auth::logout();
+    $user = Auth::user();
+    if ($user) {
+
+      $user->add_log([
+        'type' => 'logout'
+      ]);
+
+      Auth::logout();
+    }
 
     return response()->json(['status' => true]);
   }

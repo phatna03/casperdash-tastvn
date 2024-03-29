@@ -261,13 +261,14 @@
                   <tr>
                     <th></th>
                     <th>Status</th>
-                    <th class="acm-width-200-min">Dish</th>
+                    <th class="acm-width-300-min">Dish</th>
                     <th>Confidence</th>
-                    <th class="acm-width-250-min acm-width-250-max">Ingredients missing</th>
-                    <th>Time upload</th>
-                    <th>Time scanned</th>
-                    <th class="acm-width-200-min">Note</th>
+                    <th class="acm-width-300-min">Ingredients missing</th>
+                    <th class="acm-width-120-min">Time upload</th>
+                    <th class="acm-width-120-min">Time scanned</th>
+                    <th class="acm-width-400-min">Note</th>
                     <th class="acm-width-200-min">Category</th>
+                    <th class="d-none"></th>
                   </tr>
                   </thead>
                 </table>
@@ -368,7 +369,7 @@
   <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvas_add_foods"
        aria-labelledby="offcanvas_add_foods_label">
     <div class="offcanvas-header">
-      <h5 id="offcanvas_add_foods_label" class="offcanvas-title">Add Dishes Into Restaurant</h5>
+      <h5 id="offcanvas_add_foods_label" class="offcanvas-title">Add Dishes To Restaurant</h5>
       <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
     <div class="offcanvas-body mx-0 flex-grow-0 h-100">
@@ -596,7 +597,7 @@
       columnDefs: [
         {
           targets: 3,
-          render: $.fn.dataTable.render.moment('YYYY-MM-DDTHH:mm:ss.SSSSZ', 'DD/MM/YY H:mm:ss')
+          render: $.fn.dataTable.render.moment('YYYY-MM-DDTHH:mm:ss.SSSSZ', 'DD/MM/YY HH:mm:ss')
         },
         {
           // Actions
@@ -619,7 +620,7 @@
       ],
       buttons: [
         {
-          text: '<i class="mdi mdi-plus me-0 me-sm-1"></i><span class="d-none d-sm-inline-block">Add Dishes Into Restaurant</span>',
+          text: '<i class="mdi mdi-plus me-0 me-sm-1"></i><span class="d-none d-sm-inline-block">Add Dishes To Restaurant</span>',
           className: 'add-new btn btn-primary waves-effect waves-light acm-mr-px-10',
           attr: {
             'data-bs-toggle': 'offcanvas',
@@ -669,7 +670,7 @@
       "columns": [
         //stt
         {data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false},
-        {data: 'id', name: 'id'},
+        {data: 'text_texts', name: 'text_texts'},
         {data: 'food_name', name: 'foods.name'},
         {data: 'confidence', name: 'confidence'},
         {data: 'missing_texts', name: 'missing_texts'},
@@ -712,7 +713,7 @@
           targets: 2,
           render: function (data, type, full, meta) {
 
-            var food_name = !full['food_name'] || full['food_name'] === 'null' ? 'Không xác định...'
+            var food_name = !full['food_name'] || full['food_name'] === 'null' ? 'Unknown...'
               : full['food_name'];
 
             return (
@@ -801,6 +802,42 @@
               html = full['time_scan'];
             }
             return ('<div class="cursor-pointer" onclick="restaurant_food_scan_result_info(' + full['id'] + ')">' + html + '</div>');
+          }
+        },
+        {
+          targets: 7,
+          sType: "priority",
+          render: function (data, type, full, meta) {
+            if (type == 'order' || type == 'sort') {
+              var sort = 0;
+              if (full['text_texts'] && full['text_texts'] !== '' && full['text_texts'] !== 'NULL') {
+                var texts = full['text_texts'].split('&amp;nbsp');
+                if (texts.length) {
+                  sort = texts.length;
+                }
+              }
+              return sort;
+            }
+            else {
+              var html = '';
+              if (full['text_texts'] && full['text_texts'] !== '' && full['text_texts'] !== 'NULL') {
+                var texts = full['text_texts'].split('&amp;nbsp');
+                if (texts.length) {
+                  texts.forEach(function (v, k) {
+
+                    if (v && v.trim() !== '') {
+                      html += '<div>+ ' + v + '</div>';
+                    }
+                  });
+                }
+              }
+
+              if (full['note'] && full['note'] !== 'null') {
+                html += '<div>+ ' + full['note'] + '</div>';
+              }
+
+              return ('<div class="cursor-pointer" onclick="restaurant_food_scan_result_info(' + full['id'] + ')">' + html + '</div>');
+            }
           }
         },
       ],

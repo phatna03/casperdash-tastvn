@@ -48,6 +48,9 @@
     <div class="offcanvas-body mx-0 flex-grow-0 h-100">
       <form class="pt-0" onsubmit="return user_add(event, this);">
         <div class="form-floating form-floating-outline mb-4">
+          <span class="text-dark fw-bold">Default password for new user:</span> <span class="badge bg-primary">tastevietnam</span>
+        </div>
+        <div class="form-floating form-floating-outline mb-4">
           <input type="text" class="form-control" id="add-item-name" name="name" />
           <label for="add-item-name">Name <b class="text-danger">*</b></label>
         </div>
@@ -108,7 +111,7 @@
             <div class="form-check">
               <input class="form-check-input" type="checkbox" onchange="user_full_restaurants(this)"
                      name="access_full" id="add-item-manage-full" checked />
-              <label class="form-check-label" for="add-item-manage-full">
+              <label class="form-check-label text-dark fw-bold" for="add-item-manage-full">
                 Full access to all restaurants
               </label>
             </div>
@@ -196,7 +199,7 @@
             <div class="form-check">
               <input class="form-check-input" type="checkbox" onchange="user_full_restaurants(this)"
                      name="access_full" id="edit-item-manage-full" checked />
-              <label class="form-check-label" for="edit-item-manage-full">
+              <label class="form-check-label text-dark fw-bold" for="edit-item-manage-full">
                 Full access to all restaurants
               </label>
             </div>
@@ -377,7 +380,7 @@
         },
         {
           targets: 6,
-          render: $.fn.dataTable.render.moment('YYYY-MM-DDTHH:mm:ss.SSSSZ', 'DD/MM/YY H:mm:ss' )
+          render: $.fn.dataTable.render.moment('YYYY-MM-DDTHH:mm:ss.SSSSZ', 'DD/MM/YY HH:mm:ss' )
         },
         {
           // Actions

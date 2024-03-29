@@ -1,6 +1,6 @@
 @if(count($ingredients))
   <div class="form-floating form-floating-outline">
-    <div class="form-control acm-height-px-auto p-2" id="user-update-ingredients">
+    <div class="form-control acm-height-px-auto acm-overflow-y-auto acm-height-400-max p-2" id="user-update-ingredients">
       @foreach($ingredients as $ingredient)
         <div class="mt-2 position-relative clearfix js-item-row"
              data-itd="{{$ingredient->id}}"

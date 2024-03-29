@@ -9,6 +9,8 @@ use Illuminate\Notifications\Notifiable;
 
 use Laravel\Sanctum\HasApiTokens;
 
+use Carbon\Carbon;
+
 class User extends Authenticatable
 {
   use HasApiTokens, HasFactory, Notifiable;
@@ -41,6 +43,25 @@ class User extends Authenticatable
     'email_verified_at' => 'datetime',
     'password' => 'hashed',
   ];
+
+  public function get_type()
+  {
+    return 'user';
+  }
+
+  public function get_log()
+  {
+    return [
+      'name' => $this->name,
+      'email' => $this->email,
+      'phone' => $this->phone,
+      'status' => $this->status,
+      'role' => $this->role,
+      'note' => $this->note,
+      'access_full' => $this->access_full,
+      'access_ids' => $this->access_ids,
+    ];
+  }
 
   public function set_setting($key, $value)
   {
@@ -158,4 +179,80 @@ class User extends Authenticatable
       }
     }
   }
+
+  public function add_log($pars = [])
+  {
+    if (count($pars)) {
+
+      $pars['user_id'] = isset($pars['user_id']) ? (int)$pars['user_id'] : $this->id;
+
+      //check spam action
+      $minutes = 3;
+      $type1s = [
+        'login', 'logout', 'view_profile_info', 'view_profile_setting',
+        'view_listing_notification', 'view_listing_restaurant', 'view_listing_user',
+        'view_listing_food_category', 'view_listing_ingredient',
+        'view_listing_food', 'view_listing_photo',
+        'view_listing_text', 'view_listing_setting',
+        'view_listing_log', 'view_modal_testing',
+      ];
+      $type2s = [
+        'view_item_restaurant', 'view_item_food',
+        'view_item_restaurant_food_scan', 'view_item_photo',
+      ];
+
+      if (in_array($pars['type'], $type1s)) {
+
+        $row = Log::where('user_id', $this->id)
+          ->where('type', $pars['type'])
+          ->where('created_at', '>=', Carbon::now()->subMinutes($minutes)->toDateTimeString())
+          ->orderByDesc('id')
+          ->limit(1)
+          ->first();
+
+        if ($row) {
+          $row->update([
+            'created_at' => date('Y-m-d H:i:s')
+          ]);
+
+          return $row;
+        }
+
+      } elseif (in_array($pars['type'], $type2s)) {
+
+        $select = Log::where('user_id', $this->id)
+          ->where('type', $pars['type'])
+          ->where('created_at', '>=', Carbon::now()->subMinutes($minutes)->toDateTimeString());
+        if (isset($pars['restaurant_id'])) {
+          $select->where('restaurant_id', (int)$pars['restaurant_id']);
+        }
+        if (isset($pars['item_id'])) {
+          $select->where('item_id', (int)$pars['item_id'])
+            ->where('item_type', $pars['item_type']);
+        }
+
+        $row = $select->orderByDesc('id')
+          ->limit(1)
+          ->first();
+        if ($row) {
+          $row->update([
+            'created_at' => date('Y-m-d H:i:s')
+          ]);
+
+          return $row;
+        }
+
+      }
+
+      $row = Log::create($pars);
+
+      $row->set_text();
+
+      return $row;
+    }
+
+    return null;
+  }
+
+
 }

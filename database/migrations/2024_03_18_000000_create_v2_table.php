@@ -52,6 +52,20 @@ return new class extends Migration {
       });
     }
 
+    if (!Schema::hasTable('logs')) {
+      Schema::create('logs', function (Blueprint $table) {
+        $table->id();
+        $table->bigInteger('user_id');
+        $table->bigInteger('restaurant_id')->default(0);
+        $table->string('type');
+        $table->bigInteger('item_id')->nullable();
+        $table->string('item_type')->nullable();
+        $table->longText('params')->nullable();
+        $table->text('text')->nullable();
+        $table->bigInteger('deleted')->default(0);
+        $table->timestamps();
+      });
+    }
   }
 
   /**
@@ -64,5 +78,7 @@ return new class extends Migration {
 
     Schema::dropIfExists('texts');
     Schema::dropIfExists('restaurant_food_scan_texts');
+
+    Schema::dropIfExists('logs');
   }
 };

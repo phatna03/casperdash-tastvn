@@ -21,6 +21,18 @@ class Comment extends Model
     'deleted',
   ];
 
+  public function get_type()
+  {
+    return 'comment';
+  }
+
+  public function get_log()
+  {
+    return [
+      'content' => $this->content
+    ];
+  }
+
   public function owner()
   {
     return $this->belongsTo('App\Models\User', 'user_id');

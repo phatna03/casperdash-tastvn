@@ -1,12 +1,12 @@
 <div class="row">
   <div class="col-lg-6 mb-2">
     <div class="form-floating form-floating-outline">
-      <textarea class="form-control @if(count($texts)) h-px-200 @else h-px-500 @endif" id="user-update-note" name="update_note">{{$item->note}}</textarea>
+      <textarea class="form-control @if(count($texts)) h-px-150 @else h-px-400 @endif" id="user-update-note" name="update_note">{{$item->note}}</textarea>
       <label for="user-update-note" class="text-danger">Note</label>
     </div>
 
     <div class="form-floating form-floating-outline mt-4 mb-2 wrap-texts @if(!count($texts)) d-none @endif">
-      <div class="form-control acm-height-px-auto p-2" id="user-update-text">
+      <div class="form-control acm-height-px-auto acm-overflow-y-auto acm-height-300-max p-2" id="user-update-text">
         @if(count($texts))
           @foreach($texts as $k => $text)
             <div class="mt-1 position-relative clearfix itm-text">
@@ -21,7 +21,7 @@
           @endforeach
         @endif
       </div>
-      <label for="user-update-text" class="text-danger">Texts</label>
+      <label for="user-update-text" class="text-danger">Text Notes</label>
     </div>
   </div>
 

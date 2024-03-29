@@ -20,6 +20,39 @@ class Food extends Model
     'deleted',
   ];
 
+  public function get_type()
+  {
+    return 'food';
+  }
+
+  public function get_log()
+  {
+    $ingredients = [];
+    $arr = $this->get_ingredients();
+    if (count($arr)) {
+
+      $a1 = [];
+      $a2 = [];
+
+      foreach ($arr as $key => $itm) {
+        $ingredients[] = [
+          'id' => $itm->id,
+          'quantity' => $itm->ingredient_quantity,
+        ];
+
+        $a1[$key] = $itm->id;
+        $a2[$key] = $itm->ingredient_quantity;
+      }
+
+      array_multisort($a1, SORT_ASC, $a2, SORT_DESC, $ingredients);
+    }
+
+    return [
+      'name' => $this->name,
+      'ingredients' => $ingredients,
+    ];
+  }
+
   public function add_ingredients($ingredients = [])
   {
     //duplicate

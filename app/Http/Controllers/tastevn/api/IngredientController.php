@@ -36,13 +36,18 @@ class IngredientController extends Controller
       'hasCustomizer' => false,
     ];
 
+    $user->add_log([
+      'type' => 'view_listing_ingredient',
+    ]);
+
     return view('tastevn.pages.ingredients', ['pageConfigs' => $pageConfigs]);
   }
 
   public function create(Request $request)
   {
     $values = $request->all();
-//    echo '<pre>';var_dump($values);die;
+    $user = Auth::user();
+
     $data = [];
     if (isset($values['name']) && !empty(trim($values['name']))) {
       $row = Ingredient::whereRaw('LOWER(name) LIKE ?', strtolower(trim($values['name'])))
@@ -50,6 +55,12 @@ class IngredientController extends Controller
       if (!$row) {
         $row = Ingredient::create([
           'name' => trim($values['name'])
+        ]);
+
+        $user->add_log([
+          'type' => 'add_' . $row->get_type(),
+          'item_id' => (int)$row->id,
+          'item_type' => $row->get_type(),
         ]);
       }
     }
@@ -65,7 +76,7 @@ class IngredientController extends Controller
   public function store(Request $request)
   {
     $values = $request->all();
-    $viewer = Auth::user();
+    $user = Auth::user();
     //required
     $validator = Validator::make($values, [
       'name' => 'required|string',
@@ -92,7 +103,13 @@ class IngredientController extends Controller
     $row = Ingredient::create([
       'name' => trim($values['name']),
       'name_vi' => isset($values['name_vi']) ? trim($values['name_vi']) : null,
-      'creator_id' => $viewer->id,
+      'creator_id' => $user->id,
+    ]);
+
+    $user->add_log([
+      'type' => 'add_' . $row->get_type(),
+      'item_id' => (int)$row->id,
+      'item_type' => $row->get_type(),
     ]);
 
     return response()->json([
@@ -123,7 +140,7 @@ class IngredientController extends Controller
   public function update(Request $request)
   {
     $values = $request->all();
-    $viewer = Auth::user();
+    $user = Auth::user();
     //required
     $validator = Validator::make($values, [
       'item' => 'required',
@@ -157,12 +174,25 @@ class IngredientController extends Controller
       }
     }
 
+    $diffs['before'] = $row->get_log();
+
     $row->update([
       'name' => trim($values['name']),
       'name_vi' => isset($values['name_vi']) ? trim($values['name_vi']) : null,
     ]);
 
     $row->on_update_after();
+
+    $row = Ingredient::find($row->id);
+    $diffs['after'] = $row->get_log();
+    if (json_encode($diffs['before']) !== json_encode($diffs['after'])) {
+      $user->add_log([
+        'type' => 'edit_' . $row->get_type(),
+        'item_id' => (int)$row->id,
+        'item_type' => $row->get_type(),
+        'params' => json_encode($diffs),
+      ]);
+    }
 
     return response()->json([
       'status' => true,

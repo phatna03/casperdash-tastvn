@@ -2,16 +2,16 @@
 
 namespace App\Http\Controllers\tastevn\api;
 
-use App\Api\SysCore;
 use App\Http\Controllers\Controller;
-use App\Models\RestaurantFood;
 use Illuminate\Http\Request;
-
 use Illuminate\Support\Facades\Auth;
-use Validator;
-use App\Models\SysSetting;
 
-class SettingController extends Controller
+use App\Api\SysCore;
+
+use Validator;
+use App\Models\Log;
+
+class LogController extends Controller
 {
   public function __construct()
   {
@@ -28,32 +28,26 @@ class SettingController extends Controller
   public function index(Request $request)
   {
     $user = Auth::user();
-    $invalid_roles = ['moderator', 'user'];
+    $invalid_roles = ['user', 'moderator'];
     if (in_array($user->role, $invalid_roles)) {
       return redirect('page_not_found');
     }
 
-    $settings = [];
-
-    $rows = SysSetting::all();
-    if (count($rows)) {
-      foreach ($rows as $row) {
-        $settings[$row->key] = $row->value;
-      }
-    }
+    $api_core = new SysCore();
 
     $pageConfigs = [
       'myLayout' => 'horizontal',
       'hasCustomizer' => false,
 
-      'settings' => $settings
+      'options_type' => $api_core->get_log_types(),
+      'options_item' => $api_core->get_log_items(),
     ];
 
     $user->add_log([
-      'type' => 'view_listing_setting',
+      'type' => 'view_listing_log',
     ]);
 
-    return view('tastevn.pages.settings', ['pageConfigs' => $pageConfigs]);
+    return view('tastevn.pages.logs', ['pageConfigs' => $pageConfigs]);
   }
 
   public function create(Request $request)
@@ -90,27 +84,7 @@ class SettingController extends Controller
    */
   public function update(Request $request)
   {
-    $values = $request->all();
-    $user = Auth::user();
-    $api_core = new SysCore();
-
-    $diffs['before'] = $api_core->get_log_settings();
-
-    if (count($values)) {
-      $this->save_settings($values);
-    }
-
-    $diffs['after'] = $api_core->get_log_settings();
-    if (json_encode($diffs['before']) !== json_encode($diffs['after'])) {
-      $user->add_log([
-        'type' => 'edit_setting',
-        'params' => json_encode($diffs),
-      ]);
-    }
-
-    return response()->json([
-      'status' => true,
-    ], 200);
+    //
   }
 
   /**
@@ -121,15 +95,13 @@ class SettingController extends Controller
     //
   }
 
-  protected function save_settings($settings = [])
+  public function delete(Request $request)
   {
-    foreach ($settings as $key => $value) {
-      SysSetting::updateOrCreate([
-        'key' => $key,
-      ],
-      [
-        'value' => $value,
-      ]);
-    }
+    //
+  }
+
+  public function restore(Request $request)
+  {
+    //
   }
 }

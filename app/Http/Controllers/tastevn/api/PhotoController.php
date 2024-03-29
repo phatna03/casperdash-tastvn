@@ -34,11 +34,17 @@ class PhotoController extends Controller
 
   public function index(Request $request)
   {
+    $user = Auth::user();
+
     $pageConfigs = [
       'myLayout' => 'horizontal',
       'hasCustomizer' => false,
 
     ];
+
+    $user->add_log([
+      'type' => 'view_listing_photo',
+    ]);
 
     return view('tastevn.pages.photos', ['pageConfigs' => $pageConfigs]);
   }
@@ -83,6 +89,26 @@ class PhotoController extends Controller
 
     return response()->json([
       'html' => $html,
+    ]);
+  }
+
+  public function view(Request $request)
+  {
+    $values = $request->post();
+    $user = Auth::user();
+
+    $row = RestaurantFoodScan::find((int)$values['item']);
+    if ($row) {
+      $user->add_log([
+        'type' => 'view_item_photo',
+        'restaurant_id' => (int)$row->restaurant_id,
+        'item_id' => (int)$row->id,
+        'item_type' => $row->get_type(),
+      ]);
+    }
+
+    return response()->json([
+
     ]);
   }
 }

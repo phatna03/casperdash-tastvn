@@ -19,10 +19,25 @@ class Restaurant extends Model
     'name',
     's3_bucket_name',
     's3_bucket_address',
+    's3_checking',
     'count_foods',
     'creator_id',
     'deleted',
   ];
+
+  public function get_type()
+  {
+    return 'restaurant';
+  }
+
+  public function get_log()
+  {
+    return [
+      'name' => $this->name,
+      's3_bucket_name' => $this->s3_bucket_name,
+      's3_bucket_address' => $this->s3_bucket_address,
+    ];
+  }
 
   public function creator()
   {

@@ -100,7 +100,7 @@
       columnDefs: [
         {
           targets: 3,
-          render: $.fn.dataTable.render.moment('YYYY-MM-DDTHH:mm:ss.SSSSZ', 'DD/MM/YY H:mm:ss' )
+          render: $.fn.dataTable.render.moment('YYYY-MM-DDTHH:mm:ss.SSSSZ', 'DD/MM/YY HH:mm:ss' )
         },
         {
           // Actions

@@ -52,6 +52,10 @@ class RoboflowController extends Controller
       ]
     ];
 
+    $user->add_log([
+      'type' => 'view_modal_testing',
+    ]);
+
     return view('tastevn.pages.roboflow', ['pageConfigs' => $pageConfigs]);
   }
 

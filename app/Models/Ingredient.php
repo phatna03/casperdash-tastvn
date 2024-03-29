@@ -18,6 +18,19 @@ class Ingredient extends Model
     'deleted',
   ];
 
+  public function get_type()
+  {
+    return 'ingredient';
+  }
+
+  public function get_log()
+  {
+    return [
+      'name' => $this->name,
+      'name_vi' => $this->name_vi,
+    ];
+  }
+
   public function get_ingredient_type($food)
   {
     $type = 'additive';

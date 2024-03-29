@@ -141,6 +141,43 @@ function bind_selectize(wrap) {
 
         select.removeClass('ajx_selectize');
 
+      } else if (value === 'user') {
+
+        select.selectize({
+          valueField: 'id',
+          labelField: 'name',
+          searchField: 'name',
+          preload: true,
+          clearCache: function (template) {
+          },
+          load: function (query, callback) {
+            $.ajax({
+              url: acmcfs.link_base_url + '/admin/user/selectize',
+              type: 'post',
+              data: {
+                keyword: query,
+                _token: acmcfs.var_csrf,
+              },
+              complete: function (xhr, textStatus) {
+                var rsp = xhr.responseJSON;
+
+                if (xhr.status == 200) {
+                  select.options = rsp.items;
+                  callback(rsp.items);
+
+                  if (chosen && parseInt(chosen)) {
+                    setTimeout(function () {
+                      select.selectize()[0].selectize.setValue(chosen);
+                    }, acmcfs.timeout_quick);
+                  }
+                }
+              },
+            });
+          },
+        });
+
+        select.removeClass('ajx_selectize');
+
       }
     });
   }
@@ -332,6 +369,17 @@ function sound_play() {
   audio.play();
 }
 
+function speaker_play() {
+  // var audio = new Audio(acmcfs.link_speaker_notify);
+  // audio.play();
+  $('#wrap-speaker-play')[0].click();
+}
+
+function speaker_tester() {
+  var audio = new Audio(acmcfs.link_speaker_tester);
+  audio.play();
+}
+
 function message_from_toast(type, title, body, sound = false) {
 
   toastr.options = {
@@ -353,11 +401,7 @@ function message_from_toast(type, title, body, sound = false) {
 
   if (sound) {
     //check user setting
-    if ($('input[name=user_setting_notify_sound]').length) {
-      if (parseInt($('input[name=user_setting_notify_sound]').val())) {
-        sound_play();
-      }
-    } else {
+    if (parseInt(acmcfs.notify_sound)) {
       sound_play();
     }
   }
@@ -1019,8 +1063,12 @@ function user_test_sound() {
   sound_play();
 }
 
+function user_test_speaker() {
+  speaker_tester();
+}
+
 function user_test_printer() {
-  page_open(acmcfs.link_base_url + '/printer?ids=1,2,3');
+  page_open(acmcfs.link_base_url + '/printer-test');
 }
 
 function user_setting_notify_confirm(evt, frm) {
@@ -1055,6 +1103,13 @@ function user_setting_notify() {
     });
 
     key = notify + '_alert_email';
+    val = bind.find('input[name=' + key + ']').is(':checked') ? 1 : 0;
+    notifications.push({
+      key: key,
+      val: val,
+    });
+
+    key = notify + '_alert_speaker';
     val = bind.find('input[name=' + key + ']').is(':checked') ? 1 : 0;
     notifications.push({
       key: key,
@@ -1449,7 +1504,6 @@ function restaurant_get_scan_results(ele, id) {
       if (response.data.notify && parseInt(response.data.notify)) {
         var htmlToast = '<div class="cursor-pointer" onclick="restaurant_food_scan_result_info(' + response.data.notify + ')">Dish found error</div>';
         message_from_toast('error', 'Notification', htmlToast);
-        // restaurant_food_scan_result_info(response.data.notify);
       }
     })
     .catch(error => {
@@ -1468,14 +1522,35 @@ function restaurant_food_scan_result_info(id) {
   popup.find('input[name=popup_view_id_itm]').val(id);
 
   var hidden_btns = true;
-  var table = $('#datatable-listing-scan table');
-  if (table.length) {
+  var table1 = $('#datatable-listing-scan table');
+  if (table1.length) {
     var count = 0;
     var ids = '';
-    if (table.find('tbody tr').length) {
-      table.find('tbody tr').each(function (k, v) {
+    if (table1.find('tbody tr').length) {
+      table1.find('tbody tr').each(function (k, v) {
         if (parseInt($(v).attr('data-itd'))) {
           ids += parseInt($(v).attr('data-itd')) + ';';
+          count++;
+        }
+      });
+    }
+
+    if (ids && ids != '') {
+      popup.find('input[name=popup_view_ids]').val(ids);
+    }
+    if (count > 1) {
+      hidden_btns = false;
+    }
+  }
+
+  var table2 = $('#wrap-notifications');
+  if (table2.length) {
+    var count = 0;
+    var ids = '';
+    if (table2.find('.acm-itm-notify').length) {
+      table2.find('.acm-itm-notify').each(function (k, v) {
+        if (parseInt($(v).attr('data-rfs-id'))) {
+          ids += parseInt($(v).attr('data-rfs-id')) + ';';
           count++;
         }
       });
@@ -1731,6 +1806,20 @@ function restaurant_food_scan_error_info(ele) {
     })
     .catch(error => {
 
+    });
+
+  return false;
+}
+
+function restaurant_food_scan_view(id) {
+  axios.post('/admin/photo/view', {
+    item: id,
+  })
+    .then(response => {
+      //
+    })
+    .catch(error => {
+      //
     });
 
   return false;
@@ -2362,6 +2451,12 @@ function notification_newest() {
         if (parseInt(acmcfs.printer_ok)) {
           page_open(acmcfs.link_base_url + '/printer?ids=' + response.data.ids.toString());
         }
+      }
+
+      if (response.data.speaker) {
+        setTimeout(function () {
+          speaker_play();
+        }, acmcfs.timeout_default);
       }
 
       if (response.data.role) {

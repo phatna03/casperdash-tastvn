@@ -17,6 +17,7 @@ return new class extends Migration {
         $table->bigInteger('count_foods')->default(0);
         $table->string('s3_bucket_name')->nullable();
         $table->string('s3_bucket_address')->nullable();
+        $table->smallInteger('s3_checking')->default(0);
         $table->bigInteger('creator_id')->default(0);
         $table->bigInteger('deleted')->default(0);
         $table->timestamps();
@@ -104,6 +105,8 @@ return new class extends Migration {
         $table->string('found_by')->nullable();
         $table->enum('status', ['new', 'failed', 'scanned', 'checked', 'edited']);
         $table->text('note')->nullable();
+        $table->text('text_ids')->nullable();
+        $table->longText('text_texts')->nullable();
         $table->timestamp('time_photo')->nullable();
         $table->timestamp('time_scan')->nullable();
         $table->decimal('total_seconds')->default(0);

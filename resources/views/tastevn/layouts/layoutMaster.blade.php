@@ -33,7 +33,6 @@
   var acmcfs = {
     link_base_url: '{{url('')}}',
     var_csrf: '{{csrf_token()}}',
-    printer_ok: '{{$viewer && (int)$viewer->get_setting('allow_printer') ? 1 : 0}}',
 
     message_title_info: '{{config('tastevn.message_title_info')}}',
     message_title_success: '{{config('tastevn.message_title_success')}}',
@@ -47,6 +46,18 @@
     timeout_default: 2000,
     timeout_quick: 500,
     timeout_notification: 5000,
+
+    @if($viewer)
+      printer_ok: '{{(int)$viewer->get_setting('allow_printer') ? 1 : 0}}',
+      notify_sound: '{{(int)$viewer->get_setting('notify_sound') ? 1 : 0}}',
+      link_speaker_tester: "https://s3.ap-southeast-1.amazonaws.com/cargo.tastevietnam.asia/casperdash/user_{{$viewer->id}}/speaker_tester.mp3",
+      link_speaker_notify: "https://s3.ap-southeast-1.amazonaws.com/cargo.tastevietnam.asia/casperdash/user_{{$viewer->id}}/speaker_notify.mp3",
+    @else
+      printer_ok: 0,
+      notify_sound: 0,
+      link_speaker_tester: '{{url('')}}',
+      link_speaker_notify: '{{url('')}}',
+    @endif
 
     datatable_init: {
       "pageLength": 25,
@@ -96,6 +107,23 @@
       $('.modal-backdrop').not('.stacked').addClass('stacked');
     });
 
+    //speaker
+    document.getElementById('wrap-speaker-play').addEventListener('click', function() {
+      var audioPlayer = document.getElementById('wrap-speaker-audio');
+      audioPlayer.play()
+        .then(function() {
+          console.log('Audio playback started successfully.');
+        })
+        .catch(function(error) {
+          console.error('Error starting audio playback:', error);
+        });
+    });
+    setTimeout(function () {
+      speaker_play();
+      $('#wrap-speaker-audio').removeAttr('src');
+      $('#wrap-speaker-audio').attr('src', acmcfs.link_speaker_notify);
+    }, acmcfs.timeout_default);
+
     @endauth
   });
 </script>
@@ -103,7 +131,11 @@
 @yield('js_end')
 
 @auth
-  <input type="hidden" name="user_setting_notify_sound" value="{{(int)$viewer->get_setting('notify_sound')}}" />
+  <div id="wrap-speaker" class="d-none">
+    <button id="wrap-speaker-play">Play Audio</button>
+    <audio id="wrap-speaker-audio"
+           src="https://s3.ap-southeast-1.amazonaws.com/cargo.tastevietnam.asia/casperdash/speaker_tester.mp3"></audio>
+  </div>
 
   <div class="modal animate__animated animate__rollIn" id="modal_logout" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">

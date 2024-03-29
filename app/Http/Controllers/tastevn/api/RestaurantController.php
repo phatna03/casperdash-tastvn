@@ -4,7 +4,6 @@ namespace App\Http\Controllers\tastevn\api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-
 use Illuminate\Support\Facades\Auth;
 use Validator;
 
@@ -19,6 +18,7 @@ use App\Models\Food;
 use App\Models\Ingredient;
 use App\Models\Text;
 use App\Models\RestaurantFoodScanText;
+use App\Models\RestaurantFoodScanMissing;
 
 class RestaurantController extends Controller
 {
@@ -47,6 +47,10 @@ class RestaurantController extends Controller
       'hasCustomizer' => false,
     ];
 
+    $user->add_log([
+      'type' => 'view_listing_restaurant',
+    ]);
+
     return view('tastevn.pages.dashboard', ['pageConfigs' => $pageConfigs]);
   }
 
@@ -64,7 +68,7 @@ class RestaurantController extends Controller
   public function store(Request $request)
   {
     $values = $request->all();
-    $viewer = Auth::user();
+    $user = Auth::user();
     //required
     $validator = Validator::make($values, [
       'name' => 'required|string',
@@ -92,7 +96,14 @@ class RestaurantController extends Controller
       'name' => trim($values['name']),
       's3_bucket_name' => isset($values['s3_bucket_name']) ? trim($values['s3_bucket_name']) : '',
       's3_bucket_address' => isset($values['s3_bucket_address']) ? trim($values['s3_bucket_address']) : '',
-      'creator_id' => $viewer->id,
+      'creator_id' => $user->id,
+    ]);
+
+    $user->add_log([
+      'type' => 'add_' . $row->get_type(),
+      'restaurant_id' => (int)$row->id,
+      'item_id' => (int)$row->id,
+      'item_type' => $row->get_type(),
     ]);
 
     return response()->json([
@@ -117,7 +128,6 @@ class RestaurantController extends Controller
       return redirect('page_not_found');
     }
 
-    $user = Auth::user();
     if (!$user->can_access_restaurant($row)) {
       return redirect('page_not_found');
     }
@@ -128,6 +138,13 @@ class RestaurantController extends Controller
 
       'item' => $row,
     ];
+
+    $user->add_log([
+      'type' => 'view_item_' . $row->get_type(),
+      'restaurant_id' => (int)$row->id,
+      'item_id' => (int)$row->id,
+      'item_type' => $row->get_type(),
+    ]);
 
     return view('tastevn.pages.restaurant_info', ['pageConfigs' => $pageConfigs]);
   }
@@ -146,7 +163,7 @@ class RestaurantController extends Controller
   public function update(Request $request)
   {
     $values = $request->all();
-    $viewer = Auth::user();
+    $user = Auth::user();
     //required
     $validator = Validator::make($values, [
       'item' => 'required',
@@ -180,6 +197,8 @@ class RestaurantController extends Controller
       }
     }
 
+    $diffs['before'] = $row->get_log();
+
     $row->update([
       'name' => trim($values['name']),
       's3_bucket_name' => isset($values['s3_bucket_name']) ? trim($values['s3_bucket_name']) : '',
@@ -187,6 +206,18 @@ class RestaurantController extends Controller
     ]);
 
     $row->on_update_after();
+
+    $row = Restaurant::find($row->id);
+    $diffs['after'] = $row->get_log();
+    if (json_encode($diffs['before']) !== json_encode($diffs['after'])) {
+      $user->add_log([
+        'type' => 'edit_' . $row->get_type(),
+        'restaurant_id' => (int)$row->id,
+        'item_id' => (int)$row->id,
+        'item_type' => $row->get_type(),
+        'params' => json_encode($diffs),
+      ]);
+    }
 
     return response()->json([
       'status' => true,
@@ -205,7 +236,7 @@ class RestaurantController extends Controller
   public function delete(Request $request)
   {
     $values = $request->all();
-    $viewer = Auth::user();
+    $user = Auth::user();
     //required
     $validator = Validator::make($values, [
       'item' => 'required',
@@ -222,10 +253,17 @@ class RestaurantController extends Controller
     }
 
     $row->update([
-      'deleted' => $viewer->id,
+      'deleted' => $user->id,
     ]);
 
     $row->on_delete_after();
+
+    $user->add_log([
+      'type' => 'delete_' . $row->get_type(),
+      'restaurant_id' => (int)$row->id,
+      'item_id' => (int)$row->id,
+      'item_type' => $row->get_type(),
+    ]);
 
     return response()->json([
       'status' => true,
@@ -236,7 +274,7 @@ class RestaurantController extends Controller
   public function restore(Request $request)
   {
     $values = $request->all();
-    $viewer = Auth::user();
+    $user = Auth::user();
     //required
     $validator = Validator::make($values, [
       'item' => 'required',
@@ -255,6 +293,13 @@ class RestaurantController extends Controller
 
     $row->update([
       'deleted' => 0,
+    ]);
+
+    $user->add_log([
+      'type' => 'restore_' . $row->get_type(),
+      'restaurant_id' => (int)$row->id,
+      'item_id' => (int)$row->id,
+      'item_type' => $row->get_type(),
     ]);
 
     return response()->json([
@@ -282,7 +327,7 @@ class RestaurantController extends Controller
   public function food_add(Request $request)
   {
     $values = $request->all();
-//    echo '<pre>';var_dump($values);die;
+    $user = Auth::user();
     //required
     $validator = Validator::make($values, [
       'item' => 'required',
@@ -310,6 +355,15 @@ class RestaurantController extends Controller
 
     $row->add_foods($foods, $category);
 
+    $user->add_log([
+      'type' => 'add_restaurant_dish',
+      'restaurant_id' => (int)$row->id,
+      'params' => json_encode([
+        'category' => $category,
+        'foods' => $foods,
+      ])
+    ]);
+
     return response()->json([
       'status' => true,
       'item' => $row->name,
@@ -319,7 +373,7 @@ class RestaurantController extends Controller
   public function food_delete(Request $request)
   {
     $values = $request->all();
-//    echo '<pre>';var_dump($values);die;
+    $user = Auth::user();
     //required
     $validator = Validator::make($values, [
       'item' => 'required',
@@ -338,6 +392,14 @@ class RestaurantController extends Controller
     }
 
     $row->delete_food($food);
+
+    $user->add_log([
+      'type' => 'delete_restaurant_dish',
+      'restaurant_id' => (int)$row->id,
+      'params' => json_encode([
+        'food' => $food->id,
+      ])
+    ]);
 
     return response()->json([
       'status' => true,
@@ -397,6 +459,7 @@ class RestaurantController extends Controller
   public function food_scan_info(Request $request)
   {
     $values = $request->all();
+    $user = Auth::user();
     $api_core = new SysCore();
 
     $validator = Validator::make($values, [
@@ -518,8 +581,15 @@ class RestaurantController extends Controller
       ->with('item', $row)
       ->with('data', $data)
       ->with('comments', $row->get_comments())
-      ->with('texts', $row->get_texts(['text_only' => 1]))
+      ->with('texts', $row->get_texts(['text_name_only' => 1]))
       ->render();
+
+    $user->add_log([
+      'type' => 'view_item_' . $row->get_type(),
+      'restaurant_id' => (int)$row->restaurant_id,
+      'item_id' => (int)$row->id,
+      'item_type' => $row->get_type(),
+    ]);
 
     return response()->json([
       'item' => $row,
@@ -556,10 +626,15 @@ class RestaurantController extends Controller
     }
 
     $texts = Text::where('deleted', 0)
-      ->orderByRaw('TRIM(LOWER(name))')
+      ->orderByRaw('TRIM(LOWER(name)) + 0')
       ->get();
 
-    $text_ids = []; //$row->get_texts(['id_only' => 1])
+    $text_ids = [];
+    $arr = $row->get_texts(['text_id_only' => 1]);
+    if (count($arr)) {
+      $text_ids = $arr->toArray();
+      $text_ids = array_map('current', $text_ids);
+    }
 
     //info
     $html_info = view('tastevn.htmls.item_food_scan_get')
@@ -579,7 +654,7 @@ class RestaurantController extends Controller
   public function food_scan_update(Request $request)
   {
     $values = $request->all();
-
+    $user = Auth::user();
     $validator = Validator::make($values, [
       'item' => 'required',
     ]);
@@ -597,12 +672,16 @@ class RestaurantController extends Controller
     $noted = isset($values['note']) ? $values['note'] : NULL;
     $texts = isset($values['texts']) && count($values['texts']) ? (array)$values['texts'] : [];
     $ingredients_missing = isset($values['missings']) && count($values['missings']) ? (array)$values['missings'] : [];
+    $unknown = true;
+
+    $diffs['before'] = $row->get_log();
 
     $item_old = $row->toArray();
 
     if (isset($values['food'])) {
       $food = Food::find((int)$values['food']);
       if ($food) {
+        $unknown = false;
 
         if ($food->id != $row->food_id) {
           $row->update([
@@ -614,7 +693,7 @@ class RestaurantController extends Controller
           'usr_predict' => $food->id,
           'found_by' => 'usr',
           'status' => 'edited',
-          'confidence' => 0,
+          'confidence' => 100,
           'food_category_id' => $row->get_restaurant()->get_food_category($food)
             ? $row->get_restaurant()->get_food_category($food)->id : 0,
         ]);
@@ -638,6 +717,20 @@ class RestaurantController extends Controller
         $row->add_ingredients_missing($ingredients_missing, false);
 
       }
+    }
+
+    if ($unknown) {
+      $row->update([
+        'food_id' => 0,
+        'usr_predict' => 0,
+        'found_by' => 'usr',
+        'status' => 'edited',
+        'confidence' => 0,
+        'food_category_id' => 0,
+      ]);
+
+      RestaurantFoodScanMissing::where('restaurant_food_scan_id', $row->id)
+        ->delete();
     }
 
     $row = RestaurantFoodScan::find($row->id);
@@ -670,6 +763,20 @@ class RestaurantController extends Controller
           'text_id' => (int)$text,
         ]);
       }
+    }
+
+    $row->update_text_notes();
+
+    $row = RestaurantFoodScan::find($row->id);
+    $diffs['after'] = $row->get_log();
+    if (json_encode($diffs['before']) !== json_encode($diffs['after'])) {
+      $user->add_log([
+        'type' => 'edit_result',
+        'restaurant_id' => (int)$row->restaurant_id,
+        'item_id' => (int)$row->id,
+        'item_type' => $row->get_type(),
+        'params' => json_encode($diffs),
+      ]);
     }
 
     return response()->json([

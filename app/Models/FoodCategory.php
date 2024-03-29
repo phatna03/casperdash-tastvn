@@ -18,4 +18,15 @@ class FoodCategory extends Model
     'deleted',
   ];
 
+  public function get_type()
+  {
+    return 'food_category';
+  }
+
+  public function get_log()
+  {
+    return [
+      'name' => $this->name
+    ];
+  }
 }

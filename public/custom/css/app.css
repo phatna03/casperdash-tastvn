@@ -261,12 +261,28 @@
   max-width: 100%;
 }
 
+.acm-width-120-max {
+  max-width: 120px;
+}
+
 .acm-width-250-max {
   max-width: 250px;
 }
 
+.acm-width-300-max {
+  max-width: 300px;
+}
+
 .acm-width-100-min {
   min-width: 100px;
+}
+
+.acm-width-120-min {
+  min-width: 120px;
+}
+
+.acm-width-150-min {
+  min-width: 150px;
 }
 
 .acm-width-200-min {
@@ -275,6 +291,14 @@
 
 .acm-width-250-min {
   min-width: 250px;
+}
+
+.acm-width-300-min {
+  min-width: 300px;
+}
+
+.acm-width-400-min {
+  min-width: 400px;
 }
 
 .acm-overflow-y-auto {
@@ -293,6 +317,10 @@
 
 .acm-text-black {
   color: #000 !important;
+}
+
+.acm-text-line-through {
+  text-decoration: line-through;
 }
 
 .acm-itm-notify {
@@ -416,8 +444,9 @@
   color: #fff !important;
 }
 
+.dataTables_wrapper table th,
 .dataTables_wrapper table td {
-  padding: 5px;
+  padding: 5px !important;
 }
 
 .lcl_icon.lcl_prev {

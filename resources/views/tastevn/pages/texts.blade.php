@@ -1,6 +1,6 @@
 @extends('tastevn/layouts/layoutMaster')
 
-@section('title', 'Admin - Texts')
+@section('title', 'Admin - Text Notes')
 
 @section('vendor-style')
   <link rel="stylesheet" href="{{asset('assets/vendor/libs/datatables-bs5/datatables.bootstrap5.css')}}">
@@ -14,11 +14,11 @@
 @endsection
 
 @section('content')
-  <h4 class="mb-2"><span class="text-muted fw-light">Admin /</span> Texts</h4>
+  <h4 class="mb-2"><span class="text-muted fw-light">Admin /</span> Text Notes</h4>
 
   <div class="card">
     <div class="card-header border-bottom">
-      <h5 class="card-title mb-0">List of Texts</h5>
+      <h5 class="card-title mb-0">List of Text Notes</h5>
     </div>
 
     <div class="card-datatable table-responsive">
@@ -98,7 +98,7 @@
       columnDefs: [
         {
           targets: 2,
-          render: $.fn.dataTable.render.moment('YYYY-MM-DDTHH:mm:ss.SSSSZ', 'DD/MM/YY H:mm:ss' )
+          render: $.fn.dataTable.render.moment('YYYY-MM-DDTHH:mm:ss.SSSSZ', 'DD/MM/YY HH:mm:ss' )
         },
         {
           // Actions

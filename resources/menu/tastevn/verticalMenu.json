@@ -43,10 +43,16 @@
       "slug": "admin-settings"
     },
     {
-      "name": "Texts",
+      "name": "Text Notes",
       "icon": "menu-icon tf-icons mdi mdi-list-box-outline no_user",
       "url": "admin/texts",
       "slug": "admin-texts"
+    },
+    {
+      "name": "Logs",
+      "icon": "menu-icon tf-icons mdi mdi-math-log no_user no_moderator",
+      "url": "admin/logs",
+      "slug": "admin-logs"
     },
     {
       "name": "Modal Testing",
