@@ -100,13 +100,16 @@ class GuestController extends Controller
     return view('tastevn.pages.printer', ['pageConfigs' => $pageConfigs]);
   }
 
-  public function s3_photo_new()
+  public function s3_photo_new($request)
   {
-    //debug
-    $log_path = 'public/logs/s3_callback.log';
-    Storage::prepend($log_path, 'CALLBACK_AT_' . date('d_M_Y_H_i_s'));
+    $values = $request->post();
 
     $api_core = new SysCore();
     $api_core->s3_todo();
+
+    return response()->json([
+      'status' => true,
+      'params' => $values,
+    ]);
   }
 }
