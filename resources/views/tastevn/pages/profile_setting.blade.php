@@ -88,7 +88,7 @@
     <form class="card-body" onsubmit="return user_setting_notify_confirm(event, this);" id="frm-setting-notify">
       <div class="acm-clearfix">
         <div class="acm-float-right ml-2">
-          <button type="button" class="btn btn-secondary me-1" onclick="user_test_printer()">Test Printer</button>
+          <button type="button" class="btn btn-info me-1" onclick="page_url('{{url('guide/printer')}}')">Setup Printer</button>
           <button type="button" class="btn btn-secondary me-1" onclick="user_test_speaker()">Test Text-to-speech</button>
           <button type="submit" class="btn btn-primary me-1">Submit</button>
         </div>

@@ -108,6 +108,15 @@ class GuestController extends Controller
     return view('tastevn.pages.printer', ['pageConfigs' => $pageConfigs]);
   }
 
+  public function guide_printer()
+  {
+    $pageConfigs = [
+      'myLayout' => 'horizontal',
+      'hasCustomizer' => false,
+    ];
+    return view('tastevn.pages.guide_printer', ['pageConfigs' => $pageConfigs]);
+  }
+
   public function s3_bucket_callback(Request $request)
   {
     $values = $request->post();
