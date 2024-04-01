@@ -22,7 +22,7 @@
 @section('content')
   <h4 class="mb-2"><span class="text-muted fw-light">Admin /</span> Profile Settings</h4>
 
-  <div class="card mb-2">
+  <div class="card mb-2 d-none">
     <form class="card-body" onsubmit="return user_setting_confirm(event, this);" id="frm-setting">
       <div class="acm-clearfix">
         <div class="acm-float-right ml-2">
@@ -88,6 +88,7 @@
     <form class="card-body" onsubmit="return user_setting_notify_confirm(event, this);" id="frm-setting-notify">
       <div class="acm-clearfix">
         <div class="acm-float-right ml-2">
+          <button type="button" class="btn btn-secondary me-1" onclick="user_test_printer()">Test Printer</button>
           <button type="button" class="btn btn-secondary me-1" onclick="user_test_speaker()">Test Text-to-speech</button>
           <button type="submit" class="btn btn-primary me-1">Submit</button>
         </div>
@@ -118,9 +119,9 @@
                   </div>
                   <div class="col-md-3">
                     <div class="form-check">
-                      <input class="form-check-input" type="checkbox" name="{{$notify . '_alert_realtime'}}" id="setting-notify-realtime-{{$notify}}"
-                             @if($viewer->get_setting($notify . '_alert_realtime')) checked @endif />
-                      <label class="form-check-label" for="setting-notify-realtime-{{$notify}}">Real-time alert?</label>
+                      <input class="form-check-input" type="checkbox" name="{{$notify . '_alert_printer'}}" id="setting-notify-printer-{{$notify}}"
+                             @if($viewer->get_setting($notify . '_alert_printer')) checked @endif />
+                      <label class="form-check-label" for="setting-notify-printer-{{$notify}}">Printer alert?</label>
                     </div>
                   </div>
                   <div class="col-md-3">

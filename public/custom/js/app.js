@@ -400,10 +400,7 @@ function message_from_toast(type, title, body, sound = false) {
   toastr[type](body, htmlTitle);
 
   if (sound) {
-    //check user setting
-    if (parseInt(acmcfs.notify_sound)) {
-      sound_play();
-    }
+    sound_play();
   }
 }
 
@@ -1037,8 +1034,7 @@ function user_setting() {
 
   axios.post('/admin/profile/setting/update', {
     settings: {
-      notify_sound: form.find('input[name=setting_notify_sound]:checked').val() == 'yes' ? 1 : 0,
-      allow_printer: form.find('input[name=setting_allow_printer]:checked').val() == 'yes' ? 1 : 0,
+
     }
   })
     .then(response => {
@@ -1095,7 +1091,7 @@ function user_setting_notify() {
       val: val,
     });
 
-    key = notify + '_alert_realtime';
+    key = notify + '_alert_printer';
     val = bind.find('input[name=' + key + ']').is(':checked') ? 1 : 0;
     notifications.push({
       key: key,
@@ -2448,7 +2444,8 @@ function notification_newest() {
           message_from_toast('info', v.restaurant_name, html_toast, true);
         });
 
-        if (parseInt(acmcfs.printer_ok)) {
+
+        if (response.data.printer) {
           page_open(acmcfs.link_base_url + '/printer?ids=' + response.data.ids.toString());
         }
       }

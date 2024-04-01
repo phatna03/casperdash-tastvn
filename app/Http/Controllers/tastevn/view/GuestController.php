@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\tastevn\view;
 
 use App\Http\Controllers\Controller;
+use App\Models\Restaurant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
@@ -55,6 +56,13 @@ class GuestController extends Controller
     $values = $request->all();
     $api_core = new SysCore();
 
+    $user = Auth::user();
+    if (!$user) {
+      return response()->json([
+        'error' => 'Invalid user'
+      ], 422);
+    }
+
     $ids = isset($values['ids']) ? array_filter(explode(',', $values['ids'])) : [];
     if (!count($ids)) {
       return response()->json([
@@ -103,9 +111,30 @@ class GuestController extends Controller
   public function s3_bucket_callback(Request $request)
   {
     $values = $request->post();
-
     $api_core = new SysCore();
-    $api_core->s3_get_photos();
+
+    $bucket = isset($values['bucket']) ? $values['bucket'] : NULL;
+    $key = isset($values['key']) ? $values['key'] : NULL;
+
+    if (!empty($bucket) && !empty($key)) {
+
+      $restaurants = Restaurant::where('deleted', 0)
+          ->where('s3_bucket_name', $bucket)
+          ->where('s3_bucket_address', '<>', NULL)
+          ->where('s3_checking', 0)
+          ->get();
+      if (count($restaurants)) {
+        foreach ($restaurants as $restaurant) {
+          $api_core->s3_get_photos([
+            'restaurant_id' => $restaurant->id,
+          ]);
+        }
+      }
+    }
+    else {
+
+      $api_core->s3_get_photos();
+    }
 
     return response()->json([
       'status' => true,

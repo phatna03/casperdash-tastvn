@@ -26,6 +26,11 @@ use App\Models\FoodCategory;
 
 class SysCore
 {
+  protected const _DEBUG = true;
+  protected const _DEBUG_LOG_FILE_CRON = 'public/logs/cron_tastevn.log';
+  protected const _DEBUG_LOG_FILE_S3_POLLY = 'public/logs/s3_polly.log';
+  protected const _DEBUG_LOG_FILE_ROBOFLOW = 'public/logs/cron_tastevn_rbf_retrain.log';
+
   public function random_str($length = 8)
   {
     $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -109,41 +114,50 @@ class SysCore
     })->toArray());
   }
 
+  public function log_failed()
+  {
+
+  }
+
   public function s3_todo()
   {
-//restaurants
+    //restaurants
     $select = Restaurant::where('deleted', 0)
       ->where('s3_bucket_name', '<>', NULL)
       ->where('s3_bucket_address', '<>', NULL);
     $restaurants = $select->get();
 
-    //debug
-//    $log_path = 'public/logs/cron_tastevn.log';
-//    Storage::prepend($log_path, 'RUN_AT_' . date('d_M_Y_H_i_s'));
+      $this::_DEBUG ? Storage::append($this::_DEBUG_LOG_FILE_CRON, 'TODO_AT_' . date('d_M_Y_H_i_s')) : $this->log_failed();
 
     if (count($restaurants)) {
       foreach ($restaurants as $restaurant) {
-
+          $this::_DEBUG ? Storage::append($this::_DEBUG_LOG_FILE_CRON,
+          'RESTAURANT - ' . $restaurant->id . ' - ' . $restaurant->name) : $this->log_failed();
         dispatch(new PhotoGet($restaurant));
-
-//        Storage::prepend($log_path, 'RESTAURANT - ' . $restaurant->id . ' - ' . $restaurant->name);
       }
     }
   }
 
   public function s3_get_photos($pars = [])
   {
-//settings
+    //settings
     $s3_region = $this->get_setting('s3_region');
     $s3_api_key = $this->get_setting('s3_api_key');
     $s3_api_secret = $this->get_setting('s3_api_secret');
-
+    //time
+    $scan_date = date("Y-m-d");
+    if (count($pars) && isset($pars['scan_date'])) {
+      $scan_date = $pars['scan_date'];
+    }
+    $scan_hour = date('H');
+    if (count($pars) && isset($pars['scan_hour'])) {
+      $scan_hour = $pars['scan_hour'];
+    }
     //restaurants
     $select = Restaurant::where('deleted', 0)
       ->where('s3_bucket_name', '<>', NULL)
       ->where('s3_bucket_address', '<>', NULL)
-      ->where('s3_checking', 0)
-    ;
+      ->where('s3_checking', 0);
 
     if (count($pars) && isset($pars['restaurant_id'])) {
       $select->where('id', (int)$pars['restaurant_id']);
@@ -151,12 +165,11 @@ class SysCore
 
     $restaurants = $select->get();
 
+      $this::_DEBUG ? Storage::append($this::_DEBUG_LOG_FILE_CRON, 'GET_PHOTOS_' . date('d_M_Y_H_i_s')) : $this->log_failed();
+      $this::_DEBUG ? Storage::append($this::_DEBUG_LOG_FILE_CRON, 'TIME_' . $scan_date . ' - ' . $scan_hour) : $this->log_failed();
+
     if (count($restaurants) && !empty($s3_region) && !empty($s3_api_key) && !empty($s3_api_secret)) {
       foreach ($restaurants as $restaurant) {
-
-        $restaurant->update([
-          's3_checking' => 1,
-        ]);
 
         $s3_bucket = $restaurant->s3_bucket_name;
         $s3_address = $this->parse_s3_bucket_address($restaurant->s3_bucket_address);
@@ -164,15 +177,9 @@ class SysCore
           continue;
         }
 
-        $scan_date = date("Y-m-d");
-        $scan_hour = date('HH');
-
-        if (count($pars) && isset($pars['scan_date'])) {
-          $scan_date = $pars['scan_date'];
-        }
-        if (count($pars) && isset($pars['scan_hour'])) {
-          $scan_hour = $pars['scan_hour'];
-        }
+        $restaurant->update([
+          's3_checking' => 1,
+        ]);
 
         try {
 
@@ -199,6 +206,9 @@ class SysCore
               //valid photo
               if (@getimagesize($URL)) {
 
+                  $this::_DEBUG ? Storage::append($this::_DEBUG_LOG_FILE_CRON, 'KEY - ' . $content['Key']) : $this->log_failed();
+                  $this::_DEBUG ? Storage::append($this::_DEBUG_LOG_FILE_CRON, 'URL - ' . $URL) : $this->log_failed();
+
                 $row = RestaurantFoodScan::where('deleted', 0)
                   ->where('restaurant_id', $restaurant->id)
                   ->where('photo_name', $content['Key'])
@@ -224,16 +234,7 @@ class SysCore
 
           dispatch(new PhotoScan($restaurant));
 
-          $restaurant->update([
-            's3_checking' => 0,
-          ]);
-
         } catch (\Exception $e) {
-
-          $restaurant->update([
-            's3_checking' => 0,
-          ]);
-
           $this->bug_add([
             'type' => 's3_photo_get',
             'line' => $e->getLine(),
@@ -243,6 +244,9 @@ class SysCore
           ]);
         }
 
+        $restaurant->update([
+          's3_checking' => 0,
+        ]);
       }
     }
   }
@@ -340,9 +344,7 @@ class SysCore
       ->where('rbf_retrain', 1)
       ->orderBy('id', 'asc');
 
-    //debug
-    $log_path = 'public/logs/cron_tastevn_rbf_retrain.log';
-    Storage::prepend($log_path, 'RUN_AT_' . date('d_M_Y_H_i_s'));
+      $this::_DEBUG ? Storage::append($this::_DEBUG_LOG_FILE_ROBOFLOW, 'TODO_AT_' . date('d_M_Y_H_i_s')) : $this->log_failed();
 
     try {
 
@@ -354,7 +356,7 @@ class SysCore
 
         foreach ($rows as $row) {
 
-          Storage::prepend($log_path, 'ROW_' . $row->id . '_START_');
+            $this::_DEBUG ? Storage::append($this::_DEBUG_LOG_FILE_ROBOFLOW, 'ROW_' . $row->id . '_START_') : $this->log_failed();
 
           $count++;
 
@@ -376,7 +378,7 @@ class SysCore
           $context = stream_context_create($options);
           $result = file_get_contents($url, false, $context);
 
-          Storage::prepend($log_path, 'ROW_' . $row->id . '_RESULT_' . json_encode($result));
+            $this::_DEBUG ? Storage::append($this::_DEBUG_LOG_FILE_ROBOFLOW, 'ROW_' . $row->id . '_END_' . json_encode($result)) : $this->log_failed();
 
           if (!empty($result)) {
             $result = (array)json_decode($result);
@@ -531,9 +533,6 @@ class SysCore
     $tester = isset($pars['tester']) ? (int)$pars['tester'] : 0;
     $text_rate = isset($pars['text_rate']) && !empty($pars['text_rate']) ? $pars['text_rate'] : 'medium';
     $text_to_speak = isset($pars['text_to_speak']) && !empty($pars['text_to_speak']) ? $pars['text_to_speak'] : NULL;
-    //debug
-    $log_path = 'public/logs/s3_polly.log';
-    Storage::prepend($log_path, 'RUN_AT_' . date('d_M_Y_H_i_s'));
     //configs
     $s3_polly_configs = [
       'version' => 'latest',
@@ -546,6 +545,8 @@ class SysCore
     $s3_bucket = 'cargo.tastevietnam.asia';
     $s3_file_path = 'casperdash/user_' . $user->id . '/speaker_notify.mp3';
 
+      $this::_DEBUG ? Storage::append($this::_DEBUG_LOG_FILE_S3_POLLY, 'TODO_AT_' . date('d_M_Y_H_i_s')) : $this->log_failed();
+
     if ($tester) {
 
       $s3_file_path = 'casperdash/user_' . $user->id . '/speaker_tester.mp3';
@@ -555,7 +556,7 @@ class SysCore
         return false;
       }
 
-      Storage::prepend($log_path, 'TESTER - ' . $user->id . ' - ' . $user->name);
+        $this::_DEBUG ? Storage::append($this::_DEBUG_LOG_FILE_S3_POLLY, 'TESTER - ' . $user->id . ' - ' . $user->name) : $this->log_failed();
 
       try {
 
@@ -564,7 +565,7 @@ class SysCore
         //text_rate = x-slow, slow, medium, fast, and x-fast
         $text_to_speak = "<speak>" .
           "<prosody rate='{$text_rate}'>" .
-          "[Text to Speech] Cargo Restaurant occurred at " . date('H:i:s') . " on " . date('F d, Y') . ","  .
+          "[Text to Speech] Cargo Restaurant occurred at " . date('H:i:s') . " on " . date('F d, Y') . "," .
           "Ingredients Missing, 1 Sour Bread, 2 Grilled Tomatoes, 3 Avocado Sliced" .
           "</prosody>" .
           "</speak>";
@@ -604,8 +605,7 @@ class SysCore
           'params' => json_encode($e),
         ]);
       }
-    }
-    else {
+    } else {
       //live
       if (!empty($text_to_speak)) {
         $text_to_speak = "<speak>" .
@@ -615,7 +615,7 @@ class SysCore
           "</speak>";
       }
 
-      Storage::prepend($log_path, 'NOTIFY - ' . $user->id . ' - ' . $user->name . ' - ' . $text_to_speak);
+        $this::_DEBUG ? Storage::append($this::_DEBUG_LOG_FILE_S3_POLLY, 'NOTIFY - ' . $user->id . ' - ' . $user->name) : $this->log_failed();
 
       try {
 

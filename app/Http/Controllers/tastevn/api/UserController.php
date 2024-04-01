@@ -505,7 +505,7 @@ class UserController extends Controller
 
     $diffs = [];
     $arr = [
-      'allow_printer', 'notify_sound'
+
     ];
     foreach ($arr as $k => $v) {
       $diffs['before'][$v] = (int)$user->get_setting($v);
@@ -542,7 +542,7 @@ class UserController extends Controller
 
     $diffs = [];
     $arr = [
-      'missing_ingredient_receive', 'missing_ingredient_alert_realtime', 'missing_ingredient_alert_email',
+      'missing_ingredient_receive', 'missing_ingredient_alert_speaker', 'missing_ingredient_alert_printer', 'missing_ingredient_alert_email',
     ];
     foreach ($arr as $k => $v) {
       $diffs['before'][$v] = (int)$user->get_setting($v);

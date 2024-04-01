@@ -48,13 +48,9 @@
     timeout_notification: 5000,
 
     @if($viewer)
-      printer_ok: '{{(int)$viewer->get_setting('allow_printer') ? 1 : 0}}',
-      notify_sound: '{{(int)$viewer->get_setting('notify_sound') ? 1 : 0}}',
       link_speaker_tester: "https://s3.ap-southeast-1.amazonaws.com/cargo.tastevietnam.asia/casperdash/user_{{$viewer->id}}/speaker_tester.mp3",
       link_speaker_notify: "https://s3.ap-southeast-1.amazonaws.com/cargo.tastevietnam.asia/casperdash/user_{{$viewer->id}}/speaker_notify.mp3",
     @else
-      printer_ok: 0,
-      notify_sound: 0,
       link_speaker_tester: '{{url('')}}',
       link_speaker_notify: '{{url('')}}',
     @endif

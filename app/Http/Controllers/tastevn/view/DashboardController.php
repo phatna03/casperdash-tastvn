@@ -121,24 +121,24 @@ class DashboardController extends Controller
     $items = [];
     $ids = [];
 
+    $printer = false;
     $text_to_speech = false;
     $text_to_speak = '';
     $valid_types = [];
 
     //user_setting
-    if ((int)$user->get_setting('missing_ingredient_receive')
-      && (int)$user->get_setting('missing_ingredient_alert_realtime')
-    ) {
+    if ((int)$user->get_setting('missing_ingredient_receive')) {
       $valid_types[] = 'App\Notifications\IngredientMissing';
     }
 
+    //speaker
     if ((int)$user->get_setting('missing_ingredient_alert_speaker')) {
       $text_to_speech = true;
     }
 
-    //allow_printer
-    if ((int)$user->get_setting('allow_printer')) {
-      $valid_types[] = 'App\Notifications\IngredientMissing';
+    //printer
+    if ((int)$user->get_setting('missing_ingredient_alert_printer')) {
+      $printer = true;
     }
 
     if (!empty($user->time_notification)) {
@@ -215,6 +215,8 @@ class DashboardController extends Controller
       'ids' => $ids,
       'role' => $user->role,
       'speaker' => $text_to_speech && !empty($text_to_speak),
+      'speaker_text' => $text_to_speak,
+      'printer' => $printer,
     ]);
   }
 
