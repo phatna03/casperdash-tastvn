@@ -169,6 +169,9 @@ class SysCore
       $this::_DEBUG ? Storage::append($this::_DEBUG_LOG_FILE_CRON, 'TIME_' . $scan_date . ' - ' . $scan_hour) : $this->log_failed();
 
     if (count($restaurants) && !empty($s3_region) && !empty($s3_api_key) && !empty($s3_api_secret)) {
+
+      $this::_DEBUG ? Storage::append($this::_DEBUG_LOG_FILE_CRON, 'VALID_RESTAURANT_' . count($restaurants)) : $this->log_failed();
+
       foreach ($restaurants as $restaurant) {
 
         $s3_bucket = $restaurant->s3_bucket_name;
@@ -176,6 +179,8 @@ class SysCore
         if (empty($s3_bucket) || empty($s3_address)) {
           continue;
         }
+
+        $this::_DEBUG ? Storage::append($this::_DEBUG_LOG_FILE_CRON, 'RESTAURANT - ' . $restaurant->id . ' - ' . $restaurant->name) : $this->log_failed();
 
         $restaurant->update([
           's3_checking' => 1,
