@@ -36,7 +36,7 @@ jobs:
 
     - name: Cache permission
       run: |
-        ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.EC2_PUBLIC_IP }} 'cd /var/www/html && sudo chmod -R 777 storage bootstrap/cache && sudo chown -R ubuntu:ubuntu storage bootstrap/cache'
+        ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.EC2_PUBLIC_IP }} 'cd /var/www/html && sudo chmod -R 775 storage bootstrap/cache && sudo chown -R ubuntu:ubuntu storage bootstrap/cache'
 
 
     - name: Clear SSH key

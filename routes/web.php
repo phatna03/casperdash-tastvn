@@ -511,7 +511,8 @@ Route::get('/datatable/foods', function (Request $request) {
     }
   }
 
-  $select = App\Models\Food::query();
+  $select = App\Models\Food::query()
+    ->where('deleted', 0);
 
   if ($order_default) {
     $select->orderBy('updated_at', 'desc')

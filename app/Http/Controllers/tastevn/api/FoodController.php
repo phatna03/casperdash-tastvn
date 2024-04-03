@@ -273,7 +273,8 @@ class FoodController extends Controller
   protected function selectize_items($pars = [])
   {
     $select = Food::query("foods")
-      ->select('foods.id', 'foods.name');
+      ->select('foods.id', 'foods.name')
+      ->where('foods.deleted', 0);
 
     $keyword = isset($pars['keyword']) && !empty($pars['keyword']) ? $pars['keyword'] : NULL;
     if (!empty($keyword)) {
@@ -379,7 +380,7 @@ class FoodController extends Controller
 
         $col1 = trim($data[0]);
         $col2 = trim($data[1]);
-        $col3 = trim($data[2]);
+        $col3 = !empty(trim($data[2])) ? (int)trim($data[2]) : 1;
 
         if (!(!empty($col1) || (!empty($col2) && !empty($col3)))) {
           continue;

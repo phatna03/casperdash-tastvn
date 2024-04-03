@@ -40,7 +40,10 @@ class RoboflowController extends Controller
       return redirect('page_not_found');
     }
 
-    $food = Food::find(4);
+    $food = Food::where('deleted', 0)
+      ->orderByDesc('id')
+      ->limit(1)
+      ->first();
 
     $pageConfigs = [
       'myLayout' => 'horizontal',
