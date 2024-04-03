@@ -28,16 +28,11 @@ jobs:
 
     - name: Deploy to EC2
       run: |
-        ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.EC2_PUBLIC_IP }} 'cd /var/www/html && git checkout -f && git pull && composer install --no-interaction --prefer-dist --optimize-autoloader && composer dump-autoload'
+        ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.EC2_PUBLIC_IP }} 'cd /var/www/html && git checkout -f && git pull && composer install --no-interaction --prefer-dist --optimize-autoloader && composer dump-autoload && composer clear-cache'
 
     - name: Cache clear
       run: |
-        ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.EC2_PUBLIC_IP }} 'cd /var/www/html && sudo php artisan cache:clear && sudo php artisan route:clear && sudo php artisan view:clear && sudo php artisan config:cache'
-
-    - name: Cache permission
-      run: |
-        ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.EC2_PUBLIC_IP }} 'cd /var/www/html && sudo chmod -R 775 storage bootstrap/cache && sudo chown -R ubuntu:ubuntu storage bootstrap/cache'
-
+        ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.EC2_PUBLIC_IP }} 'cd /var/www/html && sudo php artisan cache:clear && sudo php artisan route:clear && sudo php artisan view:clear'
 
     - name: Clear SSH key
       run: rm ~/.ssh/id_rsa
