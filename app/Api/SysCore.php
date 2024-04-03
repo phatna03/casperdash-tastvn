@@ -197,6 +197,8 @@ class SysCore
             )
           ]);
 
+          $scan_hour = (int)$scan_hour; //9 not 09
+
           $s3_objects = $s3_api->ListObjects([
             'Bucket' => $s3_bucket,
             'Delimiter' => '/',
