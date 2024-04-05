@@ -186,12 +186,6 @@ class RoboflowController extends Controller
 
             $food = Food::whereRaw('LOWER(name) LIKE ?', strtolower(trim($prediction['class'])))
               ->first();
-
-            //tester only
-            if ($prediction['class'] == 'Scramble eggs') {
-              $food = Food::find(4);
-            }
-
             if ($food) {
               $rbf_food_confidence = (int)($prediction['confidence'] * 100);
               break;

@@ -47,10 +47,14 @@
     timeout_quick: 500,
     timeout_notification: 5000,
 
+    //speaker
+    speaker: 0,
     @if($viewer)
+      link_speaker: "https://s3.ap-southeast-1.amazonaws.com/cargo.tastevietnam.asia/casperdash/speaker_tester.mp3",
       link_speaker_tester: "https://s3.ap-southeast-1.amazonaws.com/cargo.tastevietnam.asia/casperdash/user_{{$viewer->id}}/speaker_tester.mp3",
       link_speaker_notify: "https://s3.ap-southeast-1.amazonaws.com/cargo.tastevietnam.asia/casperdash/user_{{$viewer->id}}/speaker_notify.mp3",
     @else
+      link_speaker: '{{url('')}}',
       link_speaker_tester: '{{url('')}}',
       link_speaker_notify: '{{url('')}}',
     @endif
@@ -103,23 +107,6 @@
       $('.modal-backdrop').not('.stacked').addClass('stacked');
     });
 
-    //speaker
-    document.getElementById('wrap-speaker-play').addEventListener('click', function() {
-      var audioPlayer = document.getElementById('wrap-speaker-audio');
-      audioPlayer.play()
-        .then(function() {
-          console.log('Audio playback started successfully.');
-        })
-        .catch(function(error) {
-          console.error('Error starting audio playback:', error);
-        });
-    });
-    setTimeout(function () {
-      speaker_play();
-      $('#wrap-speaker-audio').removeAttr('src');
-      $('#wrap-speaker-audio').attr('src', acmcfs.link_speaker_notify);
-    }, acmcfs.timeout_default);
-
     @endauth
   });
 </script>
@@ -127,12 +114,6 @@
 @yield('js_end')
 
 @auth
-  <div id="wrap-speaker" class="d-none">
-    <button id="wrap-speaker-play">Play Audio</button>
-    <audio id="wrap-speaker-audio"
-           src="https://s3.ap-southeast-1.amazonaws.com/cargo.tastevietnam.asia/casperdash/speaker_tester.mp3"></audio>
-  </div>
-
   <div class="modal animate__animated animate__rollIn" id="modal_logout" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
       <div class="modal-content">

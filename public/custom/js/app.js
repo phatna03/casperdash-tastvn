@@ -369,10 +369,14 @@ function sound_play() {
   audio.play();
 }
 
+function speaker_allow() {
+  var audio = new Audio(acmcfs.link_speaker);
+  audio.play();
+}
+
 function speaker_play() {
-  // var audio = new Audio(acmcfs.link_speaker_notify);
-  // audio.play();
-  $('#wrap-speaker-play')[0].click();
+  var audio = new Audio(acmcfs.link_speaker_notify);
+  audio.play();
 }
 
 function speaker_tester() {
@@ -1033,9 +1037,7 @@ function user_setting() {
   var form = $('#frm-setting');
 
   axios.post('/admin/profile/setting/update', {
-    settings: {
-
-    }
+    settings: {}
   })
     .then(response => {
 

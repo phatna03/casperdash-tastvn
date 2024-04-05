@@ -130,7 +130,7 @@ class User extends Authenticatable
       'access_texts' => '',
     ]);
 
-    $roles = ['superadmin', 'admin', 'user'];
+    $roles = ['superadmin', 'admin'];
 
     if ($this->access_full || in_array($this->role, $roles)) {
 
@@ -254,5 +254,8 @@ class User extends Authenticatable
     return null;
   }
 
-
+  public function is_admin()
+  {
+    return $this->role == 'superadmin' || $this->role == 'admin';
+  }
 }

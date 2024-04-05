@@ -88,7 +88,7 @@ class FoodController extends Controller
     }
 
     $row = Food::create([
-      'name' => trim($values['name']),
+      'name' => ucwords(strtolower(trim($values['name']))),
       'creator_id' => $user->id,
     ]);
 
@@ -198,7 +198,7 @@ class FoodController extends Controller
     $diffs['before'] = $row->get_log();
 
     $row->update([
-      'name' => trim($values['name']),
+      'name' => ucwords(strtolower(trim($values['name']))),
     ]);
 
     $row->update_ingredients($ingredients);
@@ -415,7 +415,7 @@ class FoodController extends Controller
             $food_count++;
 
             $row = Food::create([
-              'name' => $temp['food'],
+              'name' => ucwords(strtolower($temp['food'])),
               'creator_id' => $user->id,
             ]);
 
@@ -425,7 +425,7 @@ class FoodController extends Controller
                 ->first();
               if (!$ingredient) {
                 $ingredient = Ingredient::create([
-                  'name' => $ing['ingredient']
+                  'name' => strtolower($ing['ingredient'])
                 ]);
               }
 

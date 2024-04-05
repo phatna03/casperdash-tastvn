@@ -54,7 +54,7 @@ class IngredientController extends Controller
         ->first();
       if (!$row) {
         $row = Ingredient::create([
-          'name' => trim($values['name'])
+          'name' => strtolower(trim($values['name']))
         ]);
 
         $user->add_log([
@@ -101,7 +101,7 @@ class IngredientController extends Controller
     }
 
     $row = Ingredient::create([
-      'name' => trim($values['name']),
+      'name' => strtolower(trim($values['name'])),
       'name_vi' => isset($values['name_vi']) ? trim($values['name_vi']) : null,
       'creator_id' => $user->id,
     ]);
@@ -177,7 +177,7 @@ class IngredientController extends Controller
     $diffs['before'] = $row->get_log();
 
     $row->update([
-      'name' => trim($values['name']),
+      'name' => strtolower(trim($values['name'])),
       'name_vi' => isset($values['name_vi']) ? trim($values['name_vi']) : null,
     ]);
 

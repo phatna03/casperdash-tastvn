@@ -54,7 +54,7 @@ class FoodCategoryController extends Controller
         ->first();
       if (!$row) {
         $row = FoodCategory::create([
-          'name' => trim($values['name'])
+          'name' => ucwords(strtolower(trim($values['name'])))
         ]);
 
         $user->add_log([
@@ -101,7 +101,7 @@ class FoodCategoryController extends Controller
     }
 
     $row = FoodCategory::create([
-      'name' => trim($values['name']),
+      'name' => ucwords(strtolower(trim($values['name']))),
       'creator_id' => $user->id,
     ]);
 
@@ -176,7 +176,7 @@ class FoodCategoryController extends Controller
     $diffs['before'] = $row->get_log();
 
     $row->update([
-      'name' => trim($values['name']),
+      'name' => ucwords(strtolower(trim($values['name']))),
     ]);
 
 //    $row->on_update_after();

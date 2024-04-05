@@ -494,6 +494,11 @@ class RestaurantController extends Controller
 
     //data
     $apid = (array)json_decode($row->rbf_api, true);
+    if (!count($apid)) {
+      return response()->json([
+        'error' => 'Waiting for check...'
+      ], 422);
+    }
 
     $founds = $api_core->sys_ingredients_found($apid['predictions']);
     $sys_food_predicts = $api_core->sys_predict_foods_by_ingredients($founds);

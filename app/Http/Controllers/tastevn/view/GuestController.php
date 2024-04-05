@@ -31,9 +31,8 @@ class GuestController extends Controller
       return redirect('/admin');
     }
 
-    if (url()->previous() != url()->current()){
+    if (url()->previous() != url()->current()) {
       Redirect::setIntendedUrl(url()->previous());
-//      var_dump(url()->previous());
     }
 
     $pageConfigs = [
@@ -110,6 +109,10 @@ class GuestController extends Controller
 
   public function guide_printer()
   {
+    if (!Auth::user()) {
+      return redirect('/login');
+    }
+
     $pageConfigs = [
       'myLayout' => 'horizontal',
       'hasCustomizer' => false,
@@ -128,10 +131,10 @@ class GuestController extends Controller
     if (!empty($bucket) && !empty($key)) {
 
       $restaurants = Restaurant::where('deleted', 0)
-          ->where('s3_bucket_name', $bucket)
-          ->where('s3_bucket_address', '<>', NULL)
-          ->where('s3_checking', 0)
-          ->get();
+        ->where('s3_bucket_name', $bucket)
+        ->where('s3_bucket_address', '<>', NULL)
+        ->where('s3_checking', 0)
+        ->get();
       if (count($restaurants)) {
         foreach ($restaurants as $restaurant) {
           $api_core->s3_get_photos([
@@ -139,8 +142,7 @@ class GuestController extends Controller
           ]);
         }
       }
-    }
-    else {
+    } else {
 
       $api_core->s3_get_photos();
     }

@@ -28,14 +28,15 @@ class UserController extends Controller
     $this->middleware('auth');
   }
 
+  public const _assigned_roles = ['moderator', 'user'];
+
   /**
    * Display a listing of the resource.
    */
   public function index(Request $request)
   {
     $user = Auth::user();
-    $invalid_roles = ['moderator', 'user'];
-    if (in_array($user->role, $invalid_roles)) {
+    if (in_array($user->role, $this::_assigned_roles)) {
       return redirect('page_not_found');
     }
 
@@ -102,7 +103,7 @@ class UserController extends Controller
       'access_full' => $values['role'] == 'admin' ? 1 : (int)$values['access_full'],
     ]);
 
-    if (count($values['access_restaurants']) && $values['role'] == 'moderator') {
+    if (count($values['access_restaurants']) && in_array($values['role'], $this::_assigned_roles)) {
       foreach ($values['access_restaurants'] as $restaurant_id) {
         RestaurantAccess::create([
           'user_id' => $row->id,
@@ -198,7 +199,7 @@ class UserController extends Controller
     RestaurantAccess::where('user_id', $row->id)
       ->delete();
 
-    if (count($values['access_restaurants']) && $values['role'] == 'moderator') {
+    if (count($values['access_restaurants']) && in_array($values['role'], $this::_assigned_roles)) {
       foreach ($values['access_restaurants'] as $restaurant_id) {
         RestaurantAccess::create([
           'user_id' => $row->id,

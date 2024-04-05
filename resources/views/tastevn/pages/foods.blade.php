@@ -269,19 +269,23 @@
           searchable: false,
           orderable: false,
           render: function (data, type, full, meta) {
+            @if($viewer->is_admin())
             return (
               '<div class="dropdown">' +
               '<button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown"><i class="mdi mdi-dots-vertical"></i></button>' +
               '<div class="dropdown-menu">' +
               '<a class="dropdown-item" href="javascript:void(0);" data-bs-toggle="offcanvas" data-bs-target="#offcanvas_edit_item" onclick="food_edit_prepare(this)"><i class="mdi mdi-pencil-outline me-1"></i> Edit</a>' +
-              // '<a class="dropdown-item" href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#modalDeleteItem" onclick="food_delete_confirm(this)"><i class="mdi mdi-trash-can-outline me-1"></i> Delete</a>' +
               '</div>' +
               '</div>'
             );
+            @else
+            return ('<div></div>');
+            @endif
           }
         }
       ],
       buttons: [
+        @if($viewer->is_admin())
         {
           text: '<i class="mdi mdi-plus me-0 me-sm-1"></i><span class="d-none d-sm-inline-block">Import Excel</span>',
           className: 'add-new btn btn-info waves-effect waves-light acm-mr-px-10',
@@ -299,6 +303,7 @@
             'onclick': 'setTimeout(function () { $("#offcanvas_add_item form input[name=name]").focus(); }, 500)',
           }
         },
+        @endif
         {
           text: '<i class="mdi mdi-reload me-0 me-sm-1"></i><span class="d-none d-sm-inline-block">Refresh</span>',
           className: 'add-new btn btn-dark waves-effect waves-light',

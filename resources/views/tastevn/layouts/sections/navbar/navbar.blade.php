@@ -219,6 +219,15 @@
                 <!-- Quick links -->
               @endif
 
+              <!-- Speaker -->
+              <li class="nav-item acm-mr-px-10" id="btn_speaker">
+                <button type="button" class="btn btn-primary p-1" onclick="speaker_allow()"
+                        data-bs-toggle="tooltip" data-bs-placement="left" data-bs-custom-class="tooltip-primary" data-bs-original-title="Please click this button if you want to enable Speaker!" aria-describedby="tooltip310439"
+                >
+                  <i class="mdi mdi-speaker"></i>
+                </button>
+              </li>
+
               <!-- Notification -->
               <li class="nav-item dropdown-notifications navbar-dropdown dropdown me-2 me-xl-1"
                   id="navbar-notifications">

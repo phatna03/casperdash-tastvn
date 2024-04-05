@@ -231,9 +231,9 @@
                         <div class="form-control acm-wrap-selectize" id="scan-search-status">
                           <select name="statuses" class="opt_selectize" multiple onchange="restaurant_search_food_scan(this)">
                             <option value="">All</option>
-                            <option selected="selected" value="checked">checked</option>
-                            <option value="failed">failed</option>
-                            <option selected="selected" value="edited">edited</option>
+                            <option value="checked">checked</option>
+                            <option value="failed">no data</option>
+                            <option value="edited">edited</option>
                           </select>
                         </div>
                         <label for="scan-search-status">Statuses</label>
@@ -687,9 +687,9 @@
             var retrain = parseInt(full['rbf_retrain']);
 
             if (full['status'] == 'new') {
-              html = '<div><span class="badge bg-secondary">' + full['status'] + '</span></div>';
-            } else if (full['status'] == 'failed') {
               html = '<div><span class="badge bg-warning">' + full['status'] + '</span></div>';
+            } else if (full['status'] == 'failed') {
+              html = '<div><span class="badge bg-secondary">no data</span></div>';
             } else if (full['status'] == 'scanned') {
               html = '<div><span class="badge bg-primary">' + full['status'] + '</span></div>';
             } else if (full['status'] == 'checked') {
@@ -842,13 +842,13 @@
         },
       ],
       buttons: [
-        {
-          text: '<i class="mdi mdi-robot-confused me-0 me-sm-1"></i><span class="d-none d-sm-inline-block">Re-train Roboflow</span>',
-          className: 'add-new btn btn-danger waves-effect waves-light acm-mr-px-10',
-          attr: {
-            'onclick': 'roboflow_retraining_confirm()',
-          }
-        },
+        // {
+        //   text: '<i class="mdi mdi-robot-confused me-0 me-sm-1"></i><span class="d-none d-sm-inline-block">Re-train Roboflow</span>',
+        //   className: 'add-new btn btn-danger waves-effect waves-light acm-mr-px-10',
+        //   attr: {
+        //     'onclick': 'roboflow_retraining_confirm()',
+        //   }
+        // },
         {
           text: '<i class="mdi mdi-reload me-0 me-sm-1"></i><span class="d-none d-sm-inline-block">Refresh</span>',
           className: 'add-new btn btn-dark waves-effect waves-light',

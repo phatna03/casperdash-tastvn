@@ -127,11 +127,11 @@ class SysCore
       ->where('s3_bucket_address', '<>', NULL);
     $restaurants = $select->get();
 
-      $this::_DEBUG ? Storage::append($this::_DEBUG_LOG_FILE_CRON, 'TODO_AT_' . date('d_M_Y_H_i_s')) : $this->log_failed();
+    $this::_DEBUG ? Storage::append($this::_DEBUG_LOG_FILE_CRON, 'TODO_AT_' . date('d_M_Y_H_i_s')) : $this->log_failed();
 
     if (count($restaurants)) {
       foreach ($restaurants as $restaurant) {
-          $this::_DEBUG ? Storage::append($this::_DEBUG_LOG_FILE_CRON,
+        $this::_DEBUG ? Storage::append($this::_DEBUG_LOG_FILE_CRON,
           'RESTAURANT - ' . $restaurant->id . ' - ' . $restaurant->name) : $this->log_failed();
         dispatch(new PhotoGet($restaurant));
       }
@@ -165,8 +165,8 @@ class SysCore
 
     $restaurants = $select->get();
 
-      $this::_DEBUG ? Storage::append($this::_DEBUG_LOG_FILE_CRON, 'GET_PHOTOS_' . date('d_M_Y_H_i_s')) : $this->log_failed();
-      $this::_DEBUG ? Storage::append($this::_DEBUG_LOG_FILE_CRON, 'TIME_' . $scan_date . ' - ' . $scan_hour) : $this->log_failed();
+    $this::_DEBUG ? Storage::append($this::_DEBUG_LOG_FILE_CRON, 'GET_PHOTOS_' . date('d_M_Y_H_i_s')) : $this->log_failed();
+    $this::_DEBUG ? Storage::append($this::_DEBUG_LOG_FILE_CRON, 'TIME_' . $scan_date . ' - ' . $scan_hour) : $this->log_failed();
 
     if (count($restaurants) && !empty($s3_region) && !empty($s3_api_key) && !empty($s3_api_secret)) {
 
@@ -213,8 +213,8 @@ class SysCore
               //valid photo
               if (@getimagesize($URL)) {
 
-                  $this::_DEBUG ? Storage::append($this::_DEBUG_LOG_FILE_CRON, 'KEY - ' . $content['Key']) : $this->log_failed();
-                  $this::_DEBUG ? Storage::append($this::_DEBUG_LOG_FILE_CRON, 'URL - ' . $URL) : $this->log_failed();
+                $this::_DEBUG ? Storage::append($this::_DEBUG_LOG_FILE_CRON, 'KEY - ' . $content['Key']) : $this->log_failed();
+                $this::_DEBUG ? Storage::append($this::_DEBUG_LOG_FILE_CRON, 'URL - ' . $URL) : $this->log_failed();
 
                 $row = RestaurantFoodScan::where('deleted', 0)
                   ->where('restaurant_id', $restaurant->id)
@@ -239,7 +239,8 @@ class SysCore
             }
           }
 
-          dispatch(new PhotoScan($restaurant));
+          //temporary off
+//          dispatch(new PhotoScan($restaurant));
 
         } catch (\Exception $e) {
           $this->bug_add([
@@ -298,7 +299,6 @@ class SysCore
               'method' => 'POST'
             ));
 
-
           $context = stream_context_create($options);
           $result = file_get_contents($url, false, $context);
           if (!empty($result)) {
@@ -326,7 +326,8 @@ class SysCore
       }
 
       if ($restaurant) {
-        dispatch(new PhotoPredict($restaurant));
+        //temporary off
+//        dispatch(new PhotoPredict($restaurant));
       }
 
     } catch (\Exception $e) {
@@ -351,7 +352,7 @@ class SysCore
       ->where('rbf_retrain', 1)
       ->orderBy('id', 'asc');
 
-      $this::_DEBUG ? Storage::append($this::_DEBUG_LOG_FILE_ROBOFLOW, 'TODO_AT_' . date('d_M_Y_H_i_s')) : $this->log_failed();
+    $this::_DEBUG ? Storage::append($this::_DEBUG_LOG_FILE_ROBOFLOW, 'TODO_AT_' . date('d_M_Y_H_i_s')) : $this->log_failed();
 
     try {
 
@@ -363,7 +364,7 @@ class SysCore
 
         foreach ($rows as $row) {
 
-            $this::_DEBUG ? Storage::append($this::_DEBUG_LOG_FILE_ROBOFLOW, 'ROW_' . $row->id . '_START_') : $this->log_failed();
+          $this::_DEBUG ? Storage::append($this::_DEBUG_LOG_FILE_ROBOFLOW, 'ROW_' . $row->id . '_START_') : $this->log_failed();
 
           $count++;
 
@@ -385,7 +386,7 @@ class SysCore
           $context = stream_context_create($options);
           $result = file_get_contents($url, false, $context);
 
-            $this::_DEBUG ? Storage::append($this::_DEBUG_LOG_FILE_ROBOFLOW, 'ROW_' . $row->id . '_END_' . json_encode($result)) : $this->log_failed();
+          $this::_DEBUG ? Storage::append($this::_DEBUG_LOG_FILE_ROBOFLOW, 'ROW_' . $row->id . '_END_' . json_encode($result)) : $this->log_failed();
 
           if (!empty($result)) {
             $result = (array)json_decode($result);
@@ -492,7 +493,7 @@ class SysCore
     if (count($foods) && count($ingredients)) {
       foreach ($foods as $food) {
         $confidence = $food->check_food_confidence_by_ingredients($ingredients);
-        if ($confidence) {
+        if ($confidence && $confidence > 70) {
           $arr[] = [
             'food' => $food->id,
             'food_name' => $food->name,
@@ -552,7 +553,7 @@ class SysCore
     $s3_bucket = 'cargo.tastevietnam.asia';
     $s3_file_path = 'casperdash/user_' . $user->id . '/speaker_notify.mp3';
 
-      $this::_DEBUG ? Storage::append($this::_DEBUG_LOG_FILE_S3_POLLY, 'TODO_AT_' . date('d_M_Y_H_i_s')) : $this->log_failed();
+    $this::_DEBUG ? Storage::append($this::_DEBUG_LOG_FILE_S3_POLLY, 'TODO_AT_' . date('d_M_Y_H_i_s')) : $this->log_failed();
 
     if ($tester) {
 
@@ -563,7 +564,7 @@ class SysCore
         return false;
       }
 
-        $this::_DEBUG ? Storage::append($this::_DEBUG_LOG_FILE_S3_POLLY, 'TESTER - ' . $user->id . ' - ' . $user->name) : $this->log_failed();
+      $this::_DEBUG ? Storage::append($this::_DEBUG_LOG_FILE_S3_POLLY, 'TESTER - ' . $user->id . ' - ' . $user->name) : $this->log_failed();
 
       try {
 
@@ -572,7 +573,7 @@ class SysCore
         //text_rate = x-slow, slow, medium, fast, and x-fast
         $text_to_speak = "<speak>" .
           "<prosody rate='{$text_rate}'>" .
-          "[Text to Speech] Cargo Restaurant occurred at " . date('H:i:s') . " on " . date('F d, Y') . "," .
+          "[Test Audio System] Cargo Restaurant," .
           "Ingredients Missing, 1 Sour Bread, 2 Grilled Tomatoes, 3 Avocado Sliced" .
           "</prosody>" .
           "</speak>";
@@ -622,7 +623,7 @@ class SysCore
           "</speak>";
       }
 
-        $this::_DEBUG ? Storage::append($this::_DEBUG_LOG_FILE_S3_POLLY, 'NOTIFY - ' . $user->id . ' - ' . $user->name) : $this->log_failed();
+      $this::_DEBUG ? Storage::append($this::_DEBUG_LOG_FILE_S3_POLLY, 'NOTIFY - ' . $user->id . ' - ' . $user->name) : $this->log_failed();
 
       try {
 

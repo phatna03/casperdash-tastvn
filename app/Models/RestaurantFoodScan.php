@@ -139,12 +139,6 @@ class RestaurantFoodScan extends Model
 
           $food = Food::whereRaw('LOWER(name) LIKE ?', strtolower(trim($prediction['class'])))
             ->first();
-
-          //tester only
-          if ($prediction['class'] == 'Scramble eggs') {
-            $food = Food::find(4);
-          }
-
           if ($food) {
             break;
           }
