@@ -184,6 +184,8 @@ class RestaurantFoodScan extends Model
         'food_category_id' => (int)$this->find_food_category($food),
         'total_seconds' => $result['time'],
         'status' => 'checked',
+        //temporary off
+        'time_scan' => $this->time_photo,
       ]);
 
       if (!$food) {

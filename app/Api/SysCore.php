@@ -270,7 +270,7 @@ class SysCore
     //new rows
     $select = RestaurantFoodScan::where('deleted', 0)
       ->where('status', 'new')
-      ->limit(20) //temporary off
+      ->limit(10) //temporary off
       ->orderBy('id', 'desc');
 
     if (count($pars) && isset($pars['restaurant_id'])) {
@@ -420,8 +420,8 @@ class SysCore
 //scanned rows
     $select = RestaurantFoodScan::where('deleted', 0)
       ->where('status', 'scanned')
-      ->limit(20)
-      ->orderBy('id', 'desc'); //temporary off
+      ->limit(20) //temporary off
+      ->orderBy('id', 'desc');
 
     if (count($pars) && isset($pars['restaurant_id'])) {
       $select->where('restaurant_id', (int)$pars['restaurant_id']);
