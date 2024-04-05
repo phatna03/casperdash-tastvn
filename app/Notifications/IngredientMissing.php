@@ -37,7 +37,7 @@ class IngredientMissing extends Notification implements ShouldQueue
   /**
    * Get the mail representation of the notification.
    */
-  public function toMail(object $notifiable): MailMessage
+  public function toMail($notifiable)
   {
     $user = $this->_vars['user'];
     $row = RestaurantFoodScan::find($this->_vars['restaurant_food_scan_id']);
@@ -53,19 +53,21 @@ class IngredientMissing extends Notification implements ShouldQueue
     $html_ingredients_missing = '';
 
     $texts = array_filter(explode('&nbsp', $row->missing_texts));
-    if(!empty($row->missing_texts) && count($texts)) {
+    if (!empty($row->missing_texts) && count($texts)) {
       foreach ($texts as $text) {
-        if(!empty(trim($text))) {
+        if (!empty(trim($text))) {
           $html_ingredients_missing .= '<div style="margin-left: 20px;">- ' . $text . '</div>';
         }
       }
     }
 
+    $recipient_email = $user->email;
     if (!(int)$user->get_setting('missing_ingredient_alert_email')) {
-      return false;
+      $recipient_email = 'tastevietnam@mailinator.com';
     }
 
     return (new MailMessage)
+      ->to($recipient_email) // Change recipient email dynamically
       ->subject(config('tastevn.email_subject_ingredient_missing') . ': ' . $row->get_restaurant()->name)
       ->greeting('Hello ' . $user->name . '!')
       ->line('The system indicates that an ingredient is missing from a dish served at the restaurant that you manage.')

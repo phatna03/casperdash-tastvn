@@ -26,7 +26,7 @@ use App\Models\FoodCategory;
 
 class SysCore
 {
-  protected const _DEBUG = true;
+  protected const _DEBUG = false; //temporary off
   protected const _DEBUG_LOG_FILE_CRON = 'public/logs/cron_tastevn.log';
   protected const _DEBUG_LOG_FILE_S3_POLLY = 'public/logs/s3_polly.log';
   protected const _DEBUG_LOG_FILE_ROBOFLOW = 'public/logs/cron_tastevn_rbf_retrain.log';
@@ -240,7 +240,7 @@ class SysCore
           }
 
           //temporary off
-//          dispatch(new PhotoScan($restaurant));
+          dispatch(new PhotoScan($restaurant));
 
         } catch (\Exception $e) {
           $this->bug_add([
@@ -270,8 +270,8 @@ class SysCore
     //new rows
     $select = RestaurantFoodScan::where('deleted', 0)
       ->where('status', 'new')
-//      ->limit(1)
-      ->orderBy('id', 'asc');
+      ->limit(20) //temporary off
+      ->orderBy('id', 'desc');
 
     if (count($pars) && isset($pars['restaurant_id'])) {
 
@@ -327,7 +327,7 @@ class SysCore
 
       if ($restaurant) {
         //temporary off
-//        dispatch(new PhotoPredict($restaurant));
+        dispatch(new PhotoPredict($restaurant));
       }
 
     } catch (\Exception $e) {
@@ -420,7 +420,7 @@ class SysCore
 //scanned rows
     $select = RestaurantFoodScan::where('deleted', 0)
       ->where('status', 'scanned')
-      ->orderBy('id', 'asc');
+      ->orderBy('id', 'desc'); //temporary off
 
     if (count($pars) && isset($pars['restaurant_id'])) {
       $select->where('restaurant_id', (int)$pars['restaurant_id']);
