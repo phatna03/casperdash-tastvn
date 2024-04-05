@@ -271,6 +271,8 @@ class SysCore
     $select = RestaurantFoodScan::where('deleted', 0)
       ->where('status', 'new')
       ->limit(10) //temporary off
+      ->whereMonth('created_at', (int)date('m'))
+      ->whereYear('created_at', (int)date('Y'))
       ->orderBy('id', 'desc');
 
     if (count($pars) && isset($pars['restaurant_id'])) {
@@ -421,6 +423,8 @@ class SysCore
     $select = RestaurantFoodScan::where('deleted', 0)
       ->where('status', 'scanned')
       ->limit(20) //temporary off
+      ->whereMonth('created_at', (int)date('m'))
+      ->whereYear('created_at', (int)date('Y'))
       ->orderBy('id', 'desc');
 
     if (count($pars) && isset($pars['restaurant_id'])) {
