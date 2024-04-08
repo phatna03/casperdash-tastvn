@@ -803,7 +803,7 @@ class SysCore
     $total_checked_missing = (int)$select_checked_missing[0]['total_photos'];
     $total_checked_ok = (int)$select_checked[0]['total_photos'] - (int)$select_checked_missing[0]['total_photos'];
 
-    $percent_checked_missing = (int)($total_checked_missing / $total_checked * 100);
+    $percent_checked_missing = $total_checked ? (int)($total_checked_missing / $total_checked * 100) : 0;
 
     return [
       'total_photos' => $total_photos,
