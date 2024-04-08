@@ -2624,3 +2624,18 @@ function stats_total() {
 
     });
 }
+
+function stats_total_by_date(start_date, end_date) {
+  console.log(start_date, start_date);
+
+  var wrap = $('#wrap-stats-total');
+  wrap.find('input[name=search_time]').daterangepicker({
+    timePicker: true,
+    timePickerIncrement: 30,
+    locale: {
+      format: 'DD/MM/YYYY HH:mm',
+    },
+    startDate: start_date + ' 00:00',
+    endDate: end_date + ' 00:00',
+  });
+}

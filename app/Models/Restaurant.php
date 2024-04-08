@@ -189,7 +189,7 @@ class Restaurant extends Model
       $search_time_to = $api_core->parse_date_range($times)['time_to'];
     }
 
-    $status_invalid = ['new', 'failed'];
+    $status_valid = ['checked', 'failed'];
 
     switch ($type) {
       case 'total':
@@ -198,14 +198,14 @@ class Restaurant extends Model
           ->distinct()
           ->where('restaurant_food_scans.deleted', 0)
           ->where('restaurant_food_scans.restaurant_id', $this->id)
-          ->whereNotIn('restaurant_food_scans.status', $status_invalid)
+          ->whereIn('restaurant_food_scans.status', $status_valid)
         ;
         $today_found = RestaurantFoodScan::query("restaurant_food_scans")
           ->distinct()
           ->where('restaurant_food_scans.deleted', 0)
           ->where('restaurant_food_scans.restaurant_id', $this->id)
-          ->whereNotIn('restaurant_food_scans.status', $status_invalid)
-          ->whereDate('restaurant_food_scans.created_at', date('Y-m-d'))
+          ->whereIn('restaurant_food_scans.status', $status_valid)
+          ->whereDate('restaurant_food_scans.time_photo', date('Y-m-d'))
         ;
 
         //food category
@@ -213,7 +213,7 @@ class Restaurant extends Model
           ->distinct()
           ->where('restaurant_food_scans.deleted', 0)
           ->where('restaurant_food_scans.restaurant_id', $this->id)
-          ->whereNotIn('restaurant_food_scans.status', $status_invalid)
+          ->whereIn('restaurant_food_scans.status', $status_valid)
           ->where('restaurant_food_scans.food_category_id', '>', 0)
           ->where('restaurant_food_scans.missing_ids', '<>', NULL)
         ;
@@ -223,7 +223,7 @@ class Restaurant extends Model
           ->distinct()
           ->where('restaurant_food_scans.deleted', 0)
           ->where('restaurant_food_scans.restaurant_id', $this->id)
-          ->whereNotIn('restaurant_food_scans.status', $status_invalid)
+          ->whereIn('restaurant_food_scans.status', $status_valid)
           ->where('restaurant_food_scans.food_id', '>', 0)
           ->where('restaurant_food_scans.missing_ids', '<>', NULL)
         ;
@@ -233,7 +233,7 @@ class Restaurant extends Model
           ->leftJoin("restaurant_food_scans", "restaurant_food_scans.id", "=", "restaurant_food_scan_missings.restaurant_food_scan_id")
           ->where('restaurant_food_scans.deleted', 0)
           ->where('restaurant_food_scans.restaurant_id', $this->id)
-          ->whereNotIn('restaurant_food_scans.status', $status_invalid)
+          ->whereIn('restaurant_food_scans.status', $status_valid)
           ->where('restaurant_food_scans.missing_ids', '<>', NULL)
           ->where('restaurant_food_scans.food_id', '>', 0)
         ;
@@ -242,25 +242,25 @@ class Restaurant extends Model
         $error_time_frame = RestaurantFoodScan::query("restaurant_food_scans")
           ->where('restaurant_food_scans.deleted', 0)
           ->where('restaurant_food_scans.restaurant_id', $this->id)
-          ->whereNotIn('restaurant_food_scans.status', $status_invalid)
+          ->whereIn('restaurant_food_scans.status', $status_valid)
           ->where('restaurant_food_scans.food_id', '>', 0)
           ->where('restaurant_food_scans.missing_ids', '<>', NULL)
         ;
 
         //search params
         if (!empty($search_time_from)) {
-          $total_found->where('restaurant_food_scans.created_at', '>=', $search_time_from);
-          $error_food_category->where('restaurant_food_scans.created_at', '>=', $search_time_from);
-          $error_food->where('restaurant_food_scans.created_at', '>=', $search_time_from);
-          $error_ingredient_missing->where('restaurant_food_scans.created_at', '>=', $search_time_from);
-          $error_time_frame->where('restaurant_food_scans.created_at', '>=', $search_time_from);
+          $total_found->where('restaurant_food_scans.time_photo', '>=', $search_time_from);
+          $error_food_category->where('restaurant_food_scans.time_photo', '>=', $search_time_from);
+          $error_food->where('restaurant_food_scans.time_photo', '>=', $search_time_from);
+          $error_ingredient_missing->where('restaurant_food_scans.time_photo', '>=', $search_time_from);
+          $error_time_frame->where('restaurant_food_scans.time_photo', '>=', $search_time_from);
         }
         if (!empty($search_time_to)) {
-          $total_found->where('restaurant_food_scans.created_at', '<=', $search_time_to);
-          $error_food_category->where('restaurant_food_scans.created_at', '<=', $search_time_to);
-          $error_food->where('restaurant_food_scans.created_at', '<=', $search_time_to);
-          $error_ingredient_missing->where('restaurant_food_scans.created_at', '<=', $search_time_to);
-          $error_time_frame->where('restaurant_food_scans.created_at', '<=', $search_time_to);
+          $total_found->where('restaurant_food_scans.time_photo', '<=', $search_time_to);
+          $error_food_category->where('restaurant_food_scans.time_photo', '<=', $search_time_to);
+          $error_food->where('restaurant_food_scans.time_photo', '<=', $search_time_to);
+          $error_ingredient_missing->where('restaurant_food_scans.time_photo', '<=', $search_time_to);
+          $error_time_frame->where('restaurant_food_scans.time_photo', '<=', $search_time_to);
         }
 
         $data['total_found'] = $total_found->count();
@@ -311,9 +311,9 @@ class Restaurant extends Model
         //time frames
         $error_time_frame_list = clone $error_time_frame;
 
-        $error_time_frame_list->select(DB::raw('hour(restaurant_food_scans.created_at) as hour_error'),
+        $error_time_frame_list->select(DB::raw('hour(restaurant_food_scans.time_photo) as hour_error'),
           DB::raw('COUNT(restaurant_food_scans.id) as total_error'))
-          ->groupBy(DB::raw('hour(restaurant_food_scans.created_at)'))
+          ->groupBy(DB::raw('hour(restaurant_food_scans.time_photo)'))
           ->orderBy('total_error', 'desc')
         ;
 

@@ -48,6 +48,7 @@
                     <input type="text" class="form-control text-center date_time_picker" name="search_time"
                            autocomplete="off"
                            onchange="stats_total()"
+                           data-value="current_month"
                     />
                     <label>Date Time Range</label>
                   </div>
@@ -143,6 +144,75 @@
               </div>
               <small>Time Frames Error</small>
             </div>
+          </div>
+        </div>
+
+        <div class="card-body d-flex justify-content-between flex-wrap gap-3">
+          @php
+          @endphp
+          <div class="card-datatable table-responsive">
+            <table class="table table-hover">
+              <thead class="table-light">
+              <tr>
+                <th></th>
+                @php
+                $datas = [];
+                  for($d=1;$d<=(int)date('d');$d++):
+
+                $datas[$d][] = $api_core->rfs_query_data(date('Y-m-' . $d), $pageConfigs['item']->id);
+
+                  $df = $d < 10 ? '0' . $d : $d;
+                  $dt = ($d + 1) < 10 ? '0' . ($d + 1) : $d + 1;
+
+                @endphp
+                <th class="cursor-pointer" onclick="stats_total_by_date('{{date($df . '/m/Y')}}', '{{date($dt . '/m/Y')}}')"
+                >{{$d . '/' . (int)date('m')}}</th>
+                @endfor
+              </tr>
+              </thead>
+              <tbody>
+              <tr>
+                <td>Total number of photos</td>
+                @php
+                  for($d=1;$d<=(int)date('d');$d++):
+                @endphp
+                <td>{{$datas[$d][0]['total_photos']}}</td>
+                @endfor
+              </tr>
+              <tr>
+                <td>-> Other photos, besides the 27 test dishes</td>
+                @php
+                  for($d=1;$d<=(int)date('d');$d++):
+                @endphp
+                <td>{{$datas[$d][0]['total_failed']}}</td>
+                @endfor
+              </tr>
+              <tr>
+                <td>-> Photos of 27 test dishes</td>
+                @php
+                  for($d=1;$d<=(int)date('d');$d++):
+                @endphp
+                <td>{{$datas[$d][0]['total_checked']}}</td>
+                @endfor
+              </tr>
+              <tr>
+                <td>---> Photos of dishes missing ingredients</td>
+                @php
+                  for($d=1;$d<=(int)date('d');$d++):
+                @endphp
+                <td>{{$datas[$d][0]['total_checked_missing']}} <b>({{$datas[$d][0]['percent_checked_missing']}}%)</b></td>
+                @endfor
+              </tr>
+              <tr>
+                <td>---> Photos of dishes full ingredients</td>
+                @php
+                  for($d=1;$d<=(int)date('d');$d++):
+                @endphp
+                <td>{{$datas[$d][0]['total_checked_ok']}}</td>
+                @endfor
+              </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </div>

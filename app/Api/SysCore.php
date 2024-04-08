@@ -239,7 +239,6 @@ class SysCore
             }
           }
 
-          //temporary off
           dispatch(new PhotoScan($restaurant));
 
         } catch (\Exception $e) {
@@ -328,7 +327,6 @@ class SysCore
       }
 
       if ($restaurant) {
-        //temporary off
         dispatch(new PhotoPredict($restaurant));
       }
 
@@ -762,6 +760,59 @@ class SysCore
         'mail_from_address' => $this->get_setting('mail_from_address'),
         'mail_from_name' => $this->get_setting('mail_from_name'),
       ],
+    ];
+  }
+
+  public function rfs_query_data($date, $restaurant_id)
+  {
+    $statuses = ['checked', 'failed'];
+
+    $select_total = RestaurantFoodScan::selectRaw('COUNT(*) as total_photos')
+      ->where('restaurant_id', $restaurant_id)
+      ->whereIn('status', $statuses)
+      ->whereDate('time_photo', $date)
+      ->get()
+      ->toArray();
+
+    $select_failed = RestaurantFoodScan::selectRaw('COUNT(*) as total_photos')
+      ->where('restaurant_id', $restaurant_id)
+      ->where('status', 'failed')
+      ->whereDate('time_photo', $date)
+      ->get()
+      ->toArray();
+
+    $select_checked = RestaurantFoodScan::selectRaw('COUNT(*) as total_photos')
+      ->where('restaurant_id', $restaurant_id)
+      ->where('status', 'checked')
+      ->whereDate('time_photo', $date)
+      ->get()
+      ->toArray();
+
+    $select_checked_missing = RestaurantFoodScan::selectRaw('COUNT(*) as total_photos')
+      ->where('restaurant_id', $restaurant_id)
+      ->where('status', 'checked')
+      ->whereDate('time_photo', $date)
+      ->where('missing_ids', '<>', NULL)
+      ->where('food_id', '<>', 0)
+      ->get()
+      ->toArray();
+
+    $total_photos = (int)$select_total[0]['total_photos'];
+    $total_failed = (int)$select_failed[0]['total_photos'];
+    $total_checked = (int)$select_checked[0]['total_photos'];
+    $total_checked_missing = (int)$select_checked_missing[0]['total_photos'];
+    $total_checked_ok = (int)$select_checked[0]['total_photos'] - (int)$select_checked_missing[0]['total_photos'];
+
+    $percent_checked_missing = (int)($total_checked_missing / $total_checked * 100);
+
+    return [
+      'total_photos' => $total_photos,
+      'total_failed' => $total_failed,
+      'total_checked' => $total_checked,
+      'total_checked_missing' => $total_checked_missing,
+      'total_checked_ok' => $total_checked_ok,
+
+      'percent_checked_missing' => $percent_checked_missing,
     ];
   }
 }

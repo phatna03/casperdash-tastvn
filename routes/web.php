@@ -429,6 +429,8 @@ Route::get('/datatable/restaurant-food-scans', function (Request $request) {
     }
   }
 
+//  echo '<pre>';var_dump($api_core->parse_to_query($select));die;
+
   return DataTables::of($select)->addIndexColumn()->toJson();
 });
 Route::get('/datatable/restaurant-food-scan-errors', function (Request $request) {
