@@ -2626,7 +2626,7 @@ function stats_total() {
 }
 
 function stats_total_by_date(start_date, end_date) {
-  console.log(start_date, start_date);
+  // console.log(start_date, start_date);
 
   var wrap = $('#wrap-stats-total');
   wrap.find('input[name=search_time]').daterangepicker({

@@ -89,7 +89,7 @@
       <div class="acm-clearfix">
         <div class="acm-float-right ml-2">
           <button type="button" class="btn btn-info me-1" onclick="page_url('{{url('guide/printer')}}')">Setup Printer</button>
-          <button type="button" class="btn btn-secondary me-1" onclick="user_test_speaker()">Test Text-to-speech</button>
+          <button type="button" class="btn btn-info me-1" onclick="page_url('{{url('guide/speaker')}}')">Setup Speaker</button>
           <button type="submit" class="btn btn-primary me-1">Submit</button>
         </div>
 

@@ -335,6 +335,36 @@
                       </a>
                     </li>
                     <li>
+                      <div class="dropdown-divider"></div>
+                    </li>
+                    <li>
+                      <a class="dropdown-item" href="{{url('guide/printer')}}">
+                        <i class='mdi mdi-cog-outline me-2'></i>
+                        <span class="align-middle">Setup Printer</span>
+                      </a>
+                    </li>
+                    <li>
+                      <a class="dropdown-item" href="{{url('guide/speaker')}}">
+                        <i class='mdi mdi-cog-outline me-2'></i>
+                        <span class="align-middle">Setup Speaker</span>
+                      </a>
+                    </li>
+                    <li>
+                      <a class="dropdown-item" href="{{url('custom/file/v1_guide_website.pptx')}}">
+                        <i class='mdi mdi-information me-2'></i>
+                        <span class="align-middle">User Guide</span>
+                      </a>
+                    </li>
+                    <li>
+                      <a class="dropdown-item" href="{{url('custom/file/v1_guide_roboflow.pptx')}}">
+                        <i class='mdi mdi-information me-2'></i>
+                        <span class="align-middle">Roboflow Guide</span>
+                      </a>
+                    </li>
+                    <li>
+                      <div class="dropdown-divider"></div>
+                    </li>
+                    <li>
                       <a class="dropdown-item" href="javascript:void(0)"
                          data-bs-toggle="modal" data-bs-target="#modal_logout"
                       >

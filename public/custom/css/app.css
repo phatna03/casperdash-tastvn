@@ -539,6 +539,12 @@
   margin-bottom: 10px;
 }
 
+.selectize-control.multi .selectize-input input,
+.opt_selectize.single .selectize-input > * {
+  font-weight: bold;
+  font-size: 18px;
+}
+
 /*modal 2*/
 .layout-navbar-fixed body:not(.modal-open) .layout-navbar-full .layout-navbar,
 .layout-menu-fixed body:not(.modal-open) .layout-navbar-full .layout-navbar,

@@ -207,6 +207,7 @@ Route::post('/admin/notification/latest', [DashboardController::class, 'notifica
 Route::post('/admin/notification/newest', [DashboardController::class, 'notification_newest']);
 
 Route::get('/guide/printer', [GuestController::class, 'guide_printer']);
+Route::get('/guide/speaker', [GuestController::class, 'guide_speaker']);
 
 Route::get('/s3/bucket/get', [GuestController::class, 's3_bucket_get']);
 Route::get('/printer', [GuestController::class, 'printer']);
