@@ -18,6 +18,7 @@ return new class extends Migration {
         $table->string('s3_bucket_name')->nullable();
         $table->string('s3_bucket_address')->nullable();
         $table->smallInteger('s3_checking')->default(0);
+        $table->smallInteger('rbf_scan')->default(0);
         $table->bigInteger('creator_id')->default(0);
         $table->bigInteger('deleted')->default(0);
         $table->timestamps();

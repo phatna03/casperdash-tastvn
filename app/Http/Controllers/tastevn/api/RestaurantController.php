@@ -96,6 +96,7 @@ class RestaurantController extends Controller
       'name' => trim($values['name']),
       's3_bucket_name' => isset($values['s3_bucket_name']) ? trim($values['s3_bucket_name']) : '',
       's3_bucket_address' => isset($values['s3_bucket_address']) ? trim($values['s3_bucket_address']) : '',
+      'rbf_scan' => isset($values['rbf_scan']) && (int)$values['rbf_scan'] ? 1 : 0,
       'creator_id' => $user->id,
     ]);
 
@@ -203,6 +204,7 @@ class RestaurantController extends Controller
       'name' => trim($values['name']),
       's3_bucket_name' => isset($values['s3_bucket_name']) ? trim($values['s3_bucket_name']) : '',
       's3_bucket_address' => isset($values['s3_bucket_address']) ? trim($values['s3_bucket_address']) : '',
+      'rbf_scan' => isset($values['rbf_scan']) && (int)$values['rbf_scan'] ? 1 : 0,
     ]);
 
     $row->on_update_after();

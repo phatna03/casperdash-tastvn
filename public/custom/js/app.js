@@ -1243,6 +1243,7 @@ function restaurant_add(evt, frm) {
     name: form.find('input[name=name]').val(),
     s3_bucket_name: form.find('input[name=s3_bucket_name]').val(),
     s3_bucket_address: form.find('input[name=s3_bucket_address]').val(),
+    rbf_scan: form.find('input[name=rbf_scan]').is(':checked') ? 1 : 0,
   })
     .then(response => {
 
@@ -1290,6 +1291,11 @@ function restaurant_edit_prepare(ele) {
   form.find('input[name=s3_bucket_name]').val(tr.attr('data-s3_bucket_name'));
   form.find('input[name=s3_bucket_address]').val(tr.attr('data-s3_bucket_address'));
 
+  form.find('input[name=rbf_scan]').prop('checked', false);
+  if (parseInt(tr.attr('data-rbf_scan'))) {
+    form.find('input[name=rbf_scan]').prop('checked', true);
+  }
+
   setTimeout(function () {
     form.find('input[name=name]').focus();
   }, acmcfs.timeout_quick);
@@ -1304,6 +1310,7 @@ function restaurant_edit(evt, frm) {
     name: form.find('input[name=name]').val(),
     s3_bucket_name: form.find('input[name=s3_bucket_name]').val(),
     s3_bucket_address: form.find('input[name=s3_bucket_address]').val(),
+    rbf_scan: form.find('input[name=rbf_scan]').is(':checked') ? 1 : 0,
   })
     .then(response => {
 

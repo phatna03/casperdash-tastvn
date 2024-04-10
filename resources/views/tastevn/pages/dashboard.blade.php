@@ -56,6 +56,15 @@
           <input type="text" class="form-control" id="add-item-s3-address" name="s3_bucket_address" />
           <label for="add-item-s3-address">S3 bucket address <b class="text-danger">*</b></label>
         </div>
+        <div class="form-floating form-floating-outline mb-4">
+          <div class="form-control" id="add-item-rbf-scan">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" name="rbf_scan" id="add-item-rbf-scan-yes" />
+              <label class="form-check-label text-dark fw-bold" for="add-item-rbf-scan-yes">Yes</label>
+            </div>
+          </div>
+          <label for="add-item-rbf-scan" class="text-danger">Check photos from Roboflow</label>
+        </div>
         <button class="btn btn-primary me-sm-3 me-1 data-submit" type="submit">Submit</button>
         <button type="reset" class="btn btn-outline-secondary" data-bs-dismiss="offcanvas">Cancel</button>
       </form>
@@ -80,6 +89,15 @@
         <div class="form-floating form-floating-outline mb-4">
           <input type="text" class="form-control" id="edit-item-s3-address" name="s3_bucket_address" />
           <label for="edit-item-s3-address">S3 bucket address <b class="text-danger">*</b></label>
+        </div>
+        <div class="form-floating form-floating-outline mb-4">
+          <div class="form-control" id="add-item-rbf-scan">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" name="rbf_scan" id="add-item-rbf-scan-yes" />
+              <label class="form-check-label text-dark fw-bold" for="add-item-rbf-scan-yes">Yes</label>
+            </div>
+          </div>
+          <label for="add-item-rbf-scan" class="text-danger">Check photos from Roboflow</label>
         </div>
         <button class="btn btn-primary me-sm-3 me-1 data-submit" type="submit">Submit</button>
         <button type="reset" class="btn btn-outline-secondary" data-bs-dismiss="offcanvas">Cancel</button>
@@ -153,6 +171,7 @@
         $(row).attr('data-name', data.name);
         $(row).attr('data-s3_bucket_name', data.s3_bucket_name);
         $(row).attr('data-s3_bucket_address', data.s3_bucket_address);
+        $(row).attr('data-rbf_scan', data.rbf_scan);
       },
       "columns": [
         //stt

@@ -20,6 +20,7 @@ class Restaurant extends Model
     's3_bucket_name',
     's3_bucket_address',
     's3_checking',
+    'rbf_scan',
     'count_foods',
     'creator_id',
     'deleted',
@@ -36,6 +37,7 @@ class Restaurant extends Model
       'name' => $this->name,
       's3_bucket_name' => $this->s3_bucket_name,
       's3_bucket_address' => $this->s3_bucket_address,
+      'rbf_scan' => $this->rbf_scan,
     ];
   }
 

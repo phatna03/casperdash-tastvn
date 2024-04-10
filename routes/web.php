@@ -292,7 +292,7 @@ Route::get('/datatable/restaurant', function (Request $request) {
   $user = \Illuminate\Support\Facades\Auth::user();
 
   $select = App\Models\Restaurant::query("restaurants")
-    ->select("restaurants.id", "restaurants.s3_bucket_name", "restaurants.s3_bucket_address",
+    ->select("restaurants.id", "restaurants.s3_bucket_name", "restaurants.s3_bucket_address", "restaurants.rbf_scan",
       "restaurants.name", "restaurants.count_foods", "restaurants.updated_at")
     ->where('restaurants.deleted', 0);
 
