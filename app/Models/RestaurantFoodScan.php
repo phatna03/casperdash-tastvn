@@ -129,6 +129,7 @@ class RestaurantFoodScan extends Model
     if (count($result)) {
 
       $food = NULL;
+      $foods = [];
       $ingredients_found = $api_core->sys_ingredients_found($result['predictions']);
 
       //find food
@@ -137,19 +138,42 @@ class RestaurantFoodScan extends Model
         foreach ($predictions as $prediction) {
           $prediction = (array)$prediction;
 
-          $food = Food::whereRaw('LOWER(name) LIKE ?', strtolower(trim($prediction['class'])))
+          $confidence = (int)($prediction['confidence'] * 100);
+
+          $found = Food::whereRaw('LOWER(name) LIKE ?', strtolower(trim($prediction['class'])))
             ->first();
-          if ($food) {
-            break;
+          if ($found && $confidence >= 50 && count($ingredients_found)) {
+            $foods[] = [
+              'food' => $found->id,
+              'confidence' => $confidence,
+            ];
           }
         }
       }
+
+      $rbf_confidence = 0;
+      if (count($foods)) {
+        if (count($foods) > 1) {
+          $a1 = [];
+          $a2 = [];
+          foreach ($foods as $key => $val) {
+            $a1[$key] = $val['confidence'];
+            $a2[$key] = $val['food'];
+          }
+          array_multisort($a1, SORT_DESC, $a2, SORT_DESC, $foods);
+        }
+
+        $foods = $foods[0];
+        $food = Food::find($foods['food']);
+        $rbf_confidence = $foods['confidence'];
+      }
+
       //found?
       if ($food) {
         $this->update([
           'food_id' => $food->id,
-          'confidence' => (int)($prediction['confidence'] * 100),
-          'rbf_confidence' => (int)($prediction['confidence'] * 100),
+          'confidence' => $rbf_confidence,
+          'rbf_confidence' => $rbf_confidence,
           'found_by' => 'rbf',
           'rbf_predict' => $food->id,
 

@@ -384,7 +384,8 @@ Route::get('/datatable/restaurant-food-scans', function (Request $request) {
     ->where("restaurant_food_scans.deleted", 0);
 
   if ($order_default) {
-    $select->orderBy('restaurant_food_scans.updated_at', 'desc')
+    $select
+//      ->orderBy('restaurant_food_scans.updated_at', 'desc')
       ->orderBy('restaurant_food_scans.id', 'desc');
   }
 
