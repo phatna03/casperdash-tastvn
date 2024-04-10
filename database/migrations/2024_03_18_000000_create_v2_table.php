@@ -66,6 +66,16 @@ return new class extends Migration {
         $table->timestamps();
       });
     }
+
+    if (!Schema::hasTable('kas_webhooks')) {
+      Schema::create('kas_webhooks', function (Blueprint $table) {
+        $table->id();
+        $table->bigInteger('restaurant_id')->default(0);
+        $table->string('type');
+        $table->longText('params')->nullable();
+        $table->timestamps();
+      });
+    }
   }
 
   /**
@@ -80,5 +90,6 @@ return new class extends Migration {
     Schema::dropIfExists('restaurant_food_scan_texts');
 
     Schema::dropIfExists('logs');
+    Schema::dropIfExists('kas_webhooks');
   }
 };
