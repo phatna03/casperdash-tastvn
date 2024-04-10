@@ -35,14 +35,29 @@ class TesterController extends Controller
     echo '<pre>';
     $api_core = new SysCore();
 
-//    var_dump($api_core->parse_date_range());
+    $rows = RestaurantFoodScan::where('deleted', 0)
+      ->where('status', 'checked')
+      ->whereMonth('created_at', (int)date('m'))
+      ->whereYear('created_at', (int)date('Y'))
+      ->get();
+    if (count($rows)) {
+      foreach ($rows as $row) {
 
-//    $user = User::find(2);
-//    Notification::send($user, new IngredientMissing([
-//      'type' => 'ingredient_missing',
-//      'restaurant_food_scan_id' => 1,
-//      'user' => $user,
-//    ]));
+        $row->update([
+          'found_by' => NULL,
+          'missing_ids' => NULL,
+          'missing_texts' => NULL,
+          'food_id' => 0,
+          'confidence' => 0,
+          'sys_predict' => 0,
+          'sys_confidence' => 0,
+          'rbf_predict' => 0,
+          'rbf_confidence' => 0,
+        ]);
+
+        $this->predict_food_clone($row);
+      }
+    }
 
     //init db testing
 //    $this->add_food();
@@ -52,6 +67,103 @@ class TesterController extends Controller
 
     echo '<br />';
     die('test ok...');
+  }
+
+  protected function predict_food_clone($row)
+  {
+    $result = (array)json_decode($row->rbf_api, true);
+    $api_core = new SysCore();
+
+    if (count($result)) {
+
+      $food = NULL;
+      $ingredients_found = $api_core->sys_ingredients_found($result['predictions']);
+
+      $foods = [];
+      //find food
+      $predictions = $result['predictions'];
+      if (count($predictions)) {
+        foreach ($predictions as $prediction) {
+          $prediction = (array)$prediction;
+
+          $food = Food::whereRaw('LOWER(name) LIKE ?', strtolower(trim($prediction['class'])))
+            ->first();
+          if ($food) {
+            $foods[] = [
+              'food' => $food->id,
+              'confidence' => (int)($prediction['confidence'] * 100),
+            ];
+          }
+        }
+      }
+      $rbf_confidence = 0;
+      if (count($foods)) {
+        if (count($foods) > 1) {
+          $a1 = [];
+          $a2 = [];
+          foreach ($foods as $key => $row) {
+            $a1[$key] = $row['confidence'];
+            $a2[$key] = $row['food'];
+          }
+          array_multisort($a1, SORT_DESC, $a2, SORT_DESC, $foods);
+
+          $foods = $foods[0];
+        }
+
+        $food = Food::find($foods['food']);
+        $rbf_confidence = $foods['confidence'];
+      }
+      //found?
+      if ($food) {
+        $row->update([
+          'food_id' => $food->id,
+          'confidence' => $rbf_confidence,
+          'rbf_confidence' => $rbf_confidence,
+          'found_by' => 'rbf',
+          'rbf_predict' => $food->id,
+
+          'sys_predict' => 0,
+          'sys_confidence' => 0,
+        ]);
+      } else {
+        //system predict
+        $predict = $api_core->sys_predict_foods_by_ingredients($ingredients_found, true);
+        if (count($predict)) {
+          $row->update([
+            'food_id' => $predict['food'],
+            'confidence' => (int)$predict['confidence'],
+            'sys_confidence' => (int)$predict['confidence'],
+            'found_by' => 'sys',
+            'sys_predict' => $predict['food'],
+          ]);
+        }
+      }
+
+      $food = Food::find($row->food_id);
+      //find missing ingredients
+      if ($food) {
+
+        $ingredients_found = $food->get_ingredients_info($ingredients_found);
+        $ingredients_missing = $food->missing_ingredients($ingredients_found);
+        $row->add_ingredients_missing($ingredients_missing, false);
+      }
+
+      //other params
+      $row->update([
+        'food_category_id' => (int)$row->find_food_category($food),
+        'total_seconds' => $result['time'],
+        'status' => 'checked',
+        //temporary off
+        'time_scan' => $row->time_photo,
+      ]);
+
+      if (!$food) {
+        $row->update([
+          'status' => 'failed',
+        ]);
+      }
+
+    }
   }
 
   protected function get_s3_bucket_files()
