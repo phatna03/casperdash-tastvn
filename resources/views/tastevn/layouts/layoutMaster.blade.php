@@ -24,8 +24,9 @@
 <script src="{{asset('assets/vendor/libs/toastr/toastr.js')}}"></script>
 <script src="{{url('custom/library/currency/format_number.js')}}"></script>
 <script src="{{url('custom/library/selectize/selectize.min.js')}}"></script>
+<script src="{{url('custom/library/axios/axios.min.js')}}"></script>
 <script src="{{url('custom/js/app.js')}}"></script>
-<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+{{--<script src="https://unpkg.com/axios/dist/axios.min.js"></script>--}}
 
 <script type="text/javascript">
   //tastevn
