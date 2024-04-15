@@ -137,8 +137,9 @@ class GuestController extends Controller
         $time1 = (float)date('s', strtotime($row->time_scan) - strtotime($row->time_photo));
         $time2 = (float)$row->total_seconds;
         $time4 = !empty($row->time_end)
-          ? (float)date('s', strtotime($row->time_end) - strtotime($row->time_scan)) : '';
-        $time5 = (float)$time4 > 0 ? $time1 + $time2 + $time4 : '';
+          ? (float)date('s', strtotime($row->time_end) - strtotime($row->time_scan)) : 0;
+        $time5 = !empty($row->time_end)
+          ? $time1 + $time2 + $time4 : 0;
 
         $items[] = [
           'photo_url' => $row->photo_url,
@@ -251,47 +252,49 @@ class GuestController extends Controller
             ]);
           }
 
-          //step 2= photo scan
-          $rbf_dataset = $api_core->get_setting('rbf_dataset_scan');
-          $rbf_api_key = $api_core->get_setting('rbf_api_key');
+          if ($restaurant->rbf_scan) {
+            //step 2= photo scan
+            $rbf_dataset = $api_core->get_setting('rbf_dataset_scan');
+            $rbf_api_key = $api_core->get_setting('rbf_api_key');
 
-          // URL for Http Request
-          $url = "https://detect.roboflow.com/" . $rbf_dataset
-            . "?api_key=" . $rbf_api_key
-            . "&image=" . urlencode($photo_URL);
+            // URL for Http Request
+            $url = "https://detect.roboflow.com/" . $rbf_dataset
+              . "?api_key=" . $rbf_api_key
+              . "&image=" . urlencode($photo_URL);
 
-          // Setup + Send Http request
-          $options = array(
-            'http' => array(
-              'header' => "Content-type: application/x-www-form-urlencoded\r\n",
-              'method' => 'POST'
-            ));
+            // Setup + Send Http request
+            $options = array(
+              'http' => array(
+                'header' => "Content-type: application/x-www-form-urlencoded\r\n",
+                'method' => 'POST'
+              ));
 
-          $context = stream_context_create($options);
-          $result = file_get_contents($url, false, $context);
-          if (!empty($result)) {
-            $result = (array)json_decode($result);
+            $context = stream_context_create($options);
+            $result = file_get_contents($url, false, $context);
+            if (!empty($result)) {
+              $result = (array)json_decode($result);
+            }
+
+            //valid data
+            if (count($result)) {
+
+              $row->update([
+                'status' => 'scanned',
+                'time_scan' => date('Y-m-d H:i:s'),
+                'rbf_api' => json_encode($result),
+              ]);
+
+            } else {
+
+              $row->update([
+                'status' => 'failed',
+                'time_scan' => date('Y-m-d H:i:s'),
+              ]);
+            }
+
+            //step 3= photo predict
+            $row->predict_food();
           }
-
-          //valid data
-          if (count($result)) {
-
-            $row->update([
-              'status' => 'scanned',
-              'time_scan' => date('Y-m-d H:i:s'),
-              'rbf_api' => json_encode($result),
-            ]);
-
-          } else {
-
-            $row->update([
-              'status' => 'failed',
-              'time_scan' => date('Y-m-d H:i:s'),
-            ]);
-          }
-
-          //step 3= photo predict
-          $row->predict_food();
         }
       }
 
