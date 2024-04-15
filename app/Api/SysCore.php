@@ -124,7 +124,8 @@ class SysCore
     //restaurants
     $select = Restaurant::where('deleted', 0)
       ->where('s3_bucket_name', '<>', NULL)
-      ->where('s3_bucket_address', '<>', NULL);
+      ->where('s3_bucket_address', '<>', NULL)
+      ->where('s3_checking', 0);
     $restaurants = $select->get();
 
     $this::_DEBUG ? Storage::append($this::_DEBUG_LOG_FILE_CRON, 'TODO_AT_' . date('d_M_Y_H_i_s')) : $this->log_failed();
