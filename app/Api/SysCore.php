@@ -331,6 +331,8 @@ class SysCore
 
             $photo_new = 1;
 
+            $row->predict_food();
+
           } else {
 
             $row->update([
@@ -342,9 +344,9 @@ class SysCore
         }
       }
 
-      if ($restaurant && $photo_new) {
-        dispatch(new PhotoPredict($restaurant));
-      }
+//      if ($restaurant && $photo_new) {
+//        dispatch(new PhotoPredict($restaurant));
+//      }
 
     } catch (\Exception $e) {
       $this->bug_add([
