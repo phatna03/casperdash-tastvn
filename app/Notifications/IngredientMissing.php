@@ -14,14 +14,14 @@ class IngredientMissing extends Notification implements ShouldQueue
 {
   use Queueable;
 
-  protected $_vars;
+  protected $vars;
 
   /**
    * Create a new notification instance.
    */
   public function __construct(array $vars)
   {
-    $this->_vars = $vars;
+    $this->vars = $vars;
   }
 
   /**
@@ -39,44 +39,26 @@ class IngredientMissing extends Notification implements ShouldQueue
    */
   public function toMail($notifiable)
   {
-    $user = $this->_vars['user'];
-    $row = RestaurantFoodScan::find($this->_vars['restaurant_food_scan_id']);
+    $row = RestaurantFoodScan::findOrFail($this->vars['restaurant_food_scan_id']);
+    $user = $notifiable;
 
-    $url_redirect = url('admin/notifications?rid=' . $row->id);
-
-    $text_food = $row->get_food()->name;
-    if ($row->confidence) {
-      $text_food = $row->confidence . '% ' . $row->get_food()->name;
-    }
-
-    $html_photo = '<div style="max-width: 300px; position: relative; text-align: center; margin: 0 auto; border: 1px solid #efefef; border-radius: 3px;"><img src="' . $row->photo_url . '" style="width: 100%;" /></div>';
-    $html_ingredients_missing = '';
-
-    $texts = array_filter(explode('&nbsp', $row->missing_texts));
-    if (!empty($row->missing_texts) && count($texts)) {
-      foreach ($texts as $text) {
-        if (!empty(trim($text))) {
-          $html_ingredients_missing .= '<div style="margin-left: 20px;">- ' . $text . '</div>';
-        }
-      }
-    }
-
-    $recipient_email = $user->email;
     if (!(int)$user->get_setting('missing_ingredient_alert_email')) {
-      $recipient_email = 'tastevietnam@mailinator.com';
+      return false;
     }
+
+    $subject = config('tastevn.email_subject_ingredient_missing') . ': ' . $row->get_restaurant()->name;
+    $greeting = 'Hello ' . $user->name . '!';
 
     return (new MailMessage)
-      ->to($recipient_email) // Change recipient email dynamically
-      ->subject(config('tastevn.email_subject_ingredient_missing') . ': ' . $row->get_restaurant()->name)
-      ->greeting('Hello ' . $user->name . '!')
+      ->subject($subject)
+      ->greeting($greeting)
       ->line('The system indicates that an ingredient is missing from a dish served at the restaurant that you manage.')
-      ->line('+ Predicted Dish: ' . $text_food)
+      ->line('+ Predicted Dish: ' . $this->getPredictedDish($row))
       ->line('+ Ingredients Missing:')
-      ->line(new HtmlString($html_ingredients_missing))
+      ->line(new HtmlString($this->getHtmlIngredientsMissing($row)))
       ->line('+ Photo: ')
-      ->line(new HtmlString($html_photo))
-      ->action('For more detailed information, please visit the website.', $url_redirect)
+      ->line(new HtmlString($this->getHtmlPhoto($row)))
+      ->action('For more detailed information, please visit the website.', $this->getUrlRedirect($row))
       ->line('Thank you for using our application!');
   }
 
@@ -87,6 +69,39 @@ class IngredientMissing extends Notification implements ShouldQueue
    */
   public function toArray(object $notifiable): array
   {
-    return $this->_vars;
+    return $this->vars;
+  }
+
+  protected function getPredictedDish($row)
+  {
+    $textFood = $row->get_food()->name;
+    if ($row->confidence) {
+      $textFood = $row->confidence . '% ' . $row->get_food()->name;
+    }
+    return $textFood;
+  }
+
+  protected function getHtmlIngredientsMissing($row)
+  {
+    $htmlIngredientsMissing = '';
+    $texts = array_filter(explode('&nbsp', $row->missing_texts));
+    if (!empty($row->missing_texts) && count($texts)) {
+      foreach ($texts as $text) {
+        if (!empty(trim($text))) {
+          $htmlIngredientsMissing .= '<div style="margin-left: 20px;">- ' . $text . '</div>';
+        }
+      }
+    }
+    return $htmlIngredientsMissing;
+  }
+
+  protected function getHtmlPhoto($row)
+  {
+    return '<div style="max-width: 300px; position: relative; text-align: center; margin: 0 auto; border: 1px solid #efefef; border-radius: 3px;"><img src="' . $row->photo_url . '" style="width: 100%;" /></div>';
+  }
+
+  protected function getUrlRedirect($row)
+  {
+    return url('admin/notifications?rid=' . $row->id);
   }
 }

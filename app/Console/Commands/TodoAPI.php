@@ -28,6 +28,10 @@ class TodoAPI extends Command
   public function handle()
   {
     $api_core = new SysCore();
-    $api_core->s3_todo();
+
+    // Run the logic every 30 seconds
+    if (now()->second % 30 == 0) {
+      $api_core->s3_todo();
+    }
   }
 }

@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\tastevn\view;
 
 use App\Http\Controllers\Controller;
-use App\Models\Restaurant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
@@ -12,8 +11,12 @@ use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
 use App\Api\SysCore;
 
+use Maatwebsite\Excel\Facades\Excel;
+use App\Excel\ExportRfs;
+
 use Validator;
 use App\Models\User;
+use App\Models\Restaurant;
 use App\Models\RestaurantFoodScan;
 use App\Models\Food;
 use App\Models\Ingredient;
@@ -107,6 +110,51 @@ class GuestController extends Controller
     ];
 
     return view('tastevn.pages.printer', ['pageConfigs' => $pageConfigs]);
+  }
+
+  public function excel(Request $request)
+  {
+    $values = $request->all();
+
+    $date = isset($values['date']) ? $values['date'] : date('Y-m-d');
+    $dated = isset($values['date']) ? $values['date'] : date('Y_m_d');
+
+    $rows = RestaurantFoodScan::where('deleted', 0)
+      ->whereIn('status', ['checked', 'failed'])
+      ->where('total_seconds', '>', 0)
+      ->where('rbf_api', '<>', NULL)
+      ->whereDate('time_photo', $date)
+      ->orderBy('id', 'desc')
+      ->get();
+
+    $items = [];
+    if (count($rows)) {
+      foreach ($rows as $row) {
+
+        $time1 = (float)date('s', strtotime($row->time_scan) - strtotime($row->time_photo));
+        $time2 = (float)$row->total_seconds;
+
+        $items[] = [
+          'photo_url' => $row->photo_url,
+          'time_photo' => $row->time_photo,
+          'time_scan' => $row->time_scan,
+          'updated_at' => date('Y-m-d H:i:s', strtotime($row->updated_at)),
+
+          'time_1' => $time1,
+          'time_2' => $time2,
+          'time_3' => $time1 + $time2,
+        ];
+      }
+    }
+
+    if (!count($items)) {
+      die('no data');
+    }
+//    echo '<pre>';var_dump($items);die;
+
+    $excel = new ExportRfs();
+    $excel->setItems($items);
+    return Excel::download($excel, 'export_data_' . $dated . '.xlsx');
   }
 
   public function guide_printer()

@@ -32,6 +32,7 @@ class RestaurantFoodScan extends Model
     'time_photo',
     'time_scan',
     'total_seconds',
+    'time_end',
     'missing_ids',
     'missing_texts',
 
@@ -208,6 +209,8 @@ class RestaurantFoodScan extends Model
         'food_category_id' => (int)$this->find_food_category($food),
         'total_seconds' => $result['time'],
         'status' => 'checked',
+
+        'time_end' => date('Y-m-d H:i:s'),
       ]);
 
       if (!$food) {

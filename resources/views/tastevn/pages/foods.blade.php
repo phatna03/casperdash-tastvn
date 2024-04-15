@@ -133,7 +133,7 @@
   </div>
   <!-- modal to import item -->
   <div class="modal animate__animated animate__rollIn" id="modal_import" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
       <div class="modal-content">
         <form onsubmit="return food_import(event, this);">
           <div class="modal-header">

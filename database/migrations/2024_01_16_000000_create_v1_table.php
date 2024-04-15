@@ -110,6 +110,7 @@ return new class extends Migration {
         $table->longText('text_texts')->nullable();
         $table->timestamp('time_photo')->nullable();
         $table->timestamp('time_scan')->nullable();
+        $table->timestamp('time_end')->nullable();
         $table->decimal('total_seconds')->default(0);
         $table->text('missing_ids')->nullable();
         $table->longText('missing_texts')->nullable();

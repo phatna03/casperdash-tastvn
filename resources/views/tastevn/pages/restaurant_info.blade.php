@@ -303,7 +303,7 @@
                             <option value="">All</option>
                             <option value="checked" selected="selected">checked</option>
                             <option value="failed">no data</option>
-                            <option value="edited">edited</option>
+                            <option value="edited" selected="selected">edited</option>
                           </select>
                         </div>
                         <label for="scan-search-status">Statuses</label>
@@ -314,7 +314,7 @@
                         <div class="form-control acm-wrap-selectize" id="scan-search-missing">
                           <select name="missing" class="opt_selectize" onchange="restaurant_search_food_scan(this)">
                             <option value="">All dishes</option>
-                            <option value="yes" selected="selected">Dish with missing ingredients only</option>
+                            <option value="yes">Dish with missing ingredients only</option>
                             <option value="no">Dish has all the ingredients</option>
                           </select>
                         </div>
