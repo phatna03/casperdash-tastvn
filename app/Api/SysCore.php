@@ -183,6 +183,7 @@ class SysCore
 
         $this::_DEBUG ? Storage::append($this::_DEBUG_LOG_FILE_CRON, 'RESTAURANT - ' . $restaurant->id . ' - ' . $restaurant->name) : $this->log_failed();
 
+        $photo_new = 0;
         $restaurant->update([
           's3_checking' => 1,
         ]);
@@ -236,11 +237,15 @@ class SysCore
                   'status' => 'new',
                   'time_photo' => $time_photo,
                 ]);
+
+                $photo_new = 1;
               }
             }
           }
 
-          dispatch(new PhotoScan($restaurant));
+          if ($photo_new) {
+            dispatch(new PhotoScan($restaurant));
+          }
 
         } catch (\Exception $e) {
           $this->bug_add([
@@ -282,6 +287,8 @@ class SysCore
       $restaurant = Restaurant::find((int)$pars['restaurant_id']);
     }
 
+    $photo_new = 0;
+
     try {
 
       $rows = $select->get();
@@ -322,6 +329,8 @@ class SysCore
               'rbf_api' => json_encode($result),
             ]);
 
+            $photo_new = 1;
+
           } else {
 
             $row->update([
@@ -333,7 +342,7 @@ class SysCore
         }
       }
 
-      if ($restaurant) {
+      if ($restaurant && $photo_new) {
         dispatch(new PhotoPredict($restaurant));
       }
 
