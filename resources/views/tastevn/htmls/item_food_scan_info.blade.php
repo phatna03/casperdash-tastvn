@@ -16,14 +16,14 @@
           <div class="text-uppercase">
             <span class="badge bg-secondary">photo sensor</span>
           </div>
-          @if(count($comments) && $viewer->role != 'user')
+          @if(count($comments))
             <span class="badge bg-danger cmt-count">{{count($comments) . ' notes'}}</span>
           @endif
         </div>
         <img class="acm-width-max-100 h-auto acm-border-css" src="{{$item['photo_url']}}"/>
       </div>
 
-      @if(count($comments) && $viewer->role != 'user')
+      @if(count($comments))
         <ul class="cmt-wrapper">
           @php
             $count = 0;

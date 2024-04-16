@@ -80,7 +80,7 @@ class RoboflowController extends Controller
 
     $food = null;
     $food_predict = null;
-    $food_photo = url('custom/img/food_photo.jpg');
+    $food_photo = url('custom/img/no_photo.png');
     $ingredients_found = [];
     $sys_food_predicts = [];
     $sys_food_predict = [];

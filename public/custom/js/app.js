@@ -2236,7 +2236,7 @@ function food_edit_prepare(ele) {
 
   //photo
   var img_photo = tr.attr('data-photo');
-  var img_src = acmcfs.link_base_url + '/custom/img/food_photo.jpg';
+  var img_src = acmcfs.link_base_url + '/custom/img/no_photo.png';
   if (img_photo && img_photo !== '' && img_photo != 'null') {
     img_src = acmcfs.link_base_url + img_photo;
   }

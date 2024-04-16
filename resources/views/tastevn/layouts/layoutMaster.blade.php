@@ -138,7 +138,7 @@
     </div>
   </div>
   <div class="modal animate__animated animate__rollIn" id="modal_food_info" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
       <div class="modal-content">
         <div class="modal-header">
           <h4 class="modal-title text-danger fw-bold"></h4>

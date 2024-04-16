@@ -17,12 +17,16 @@ return [
 
   "email_subject_forgot_password" => "[TasteVN] Request to change password",
   "email_subject_ingredient_missing" => "[TasteVN] Missing ingredient in dish at",
+  "email_subject_photo_comment" => "[TasteVN] Photo note at",
 
   "message_title_info" => 'Information',
   "message_title_success" => 'Success',
   "message_title_error" => 'Error',
   "message_description_success_add" => 'Your changes have been saved successfully!',
   "message_description_success_update" => 'Your changes have been updated successfully!',
+
+  "notify_setting_missing_ingredient" => 'Ingredients Missing',
+  "notify_setting_photo_comment" => 'Photo Note',
 
 
   //themes

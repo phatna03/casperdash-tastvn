@@ -727,7 +727,7 @@ class SysCore
   public function get_notifications()
   {
     return [
-      'missing_ingredient',
+      'missing_ingredient', 'photo_comment',
     ];
   }
 

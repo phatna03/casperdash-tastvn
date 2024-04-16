@@ -4,13 +4,11 @@ namespace App\Http\Controllers\tastevn\api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-
-use App\Api\SysCore;
 use Validator;
+use App\Api\SysCore;
 use App\Models\Comment;
 
 class CommentController extends Controller
@@ -58,6 +56,9 @@ class CommentController extends Controller
       $row = Comment::find($row->id);
       $diffs['after'] = $row->get_log();
       if (json_encode($diffs['before']) !== json_encode($diffs['after'])) {
+
+        $row->on_update_after();
+
         $user->add_log([
           'type' => 'edit_photo_note',
           'restaurant_id' => $item ? (int)$item->restaurant_id : 0,
@@ -76,6 +77,8 @@ class CommentController extends Controller
           'object_id' => $object_id,
           'content' => $content,
         ]);
+
+        $row->on_create_after();
 
         $user->add_log([
           'type' => 'add_photo_note',

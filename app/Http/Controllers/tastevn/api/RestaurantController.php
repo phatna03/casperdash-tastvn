@@ -478,7 +478,7 @@ class RestaurantController extends Controller
       ], 422);
     }
 
-    $food_photo = url('custom/img/food_photo.jpg');
+    $food_photo = url('custom/img/no_photo.png');
 
     $rbf_food_id = 0;
     $rbf_food_name = NULL;
@@ -490,66 +490,63 @@ class RestaurantController extends Controller
     $sys_food_name = NULL;
     $sys_food_confidence = 0;
     $sys_ingredients_missing = [];
+    $sys_food_predict = [];
+    $sys_food_predicts = [];
 
     $usr_food_id = 0;
     $usr_ingredients_missing = [];
 
     //data
     $apid = (array)json_decode($row->rbf_api, true);
-    if (!count($apid)) {
-      return response()->json([
-        'error' => 'Waiting for check...'
-      ], 422);
-    }
+    if (count($apid)) {
 
-    $founds = $api_core->sys_ingredients_found($apid['predictions']);
-    $sys_food_predicts = $api_core->sys_predict_foods_by_ingredients($founds);
-    $sys_food_predict = $api_core->sys_predict_foods_by_ingredients($founds, true);
-    if (count($sys_food_predict)) {
-      $food_predict = Food::find($sys_food_predict['food']);
-      if ($food_predict) {
-        $sys_ingredients_missing = $food_predict->missing_ingredients($founds);
+      $founds = $api_core->sys_ingredients_found($apid['predictions']);
+      $sys_food_predicts = $api_core->sys_predict_foods_by_ingredients($founds);
+      $sys_food_predict = $api_core->sys_predict_foods_by_ingredients($founds, true);
+      if (count($sys_food_predict)) {
+        $food_predict = Food::find($sys_food_predict['food']);
+        if ($food_predict) {
+          $sys_ingredients_missing = $food_predict->missing_ingredients($founds);
+        }
       }
-    }
+      if ($row->get_food()) {
 
-    if ($row->get_food()) {
+        $food_photo = $row->get_food()->get_photo();
 
-      $food_photo = $row->get_food()->get_photo();
+        $rbf_food = Food::find($row->rbf_predict);
+        if ($rbf_food) {
+          $rbf_food_id = $rbf_food->id;
+          $rbf_food_name = $rbf_food->name;
+          $rbf_food_confidence = $row->rbf_confidence;
 
-      $rbf_food = Food::find($row->rbf_predict);
-      if ($rbf_food) {
-        $rbf_food_id = $rbf_food->id;
-        $rbf_food_name = $rbf_food->name;
-        $rbf_food_confidence = $row->rbf_confidence;
+          $rbf_ingredients_missing = $rbf_food->missing_ingredients($founds);
+        }
 
-        $rbf_ingredients_missing = $rbf_food->missing_ingredients($founds);
+        $sys_food = Food::find($row->sys_predict);
+        if ($sys_food) {
+          $sys_food_id = $sys_food->id;
+          $sys_food_name = $sys_food->name;
+          $sys_food_confidence = $row->sys_confidence;
+
+          $sys_ingredients_missing = $sys_food->missing_ingredients($founds);
+        }
+
+        $usr_food = Food::find($row->usr_predict);
+        if ($usr_food) {
+          $usr_food_id = $usr_food->id;
+
+          $usr_ingredients_missing = $row->get_ingredients_missing();
+        }
       }
-
-      $sys_food = Food::find($row->sys_predict);
-      if ($sys_food) {
-        $sys_food_id = $sys_food->id;
-        $sys_food_name = $sys_food->name;
-        $sys_food_confidence = $row->sys_confidence;
-
-        $sys_ingredients_missing = $sys_food->missing_ingredients($founds);
-      }
-
-      $usr_food = Food::find($row->usr_predict);
-      if ($usr_food) {
-        $usr_food_id = $usr_food->id;
-
-        $usr_ingredients_missing = $row->get_ingredients_missing();
-      }
-    }
-
-    if (count($founds)) {
-      foreach ($founds as $temp) {
-        $ing = Ingredient::find((int)$temp['id']);
-        if ($ing) {
-          $rbf_ingredients_found[] = [
-            'quantity' => $temp['quantity'],
-            'title' => !empty($ing['name_vi']) ? $ing['name'] . ' - ' . $ing['name_vi'] : $ing['name'],
-          ];
+      if (count($founds)) {
+        foreach ($founds as $temp) {
+          $ing = Ingredient::find((int)$temp['id']);
+          if ($ing) {
+            $rbf_ingredients_found[] = [
+              'quantity' => $temp['quantity'],
+              'title' => !empty($ing['name_vi']) ? $ing['name'] . ' - ' . $ing['name_vi'] : $ing['name'],
+            ];
+          }
         }
       }
     }

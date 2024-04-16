@@ -544,6 +544,7 @@ class UserController extends Controller
     $diffs = [];
     $arr = [
       'missing_ingredient_receive', 'missing_ingredient_alert_speaker', 'missing_ingredient_alert_printer', 'missing_ingredient_alert_email',
+      'photo_comment_alert_email',
     ];
     foreach ($arr as $k => $v) {
       $diffs['before'][$v] = (int)$user->get_setting($v);
@@ -551,7 +552,9 @@ class UserController extends Controller
 
     if (count($notifications)) {
       foreach ($notifications as $notification) {
-        $user->set_setting($notification['key'], $notification['val']);
+        if (in_array($notification['key'], $arr)) {
+          $user->set_setting($notification['key'], $notification['val']);
+        }
       }
     }
 

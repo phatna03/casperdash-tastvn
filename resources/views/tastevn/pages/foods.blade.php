@@ -54,7 +54,7 @@
           <div class="col-lg-6">
             <div class="wrap-photo-preview">
               <div class="text-center w-auto">
-                <img width="80" src="{{url('custom/img/food_photo.jpg')}}" />
+                <img width="80" src="{{url('custom/img/no_photo.png')}}" />
               </div>
             </div>
           </div>
@@ -101,7 +101,7 @@
           <div class="col-lg-6">
             <div class="wrap-photo-preview">
               <div class="text-center w-auto">
-                <img width="80" src="{{url('custom/img/food_photo.jpg')}}" />
+                <img width="80" src="{{url('custom/img/no_photo.png')}}" />
               </div>
             </div>
           </div>
@@ -133,7 +133,7 @@
   </div>
   <!-- modal to import item -->
   <div class="modal animate__animated animate__rollIn" id="modal_import" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
+    <div class="modal-dialog modal-dialog-centered" role="document">
       <div class="modal-content">
         <form onsubmit="return food_import(event, this);">
           <div class="modal-header">
@@ -244,7 +244,7 @@
         {
           targets: 1,
           render: function (data, type, full, meta) {
-            var img_src = acmcfs.link_base_url + '/custom/img/food_photo.jpg';
+            var img_src = acmcfs.link_base_url + '/custom/img/no_photo.png';
             if (full['photo'] && full['photo'] !== '' && full['photo'] != 'null') {
               img_src = acmcfs.link_base_url + full['photo'];
             }

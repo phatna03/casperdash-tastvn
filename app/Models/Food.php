@@ -310,7 +310,7 @@ class Food extends Model
 
   public function get_photo()
   {
-    $text = url('custom/img/food_photo.jpg');
+    $text = url('custom/img/no_photo.png');
     if (!empty($this->photo)) {
       $text = url('') . $this->photo;
     }

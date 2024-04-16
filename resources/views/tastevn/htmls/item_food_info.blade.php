@@ -1,5 +1,5 @@
 @php
-  $img_src = !empty($item->photo) ? url('') . $item->photo : url('custom/img/food_photo.jpg');
+  $img_src = !empty($item->photo) ? url('') . $item->photo : url('custom/img/no_photo.png');
 @endphp
 
 <div class="row">

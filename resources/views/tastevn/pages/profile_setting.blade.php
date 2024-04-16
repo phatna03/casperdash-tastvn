@@ -106,23 +106,29 @@
                   <div class="col-md-3">
                     <div class="form-check">
                       <input class="form-check-input" type="checkbox" name="{{$notify . '_receive'}}" id="setting-notify-receive-{{$notify}}"
-                             @if($viewer->get_setting($notify . '_receive')) checked @endif />
+                             @if($viewer->get_setting($notify . '_receive') || $notify == 'photo_comment') checked @endif
+                             @if($notify == 'photo_comment') disabled @endif
+                      />
                       <label class="form-check-label" for="setting-notify-receive-{{$notify}}">Receive alert notification</label>
                     </div>
                   </div>
                   <div class="col-md-3">
+                    @if($notify == 'missing_ingredient')
                     <div class="form-check">
                       <input class="form-check-input" type="checkbox" name="{{$notify . '_alert_speaker'}}" id="setting-notify-speaker-{{$notify}}"
                              @if($viewer->get_setting($notify . '_alert_speaker')) checked @endif />
                       <label class="form-check-label" for="setting-notify-speaker-{{$notify}}">Text-to-speech alert?</label>
                     </div>
+                    @endif
                   </div>
                   <div class="col-md-3">
+                    @if($notify == 'missing_ingredient')
                     <div class="form-check">
                       <input class="form-check-input" type="checkbox" name="{{$notify . '_alert_printer'}}" id="setting-notify-printer-{{$notify}}"
                              @if($viewer->get_setting($notify . '_alert_printer')) checked @endif />
                       <label class="form-check-label" for="setting-notify-printer-{{$notify}}">Printer alert?</label>
                     </div>
+                    @endif
                   </div>
                   <div class="col-md-3">
                     <div class="form-check">
@@ -133,7 +139,7 @@
                   </div>
                 </div>
               </div>
-              <label for="setting-notify-{{$notify}}">Ingredients Missing</label>
+              <label for="setting-notify-{{$notify}}">{{config('tastevn.notify_setting_' . $notify)}}</label>
             </div>
           </div>
           @endforeach
