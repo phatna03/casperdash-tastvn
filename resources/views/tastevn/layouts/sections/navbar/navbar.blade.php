@@ -350,7 +350,7 @@
                       </a>
                     </li>
                     <li>
-                      <a class="dropdown-item" href="{{url('custom/file/v1_guide_website.pptx')}}">
+                      <a class="dropdown-item" href="{{url('custom/file/v1_guide_website_en.pptx')}}">
                         <i class='mdi mdi-information me-2'></i>
                         <span class="align-middle">User Guide</span>
                       </a>

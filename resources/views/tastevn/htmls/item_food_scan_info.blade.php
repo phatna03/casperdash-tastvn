@@ -52,55 +52,34 @@
       @endif
     </div>
   </div>
+
   @if($viewer->role != 'user')
-    <div class="col-lg-4 mb-1">
-      <div class="acm-border-css p-1 @if($item['found_by'] == 'rbf') bg-success-subtle @endif">
-        <div class="row">
-          <div class="col-12 mb-1 text-center">
-            <div class="text-uppercase">
-              <span class="badge bg-secondary">roboflow</span>
+    @if($viewer->role == 'moderator')
+      <div class="col-lg-4 mb-1">
+        <div class="acm-border-css p-1">
+          <div class="row">
+            <div class="col-12 mb-1 text-center">
+              <div class="text-uppercase">
+                <span class="badge bg-secondary">dish info</span>
+              </div>
             </div>
-          </div>
-          <div class="col-12 mb-1">
-            <div class="acm-lbl-dark text-primary">+ Predicted dish:</div>
-            <div class="acm-text-line-one">
-              @if((int)$data['rbf']['food_id'])
-                - <b class="acm-mr-px-5 text-danger">{{$data['rbf']['food_confidence']}}
-                  %</b> <span class="text-dark">{{$data['rbf']['food_name']}}</span>
-              @else
-                ---
-              @endif
-            </div>
-          </div>
-          <div class="col-12 mb-1">
-            <div class="acm-lbl-dark text-primary">+ Ingredients found:</div>
-            <div>
-              @if(count($data['rbf']['ingredients_found']))
-                @foreach($data['rbf']['ingredients_found'] as $ing)
-                  <div class="acm-text-line-one">
-                    - <b class="acm-mr-px-5 text-danger">{{$ing['quantity']}}</b> <span class="text-dark">{{$ing['title']}}</span>
-                  </div>
-                @endforeach
-              @else
-                ---
-              @endif
-            </div>
-          </div>
-          @if($item['found_by'] == 'rbf')
             <div class="col-12 mb-1">
-              <div class="acm-lbl-dark text-primary">+ Ingredients Missing:</div>
+              <div class="acm-lbl-dark text-primary">+ Predicted dish:</div>
+              <div class="acm-text-line-one">
+                @if(!empty($data['food']['name']))
+                  - <span class="text-dark">{{$data['food']['name']}}</span>
+                @else
+                  ---
+                @endif
+              </div>
+            </div>
+            <div class="col-12 mb-1">
+              <div class="acm-lbl-dark text-primary">+ Ingredients:</div>
               <div>
-                @if(count($data['rbf']['ingredients_missing']))
-                  @foreach($data['rbf']['ingredients_missing'] as $ing)
+                @if(count($data['food']['ingredients']))
+                  @foreach($data['food']['ingredients'] as $ing)
                     <div class="acm-text-line-one">
-                      - <b class="acm-mr-px-5 text-danger">{{$ing['quantity']}}</b>
-                      <span class="text-dark">
-                      @if(!empty($ing['name_vi']))
-                        {{$ing['name'] . ' - ' . $ing['name_vi']}}
-                      @else
-                        {{$ing['name']}}
-                      @endif
-                      </span>
+                      - <b class="acm-mr-px-5 text-danger">{{$ing['ingredient_quantity']}}</b> <span class="text-dark">{{$ing['name']}}</span>
                     </div>
                   @endforeach
                 @else
@@ -108,44 +87,112 @@
                 @endif
               </div>
             </div>
-          @endif
+          </div>
         </div>
       </div>
-    </div>
-    <div class="col-lg-4 mb-1">
-      <div class="acm-border-css p-1 @if($item['found_by'] == 'sys') bg-success-subtle @endif">
-        <div class="row">
-          <div class="col-12 mb-1 text-center">
-            <div class="text-uppercase">
-              <span class="badge bg-secondary">system</span>
+      <div class="col-lg-4 mb-1">
+        <div class="acm-border-css p-1">
+          <div class="row">
+            <div class="col-12 mb-1 text-center">
+              <div class="text-uppercase">
+                <span class="badge bg-secondary">system</span>
+              </div>
             </div>
-          </div>
-          <div class="col-12 mb-1">
-            <div class="acm-lbl-dark text-primary">+ Predicted dish:</div>
-            <div class="acm-text-line-one">
-              @if((int)$data['sys']['food_id'])
-                - <b class="acm-mr-px-5 text-danger">{{$data['sys']['food_confidence']}}
-                  %</b> <span class="text-dark">{{$data['sys']['food_name']}}</span>
-              @else
-                ---
-              @endif
-            </div>
-          </div>
-          @if((int)$data['sys']['food_id'])
             <div class="col-12 mb-1">
-              <div class="acm-lbl-dark text-primary">+ Ingredients Missing:</div>
+              <div class="acm-lbl-dark text-primary">+ Predicted dish:</div>
+              <div class="acm-text-line-one">
+                @if($item['found_by'] == 'rbf')
+                  @if((int)$data['rbf']['food_id'])
+                    - <b class="acm-mr-px-5 text-danger">{{$data['rbf']['food_confidence']}}
+                      %</b> <span class="text-dark">{{$data['rbf']['food_name']}}</span>
+                  @else
+                    ---
+                  @endif
+                @elseif($item['found_by'] == 'sys')
+                  @if((int)$data['sys']['food_id'])
+                    - <b class="acm-mr-px-5 text-danger">{{$data['sys']['food_confidence']}}
+                      %</b> <span class="text-dark">{{$data['sys']['food_name']}}</span>
+                  @else
+                    ---
+                  @endif
+                @endif
+              </div>
+            </div>
+            @if($item['found_by'] == 'rbf')
+              <div class="col-12 mb-1">
+                <div class="acm-lbl-dark text-primary">+ Ingredients Missing:</div>
+                <div>
+                  @if(count($data['rbf']['ingredients_missing']))
+                    @foreach($data['rbf']['ingredients_missing'] as $ing)
+                      <div class="acm-text-line-one">
+                        - <b class="acm-mr-px-5 text-danger">{{$ing['quantity']}}</b>
+                        <span class="text-dark">
+                        @if(!empty($ing['name_vi']))
+                            {{$ing['name'] . ' - ' . $ing['name_vi']}}
+                          @else
+                            {{$ing['name']}}
+                          @endif
+                        </span>
+                      </div>
+                    @endforeach
+                  @else
+                    ---
+                  @endif
+                </div>
+              </div>
+            @elseif((int)$data['sys']['food_id'])
+              <div class="col-12 mb-1">
+                <div class="acm-lbl-dark text-primary">+ Ingredients Missing:</div>
+                <div>
+                  @if(count($data['sys']['ingredients_missing']))
+                    @foreach($data['sys']['ingredients_missing'] as $ing)
+                      <div class="acm-text-line-one">
+                        - <b class="acm-mr-px-5 text-danger">{{$ing['quantity']}}</b>
+                        <span class="text-dark">
+                        @if(!empty($ing['name_vi']))
+                            {{$ing['name'] . ' - ' . $ing['name_vi']}}
+                          @else
+                            {{$ing['name']}}
+                          @endif
+                        </span>
+                      </div>
+                    @endforeach
+                  @else
+                    ---
+                  @endif
+                </div>
+              </div>
+            @endif
+          </div>
+        </div>
+      </div>
+    @else
+      <div class="col-lg-4 mb-1">
+        <div class="acm-border-css p-1 @if($item['found_by'] == 'rbf') bg-success-subtle @endif">
+          <div class="row">
+            <div class="col-12 mb-1 text-center">
+              <div class="text-uppercase">
+                <span class="badge bg-secondary">roboflow</span>
+              </div>
+            </div>
+            <div class="col-12 mb-1">
+              <div class="acm-lbl-dark text-primary">+ Predicted dish:</div>
+              <div class="acm-text-line-one">
+                @if((int)$data['rbf']['food_id'])
+                  - <b class="acm-mr-px-5 text-danger">{{$data['rbf']['food_confidence']}}
+                    %</b> <span class="text-dark">{{$data['rbf']['food_name']}}</span>
+                @else
+                  ---
+                @endif
+              </div>
+            </div>
+            <div class="col-12 mb-1">
+              <div class="acm-lbl-dark text-primary">+ Ingredients found:</div>
               <div>
-                @if(count($data['sys']['ingredients_missing']))
-                  @foreach($data['sys']['ingredients_missing'] as $ing)
+                @if(count($data['rbf']['ingredients_found']))
+                  @foreach($data['rbf']['ingredients_found'] as $ing)
                     <div class="acm-text-line-one">
-                      - <b class="acm-mr-px-5 text-danger">{{$ing['quantity']}}</b>
-                      <span class="text-dark">
-                      @if(!empty($ing['name_vi']))
-                        {{$ing['name'] . ' - ' . $ing['name_vi']}}
-                      @else
-                        {{$ing['name']}}
-                      @endif
-                      </span>
+                      - <b class="acm-mr-px-5 text-danger">{{$ing['quantity']}}</b> <span class="text-dark">{{$ing['title']}}</span>
                     </div>
                   @endforeach
                 @else
@@ -153,27 +200,96 @@
                 @endif
               </div>
             </div>
+            @if($item['found_by'] == 'rbf')
+              <div class="col-12 mb-1">
+                <div class="acm-lbl-dark text-primary">+ Ingredients Missing:</div>
+                <div>
+                  @if(count($data['rbf']['ingredients_missing']))
+                    @foreach($data['rbf']['ingredients_missing'] as $ing)
+                      <div class="acm-text-line-one">
+                        - <b class="acm-mr-px-5 text-danger">{{$ing['quantity']}}</b>
+                        <span class="text-dark">
+                        @if(!empty($ing['name_vi']))
+                          {{$ing['name'] . ' - ' . $ing['name_vi']}}
+                        @else
+                          {{$ing['name']}}
+                        @endif
+                        </span>
+                      </div>
+                    @endforeach
+                  @else
+                    ---
+                  @endif
+                </div>
+              </div>
+            @endif
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-4 mb-1">
+        <div class="acm-border-css p-1 @if($item['found_by'] == 'sys') bg-success-subtle @endif">
+          <div class="row">
+            <div class="col-12 mb-1 text-center">
+              <div class="text-uppercase">
+                <span class="badge bg-secondary">system</span>
+              </div>
+            </div>
             <div class="col-12 mb-1">
-              <div class="acm-lbl-dark text-primary">+ List of predicted dishes:</div>
-              <div>
-                @if(count($data['sys']['foods']))
-                  @php
-                    foreach($data['sys']['foods'] as $foo):
-                    $food = App\Models\Food::find($foo['food']);
-                  @endphp
-                  <div class="acm-text-line-one">
-                    - <b class="acm-mr-px-5 text-danger">{{$foo['confidence']}}%</b> <span class="text-dark">{{$food->name}}</span>
-                  </div>
-                  @endforeach
+              <div class="acm-lbl-dark text-primary">+ Predicted dish:</div>
+              <div class="acm-text-line-one">
+                @if((int)$data['sys']['food_id'])
+                  - <b class="acm-mr-px-5 text-danger">{{$data['sys']['food_confidence']}}
+                    %</b> <span class="text-dark">{{$data['sys']['food_name']}}</span>
                 @else
                   ---
                 @endif
               </div>
             </div>
-          @endif
+            @if((int)$data['sys']['food_id'])
+              <div class="col-12 mb-1">
+                <div class="acm-lbl-dark text-primary">+ Ingredients Missing:</div>
+                <div>
+                  @if(count($data['sys']['ingredients_missing']))
+                    @foreach($data['sys']['ingredients_missing'] as $ing)
+                      <div class="acm-text-line-one">
+                        - <b class="acm-mr-px-5 text-danger">{{$ing['quantity']}}</b>
+                        <span class="text-dark">
+                        @if(!empty($ing['name_vi']))
+                          {{$ing['name'] . ' - ' . $ing['name_vi']}}
+                        @else
+                          {{$ing['name']}}
+                        @endif
+                        </span>
+                      </div>
+                    @endforeach
+                  @else
+                    ---
+                  @endif
+                </div>
+              </div>
+              <div class="col-12 mb-1">
+                <div class="acm-lbl-dark text-primary">+ List of predicted dishes:</div>
+                <div>
+                  @if(count($data['sys']['foods']))
+                    @php
+                      foreach($data['sys']['foods'] as $foo):
+                      $food = App\Models\Food::find($foo['food']);
+                    @endphp
+                    <div class="acm-text-line-one">
+                      - <b class="acm-mr-px-5 text-danger">{{$foo['confidence']}}%</b> <span class="text-dark">{{$food->name}}</span>
+                    </div>
+                    @endforeach
+                  @else
+                    ---
+                  @endif
+                </div>
+              </div>
+            @endif
+          </div>
         </div>
       </div>
-    </div>
+    @endif
+
     <div class="col-lg-4 mb-1">
       <div class="acm-border-css p-1 @if($item['found_by'] == 'usr') bg-success-subtle @endif">
         <form onsubmit="return event.preventDefault();">
