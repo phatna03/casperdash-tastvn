@@ -20,7 +20,7 @@ class Kernel extends ConsoleKernel
     //custome
     $schedule->command('tastevn:todolist')
       ->withoutOverlapping()
-      ->everyTwentySeconds();
+      ->everyTenSeconds();
   }
 
   /**

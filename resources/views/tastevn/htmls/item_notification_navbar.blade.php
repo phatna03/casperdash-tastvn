@@ -29,13 +29,13 @@
         $owner = $api_core->get_item($notification->data['owner_id'], 'user');
         $comment = $api_core->get_item($notification->data['comment_id'], 'comment');
 
-        $text1 = 'added new note: ';
+        $text1 = 'added new note for the photo with ID:';
         if ($type == 'photo_comment_edit') {
-            $text1 = 'updated their note: ';
+            $text1 = 'updated their note for the photo with ID:';
         }
         @endphp
         <div class="text-dark acm-fs-13">
-          <b><span class="acm-mr-px-5">{{$owner->name}}</span></b> {{$text1}}
+          <b><span class="acm-mr-px-5">{{$owner->name}}</span></b> {{$text1}} <b><span class="acm-ml-px-5">{{$item->id}}</span></b>
         </div>
         <div class="text-dark acm-fs-13">
           <?php echo nl2br($comment->content);?>
