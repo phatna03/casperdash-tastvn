@@ -233,8 +233,8 @@ class GuestController extends Controller
           $this::_DEBUG ? Storage::append($this::_DEBUG_LOG_FILE_CALLBACK, 'VALID_' . $photo_URL) : $api_core->log_failed();
 
           //check exist
-          $row = RestaurantFoodScan::where('deleted', 0)
-            ->where('restaurant_id', $restaurant->id)
+          $row = RestaurantFoodScan::where('restaurant_id', $restaurant->id)
+//            ->where('deleted', 0)
             ->where('photo_name', $key)
             ->first();
 

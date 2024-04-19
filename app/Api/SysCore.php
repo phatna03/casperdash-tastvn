@@ -209,33 +209,52 @@ class SysCore
           ]);
 
           if ($s3_objects && isset($s3_objects['Contents']) && count($s3_objects['Contents'])) {
-            foreach ($s3_objects['Contents'] as $content) {
 
-              $URL = "https://s3.{$s3_region}.amazonaws.com/{$s3_bucket}/{$content['Key']}";
+            //group
+            $s3_contents = [];
+            foreach ($s3_objects['Contents'] as $content) {
+              $s3_contents[] = [
+                'key' => $content['Key'],
+                'date' => $content['LastModified']->format('Y-m-d H:i:s'),
+              ];
+            }
+
+            //sort
+            $a1 = [];
+            $a2 = [];
+            foreach ($s3_contents as $key => $row) {
+              $a1[$key] = $row['date'];
+              $a2[$key] = $row['key'];
+            }
+            array_multisort($a1, SORT_DESC, $a2, SORT_DESC, $s3_contents);
+
+            //check
+            foreach ($s3_contents as $content) {
+
+              $URL = "https://s3.{$s3_region}.amazonaws.com/{$s3_bucket}/{$content['key']}";
               //valid photo
               if (@getimagesize($URL)) {
 
-                $this::_DEBUG ? Storage::append($this::_DEBUG_LOG_FILE_CRON, 'KEY - ' . $content['Key']) : $this->log_failed();
+                $this::_DEBUG ? Storage::append($this::_DEBUG_LOG_FILE_CRON, 'KEY - ' . $content['key']) : $this->log_failed();
                 $this::_DEBUG ? Storage::append($this::_DEBUG_LOG_FILE_CRON, 'URL - ' . $URL) : $this->log_failed();
 
-                $row = RestaurantFoodScan::where('deleted', 0)
-                  ->where('restaurant_id', $restaurant->id)
-                  ->where('photo_name', $content['Key'])
+                $row = RestaurantFoodScan::where('restaurant_id', $restaurant->id)
+//                  ->where('deleted', 0)
+                  ->where('photo_name', $content['key'])
                   ->first();
                 if ($row) {
-                  continue;
+                  break;
                 }
 
-                $time_photo = date('Y-m-d H:i:s', strtotime($content['LastModified']->__toString()));
-                $exts = explode('.', $content['Key']);
+                $exts = explode('.', $content['key']);
 
                 RestaurantFoodScan::create([
                   'restaurant_id' => $restaurant->id,
                   'photo_url' => $URL,
-                  'photo_name' => $content['Key'],
+                  'photo_name' => $content['key'],
                   'photo_ext' => $exts[1],
                   'status' => 'new',
-                  'time_photo' => $time_photo,
+                  'time_photo' => $content['date'],
                 ]);
 
                 $photo_new = 1;
