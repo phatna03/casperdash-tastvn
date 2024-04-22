@@ -684,7 +684,7 @@ function sys_setting() {
     .then(response => {
 
       message_from_toast('success', acmcfs.message_title_success, acmcfs.message_description_success_update, true);
-      page_reload(acmcfs.timeout_default);
+      page_reload(acmcfs.timeout_quick);
 
     })
     .catch(error => {
@@ -2462,7 +2462,7 @@ function notification_newest() {
       if (response.data.speaker) {
         setTimeout(function () {
           speaker_play();
-        }, acmcfs.timeout_default);
+        }, acmcfs.timeout_quick);
       }
 
       if (response.data.role) {

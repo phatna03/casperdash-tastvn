@@ -123,10 +123,11 @@ class RestaurantFoodScan extends Model
     return $select->get();
   }
 
-  public function predict_food()
+  public function predict_food($pars = [])
   {
     $result = (array)json_decode($this->rbf_api, true);
     $api_core = new SysCore();
+    $notification = isset($pars['notification']) ? (bool)$pars['notification'] : true;
 
     if (count($result)) {
 
@@ -223,7 +224,7 @@ class RestaurantFoodScan extends Model
 
         $ingredients_found = $food->get_ingredients_info($ingredients_found);
         $ingredients_missing = $food->missing_ingredients($ingredients_found);
-        $this->add_ingredients_missing($ingredients_missing);
+        $this->add_ingredients_missing($ingredients_missing, $notification);
       }
 
       //other params

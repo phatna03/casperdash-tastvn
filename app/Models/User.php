@@ -63,28 +63,36 @@ class User extends Authenticatable
     ];
   }
 
-  public function set_setting($key, $value)
+  public function row_setting($key)
   {
-    $row = UserSetting::firstOrCreate([
-      'user_id' => $this->id,
-      'key' => $key,
-    ]);
+    $row = UserSetting::where('user_id', $this->id)
+      ->where('key', $key)
+      ->first();
 
-    if ($row) {
-      $row->update([
-        'value' => $value,
+    if (!$row) {
+      $row = UserSetting::create([
+        'user_id' => $this->id,
+        'key' => $key,
       ]);
     }
 
     return $row;
   }
 
+  public function set_setting($key, $value)
+  {
+    $row = $this->row_setting($key);
+
+    $row->update([
+      'value' => $value,
+    ]);
+
+    return $row;
+  }
+
   public function get_setting($key)
   {
-    $row = UserSetting::firstOrCreate([
-      'user_id' => $this->id,
-      'key' => $key,
-    ]);
+    $row = $this->row_setting($key);
 
     return $row ? $row->value : NULL;
   }

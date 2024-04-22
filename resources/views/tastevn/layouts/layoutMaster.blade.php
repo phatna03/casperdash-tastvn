@@ -46,7 +46,7 @@
 
     timeout_default: 2000,
     timeout_quick: 500,
-    timeout_notification: 5000,
+    timeout_notification: 3000,
 
     rbf_model: null,
 
