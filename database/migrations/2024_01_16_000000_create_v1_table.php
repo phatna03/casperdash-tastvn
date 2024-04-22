@@ -121,6 +121,7 @@ return new class extends Migration {
         $table->smallInteger('rbf_confidence')->default(0);
         $table->smallInteger('rbf_retrain')->default(0);
         $table->longText('rbf_api')->nullable();
+        $table->longText('rbf_api_js')->nullable();
         $table->longText('usr_edited')->nullable();
         $table->bigInteger('deleted')->default(0);
         $table->timestamps();

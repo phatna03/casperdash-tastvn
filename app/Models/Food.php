@@ -169,6 +169,43 @@ class Food extends Model
     return $select->get();
   }
 
+  public function get_ingredients_core($pars = [])
+  {
+    $tblFoodIngredient = app(FoodIngredient::class)->getTable();
+    $tblIngredient = app(Ingredient::class)->getTable();
+
+    $select = FoodIngredient::query($tblFoodIngredient)
+      ->distinct()
+      ->select("{$tblFoodIngredient}.id as food_ingredient_id", "{$tblIngredient}.id",
+        "{$tblIngredient}.name", "{$tblIngredient}.name_vi", "{$tblFoodIngredient}.ingredient_color",
+        "{$tblFoodIngredient}.ingredient_quantity", "{$tblFoodIngredient}.ingredient_type"
+      )
+      ->leftJoin($tblIngredient, "{$tblIngredient}.id", "=", "{$tblFoodIngredient}.ingredient_id")
+      ->where("{$tblFoodIngredient}.deleted", 0)
+      ->where("{$tblFoodIngredient}.food_id", $this->id)
+      ->where("{$tblFoodIngredient}.ingredient_type", 'core')
+      ->orderBy("{$tblFoodIngredient}.ingredient_type", "asc")
+      ->orderBy("{$tblFoodIngredient}.ingredient_quantity", "desc")
+      ->orderBy("{$tblFoodIngredient}.id");
+
+    $rows = $select->get();
+
+    if (isset($pars['ingredient_id_only']) && (int)$pars['ingredient_id_only']) {
+      $items = [];
+
+      if (count($rows)) {
+        foreach ($rows as $row) {
+          $items[] = $row->id;
+        }
+      }
+
+      sort($items);
+      return $items;
+    }
+
+    return $rows;
+  }
+
   public function check_food_confidence_by_ingredients($predictionsIds = [])
   {
     $count = 0;

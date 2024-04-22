@@ -13,7 +13,7 @@
       <div class="col-lg-12 mb-2">
         <div class="text-primary fw-bold">+ Ingredients</div>
         @foreach($ingredients as $ingredient)
-          <div class="acm-ml-px-5 ">
+          <div class="acm-ml-px-5 @if($ingredient->ingredient_type == 'core') acm-highlight @endif">
             - <b class="fnumber">{{$ingredient->ingredient_quantity}}</b>
             <span>{{$ingredient->name}}</span>
           </div>

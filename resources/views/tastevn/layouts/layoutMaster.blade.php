@@ -21,12 +21,12 @@
 <link rel="stylesheet" href="{{url('custom/library/selectize/selectize.css')}}" />
 <link rel="stylesheet" href="{{url('custom/css/app.css')}}"/>
 {{--js--}}
+<script src="https://cdn.roboflow.com/0.2.26/roboflow.js"></script>
 <script src="{{asset('assets/vendor/libs/toastr/toastr.js')}}"></script>
 <script src="{{url('custom/library/currency/format_number.js')}}"></script>
 <script src="{{url('custom/library/selectize/selectize.min.js')}}"></script>
 <script src="{{url('custom/library/axios/axios.min.js')}}"></script>
 <script src="{{url('custom/js/app.js')}}"></script>
-{{--<script src="https://unpkg.com/axios/dist/axios.min.js"></script>--}}
 
 <script type="text/javascript">
   //tastevn
@@ -47,6 +47,8 @@
     timeout_default: 2000,
     timeout_quick: 500,
     timeout_notification: 5000,
+
+    rbf_model: null,
 
     //speaker
     speaker: 0,
@@ -108,6 +110,37 @@
       $('.modal-backdrop').not('.stacked').addClass('stacked');
     });
 
+    //roboflow
+    roboflow.auth({
+      publishable_key: "rf_3DtUFXV7oiSXMh2VkXK8d0EHcRD2"
+    });
+    async function rbf_load_model() {
+      var model = await roboflow.load({
+        model: "missing-dish-ingredients",
+        version: 17
+      });
+
+      model.configure({
+        threshold: 0.5,
+        overlap: 0.6,
+        max_objects: 50
+      });
+
+      acmcfs.rbf_model = model;
+
+      return model;
+    }
+
+// Call the async function
+    rbf_load_model().then(model => {
+      // Do something with the model
+      console.log(model.getMetadata());
+      console.log(model.getConfiguration());
+      console.log('ok...');
+
+    }).catch(error => {
+      console.error('Error loading model:', error);
+    });
     @endauth
   });
 </script>

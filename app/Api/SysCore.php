@@ -530,7 +530,7 @@ class SysCore
     if (count($foods) && count($ingredients)) {
       foreach ($foods as $food) {
         $confidence = $food->check_food_confidence_by_ingredients($ingredients);
-        if ($confidence && $confidence >= 70) {
+        if ($confidence && $confidence >= 80) {
           $arr[] = [
             'food' => $food->id,
             'food_name' => $food->name,

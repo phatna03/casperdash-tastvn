@@ -45,6 +45,7 @@ class RestaurantFoodScan extends Model
     'rbf_predict',
     'rbf_confidence',
     'rbf_api',
+    'rbf_api_js',
     //1= need retrain //2= retrain success //3= retrain failed
     'rbf_retrain',
     'deleted',
@@ -144,10 +145,31 @@ class RestaurantFoodScan extends Model
           $found = Food::whereRaw('LOWER(name) LIKE ?', strtolower(trim($prediction['class'])))
             ->first();
           if ($found && $confidence >= 50 && count($ingredients_found)) {
-            $foods[] = [
-              'food' => $found->id,
-              'confidence' => $confidence,
-            ];
+
+            //check core ingredient
+            $valid_core = true;
+            $core_ids = $found->get_ingredients_core([
+              'ingredient_id_only' => 1,
+            ]);
+            if (count($core_ids)) {
+              $found_ids = array_column($ingredients_found, 'id');
+              $found_count = 0;
+              foreach ($found_ids as $found_id) {
+                if (in_array($found_id, $core_ids)) {
+                  $found_count++;
+                }
+              }
+              if ($found_count != count($core_ids)) {
+                $valid_core = false;
+              }
+            }
+
+            if ($valid_core) {
+              $foods[] = [
+                'food' => $found->id,
+                'confidence' => $confidence,
+              ];
+            }
           }
         }
       }

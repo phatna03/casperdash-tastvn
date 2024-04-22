@@ -122,15 +122,21 @@ class GuestController extends Controller
     $date = isset($values['date']) ? $values['date'] : date('Y-m-d');
     $dated = isset($values['date']) ? $values['date'] : date('Y_m_d');
 
-    $rows = RestaurantFoodScan::where('deleted', 0)
+    $restaurant_id = isset($values['restaurant_id']) ? (int)$values['restaurant_id'] : 0;
+
+    $select = RestaurantFoodScan::where('deleted', 0)
       ->whereIn('status', ['checked', 'failed'])
       ->where('total_seconds', '>', 0)
       ->where('rbf_api', '<>', NULL)
       ->whereDate('time_photo', $date)
-      ->orderBy('id', 'desc')
-      ->get();
+      ->orderBy('id', 'desc');
+
+    if ($restaurant_id) {
+      $select->where('restaurant_id', $restaurant_id);
+    }
 
     $items = [];
+    $rows = $select->get();
     if (count($rows)) {
       foreach ($rows as $row) {
 

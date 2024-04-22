@@ -309,6 +309,11 @@
   overflow-y: scroll;
 }
 
+.acm-highlight {
+  color: #fa0000 !important;
+  font-weight: bold;
+}
+
 .acm-lbl-highlight {
   color: #fa0000 !important;
   font-weight: bold;
