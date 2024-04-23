@@ -5,6 +5,7 @@ namespace App\Http\Controllers\tastevn\view;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Storage;
 
@@ -13,6 +14,7 @@ use App\Api\SysCore;
 
 use Maatwebsite\Excel\Facades\Excel;
 use App\Excel\ExportRfs;
+use App\Excel\ExportFoodReport;
 
 use Validator;
 use App\Models\User;
@@ -115,7 +117,7 @@ class GuestController extends Controller
     return view('tastevn.pages.printer', ['pageConfigs' => $pageConfigs]);
   }
 
-  public function excel(Request $request)
+  public function excel1(Request $request)
   {
     $values = $request->all();
 
@@ -170,6 +172,50 @@ class GuestController extends Controller
 //    echo '<pre>';var_dump($items);die;
 
     $excel = new ExportRfs();
+    $excel->setItems($items);
+    return Excel::download($excel, 'export_data_' . $dated . '.xlsx');
+  }
+
+  public function excel2(Request $request)
+  {
+    $values = $request->all();
+    $api_core = new SysCore();
+
+    $date = isset($values['date']) ? $values['date'] : date('Y-m-d');
+    $dated = isset($values['date']) ? $values['date'] : date('Y_m_d');
+
+    $restaurant_id = isset($values['restaurant_id']) ? (int)$values['restaurant_id'] : 0;
+
+    $tblFood = app(Food::class)->getTable();
+    $tblRfs = app(RestaurantFoodScan::class)->getTable();
+
+    $select = Food::query($tblFood)
+//      ->distinct()
+      ->select("$tblFood.id", "$tblFood.name")
+      ->selectRaw("COUNT($tblRfs.id) as total_photos")
+      ->selectRaw("COUNT($tblRfs.missing_ids) as photo_missing")
+      ->leftJoin($tblRfs, "$tblFood.id", '=', "$tblRfs.food_id")
+      ->where("$tblFood.deleted", 0)
+      ->where("$tblRfs.deleted", 0)
+      ->whereIn("$tblRfs.status", ['checked', 'edited'])
+      ->whereDate("$tblRfs.time_photo", $date)
+      ->groupBy("$tblFood.id", "$tblFood.name")
+      ->orderByRaw("TRIM(LOWER($tblFood.name))");
+
+    if ($restaurant_id) {
+      $select->where("$tblRfs.restaurant_id", $restaurant_id);
+    }
+
+//    var_dump($api_core->parse_to_query($select));die;
+
+    $items = $select->get();
+
+    if (!count($items)) {
+      die('no data');
+    }
+//    echo '<pre>';var_dump($items);die;
+
+    $excel = new ExportFoodReport();
     $excel->setItems($items);
     return Excel::download($excel, 'export_data_' . $dated . '.xlsx');
   }

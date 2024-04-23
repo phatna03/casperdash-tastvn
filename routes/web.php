@@ -213,7 +213,8 @@ Route::get('/s3/bucket/get', [GuestController::class, 's3_bucket_get']);
 Route::get('/printer', [GuestController::class, 'printer']);
 Route::get('/printer-test', [GuestController::class, 'printer_test']);
 Route::get('/page_not_found', [GuestController::class, 'page_not_found']);
-Route::get('/excel', [GuestController::class, 'excel']);
+Route::get('/excel1', [GuestController::class, 'excel1']);
+Route::get('/excel2', [GuestController::class, 'excel2']);
 Route::get('/tester', [TesterController::class, 'index']);
 
 Route::get('/admin/settings', [SettingController::class, 'index']);

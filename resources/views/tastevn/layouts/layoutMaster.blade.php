@@ -21,7 +21,7 @@
 <link rel="stylesheet" href="{{url('custom/library/selectize/selectize.css')}}" />
 <link rel="stylesheet" href="{{url('custom/css/app.css')}}"/>
 {{--js--}}
-<script src="https://cdn.roboflow.com/0.2.26/roboflow.js"></script>
+<script src="{{url('custom/library/roboflow/roboflow.js')}}"></script>
 <script src="{{asset('assets/vendor/libs/toastr/toastr.js')}}"></script>
 <script src="{{url('custom/library/currency/format_number.js')}}"></script>
 <script src="{{url('custom/library/selectize/selectize.min.js')}}"></script>
@@ -46,7 +46,7 @@
 
     timeout_default: 2000,
     timeout_quick: 500,
-    timeout_notification: 3000,
+    timeout_notification: 5000,
 
     rbf_model: null,
 
