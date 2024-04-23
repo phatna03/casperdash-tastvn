@@ -215,7 +215,8 @@ class SysCore
             foreach ($s3_objects['Contents'] as $content) {
               $s3_contents[] = [
                 'key' => $content['Key'],
-                'date' => $content['LastModified']->format('Y-m-d H:i:s'),
+//                'date' => $content['LastModified']->format('Y-m-d H:i:s'), //UTC=0
+                'date' => date('Y-m-d H:i:s', strtotime($content['LastModified']->__toString())),
               ];
             }
 

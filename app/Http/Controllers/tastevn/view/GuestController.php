@@ -127,7 +127,7 @@ class GuestController extends Controller
     $restaurant_id = isset($values['restaurant_id']) ? (int)$values['restaurant_id'] : 0;
 
     $select = RestaurantFoodScan::where('deleted', 0)
-      ->whereIn('status', ['checked', 'failed'])
+      ->whereIn('status', ['checked', 'edited', 'failed'])
       ->where('total_seconds', '>', 0)
       ->where('rbf_api', '<>', NULL)
       ->whereDate('time_photo', $date)
