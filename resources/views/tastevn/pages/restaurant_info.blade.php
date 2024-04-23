@@ -48,7 +48,7 @@
                     <input type="text" class="form-control text-center date_time_picker" name="search_time"
                            autocomplete="off"
                            onchange="stats_total()"
-                           data-value="current_month"
+                           data-value="last_and_current_day"
                     />
                     <label>Date Time Range</label>
                   </div>
@@ -283,7 +283,7 @@
                     <div class="col-md-6 mb-2">
                       <div class="form-floating form-floating-outline">
                         <input type="text" class="form-control text-center date_time_picker" name="time_upload"
-                               id="scan-search-time-upload" autocomplete="off" data-value="current_month"
+                               id="scan-search-time-upload" autocomplete="off" data-value="last_and_current_day"
                                onchange="restaurant_search_food_scan(this)"/>
                         <label for="scan-search-time-upload">Time upload</label>
                       </div>
@@ -291,7 +291,7 @@
                     <div class="col-md-6 mb-2">
                       <div class="form-floating form-floating-outline">
                         <input type="text" class="form-control text-center date_time_picker" name="time_scan"
-                               id="scan-search-time-scan" autocomplete="off" data-value="current_month"
+                               id="scan-search-time-scan" autocomplete="off" data-value="last_and_current_day"
                                onchange="restaurant_search_food_scan(this)"/>
                         <label for="scan-search-time-scan">Time scanned</label>
                       </div>
@@ -377,7 +377,7 @@
                     <div class="col-md-6 mb-2">
                       <div class="form-floating form-floating-outline">
                         <input type="text" class="form-control text-center date_time_picker" name="time_upload"
-                               id="error-search-time-upload" autocomplete="off" data-value="current_month"
+                               id="error-search-time-upload" autocomplete="off" data-value="last_and_current_day"
                                onchange="restaurant_search_food_scan_error(this)"/>
                         <label for="error-search-time-upload">Time upload</label>
                       </div>
@@ -385,7 +385,7 @@
                     <div class="col-md-6 mb-2">
                       <div class="form-floating form-floating-outline">
                         <input type="text" class="form-control text-center date_time_picker" name="time_scan"
-                               id="error-search-time-scan" autocomplete="off" data-value="current_month"
+                               id="error-search-time-scan" autocomplete="off" data-value="last_and_current_day"
                                onchange="restaurant_search_food_scan_error(this)"/>
                         <label for="error-search-time-scan">Time scanned</label>
                       </div>

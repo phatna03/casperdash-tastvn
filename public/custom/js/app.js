@@ -1592,6 +1592,8 @@ function restaurant_food_scan_result_info(id) {
       bind_datad(popup);
       popup.modal('show');
 
+
+
     })
     .catch(error => {
       if (error.response.data && Object.values(error.response.data).length) {

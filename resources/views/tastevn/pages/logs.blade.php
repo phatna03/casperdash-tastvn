@@ -88,7 +88,7 @@
           <div class="col-md-6 mb-2">
             <div class="form-floating form-floating-outline">
               <input type="text" class="form-control text-center date_time_picker" name="time_created"
-                     id="log-search-time-created" autocomplete="off" data-value="current_month"
+                     id="log-search-time-created" autocomplete="off" data-value="last_and_current_day"
                      onchange="datatable_refresh()"/>
               <label for="log-search-time-created">Time created</label>
             </div>
