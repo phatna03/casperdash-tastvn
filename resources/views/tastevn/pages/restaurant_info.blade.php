@@ -647,6 +647,18 @@
       datatable_listing_scan = $('#datatable-listing-scan table').DataTable(Object.assign(datatable_listing_scan_cfs, acmcfs.datatable_init));
       datatable_listing_error = $('#datatable-listing-error table').DataTable(Object.assign(datatable_listing_error_cfs, acmcfs.datatable_init));
 
+      //
+      $(document).keydown(function(e) {
+        console.log(e.keyCode);
+        if ($('#modal_food_scan_info').hasClass('show')) {
+          if (e.keyCode == 37) {
+            restaurant_food_scan_result_info_action();
+          } else if (e.keyCode == 39) {
+            restaurant_food_scan_result_info_action(1);
+          }
+        }
+      });
+
     });
 
     var datatable_listing_food;
