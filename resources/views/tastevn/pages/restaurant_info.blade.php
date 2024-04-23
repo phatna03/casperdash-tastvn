@@ -147,7 +147,7 @@
           </div>
         </div>
 
-        <div class="card-body d-flex justify-content-between flex-wrap gap-3">
+        <div class="card-body d-flex justify-content-between flex-wrap gap-3 no_moderator no_user">
           @php
           @endphp
           <div class="card-datatable table-responsive">
