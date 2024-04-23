@@ -142,26 +142,25 @@ class GuestController extends Controller
     if (count($rows)) {
       foreach ($rows as $row) {
 
-        $time1 = (float)date('s', strtotime($row->time_scan) - strtotime($row->time_photo));
+        $time1 = (float)date('s', strtotime($row->created_at) - strtotime($row->time_photo));
         $time2 = (float)$row->total_seconds;
-        $time4 = !empty($row->time_end)
+        $time3 = !empty($row->time_end)
           ? (float)date('s', strtotime($row->time_end) - strtotime($row->time_scan)) : 0;
-        $time5 = !empty($row->time_end)
-          ? $time1 + $time2 + $time4 : 0;
+        $time4 = !empty($row->time_end)
+          ? $time1 + $time2 + $time3 : 0;
 
         $items[] = [
+          'id' => $row->id,
           'photo_url' => $row->photo_url,
           'time_photo' => $row->time_photo,
           'time_scan' => $row->time_scan,
           'time_end' => $row->time_end,
-          'updated_at' => date('Y-m-d H:i:s', strtotime($row->updated_at)),
+          'time_save' => date('Y-m-d H:i:s', strtotime($row->created_at)),
 
           'time_1' => $time1,
           'time_2' => $time2,
-          'time_3' => $time1 + $time2,
-
+          'time_3' => $time3,
           'time_4' => $time4,
-          'time_5' => $time5,
         ];
       }
     }
