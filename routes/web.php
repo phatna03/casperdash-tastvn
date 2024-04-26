@@ -506,6 +506,7 @@ Route::post('/admin/food/ingredient/html', [FoodController::class, 'ingredient_h
 Route::post('/admin/food/store', [FoodController::class, 'store']);
 Route::post('/admin/food/update', [FoodController::class, 'update']);
 Route::post('/admin/food/import', [FoodController::class, 'import']);
+Route::post('/admin/food/import/recipe', [FoodController::class, 'import_recipe']);
 Route::post('/admin/food/selectize', [FoodController::class, 'selectize']);
 Route::get('/datatable/foods', function (Request $request) {
   $values = $request->all();

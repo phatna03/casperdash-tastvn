@@ -532,11 +532,39 @@ class SysCore
       foreach ($foods as $food) {
         $confidence = $food->check_food_confidence_by_ingredients($ingredients);
         if ($confidence && $confidence >= 80) {
-          $arr[] = [
-            'food' => $food->id,
-            'food_name' => $food->name,
-            'confidence' => $confidence,
-          ];
+
+          //check valid ingredient
+          $valid_food = true;
+          $food_ingredients = $food->get_ingredients();
+          if (!count($food_ingredients)) {
+            $valid_food = false;
+          }
+
+          //check core ingredient
+          $valid_core = true;
+          $core_ids = $food->get_ingredients_core([
+            'ingredient_id_only' => 1,
+          ]);
+          if (count($core_ids)) {
+            $found_ids = array_column($ingredients, 'id');
+            $found_count = 0;
+            foreach ($found_ids as $found_id) {
+              if (in_array($found_id, $core_ids)) {
+                $found_count++;
+              }
+            }
+            if ($found_count != count($core_ids)) {
+              $valid_core = false;
+            }
+          }
+
+          if ($valid_core && $valid_food) {
+            $arr[] = [
+              'food' => $food->id,
+              'food_name' => $food->name,
+              'confidence' => $confidence,
+            ];
+          }
         }
       }
     }

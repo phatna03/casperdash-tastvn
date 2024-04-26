@@ -147,6 +147,13 @@ class RestaurantFoodScan extends Model
             ->first();
           if ($found && $confidence >= 50 && count($ingredients_found)) {
 
+            //check valid ingredient
+            $valid_food = true;
+            $food_ingredients = $found->get_ingredients();
+            if (!count($food_ingredients)) {
+              $valid_food = false;
+            }
+
             //check core ingredient
             $valid_core = true;
             $core_ids = $found->get_ingredients_core([
@@ -165,7 +172,7 @@ class RestaurantFoodScan extends Model
               }
             }
 
-            if ($valid_core) {
+            if ($valid_core && $valid_food) {
               $foods[] = [
                 'food' => $found->id,
                 'confidence' => $confidence,
@@ -224,7 +231,7 @@ class RestaurantFoodScan extends Model
 
         $ingredients_found = $food->get_ingredients_info($ingredients_found);
         $ingredients_missing = $food->missing_ingredients($ingredients_found);
-        $this->add_ingredients_missing($ingredients_missing, $notification);
+        $this->add_ingredients_missing($food, $ingredients_missing, $notification);
       }
 
       //other params
@@ -260,7 +267,7 @@ class RestaurantFoodScan extends Model
     return (int)$count;
   }
 
-  public function add_ingredients_missing($ingredients = [], $notification = true)
+  public function add_ingredients_missing($food, $ingredients = [], $notification = true)
   {
     RestaurantFoodScanMissing::where('restaurant_food_scan_id', $this->id)
       ->delete();
@@ -280,14 +287,31 @@ class RestaurantFoodScan extends Model
         $users = $this->get_restaurant()->get_users();
         if (count($users)) {
           foreach ($users as $user) {
-            if ((int)$user->get_setting('missing_ingredient_receive')) {
-              //user_setting
-              Notification::send($user, new IngredientMissing([
-                'type' => 'ingredient_missing',
-                'restaurant_food_scan_id' => $this->id,
-                'user' => $user,
-              ]));
+
+            //live_group
+            $valid_group = true;
+            if ($food->live_group > 1) {
+              $valid_group = false;
             }
+            if ($user->is_admin()) {
+              $valid_group = true;
+            }
+
+            //user_setting
+            $valid_setting = false;
+            if ((int)$user->get_setting('missing_ingredient_receive')) {
+              $valid_setting = true;
+            }
+
+            if (!$valid_group || !$valid_setting) {
+              continue;
+            }
+
+            Notification::send($user, new IngredientMissing([
+              'type' => 'ingredient_missing',
+              'restaurant_food_scan_id' => $this->id,
+              'user' => $user,
+            ]));
           }
         }
       }

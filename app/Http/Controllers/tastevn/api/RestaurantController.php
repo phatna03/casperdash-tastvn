@@ -724,7 +724,7 @@ class RestaurantController extends Controller
             ];
           }
         }
-        $row->add_ingredients_missing($ingredients_missing, false);
+        $row->add_ingredients_missing($food, $ingredients_missing, false);
 
       }
     }

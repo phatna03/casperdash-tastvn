@@ -50,6 +50,7 @@ return new class extends Migration {
         $table->id();
         $table->string('name');
         $table->text('photo')->nullable();
+        $table->bigInteger('live_group')->default(3);
         $table->bigInteger('count_restaurants')->default(0);
         $table->bigInteger('creator_id')->default(0);
         $table->bigInteger('deleted')->default(0);

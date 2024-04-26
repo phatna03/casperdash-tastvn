@@ -142,25 +142,49 @@ class GuestController extends Controller
     if (count($rows)) {
       foreach ($rows as $row) {
 
-        $time1 = (float)date('s', strtotime($row->created_at) - strtotime($row->time_photo));
-        $time2 = (float)$row->total_seconds;
-        $time3 = !empty($row->time_end)
-          ? (float)date('s', strtotime($row->time_end) - strtotime($row->time_scan)) : 0;
-        $time4 = !empty($row->time_end)
-          ? $time1 + $time2 + $time3 : 0;
+//        58-5b-69-15-cd-2b/SENSOR/1/2024-04-22/9/SENSOR1_2024-04-22-09-32-39-229_087.jpg
+        $photo_names = explode('SENSOR1_', $row->photo_name);
+        if (count($photo_names) < 2) {
+          $photo_names = explode('SENSOR_', $row->photo_name);
+        }
+        $temps = array_filter(explode('-', $photo_names[1]));
+        $time_photo = date($temps[0] . '-' . $temps[1] . '-' . $temps[2] . ' ' . $temps[3] . ':' . $temps[4] . ':' . $temps[5]);
+
+        $time_s3 = date('Y-m-d H:i:s', strtotime($row->time_photo));
+        $time_web = date('Y-m-d H:i:s', strtotime($row->created_at));
+        $time_scan = date('Y-m-d H:i:s', strtotime($row->time_scan));
+        $time_end = !empty($row->time_end) ? date('Y-m-d H:i:s', strtotime($row->time_end)) : '';
+
+        $time1 = (float)date('s', strtotime($time_s3) - strtotime($time_photo))
+          ? (float)date('s', strtotime($time_s3) - strtotime($time_photo)) : 0;
+
+        $time2 = (float)date('s', strtotime($time_web) - strtotime($time_s3))
+          ? (float)date('s', strtotime($time_web) - strtotime($time_s3)) : 0;
+
+        $time3 = (float)date('s', strtotime($time_scan) - strtotime($time_web))
+          ? (float)date('s', strtotime($time_scan) - strtotime($time_web)) : 0;
+
+        $time4 = (float)date('s', strtotime($time_end) - strtotime($time_scan))
+          ? (float)date('s', strtotime($time_end) - strtotime($time_scan)) : 0;
+
+        $time5 = !empty($row->time_end)
+          ? $time1 + $time2 + $time3 + $time4 : 0;
 
         $items[] = [
           'id' => $row->id,
           'photo_url' => $row->photo_url,
-          'time_photo' => $row->time_photo,
-          'time_scan' => $row->time_scan,
-          'time_end' => $row->time_end,
-          'time_save' => date('Y-m-d H:i:s', strtotime($row->created_at)),
+
+          'time_photo' => $time_photo,
+          'time_s3' => $time_s3,
+          'time_web' => $time_web,
+          'time_scan' => $time_scan,
+          'time_end' => $time_end,
 
           'time_1' => $time1,
           'time_2' => $time2,
           'time_3' => $time3,
           'time_4' => $time4,
+          'time_5' => $time5,
         ];
       }
     }

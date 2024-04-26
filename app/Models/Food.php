@@ -15,6 +15,7 @@ class Food extends Model
   protected $fillable = [
     'name',
     'photo',
+    'live_group',
     'count_restaurants',
     'creator_id',
     'deleted',
@@ -51,6 +52,47 @@ class Food extends Model
       'name' => $this->name,
       'ingredients' => $ingredients,
     ];
+  }
+
+  public function add_recipes($ingredients = [])
+  {
+    //duplicate
+    $ids = [];
+
+    if (count($ingredients)) {
+      foreach ($ingredients as $ingredient) {
+        $ingredient = (array)$ingredient;
+
+        if (!in_array((int)$ingredient['id'], $ids)) {
+          FoodRecipe::create([
+            'food_id' => $this->id,
+            'ingredient_id' => (int)$ingredient['id'],
+            'ingredient_quantity' => (int)$ingredient['quantity'],
+          ]);
+        }
+
+        $ids[] = (int)$ingredient['id'];
+      }
+    }
+  }
+
+  public function get_recipes()
+  {
+    $tblFoodIngredient = app(FoodRecipe::class)->getTable();
+    $tblIngredient = app(Ingredient::class)->getTable();
+
+    $select = FoodRecipe::query($tblFoodIngredient)
+      ->distinct()
+      ->select("{$tblFoodIngredient}.id as food_ingredient_id", "{$tblIngredient}.id",
+        "{$tblIngredient}.name", "{$tblIngredient}.name_vi", "{$tblFoodIngredient}.ingredient_quantity"
+      )
+      ->leftJoin($tblIngredient, "{$tblIngredient}.id", "=", "{$tblFoodIngredient}.ingredient_id")
+      ->where("{$tblFoodIngredient}.deleted", 0)
+      ->where("{$tblFoodIngredient}.food_id", $this->id)
+      ->orderBy("{$tblFoodIngredient}.ingredient_quantity", "desc")
+      ->orderBy("{$tblFoodIngredient}.id");
+
+    return $select->get();
   }
 
   public function add_ingredients($ingredients = [])

@@ -2371,6 +2371,32 @@ function food_import(evt, frm) {
   return false;
 }
 
+function food_import_recipe(evt, frm) {
+  evt.preventDefault();
+  var form = $(frm);
+
+  const formData = new FormData();
+  formData.append('excel', form.find('input[type=file]')[0].files[0]);
+
+  axios.post('/admin/food/import/recipe', formData)
+    .then(response => {
+
+      message_from_toast('success', acmcfs.message_title_success, acmcfs.message_description_success_add, true);
+
+      datatable_refresh();
+
+    })
+    .catch(error => {
+      if (error.response.data && Object.values(error.response.data).length) {
+        Object.values(error.response.data).forEach(function (v, k) {
+          message_from_toast('error', acmcfs.message_title_error, v);
+        });
+      }
+    });
+
+  return false;
+}
+
 function notification_read(ele) {
   var bind = $(ele);
 

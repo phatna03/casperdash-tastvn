@@ -14,7 +14,7 @@ $ingredients = isset($ingredients) && count($ingredients) ? $ingredients : [];
       <input type="hidden" name="old" value="{{$ingredient->food_ingredient_id}}" />
 
       <div class="row">
-        <div class="col-lg-1 mb-1 d-none">
+        <div class="col-lg-2 mb-1">
           <div>
             <label class="form-check-label">core</label>
           </div>
@@ -34,7 +34,7 @@ $ingredients = isset($ingredients) && count($ingredients) ? $ingredients : [];
                  value="{{$ingredient ? $ingredient->ingredient_quantity : 1}}"
           />
         </div>
-        <div class="col-lg-10 mb-1">
+        <div class="col-lg-8 mb-1">
           <select class="ajx_selectize" name="ing_name"
                   data-value="ingredient"
                   data-placeholder="ingredient name..."
@@ -59,7 +59,7 @@ $ingredients = isset($ingredients) && count($ingredients) ? $ingredients : [];
   </div>
 
   <div class="row">
-    <div class="col-lg-1 mb-1 d-none">
+    <div class="col-lg-2 mb-1">
       <div>
         <label class="form-check-label">core</label>
       </div>
@@ -76,7 +76,7 @@ $ingredients = isset($ingredients) && count($ingredients) ? $ingredients : [];
              onblur="ingredient_item_focus(this); input_number_min_one(this);"
              placeholder="quantity" value="1" />
     </div>
-    <div class="col-lg-10 mb-1">
+    <div class="col-lg-8 mb-1">
       <select class="ajx_selectize" name="ing_name"
               data-value="ingredient"
               data-placeholder="ingredient name..."

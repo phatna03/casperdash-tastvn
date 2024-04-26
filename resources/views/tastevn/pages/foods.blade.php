@@ -160,6 +160,34 @@
       </div>
     </div>
   </div>
+  <div class="modal animate__animated animate__rollIn" id="modal_import_recipe" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <form onsubmit="return food_import_recipe(event, this);">
+          <div class="modal-header">
+            <h4 class="modal-title">Import Recipes</h4>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="row">
+              <a class="text-primary fw-bold" href="{{url('import_food.xlsx')}}" download="" style="margin-bottom: 10px;">Download excel template file</a>
+
+              <div class="col-12">
+                <input name="file" type="file"
+                       accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+                       required onchange="excel_check(this)" class="form-control"
+                />
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-primary">Confirm</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
 @endsection
 
 @section('js_end')
@@ -287,16 +315,24 @@
       buttons: [
         @if($viewer->is_admin())
         {
-          text: '<i class="mdi mdi-plus me-0 me-sm-1"></i><span class="d-none d-sm-inline-block">Import Excel</span>',
-          className: 'add-new btn btn-info waves-effect waves-light acm-mr-px-10',
+          text: '<i class="mdi mdi-plus me-0 me-sm-1"></i><span class="d-none d-sm-inline-block">Import Ingredients</span>',
+          className: 'add-new btn btn-info waves-effect waves-light',
           attr: {
             'data-bs-toggle': 'modal',
             'data-bs-target': '#modal_import',
           }
         },
         {
+          text: '<i class="mdi mdi-plus me-0 me-sm-1"></i><span class="d-none d-sm-inline-block">Import Recipes</span>',
+          className: 'add-new btn btn-warning waves-effect waves-light',
+          attr: {
+            'data-bs-toggle': 'modal',
+            'data-bs-target': '#modal_import_recipe',
+          }
+        },
+        {
           text: '<i class="mdi mdi-plus me-0 me-sm-1"></i><span class="d-none d-sm-inline-block">Add Dish</span>',
-          className: 'add-new btn btn-primary waves-effect waves-light acm-mr-px-10',
+          className: 'add-new btn btn-primary waves-effect waves-light',
           attr: {
             'data-bs-toggle': 'offcanvas',
             'data-bs-target': '#offcanvas_add_item',

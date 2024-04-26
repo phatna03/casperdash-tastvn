@@ -406,45 +406,47 @@ class FoodController extends Controller
 
           $row = Food::whereRaw('LOWER(name) LIKE ?', strtolower($temp['food']))
             ->first();
-          if ($row || !isset($temp['ingredient']) || !count($temp['ingredient'])) {
 
+          $existed = $row ? count($row->get_ingredients()) : 0;
+          if (!isset($temp['ingredient']) || !count($temp['ingredient']) || $existed) {
             $faileds[] = $temp;
+            continue;
+          }
 
-          } else {
+          $food_count++;
 
-            $food_count++;
-
+          if (!$row) {
             $row = Food::create([
               'name' => ucwords(strtolower($temp['food'])),
               'creator_id' => $user->id,
             ]);
+          }
 
-            $ingredients = [];
-            foreach ($temp['ingredient'] as $ing) {
-              $ingredient = Ingredient::whereRaw('LOWER(name) LIKE ?', strtolower($ing['ingredient']))
-                ->first();
-              if (!$ingredient) {
-                $ingredient = Ingredient::create([
-                  'name' => strtolower($ing['ingredient'])
-                ]);
-              }
-
-              $ingredients[] = [
-                'id' => $ingredient->id,
-                'quantity' => $ing['quantity'],
-                'core' => 0,
-                'color' => null,
-              ];
+          $ingredients = [];
+          foreach ($temp['ingredient'] as $ing) {
+            $ingredient = Ingredient::whereRaw('LOWER(name) LIKE ?', strtolower($ing['ingredient']))
+              ->first();
+            if (!$ingredient) {
+              $ingredient = Ingredient::create([
+                'name' => strtolower($ing['ingredient'])
+              ]);
             }
 
-            $row->add_ingredients($ingredients);
-
-            $user->add_log([
-              'type' => 'import_' . $row->get_type(),
-              'item_id' => (int)$row->id,
-              'item_type' => $row->get_type(),
-            ]);
+            $ingredients[] = [
+              'id' => $ingredient->id,
+              'quantity' => $ing['quantity'],
+              'core' => 0,
+              'color' => null,
+            ];
           }
+
+          $row->add_ingredients($ingredients);
+
+          $user->add_log([
+            'type' => 'import_' . $row->get_type(),
+            'item_id' => (int)$row->id,
+            'item_type' => $row->get_type(),
+          ]);
         }
       }
 
@@ -470,4 +472,116 @@ class FoodController extends Controller
     ], 422);
   }
 
+  public function import_recipe(Request $request)
+  {
+    $datas = (new ImportData())->toArray($request->file('excel'));
+    if (!count($datas) || !count($datas[0])) {
+      return response()->json([
+        'error' => 'Invalid data'
+      ], 404);
+    }
+
+    $user = Auth::user();
+    $faileds = [];
+    $temp_count = 0;
+    $temps = [];
+    $food_count = 0;
+
+    DB::beginTransaction();
+    try {
+
+      foreach ($datas[0] as $k => $data) {
+
+        $col1 = trim($data[0]);
+        $col2 = trim($data[1]);
+        $col3 = !empty(trim($data[2])) ? (int)trim($data[2]) : 1;
+
+        if (!(!empty($col1) || (!empty($col2) && !empty($col3)))) {
+          continue;
+        }
+
+        if (!empty($col1)) {
+
+          $temp_count++;
+          $temps['food_' . $temp_count]['food'] = $col1;
+
+        } elseif (!empty($col2) && !empty($col3)) {
+
+          $temps['food_' . $temp_count]['ingredient'][] = [
+            'quantity' => $col3,
+            'ingredient' => $col2,
+          ];
+
+        }
+      }
+
+      if (count($temps)) {
+        foreach ($temps as $temp) {
+
+          $row = Food::whereRaw('LOWER(name) LIKE ?', strtolower($temp['food']))
+            ->first();
+
+          $existed = $row ? count($row->get_recipes()) : 0;
+          if (!isset($temp['ingredient']) || !count($temp['ingredient']) || $existed) {
+            $faileds[] = $temp;
+            continue;
+          }
+
+          $food_count++;
+
+          if (!$row) {
+            $row = Food::create([
+              'name' => ucwords(strtolower($temp['food'])),
+              'creator_id' => $user->id,
+            ]);
+          }
+
+
+          $ingredients = [];
+          foreach ($temp['ingredient'] as $ing) {
+            $ingredient = Ingredient::whereRaw('LOWER(name) LIKE ?', strtolower($ing['ingredient']))
+              ->first();
+            if (!$ingredient) {
+              $ingredient = Ingredient::create([
+                'name' => strtolower($ing['ingredient'])
+              ]);
+            }
+
+            $ingredients[] = [
+              'id' => $ingredient->id,
+              'quantity' => $ing['quantity'],
+            ];
+          }
+
+          $row->add_recipes($ingredients);
+
+          $user->add_log([
+            'type' => 'import_recipe_' . $row->get_type(),
+            'item_id' => (int)$row->id,
+            'item_type' => $row->get_type(),
+          ]);
+        }
+      }
+
+      DB::commit();
+
+    } catch (\Exception $e) {
+      DB::rollback();
+
+      return response()->json([
+        'error' => 'Error transaction! Please try again later.', //$e->getMessage()
+      ], 422);
+    }
+
+    if ($food_count) {
+      return response()->json([
+        'status' => true,
+        'message' => 'import food= ' . $food_count,
+      ], 200);
+    }
+
+    return response()->json([
+      'error' => 'Invalid data or dishes existed',
+    ], 422);
+  }
 }
