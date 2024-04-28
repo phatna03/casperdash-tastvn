@@ -148,7 +148,7 @@
         </div>
 
         @if($viewer->id == 5)
-        <div class="card-body d-flex justify-content-between flex-wrap gap-3 no_admin no_moderator no_user">
+        <div class="card-body d-flex justify-content-between flex-wrap gap-3">
           <div class="card-datatable table-responsive">
             <table class="table table-hover">
               <thead class="table-light">
@@ -319,6 +319,18 @@
                           </select>
                         </div>
                         <label for="scan-search-missing">Type</label>
+                      </div>
+                    </div>
+                    <div class="col-md-12 mb-2">
+                      <div class="form-floating form-floating-outline wrap-select-users">
+                        <div class="form-control acm-wrap-selectize" id="scan-search-users">
+                          <select name="users" multiple onchange="restaurant_search_food_scan(this)"
+                                  data-value="user" class="ajx_selectize"
+                          >
+                            <option value="">All</option>
+                          </select>
+                        </div>
+                        <label for="scan-search-users">Commentators</label>
                       </div>
                     </div>
                   </div>
@@ -647,9 +659,9 @@
       datatable_listing_scan = $('#datatable-listing-scan table').DataTable(Object.assign(datatable_listing_scan_cfs, acmcfs.datatable_init));
       datatable_listing_error = $('#datatable-listing-error table').DataTable(Object.assign(datatable_listing_error_cfs, acmcfs.datatable_init));
 
-      //
+      //keyCode
       $(document).keydown(function(e) {
-        console.log(e.keyCode);
+        // console.log(e.keyCode);
         if ($('#modal_food_scan_info').hasClass('show')) {
           if (e.keyCode == 37) {
             restaurant_food_scan_result_info_action();
@@ -730,6 +742,7 @@
           d.missing = $('#datatable-listing-scan .wrap-search-form form select[name=missing]').val();
           d.categories = $('#datatable-listing-scan .wrap-search-form form select[name=categories]').val();
           d.foods = $('#datatable-listing-scan .wrap-search-form form select[name=foods]').val();
+          d.users = $('#datatable-listing-scan .wrap-search-form form select[name=users]').val();
           d.time_upload = $('#datatable-listing-scan .wrap-search-form form input[name=time_upload]').val();
           d.time_scan = $('#datatable-listing-scan .wrap-search-form form input[name=time_scan]').val();
         },

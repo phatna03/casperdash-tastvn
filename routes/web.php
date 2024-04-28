@@ -371,6 +371,7 @@ Route::get('/datatable/restaurant-food-scans', function (Request $request) {
   $missing = isset($values['missing']) && !empty($values['missing']) ? $values['missing'] : NULL;
   $food_catetories = isset($values['categories']) ? (array)$values['categories'] : [];
   $foods = isset($values['foods']) ? (array)$values['foods'] : [];
+  $users = isset($values['users']) ? (array)$values['users'] : [];
   $time_upload = isset($values['time_upload']) && !empty($values['time_upload']) ? $values['time_upload'] : NULL;
   $time_scan = isset($values['time_scan']) && !empty($values['time_scan']) ? $values['time_scan'] : NULL;
 
@@ -399,6 +400,15 @@ Route::get('/datatable/restaurant-food-scans', function (Request $request) {
   }
   if (count($foods)) {
     $select->whereIn("restaurant_food_scans.food_id", $foods);
+  }
+  if (count($users)) {
+    $select->whereIn("restaurant_food_scans.id", function ($q) use ($users) {
+      $q->select('object_id')
+        ->distinct()
+        ->from('comments')
+        ->where('object_type', 'restaurant_food_scan')
+        ->whereIn('user_id', $users);
+    });
   }
   if (!empty($time_scan)) {
     $times = $api_core->parse_date_range($time_scan);

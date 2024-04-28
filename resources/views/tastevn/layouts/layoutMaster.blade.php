@@ -21,7 +21,7 @@
 <link rel="stylesheet" href="{{url('custom/library/selectize/selectize.css')}}" />
 <link rel="stylesheet" href="{{url('custom/css/app.css')}}"/>
 {{--js--}}
-<script src="{{url('custom/library/roboflow/roboflow.js')}}"></script>
+{{--<script src="{{url('custom/library/roboflow/roboflow.js')}}"></script>--}}
 <script src="{{asset('assets/vendor/libs/toastr/toastr.js')}}"></script>
 <script src="{{url('custom/library/currency/format_number.js')}}"></script>
 <script src="{{url('custom/library/selectize/selectize.min.js')}}"></script>
