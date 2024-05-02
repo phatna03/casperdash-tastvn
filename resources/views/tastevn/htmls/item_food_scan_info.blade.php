@@ -74,9 +74,21 @@
               </div>
             </div>
             <div class="col-12 mb-1">
-              <div class="acm-lbl-dark text-primary">+ Ingredients:</div>
+              <div class="acm-lbl-dark text-primary">
+                @if(count($data['food']['recipes']))
+                  + Recipe Ingredients:
+                @else
+                  + Roboflow Ingredients:
+                @endif
+              </div>
               <div>
-                @if(count($data['food']['ingredients']))
+                @if(count($data['food']['recipes']))
+                  @foreach($data['food']['recipes'] as $ing)
+                    <div class="acm-text-line-one">
+                      - <span class="text-dark">{{$ing['name']}}</span>
+                    </div>
+                  @endforeach
+                @elseif(count($data['food']['ingredients']))
                   @foreach($data['food']['ingredients'] as $ing)
                     <div class="acm-text-line-one">
                       - <b class="acm-mr-px-5 text-danger">{{$ing['ingredient_quantity']}}</b> <span class="text-dark">{{$ing['name']}}</span>

@@ -322,6 +322,7 @@ class FoodController extends Controller
     //info
     $html_info = view('tastevn.htmls.item_food_info')
       ->with('item', $row)
+      ->with('recipes', $row->get_recipes())
       ->with('ingredients', $row->get_ingredients())
       ->with('restaurants', $row->get_restaurants())
       ->render();
@@ -380,7 +381,7 @@ class FoodController extends Controller
 
         $col1 = trim($data[0]);
         $col2 = trim($data[1]);
-        $col3 = !empty(trim($data[2])) ? (int)trim($data[2]) : 1;
+        $col3 = isset($data[2]) && !empty(trim($data[2])) ? (int)trim($data[2]) : 1;
 
         if (!(!empty($col1) || (!empty($col2) && !empty($col3)))) {
           continue;
@@ -494,7 +495,7 @@ class FoodController extends Controller
 
         $col1 = trim($data[0]);
         $col2 = trim($data[1]);
-        $col3 = !empty(trim($data[2])) ? (int)trim($data[2]) : 1;
+        $col3 = isset($data[2]) && !empty(trim($data[2])) ? (int)trim($data[2]) : 1;
 
         if (!(!empty($col1) || (!empty($col2) && !empty($col3)))) {
           continue;
@@ -569,7 +570,8 @@ class FoodController extends Controller
       DB::rollback();
 
       return response()->json([
-        'error' => 'Error transaction! Please try again later.', //$e->getMessage()
+//        'error' => 'Error transaction! Please try again later.',
+        'error' => $e->getMessage(),
       ], 422);
     }
 

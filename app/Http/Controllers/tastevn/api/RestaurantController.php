@@ -480,6 +480,7 @@ class RestaurantController extends Controller
 
     $food_photo = url('custom/img/no_photo.png');
     $food_ingredients = [];
+    $food_recipes = [];
     $food_name = NULL;
 
     $rbf_food_id = 0;
@@ -513,9 +514,10 @@ class RestaurantController extends Controller
       }
       if ($row->get_food()) {
 
+        $food_name = $row->get_food()->name;
         $food_photo = $row->get_food()->get_photo();
         $food_ingredients = $row->get_food()->get_ingredients();
-        $food_name = $row->get_food()->name;
+        $food_recipes = $row->get_food()->get_recipes();
 
         $rbf_food = Food::find($row->rbf_predict);
         if ($rbf_food) {
@@ -557,9 +559,10 @@ class RestaurantController extends Controller
 
     $data = [
       'food' => [
+        'name' => $food_name,
         'photo' => $food_photo,
         'ingredients' => $food_ingredients,
-        'name' => $food_name,
+        'recipes' => $food_recipes,
       ],
 
       'rbf' => [

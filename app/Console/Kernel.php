@@ -19,7 +19,7 @@ class Kernel extends ConsoleKernel
   {
     //custome
     $limit = 1;
-    $page = 3; //current go live restaurant + 1
+    $page = 7; //current go live restaurant
 
     for ($i = 1; $i <= $page; $i++) {
       $schedule->command('tastevn:s3todo', [$limit, $i])

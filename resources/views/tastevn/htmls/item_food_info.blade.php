@@ -11,7 +11,7 @@
   <div class="col-lg-6 mb-2">
     <div class="row">
       <div class="col-lg-12 mb-2">
-        <div class="text-primary fw-bold">+ Ingredients</div>
+        <div class="text-primary fw-bold">+ Roboflow Ingredients</div>
         @foreach($ingredients as $ingredient)
           <div class="acm-ml-px-5 @if($ingredient->ingredient_type == 'core') acm-highlight @endif">
             - <b class="fnumber">{{$ingredient->ingredient_quantity}}</b>
@@ -19,6 +19,17 @@
           </div>
         @endforeach
       </div>
+
+      @if(count($recipes))
+      <div class="col-lg-12 mb-2">
+        <div class="text-primary fw-bold">+ Recipe Ingredients</div>
+        @foreach($recipes as $ingredient)
+          <div class="acm-ml-px-5">
+            - <span>{{$ingredient->name}}</span>
+          </div>
+        @endforeach
+      </div>
+      @endif
 
       @if(count($restaurants))
       <div class="col-lg-12 mb-2">
