@@ -13,7 +13,7 @@ class TodoAPI extends Command
    *
    * @var string
    */
-  protected $signature = 'tastevn:todolist';
+  protected $signature = 'tastevn:s3todo {limit} {page}';
 
   /**
    * The console command description.
@@ -28,6 +28,13 @@ class TodoAPI extends Command
   public function handle()
   {
     $api_core = new SysCore();
-    $api_core->v2_s3_api();
+
+    $limit = $this->argument('limit');
+    $page = $this->argument('page');
+
+    $api_core->v3_s3_todo([
+      'limit' => $limit,
+      'page' => $page,
+    ]);
   }
 }

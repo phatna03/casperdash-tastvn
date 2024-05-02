@@ -125,8 +125,9 @@ class RestaurantFoodScan extends Model
 
   public function predict_food($pars = [])
   {
-    $result = (array)json_decode($this->rbf_api, true);
     $api_core = new SysCore();
+
+    $result = (array)json_decode($this->rbf_api, true);
     $notification = isset($pars['notification']) ? (bool)$pars['notification'] : true;
 
     if (count($result)) {

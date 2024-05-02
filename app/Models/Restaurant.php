@@ -6,7 +6,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
+use Aws\S3\S3Client;
 use App\Api\SysCore;
 
 class Restaurant extends Model
@@ -332,5 +334,164 @@ class Restaurant extends Model
     return $data;
   }
 
+  //v3
+  public function photo_s3($pars = [])
+  {
+    $api_core = new SysCore();
 
+    $s3_region = $pars['s3_region'];
+    $s3_api_key = $pars['s3_api_key'];
+    $s3_api_secret = $pars['s3_api_secret'];
+    $s3_bucket = $pars['s3_bucket'];
+    $s3_address = $pars['s3_address'];
+
+    $scan_date = $pars['scan_date'];
+    $scan_hour = (int)$pars['scan_hour']; //9 not 09
+
+    $file_log = $pars['file_log'];
+
+    //run
+    $this->update([
+      's3_checking' => 1,
+    ]);
+
+    //s3 call
+    $s3_api = new S3Client([
+      'version' => 'latest',
+      'region' => $s3_region,
+      'credentials' => array(
+        'key' => $s3_api_key,
+        'secret' => $s3_api_secret
+      )
+    ]);
+
+    $s3_objects = $s3_api->ListObjects([
+      'Bucket' => $s3_bucket,
+      'Delimiter' => '/',
+//      'Prefix' => '58-5b-69-19-ad-67/SENSOR/1/2023-11-30/11/',
+      'Prefix' => "{$s3_address}/{$scan_date}/{$scan_hour}/",
+    ]);
+
+    //s3 data
+    if ($s3_objects && isset($s3_objects['Contents']) && count($s3_objects['Contents'])) {
+
+      //group
+      $s3_contents = [];
+      foreach ($s3_objects['Contents'] as $content) {
+        $s3_contents[] = [
+          'key' => $content['Key'],
+//        'date' => $content['LastModified']->format('Y-m-d H:i:s'), //UTC=0
+          'date' => date('Y-m-d H:i:s', strtotime($content['LastModified']->__toString())),
+        ];
+      }
+
+      //sort
+      $a1 = [];
+      $a2 = [];
+      foreach ($s3_contents as $key => $row) {
+        $a1[$key] = $row['date'];
+        $a2[$key] = $row['key'];
+      }
+      array_multisort($a1, SORT_DESC, $a2, SORT_DESC, $s3_contents);
+
+      //check
+      foreach ($s3_contents as $content) {
+
+        $s3_photo_url = "https://s3.{$s3_region}.amazonaws.com/{$s3_bucket}/{$content['key']}";
+        $s3_photo_ext = explode('.', $content['key']);
+
+        //valid photo
+        if (@getimagesize($s3_photo_url)) {
+
+          $api_core::_DEBUG ? Storage::append($file_log, 'PHOTO_NAME_' . $content['key']) : $api_core->log_failed();
+          $api_core::_DEBUG ? Storage::append($file_log, 'PHOTO_URL_' . $s3_photo_url) : $api_core->log_failed();
+
+          $row = RestaurantFoodScan::where('restaurant_id', $this->id)
+            ->where('photo_name', $content['key'])
+            ->first();
+          if ($row) {
+            break; //only find latest
+          }
+
+          $api_core::_DEBUG ? Storage::append($file_log, 'PHOTO_URL_SAVED') : $api_core->log_failed();
+
+          //step 1= photo get
+          $row = $this->photo_save([
+            'photo_url' => $s3_photo_url,
+            'photo_name' => $content['key'],
+            'photo_ext' => $s3_photo_ext[1],
+            'time_photo' => $content['date'],
+          ]);
+
+          $this->photo_scan($row);
+        }
+      }
+    }
+
+    $this->update([
+      's3_checking' => 0,
+    ]);
+  }
+
+  public function photo_save($pars = [])
+  {
+    $row = RestaurantFoodScan::where('restaurant_id', $this->id)
+      ->where('photo_name', $pars['photo_name'])
+      ->first();
+
+    if (!$row) {
+      $row = RestaurantFoodScan::create([
+        'restaurant_id' => $this->id,
+        'status' => 'new',
+
+        'photo_url' => $pars['photo_url'],
+        'photo_name' => $pars['photo_name'],
+        'photo_ext' => $pars['photo_ext'],
+        'time_photo' => $pars['time_photo'],
+      ]);
+    }
+
+    return $row;
+  }
+
+  public function photo_scan($rfs)
+  {
+    $api_core = new SysCore();
+
+    $rbf_dataset = $api_core->get_setting('rbf_dataset_scan');
+    $rbf_api_key = $api_core->get_setting('rbf_api_key');
+
+    $rfs_result = [];
+
+    if ($rfs && $this->rbf_scan && !empty($rbf_dataset) && !empty($rbf_api_key)) {
+
+      // URL for Http Request
+      $rbf_url = "https://detect.roboflow.com/" . $rbf_dataset
+        . "?api_key=" . $rbf_api_key
+        . "&image=" . urlencode($rfs->photo_url);
+
+      // Setup + Send Http request
+      $rbf_options = array(
+        'http' => array(
+          'header' => "Content-type: application/x-www-form-urlencoded\r\n",
+          'method' => 'POST'
+        ));
+
+      $rbf_context = stream_context_create($rbf_options);
+      $rbf_result = file_get_contents($rbf_url, false, $rbf_context);
+      if (!empty($rbf_result)) {
+        $rfs_result = (array)json_decode($rbf_result);
+      }
+
+      //step 2= photo scan
+      $rfs->update([
+        'time_scan' => date('Y-m-d H:i:s'),
+        'status' => count($rfs_result) ? 'scanned' : 'failed',
+        'rbf_api' => count($rfs_result) ? json_encode($rfs_result) : NULL,
+      ]);
+
+      //step 3= photo predict
+      $rfs->predict_food();
+    }
+  }
 }

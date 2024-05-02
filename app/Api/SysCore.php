@@ -3,6 +3,7 @@
 namespace App\Api;
 
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 use Aws\S3\S3Client;
@@ -26,7 +27,10 @@ use App\Models\FoodCategory;
 
 class SysCore
 {
-  protected const _DEBUG = true;
+  public const _DEBUG = true;
+  public const _DEBUG_LOG_FOLDER = 'public/logs/';
+  public const _DEBUG_LOG_FILE_S3_CALLBACK = 'public/logs/s3_callback.log';
+
   protected const _DEBUG_LOG_FILE_CRON = 'public/logs/cron_tastevn.log';
   protected const _DEBUG_LOG_FILE_S3_POLLY = 'public/logs/s3_polly.log';
   protected const _DEBUG_LOG_FILE_ROBOFLOW = 'public/logs/cron_tastevn_rbf_retrain.log';
@@ -1080,4 +1084,87 @@ class SysCore
     ]);
 
   }
+
+  //v3
+  public function v3_s3_todo($pars = [])
+  {
+    $limit = isset($pars['limit']) ? (int)$pars['limit'] : 1;
+    $page = isset($pars['page']) ? (int)$pars['page'] : 1;
+
+    //run
+    $restaurant = Restaurant::where('deleted', 0)
+      ->where('s3_bucket_name', '<>', NULL)
+      ->where('s3_bucket_address', '<>', NULL)
+      ->where('s3_checking', 0)
+      ->orderBy('rbf_scan', 'desc')
+      ->orderBy('id', 'asc')
+      ->paginate($limit, ['*'], 'page', $page)
+      ->first();
+
+    if (!$restaurant) {
+      return false;
+    }
+
+    $file_log = $this::_DEBUG_LOG_FOLDER . '/' . date('Y_m_d') . '/RESTAURANT_' . $restaurant->id;
+
+    $this::_DEBUG ? Storage::append($file_log, '============================================') : $this->log_failed();
+    $this::_DEBUG ? Storage::append($file_log, 'CRON_RUN_AT: ' . date('H:i:s')) : $this->log_failed();
+    $this::_DEBUG ? Storage::append($file_log, 'WITH_PARAMS: ' . json_encode($pars)) : $this->log_failed();
+
+    //settings
+    $s3_region = $this->get_setting('s3_region');
+    $s3_api_key = $this->get_setting('s3_api_key');
+    $s3_api_secret = $this->get_setting('s3_api_secret');
+
+    if (empty($s3_region) || empty($s3_api_key) || empty($s3_api_secret)) {
+      $this::_DEBUG ? Storage::append($file_log, 'INVALID_CONFIG') : $this->log_failed();
+      return false;
+    }
+
+    //time
+    $scan_date = date("Y-m-d");
+    if (count($pars) && isset($pars['scan_date'])) {
+      $scan_date = $pars['scan_date'];
+    }
+    $scan_hour = date('H');
+    if (count($pars) && isset($pars['scan_hour'])) {
+      $scan_hour = $pars['scan_hour'];
+    }
+
+    $this::_DEBUG ? Storage::append($file_log, 'SCAN_DATE_' . $scan_date . '_HOUR_' . $scan_hour) : $this->log_failed();
+
+    DB::beginTransaction();
+    try {
+
+      $restaurant->photo_s3([
+        's3_region' => $s3_region,
+        's3_api_key' => $s3_api_key,
+        's3_api_secret' => $s3_api_secret,
+        's3_bucket' => $restaurant->s3_bucket_name,
+        's3_address' => $this->parse_s3_bucket_address($restaurant->s3_bucket_address),
+
+        'scan_date' => $scan_date,
+        'scan_hour' => $scan_hour,
+
+        'file_log' => $file_log,
+      ]);
+
+      DB::commit();
+
+    } catch (\Exception $e) {
+
+      DB::rollBack();
+
+      $this->bug_add([
+        'type' => 's3_api',
+        'line' => $e->getLine(),
+        'file' => $e->getFile(),
+        'message' => $e->getMessage(),
+        'params' => json_encode($e),
+      ]);
+    }
+  }
+
+
+
 }

@@ -32,8 +32,6 @@ use Mike42\Escpos\Printer;
 
 class GuestController extends Controller
 {
-  protected const _DEBUG = true;
-  protected const _DEBUG_LOG_FILE_CALLBACK = 'public/logs/s3_callback.log';
 
   public function login(Request $request)
   {
@@ -274,105 +272,99 @@ class GuestController extends Controller
     $values = $request->post();
     $api_core = new SysCore();
 
-    $bucket = isset($values['bucket']) ? $values['bucket'] : NULL;
-    $key = isset($values['key']) ? $values['key'] : NULL;
+    $file_log = $api_core::_DEBUG_LOG_FILE_S3_CALLBACK;
+    $api_core::_DEBUG ? Storage::append($file_log, '============================================') : $api_core->log_failed();
+    $api_core::_DEBUG ? Storage::append($file_log, 'CRON_RUN_AT: ' . date('H:i:s')) : $api_core->log_failed();
+    $api_core::_DEBUG ? Storage::append($file_log, 'WITH_PARAMS: ' . json_encode($values)) : $api_core->log_failed();
 
-    $this::_DEBUG ? Storage::append($this::_DEBUG_LOG_FILE_CALLBACK, 'TODO_AT_' . date('d_M_Y_H_i_s')) : $api_core->log_failed();
+    $s3_bucket = isset($values['bucket']) ? $values['bucket'] : NULL; //bucket: 'cargo.tastevietnam.asia'
+    $s3_photo_name = isset($values['key']) ? $values['key'] : NULL; //key: '58-5b-69-19-ad-67/SENSOR/1/2024-05-02/'
+    $rbf_api_js = isset($values['rbf_api_js']) ? $values['rbf_api_js'] : NULL;
 
-    if (!empty($bucket) && !empty($key)) {
+    if (empty($s3_bucket) || empty($s3_photo_name)) {
+      $api_core::_DEBUG ? Storage::append($file_log, 'INVALID_PARAMS') : $api_core->log_failed();
+      return false;
+    }
 
-      $sensor = explode('/SENSOR/', $key);
+    $restaurant = NULL;
+    $temps = explode('/SENSOR/', $s3_photo_name);
+    $s3_address = count($temps) ? $temps[0] : NULL;
+
+    if (!empty($s3_address)) {
       $restaurant = Restaurant::where('deleted', 0)
-        ->where('s3_bucket_name', $bucket)
-        ->where('s3_bucket_address', 'LIKE', "%{$sensor[0]}%")
+        ->where('s3_bucket_name', $s3_bucket)
+        ->where('s3_bucket_address', 'LIKE', "%{$s3_address}%")
         ->orderBy('id', 'desc')
         ->limit(1)
         ->first();
+    }
 
-      $this::_DEBUG ? Storage::append($this::_DEBUG_LOG_FILE_CALLBACK, 'BUCKET_' . $bucket) : $api_core->log_failed();
-      $this::_DEBUG ? Storage::append($this::_DEBUG_LOG_FILE_CALLBACK, 'KEY_' . $key) : $api_core->log_failed();
+    if (!$restaurant) {
+      $api_core::_DEBUG ? Storage::append($file_log, 'EMPTY_RESTAURANT') : $api_core->log_failed();
+      return false;
+    }
 
-      if ($restaurant) {
+    $file_log = $api_core::_DEBUG_LOG_FOLDER . '/' . date('Y_m_d') . '/S3_CALLBACK/RESTAURANT_' . $restaurant->id;
 
-        $this::_DEBUG ? Storage::append($this::_DEBUG_LOG_FILE_CALLBACK, 'RESTAURANT_' . $restaurant->id . '_' . $restaurant->name) : $api_core->log_failed();
+    $api_core::_DEBUG ? Storage::append($file_log, '============================================') : $api_core->log_failed();
+    $api_core::_DEBUG ? Storage::append($file_log, 'CRON_RUN_AT: ' . date('H:i:s')) : $api_core->log_failed();
+    $api_core::_DEBUG ? Storage::append($file_log, 'WITH_PARAMS: ' . json_encode($values)) : $api_core->log_failed();
 
-        //step 1= photo get
-        //settings
-        $s3_region = $api_core->get_setting('s3_region');
-        $s3_api_key = $api_core->get_setting('s3_api_key');
-        $s3_api_secret = $api_core->get_setting('s3_api_secret');
-        $photo_URL = "https://s3.{$s3_region}.amazonaws.com/{$bucket}/{$key}";
-        //valid photo
-        if (@getimagesize($photo_URL)) {
+    //settings
+    $s3_region = $api_core->get_setting('s3_region');
+    $s3_api_key = $api_core->get_setting('s3_api_key');
+    $s3_api_secret = $api_core->get_setting('s3_api_secret');
 
-          $this::_DEBUG ? Storage::append($this::_DEBUG_LOG_FILE_CALLBACK, 'VALID_' . $photo_URL) : $api_core->log_failed();
+    if (empty($s3_region) || empty($s3_api_key) || empty($s3_api_secret)) {
+      $api_core::_DEBUG ? Storage::append($file_log, 'INVALID_CONFIG') : $api_core->log_failed();
+      return false;
+    }
 
-          //check exist
-          $row = RestaurantFoodScan::where('restaurant_id', $restaurant->id)
-//            ->where('deleted', 0)
-            ->where('photo_name', $key)
-            ->first();
+    DB::beginTransaction();
+    try {
 
-          if (!$row) {
-            $time_photo = date('Y-m-d H:i:s');
-            $exts = explode('.', $key);
+      $s3_photo_url = "https://s3.{$s3_region}.amazonaws.com/{$s3_bucket}/{$s3_photo_name}";
+      $s3_photo_ext = explode('.', $s3_photo_name);
 
-            $row = RestaurantFoodScan::create([
-              'restaurant_id' => $restaurant->id,
-              'photo_url' => $photo_URL,
-              'photo_name' => $key,
-              'photo_ext' => $exts[1],
-              'status' => 'new',
-              'time_photo' => $time_photo,
-            ]);
-          }
+      $api_core::_DEBUG ? Storage::append($file_log, 'PHOTO_NAME_' . $s3_photo_name) : $api_core->log_failed();
+      $api_core::_DEBUG ? Storage::append($file_log, 'PHOTO_URL_' . $s3_photo_url) : $api_core->log_failed();
 
-          if ($restaurant->rbf_scan) {
-            //step 2= photo scan
-            $rbf_dataset = $api_core->get_setting('rbf_dataset_scan');
-            $rbf_api_key = $api_core->get_setting('rbf_api_key');
+      //valid photo
+      if (@getimagesize($s3_photo_url)) {
 
-            // URL for Http Request
-            $url = "https://detect.roboflow.com/" . $rbf_dataset
-              . "?api_key=" . $rbf_api_key
-              . "&image=" . urlencode($photo_URL);
+        //check exist
+        $row = RestaurantFoodScan::where('restaurant_id', $restaurant->id)
+          ->where('photo_name', $s3_photo_name)
+          ->first();
 
-            // Setup + Send Http request
-            $options = array(
-              'http' => array(
-                'header' => "Content-type: application/x-www-form-urlencoded\r\n",
-                'method' => 'POST'
-              ));
+        if (!$row) {
 
-            $context = stream_context_create($options);
-            $result = file_get_contents($url, false, $context);
-            if (!empty($result)) {
-              $result = (array)json_decode($result);
-            }
+          $api_core::_DEBUG ? Storage::append($file_log, 'PHOTO_URL_VALID') : $api_core->log_failed();
 
-            //valid data
-            if (count($result)) {
+          $row = $restaurant->photo_save([
+            'photo_url' => $s3_photo_url,
+            'photo_name' => $s3_photo_name,
+            'photo_ext' => $s3_photo_ext[1],
+            'time_photo' => date('Y-m-d H:i:s'),
+          ]);
 
-              $row->update([
-                'status' => 'scanned',
-                'time_scan' => date('Y-m-d H:i:s'),
-                'rbf_api' => json_encode($result),
-              ]);
-
-            } else {
-
-              $row->update([
-                'status' => 'failed',
-                'time_scan' => date('Y-m-d H:i:s'),
-              ]);
-            }
-
-            //step 3= photo predict
-            $row->predict_food();
-          }
+          $restaurant->photo_scan($row);
         }
       }
 
+      DB::commit();
+
+    } catch (\Exception $e) {
+
+      DB::rollBack();
+
+      $api_core->bug_add([
+        'type' => 's3_callback',
+        'line' => $e->getLine(),
+        'file' => $e->getFile(),
+        'message' => $e->getMessage(),
+        'params' => json_encode($e),
+      ]);
     }
 
     return response()->json([
