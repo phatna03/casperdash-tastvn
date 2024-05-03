@@ -18,15 +18,49 @@ class Kernel extends ConsoleKernel
   protected function schedule(Schedule $schedule): void
   {
     //custome
-    $limit = 1;
-    $page = 7; //current go live restaurant
+//    $limit = 1;
+//    $page = 6; //current go live restaurant
+//
+//    for ($i = 1; $i <= $page; $i++) {
+//      $schedule->command('tastevn:s3todo', [$limit, $i])
+//        ->withoutOverlapping()
+////        ->everyTwoSeconds()
+//        ->everyFiveSeconds()
+//        ->runInBackground();
+//    }
 
-    for ($i = 1; $i <= $page; $i++) {
-      $schedule->command('tastevn:s3todo', [$limit, $i])
-        ->withoutOverlapping()
-        ->everyTwoSeconds()
-        ->runInBackground();
-    }
+    //v2
+    //cargo
+    $schedule->command('tastevn:s3todo', [1, 1])
+      ->withoutOverlapping()
+      ->everyFiveSeconds()
+      ->runInBackground();
+
+    $schedule->command('tastevn:s3todo', [1, 2])
+      ->withoutOverlapping()
+      ->everyFiveSeconds()
+      ->runInBackground();
+    //deli
+    $schedule->command('tastevn:s3todo', [1, 3])
+      ->withoutOverlapping()
+      ->everyTenSeconds()
+      ->runInBackground();
+
+    $schedule->command('tastevn:s3todo', [1, 4])
+      ->withoutOverlapping()
+      ->everyTenSeconds()
+      ->runInBackground();
+    //market
+    $schedule->command('tastevn:s3todo', [1, 5])
+      ->withoutOverlapping()
+      ->everyTenSeconds()
+      ->runInBackground();
+    //poison
+    $schedule->command('tastevn:s3todo', [1, 6])
+      ->withoutOverlapping()
+      ->everyTenSeconds()
+      ->runInBackground();
+
 
   }
 
