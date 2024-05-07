@@ -18,6 +18,7 @@ class Restaurant extends Model
   public $table = 'restaurants';
 
   protected $fillable = [
+    'restaurant_parent_id',
     'name',
     's3_bucket_name',
     's3_bucket_address',
@@ -172,6 +173,9 @@ class Restaurant extends Model
 
   public function get_food_category($food)
   {
+    //check later
+    return NULL;
+
     $row = RestaurantFood::select("food_category_id")
       ->where("restaurant_id", 15)
       ->where("food_id", 4)
@@ -332,6 +336,20 @@ class Restaurant extends Model
     }
 
     return $data;
+  }
+
+  public function serve_food($food)
+  {
+    $rows = [];
+
+    if ($food) {
+      $rows = RestaurantFood::where('restaurant_id', $this->id)
+        ->where('deleted', 0)
+        ->where('food_id', $food->id)
+        ->get();
+    }
+
+    return count($rows) ? true : false;
   }
 
   //v3

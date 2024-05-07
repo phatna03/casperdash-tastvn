@@ -15,6 +15,7 @@ class RestaurantFood extends Model
     'restaurant_id',
     'food_id',
     'food_category_id',
+    'photo',
     'creator_id',
     'deleted',
   ];

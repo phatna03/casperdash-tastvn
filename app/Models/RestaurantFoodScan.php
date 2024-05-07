@@ -123,12 +123,35 @@ class RestaurantFoodScan extends Model
     return $select->get();
   }
 
+  public function predict_reset()
+  {
+    $this->update([
+      'food_id' => 0,
+      'food_category_id' => 0,
+      'confidence' => 0,
+      'sys_predict' => 0,
+      'sys_confidence' => 0,
+      'usr_predict' => 0,
+      'rbf_predict' => 0,
+      'rbf_confidence' => 0,
+      'rbf_retrain' => 0,
+      'usr_edited' => 0,
+      'deleted' => 0,
+
+      'found_by' => NULL,
+      'status' => 'scanned',
+      'missing_ids' => NULL,
+      'missing_texts' => NULL,
+    ]);
+  }
+
   public function predict_food($pars = [])
   {
     $api_core = new SysCore();
 
     $result = (array)json_decode($this->rbf_api, true);
     $notification = isset($pars['notification']) ? (bool)$pars['notification'] : true;
+    $restaurant = $this->get_restaurant();
 
     if (count($result)) {
 
@@ -146,11 +169,13 @@ class RestaurantFoodScan extends Model
 
           $found = Food::whereRaw('LOWER(name) LIKE ?', strtolower(trim($prediction['class'])))
             ->first();
-          if ($found && $confidence >= 50 && count($ingredients_found)) {
+          if ($found && $confidence >= 50 && count($ingredients_found) && $restaurant->serve_food($found)) {
 
             //check valid ingredient
             $valid_food = true;
-            $food_ingredients = $found->get_ingredients();
+            $food_ingredients = $found->get_ingredients([
+              'restaurant_parent_id' => $restaurant->restaurant_parent_id,
+            ]);
             if (!count($food_ingredients)) {
               $valid_food = false;
             }
@@ -158,6 +183,7 @@ class RestaurantFoodScan extends Model
             //check core ingredient
             $valid_core = true;
             $core_ids = $found->get_ingredients_core([
+              'restaurant_parent_id' => $restaurant->restaurant_parent_id,
               'ingredient_id_only' => 1,
             ]);
             if (count($core_ids)) {
@@ -247,8 +273,14 @@ class RestaurantFoodScan extends Model
       //find missing ingredients
       if ($food) {
 
-        $ingredients_found = $food->get_ingredients_info($ingredients_found);
-        $ingredients_missing = $food->missing_ingredients($ingredients_found);
+        $ingredients_found = $food->get_ingredients_info([
+          'restaurant_parent_id' => $restaurant->restaurant_parent_id,
+          'ingredients' => $ingredients_found,
+        ]);
+        $ingredients_missing = $food->missing_ingredients([
+          'restaurant_parent_id' => $restaurant->restaurant_parent_id,
+          'ingredients' => $ingredients_found,
+        ]);
         $this->add_ingredients_missing($food, $ingredients_missing, $notification);
       }
     }
@@ -257,6 +289,8 @@ class RestaurantFoodScan extends Model
   public function find_food_category($food)
   {
     $count = 0;
+    //check later
+    return $count;
 
     if ($food) {
       $count = RestaurantFood::where('restaurant_id', $this->restaurant_id)

@@ -68,6 +68,11 @@ class FoodController extends Controller
       return response()->json($validator->errors(), 422);
     }
 
+    //check later
+    return response()->json([
+      'error' => 'Invalid restaurant'
+    ], 422);
+
     //restore
     $row = Food::whereRaw('LOWER(name) LIKE ?', strtolower(trim($values['name'])))
       ->first();
@@ -160,6 +165,11 @@ class FoodController extends Controller
     if ($validator->fails()) {
       return response()->json($validator->errors(), 422);
     }
+
+    //check later
+    return response()->json([
+      'error' => 'Invalid restaurant'
+    ], 422);
 
     //invalid
     $row = Food::findOrFail((int)$values['item']);
@@ -361,8 +371,11 @@ class FoodController extends Controller
 
   public function import(Request $request)
   {
+    $values = $request->post();
+    $restaurant_parent_id = isset($values['restaurant_parent_id']) ? (int)$values['restaurant_parent_id'] : 0;
+
     $datas = (new ImportData())->toArray($request->file('excel'));
-    if (!count($datas) || !count($datas[0])) {
+    if (!count($datas) || !count($datas[0]) || !$restaurant_parent_id) {
       return response()->json([
         'error' => 'Invalid data'
       ], 404);
@@ -408,7 +421,9 @@ class FoodController extends Controller
           $row = Food::whereRaw('LOWER(name) LIKE ?', strtolower($temp['food']))
             ->first();
 
-          $existed = $row ? count($row->get_ingredients()) : 0;
+          $existed = $row ? count($row->get_ingredients([
+            'restaurant_parent_id' => $restaurant_parent_id
+          ])) : 0;
           if (!isset($temp['ingredient']) || !count($temp['ingredient']) || $existed) {
             $faileds[] = $temp;
             continue;
@@ -441,7 +456,10 @@ class FoodController extends Controller
             ];
           }
 
-          $row->add_ingredients($ingredients);
+          $row->add_ingredients([
+            'restaurant_parent_id' => $restaurant_parent_id,
+            'ingredients' => $ingredients,
+          ]);
 
           $user->add_log([
             'type' => 'import_' . $row->get_type(),
@@ -475,8 +493,11 @@ class FoodController extends Controller
 
   public function import_recipe(Request $request)
   {
+    $values = $request->post();
+    $restaurant_parent_id = isset($values['restaurant_parent_id']) ? (int)$values['restaurant_parent_id'] : 0;
+
     $datas = (new ImportData())->toArray($request->file('excel'));
-    if (!count($datas) || !count($datas[0])) {
+    if (!count($datas) || !count($datas[0]) || !$restaurant_parent_id) {
       return response()->json([
         'error' => 'Invalid data'
       ], 404);
@@ -522,7 +543,9 @@ class FoodController extends Controller
           $row = Food::whereRaw('LOWER(name) LIKE ?', strtolower($temp['food']))
             ->first();
 
-          $existed = $row ? count($row->get_recipes()) : 0;
+          $existed = $row ? count($row->get_recipes([
+            'restaurant_parent_id' => $restaurant_parent_id
+          ])) : 0;
           if (!isset($temp['ingredient']) || !count($temp['ingredient']) || $existed) {
             $faileds[] = $temp;
             continue;
@@ -554,7 +577,10 @@ class FoodController extends Controller
             ];
           }
 
-          $row->add_recipes($ingredients);
+          $row->add_recipes([
+            'restaurant_parent_id' => $restaurant_parent_id,
+            'ingredients' => $ingredients,
+          ]);
 
           $user->add_log([
             'type' => 'import_recipe_' . $row->get_type(),

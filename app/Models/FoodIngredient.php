@@ -13,6 +13,7 @@ class FoodIngredient extends Model
 
   protected $fillable = [
     'food_id',
+    'restaurant_parent_id',
     'ingredient_type',
     'ingredient_id',
     'ingredient_quantity',

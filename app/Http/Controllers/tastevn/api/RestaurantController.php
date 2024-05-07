@@ -5,16 +5,21 @@ namespace App\Http\Controllers\tastevn\api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Validator;
 
 use App\Api\SysCore;
+use App\Excel\ImportData;
 
 use Illuminate\Support\Facades\Notification;
 use App\Notifications\IngredientMissing;
 
 use App\Models\Restaurant;
+use App\Models\RestaurantParent;
+use App\Models\RestaurantFood;
 use App\Models\RestaurantFoodScan;
 use App\Models\Food;
+use App\Models\FoodCategory;
 use App\Models\Ingredient;
 use App\Models\Text;
 use App\Models\RestaurantFoodScanText;
@@ -326,6 +331,133 @@ class RestaurantController extends Controller
     ]);
   }
 
+  public function selectize_parent(Request $request)
+  {
+    $values = $request->all();
+    $keyword = isset($values['keyword']) && !empty($values['keyword']) ? $values['keyword'] : NULL;
+
+    $select = RestaurantParent::select('id', 'name')
+      ->where('deleted', 0);
+    if (!empty($keyword)) {
+      $select->where('name', 'LIKE', "%{$keyword}%");
+    }
+
+    return response()->json([
+      'items' => $select->get()->toArray()
+    ]);
+  }
+
+  public function food_import(Request $request)
+  {
+    $values = $request->post();
+    $restaurant_id = isset($values['restaurant_id']) ? (int)$values['restaurant_id'] : 0;
+    $restaurant = Restaurant::find($restaurant_id);
+
+    $datas = (new ImportData())->toArray($request->file('excel'));
+    if (!count($datas) || !count($datas[0]) || !$restaurant) {
+      return response()->json([
+        'error' => 'Invalid data'
+      ], 404);
+    }
+
+    $user = Auth::user();
+    $faileds = [];
+    $temp_count = 0;
+    $temps = [];
+    $food_count = 0;
+
+    DB::beginTransaction();
+    try {
+
+      foreach ($datas[0] as $k => $data) {
+
+        $col1 = trim($data[0]);
+        $col2 = isset($data[1]) && !empty(trim($data[1])) ? trim($data[1]) : NULL;
+        $col3 = isset($data[2]) && !empty(trim($data[2])) ? trim($data[2]) : NULL;
+
+        if (empty($col1)) {
+          continue;
+        }
+
+        $col1 = str_replace('&', '-', $col1);
+
+        $temps[] = [
+          'food' => $col1,
+          'category' => $col2,
+          'photo' => $col3,
+        ];
+      }
+
+      if (count($temps)) {
+        foreach ($temps as $temp) {
+
+          $food = Food::whereRaw('LOWER(name) LIKE ?', strtolower($temp['food']))
+            ->first();
+          if (!$food) {
+            continue;
+          }
+
+          $food_category = NULL;
+          if (!empty($temp['category'])) {
+            $food_category = FoodCategory::whereRaw('LOWER(name) LIKE ?', strtolower($temp['category']))
+              ->first();
+            if (!$food_category) {
+              $food_category = FoodCategory::create([
+                'name' => strtolower($temp['category']),
+                'restaurant_id' => $restaurant->id,
+                'creator_id' => $user->id,
+              ]);
+            }
+          }
+
+          $row = RestaurantFood::where('restaurant_id', $restaurant->id)
+            ->where('food_id', $food->id)
+            ->first();
+          if (!$row) {
+            $row = RestaurantFood::create([
+              'restaurant_id' => $restaurant->id,
+              'food_id' => $food->id,
+              'creator_id' => $user->id,
+            ]);
+          }
+
+          $food_count++;
+
+          $row->update([
+            'food_category_id' => $food_category ? $food_category->id : 0,
+            'photo' => !empty($temp['photo']) && @getimagesize($temp['photo']) ? $temp['photo'] : NULL,
+          ]);
+
+//          $user->add_log([
+//            'type' => 'import_food_to_restaurant' . $row->get_type(),
+//            'item_id' => (int)$row->id,
+//            'item_type' => $row->get_type(),
+//          ]);
+        }
+      }
+
+      DB::commit();
+
+    } catch (\Exception $e) {
+      DB::rollback();
+
+      return response()->json([
+        'error' => 'Error transaction! Please try again later.', //$e->getMessage()
+      ], 422);
+    }
+
+    if ($food_count) {
+      return response()->json([
+        'status' => true,
+        'message' => 'import food= ' . $food_count,
+      ], 200);
+    }
+
+    return response()->json([
+      'error' => 'Invalid data or dishes existed',
+    ], 422);
+  }
+
   public function food_add(Request $request)
   {
     $values = $request->all();
@@ -337,6 +469,11 @@ class RestaurantController extends Controller
     if ($validator->fails()) {
       return response()->json($validator->errors(), 422);
     }
+
+    //check later
+    return response()->json([
+      'error' => 'Invalid restaurant'
+    ], 422);
 
     $row = Restaurant::findOrFail((int)$values['item']);
     if (!$row) {
@@ -478,6 +615,8 @@ class RestaurantController extends Controller
       ], 422);
     }
 
+    $restaurant = $row->get_restaurant();
+
     $food_photo = url('custom/img/no_photo.png');
     $food_ingredients = [];
     $food_recipes = [];
@@ -509,7 +648,10 @@ class RestaurantController extends Controller
       if (count($sys_food_predict)) {
         $food_predict = Food::find($sys_food_predict['food']);
         if ($food_predict) {
-          $sys_ingredients_missing = $food_predict->missing_ingredients($founds);
+          $sys_ingredients_missing = $food_predict->missing_ingredients([
+            'restaurant_parent_id' => $restaurant->restaurant_parent_id,
+            'ingredients' => $founds,
+          ]);
         }
       }
       if ($row->get_food()) {
@@ -525,7 +667,10 @@ class RestaurantController extends Controller
           $rbf_food_name = $rbf_food->name;
           $rbf_food_confidence = $row->rbf_confidence;
 
-          $rbf_ingredients_missing = $rbf_food->missing_ingredients($founds);
+          $rbf_ingredients_missing = $rbf_food->missing_ingredients([
+            'restaurant_parent_id' => $restaurant->restaurant_parent_id,
+            'ingredients' => $founds,
+          ]);
         }
 
         $sys_food = Food::find($row->sys_predict);
@@ -534,7 +679,10 @@ class RestaurantController extends Controller
           $sys_food_name = $sys_food->name;
           $sys_food_confidence = $row->sys_confidence;
 
-          $sys_ingredients_missing = $sys_food->missing_ingredients($founds);
+          $sys_ingredients_missing = $sys_food->missing_ingredients([
+            'restaurant_parent_id' => $restaurant->restaurant_parent_id,
+            'ingredients' => $founds,
+          ]);
         }
 
         $usr_food = Food::find($row->usr_predict);
@@ -606,7 +754,7 @@ class RestaurantController extends Controller
 
     return response()->json([
       'item' => $row,
-      'restaurant' => $row->get_restaurant(),
+      'restaurant' => $restaurant,
       'data' => $data,
       'html_info' => $html_info,
 

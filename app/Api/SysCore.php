@@ -138,7 +138,7 @@ class SysCore
       foreach ($restaurants as $restaurant) {
         $this::_DEBUG ? Storage::append($this::_DEBUG_LOG_FILE_CRON,
           'RESTAURANT - ' . $restaurant->id . ' - ' . $restaurant->name) : $this->log_failed();
-        dispatch(new PhotoGet($restaurant));
+//        dispatch(new PhotoGet($restaurant));
       }
     }
   }
@@ -268,7 +268,7 @@ class SysCore
           }
 
           if ($photo_new) {
-            dispatch(new PhotoScan($restaurant));
+//            dispatch(new PhotoScan($restaurant));
           }
 
         } catch (\Exception $e) {
@@ -526,6 +526,9 @@ class SysCore
   public function sys_predict_foods_by_ingredients($ingredients = [], $one_food = false)
   {
     $arr = [];
+
+    //no use anymore
+    return $arr;
 
     $ingredients = array_map('current', $ingredients);
 
@@ -1105,7 +1108,7 @@ class SysCore
       return false;
     }
 
-    $file_log = $this::_DEBUG_LOG_FOLDER . '/' . date('Y_m_d') . '/RESTAURANT_' . $restaurant->id;
+    $file_log = $this::_DEBUG_LOG_FOLDER . '/' . date('Y_m_d') . '/RESTAURANT_' . $restaurant->id . '.log';
 
     $this::_DEBUG ? Storage::append($file_log, '============================================') : $this->log_failed();
     $this::_DEBUG ? Storage::append($file_log, 'CRON_RUN_AT: ' . date('H:i:s')) : $this->log_failed();

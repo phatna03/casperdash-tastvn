@@ -572,6 +572,36 @@
       </div>
     </div>
   </div>
+  <!-- modal to import food into restaurant -->
+  <div class="modal animate__animated animate__rollIn" id="modal_import_food_into_restaurant" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <form onsubmit="return restaurant_import_foods(event, this);">
+          <div class="modal-header">
+            <h4 class="modal-title">Import Excel</h4>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="row">
+              <a class="text-primary fw-bold" href="{{url('import_food_to_restaurant.xlsx')}}" download="" style="margin-bottom: 10px;">Download excel template file</a>
+
+              <div class="col-12">
+                <input name="file" type="file"
+                       accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+                       required onchange="excel_check(this)" class="form-control"
+                />
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-primary">Confirm</button>
+            <input type="hidden" name="restaurant_id" value="{{$pageConfigs['item']->id}}"/>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
 @endsection
 
 @section('js_end')
@@ -713,13 +743,21 @@
         }
       ],
       buttons: [
+        // {
+        //   text: '<i class="mdi mdi-plus me-0 me-sm-1"></i><span class="d-none d-sm-inline-block">Add Dishes To Restaurant</span>',
+        //   className: 'add-new btn btn-primary waves-effect waves-light acm-mr-px-10',
+        //   attr: {
+        //     'data-bs-toggle': 'offcanvas',
+        //     'data-bs-target': '#offcanvas_add_foods',
+        //     'onclick': 'setTimeout(function () { $("#offcanvas_add_foods form select[name=foods]").selectize()[0].selectize.focus(); }, 500)',
+        //   }
+        // },
         {
-          text: '<i class="mdi mdi-plus me-0 me-sm-1"></i><span class="d-none d-sm-inline-block">Add Dishes To Restaurant</span>',
-          className: 'add-new btn btn-primary waves-effect waves-light acm-mr-px-10',
+          text: '<i class="mdi mdi-plus me-0 me-sm-1"></i><span class="d-none d-sm-inline-block">Import Dishes To Restaurant</span>',
+          className: 'add-new btn btn-warning waves-effect waves-light',
           attr: {
-            'data-bs-toggle': 'offcanvas',
-            'data-bs-target': '#offcanvas_add_foods',
-            'onclick': 'setTimeout(function () { $("#offcanvas_add_foods form select[name=foods]").selectize()[0].selectize.focus(); }, 500)',
+            'data-bs-toggle': 'modal',
+            'data-bs-target': '#modal_import_food_into_restaurant',
           }
         },
         {

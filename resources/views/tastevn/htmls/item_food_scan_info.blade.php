@@ -306,13 +306,13 @@
       <div class="acm-border-css p-1 @if($item['found_by'] == 'usr') bg-success-subtle @endif">
         <form onsubmit="return event.preventDefault();">
           <div class="row">
-            <div class="col-12 mb-1 text-center position-relative clearfix">
+            <div class="col-12 mb-1 text-center position-relative clearfix overflow-hidden acm-height-30-min">
               <div class="position-absolute acm-top-0">
-                <button type="button" class="btn btn-sm btn-danger" onclick="restaurant_food_scan_result_update_confirm()">
+                <button type="button" class="btn btn-sm btn-danger p-1" onclick="restaurant_food_scan_result_update_confirm()">
                   Update Result
                 </button>
               </div>
-              <div class="text-uppercase">
+              <div class="position-absolute acm-top-0 acm-right-15px text-uppercase">
                 <span class="badge bg-secondary">final status</span>
               </div>
             </div>

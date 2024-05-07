@@ -144,6 +144,13 @@
             <div class="row">
               <a class="text-primary fw-bold" href="{{url('import_food.xlsx')}}" download="" style="margin-bottom: 10px;">Download excel template file</a>
 
+              <div class="col-12 mb-3">
+                <select name="restaurant_parent_id" class="ajx_selectize" required
+                        data-value="restaurant_parent"
+                >
+                  <option value="">Please choose valid restaurant</option>
+                </select>
+              </div>
               <div class="col-12">
                 <input name="file" type="file"
                        accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
@@ -172,6 +179,13 @@
             <div class="row">
               <a class="text-primary fw-bold" href="{{url('import_food.xlsx')}}" download="" style="margin-bottom: 10px;">Download excel template file</a>
 
+              <div class="col-12 mb-3">
+                <select name="restaurant_parent_id" class="ajx_selectize" required
+                        data-value="restaurant_parent"
+                >
+                  <option value="">Please choose valid restaurant</option>
+                </select>
+              </div>
               <div class="col-12">
                 <input name="file" type="file"
                        accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"

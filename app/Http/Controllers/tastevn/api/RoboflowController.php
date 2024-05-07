@@ -71,7 +71,11 @@ class RoboflowController extends Controller
     $rbf_dataset = $api_core->get_setting('rbf_dataset_scan');
     $rbf_api_key = $api_core->get_setting('rbf_api_key');
 
-    if (empty($rbf_dataset) || empty($rbf_dataset)) {
+    //check later = restaurant_id
+    $restaurant_id = isset($values['restaurant_id']) ? (int)$values['restaurant_id'] : 0;
+    $restaurant = Restaurant::find((int)$restaurant_id);
+
+    if (empty($rbf_dataset) || empty($rbf_dataset) || !$restaurant) {
       return response()->json([
         'status' => false,
         'error' => "Please contact admin for config valid settings!",
@@ -176,18 +180,22 @@ class RoboflowController extends Controller
           if (count($sys_food_predict)) {
             $food_predict = Food::find($sys_food_predict['food']);
             if ($food_predict) {
-              $sys_ingredients_missing = $food_predict->missing_ingredients($ingredients_found);
+              $sys_ingredients_missing = $food_predict->missing_ingredients([
+                'restaurant_parent_id' => $restaurant->restaurant_parent_id,
+                'ingredients' => $ingredients_found,
+              ]);
             }
           }
 
           //find food
           foreach ($predictions as $prediction) {
             $prediction = (array)$prediction;
+            $confidence = (int)($prediction['confidence'] * 100);
 
             $food = Food::whereRaw('LOWER(name) LIKE ?', strtolower(trim($prediction['class'])))
               ->first();
-            if ($food) {
-              $rbf_food_confidence = (int)($prediction['confidence'] * 100);
+            if ($food && $confidence >= 50 && count($ingredients_found) && $restaurant->serve_food($food)) {
+              $rbf_food_confidence = $confidence;
               break;
             }
           }
@@ -201,7 +209,10 @@ class RoboflowController extends Controller
             $rbf_food_id = $rbf_food->id;
             $rbf_food_name = $rbf_food->name;
 
-            $rbf_ingredients_missing = $rbf_food->missing_ingredients($ingredients_found);
+            $rbf_ingredients_missing = $rbf_food->missing_ingredients([
+              'restaurant_parent_id' => $restaurant->restaurant_parent_id,
+              'ingredients' => $ingredients_found,
+            ]);
           }
           //sys
           if ($food_predict) {

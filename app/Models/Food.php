@@ -54,8 +54,11 @@ class Food extends Model
     ];
   }
 
-  public function add_recipes($ingredients = [])
+  public function add_recipes($pars = [])
   {
+    $ingredients = isset($pars['ingredients']) ? (array)$pars['ingredients'] : [];
+    $restaurant_parent_id = isset($pars['restaurant_parent_id']) ? (int)$pars['restaurant_parent_id'] : 0;
+
     //duplicate
     $ids = [];
 
@@ -65,6 +68,7 @@ class Food extends Model
 
         if (!in_array((int)$ingredient['id'], $ids)) {
           FoodRecipe::create([
+            'restaurant_parent_id' => $restaurant_parent_id,
             'food_id' => $this->id,
             'ingredient_id' => (int)$ingredient['id'],
             'ingredient_quantity' => (int)$ingredient['quantity'],
@@ -76,7 +80,7 @@ class Food extends Model
     }
   }
 
-  public function get_recipes()
+  public function get_recipes($pars = [])
   {
     $tblFoodIngredient = app(FoodRecipe::class)->getTable();
     $tblIngredient = app(Ingredient::class)->getTable();
@@ -92,11 +96,18 @@ class Food extends Model
       ->orderBy("{$tblFoodIngredient}.ingredient_quantity", "desc")
       ->orderBy("{$tblFoodIngredient}.id");
 
+    if (isset($pars['restaurant_parent_id']) && !empty($pars['restaurant_parent_id'])) {
+      $select->where("{$tblFoodIngredient}.restaurant_parent_id", (int)$pars['restaurant_parent_id']);
+    }
+
     return $select->get();
   }
 
-  public function add_ingredients($ingredients = [])
+  public function add_ingredients($pars = [])
   {
+    $ingredients = isset($pars['ingredients']) ? (array)$pars['ingredients'] : [];
+    $restaurant_parent_id = isset($pars['restaurant_parent_id']) ? (int)$pars['restaurant_parent_id'] : 0;
+
     //duplicate
     $ids = [];
 
@@ -106,6 +117,7 @@ class Food extends Model
 
         if (!in_array((int)$ingredient['id'], $ids)) {
           FoodIngredient::create([
+            'restaurant_parent_id' => $restaurant_parent_id,
             'food_id' => $this->id,
             'ingredient_id' => (int)$ingredient['id'],
             'ingredient_type' => (int)$ingredient['core'] ? 'core' : 'additive',
@@ -190,7 +202,7 @@ class Food extends Model
       ]);
   }
 
-  public function get_ingredients()
+  public function get_ingredients($pars = [])
   {
     $tblFoodIngredient = app(FoodIngredient::class)->getTable();
     $tblIngredient = app(Ingredient::class)->getTable();
@@ -207,6 +219,10 @@ class Food extends Model
       ->orderBy("{$tblFoodIngredient}.ingredient_type", "asc")
       ->orderBy("{$tblFoodIngredient}.ingredient_quantity", "desc")
       ->orderBy("{$tblFoodIngredient}.id");
+
+    if (isset($pars['restaurant_parent_id']) && !empty($pars['restaurant_parent_id'])) {
+      $select->where("{$tblFoodIngredient}.restaurant_parent_id", (int)$pars['restaurant_parent_id']);
+    }
 
     return $select->get();
   }
@@ -232,6 +248,9 @@ class Food extends Model
 
     $rows = $select->get();
 
+    if (isset($pars['restaurant_parent_id']) && !empty($pars['restaurant_parent_id'])) {
+      $select->where("{$tblFoodIngredient}.restaurant_parent_id", (int)$pars['restaurant_parent_id']);
+    }
     if (isset($pars['ingredient_id_only']) && (int)$pars['ingredient_id_only']) {
       $items = [];
 
@@ -286,12 +305,17 @@ class Food extends Model
     return $arr;
   }
 
-  public function missing_ingredients($predictions = [])
+  public function missing_ingredients($pars = [])
   {
+    $predictions = isset($pars['ingredients']) ? (array)$pars['ingredients'] : [];
+    $restaurant_parent_id = isset($pars['restaurant_parent_id']) ? (int)$pars['restaurant_parent_id'] : 0;
+
     $arr = [];
     $ids = [];
 
-    $ingredients = $this->get_ingredients();
+    $ingredients = $this->get_ingredients([
+      'restaurant_parent_id' => $restaurant_parent_id,
+    ]);
     if (count($ingredients) && count($predictions)) {
       foreach ($ingredients as $ingredient) {
         $found = false;
@@ -362,17 +386,24 @@ class Food extends Model
     return $select->get();
   }
 
-  public function get_ingredients_info($ingredients)
+  public function get_ingredients_info($pars)
   {
+    $ingredients = isset($pars['ingredients']) ? (array)$pars['ingredients'] : [];
+    $restaurant_parent_id = isset($pars['restaurant_parent_id']) ? (int)$pars['restaurant_parent_id'] : 0;
+
     $arr = [];
 
-    if (count($ingredients)) {
+    if (count($ingredients) && $restaurant_parent_id) {
       foreach ($ingredients as $ing) {
         $ingredient = Ingredient::find($ing['id']);
 
         $row = FoodIngredient::where('food_id', $this->id)
           ->where('ingredient_id', $ingredient->id)
+          ->where('restaurant_parent_id', $restaurant_parent_id)
           ->first();
+        if (!$row) {
+          continue;
+        }
 
         $arr[] = [
           'id' => $ing['id'],

@@ -141,6 +141,43 @@ function bind_selectize(wrap) {
 
         select.removeClass('ajx_selectize');
 
+      } else if (value === 'restaurant_parent') {
+
+        select.selectize({
+          valueField: 'id',
+          labelField: 'name',
+          searchField: 'name',
+          preload: true,
+          clearCache: function (template) {
+          },
+          load: function (query, callback) {
+            $.ajax({
+              url: acmcfs.link_base_url + '/admin/restaurant/selectize/parent',
+              type: 'post',
+              data: {
+                keyword: query,
+                _token: acmcfs.var_csrf,
+              },
+              complete: function (xhr, textStatus) {
+                var rsp = xhr.responseJSON;
+
+                if (xhr.status == 200) {
+                  select.options = rsp.items;
+                  callback(rsp.items);
+
+                  if (chosen && parseInt(chosen)) {
+                    setTimeout(function () {
+                      select.selectize()[0].selectize.setValue(chosen);
+                    }, acmcfs.timeout_quick);
+                  }
+                }
+              },
+            });
+          },
+        });
+
+        select.removeClass('ajx_selectize');
+
       } else if (value === 'user') {
 
         select.selectize({
@@ -1410,6 +1447,35 @@ function restaurant_info(id) {
   page_url(acmcfs.link_base_url + '/admin/restaurant/info/' + id);
 }
 
+function restaurant_import_foods(evt, frm) {
+  evt.preventDefault();
+  var form = $(frm);
+
+  const formData = new FormData();
+  formData.append('excel', form.find('input[type=file]')[0].files[0]);
+  formData.append('restaurant_id', form.find('input[name=restaurant_id]').val());
+
+  axios.post('/admin/restaurant/food/import', formData)
+    .then(response => {
+
+      message_from_toast('success', acmcfs.message_title_success, acmcfs.message_description_success_add, true);
+
+      if (typeof datatable_listing_food_refresh !== "undefined") {
+        datatable_listing_food_refresh();
+      }
+
+    })
+    .catch(error => {
+      if (error.response.data && Object.values(error.response.data).length) {
+        Object.values(error.response.data).forEach(function (v, k) {
+          message_from_toast('error', acmcfs.message_title_error, v);
+        });
+      }
+    });
+
+  return false;
+}
+
 function restaurant_add_foods(evt, frm) {
   evt.preventDefault();
   var form = $(frm);
@@ -2351,6 +2417,7 @@ function food_import(evt, frm) {
 
   const formData = new FormData();
   formData.append('excel', form.find('input[type=file]')[0].files[0]);
+  formData.append('restaurant_parent_id', form.find('select[name=restaurant_parent_id]').val());
 
   axios.post('/admin/food/import', formData)
     .then(response => {
@@ -2377,6 +2444,7 @@ function food_import_recipe(evt, frm) {
 
   const formData = new FormData();
   formData.append('excel', form.find('input[type=file]')[0].files[0]);
+  formData.append('restaurant_parent_id', form.find('select[name=restaurant_parent_id]').val());
 
   axios.post('/admin/food/import/recipe', formData)
     .then(response => {

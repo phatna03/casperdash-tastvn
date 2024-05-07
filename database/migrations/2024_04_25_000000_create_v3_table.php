@@ -14,6 +14,7 @@ return new class extends Migration {
       Schema::create('food_recipes', function (Blueprint $table) {
         $table->id();
         $table->bigInteger('food_id');
+        $table->bigInteger('restaurant_parent_id')->default(0);
         $table->bigInteger('ingredient_id');
         $table->bigInteger('ingredient_quantity')->default(1);
         $table->bigInteger('deleted')->default(0);
@@ -21,6 +22,14 @@ return new class extends Migration {
       });
     }
 
+    if (!Schema::hasTable('restaurant_parents')) {
+      Schema::create('restaurant_parents', function (Blueprint $table) {
+        $table->id();
+        $table->text('name');
+        $table->bigInteger('deleted')->default(0);
+        $table->timestamps();
+      });
+    }
   }
 
   /**

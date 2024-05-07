@@ -271,8 +271,10 @@ Route::post('/admin/restaurant/update', [RestaurantController::class, 'update'])
 Route::post('/admin/restaurant/delete', [RestaurantController::class, 'delete']);
 Route::post('/admin/restaurant/restore', [RestaurantController::class, 'restore']);
 Route::post('/admin/restaurant/selectize', [RestaurantController::class, 'selectize']);
+Route::post('/admin/restaurant/selectize/parent', [RestaurantController::class, 'selectize_parent']);
 Route::post('/admin/restaurant/stats', [RestaurantController::class, 'stats']);
 Route::get('/admin/restaurant/info/{id}', [RestaurantController::class, 'show']);
+Route::post('/admin/restaurant/food/import', [RestaurantController::class, 'food_import']);
 Route::post('/admin/restaurant/food/add', [RestaurantController::class, 'food_add']);
 Route::post('/admin/restaurant/food/delete', [RestaurantController::class, 'food_delete']);
 Route::post('/admin/restaurant/food/scan', [RestaurantController::class, 'food_scan']);

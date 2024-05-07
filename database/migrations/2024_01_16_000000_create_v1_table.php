@@ -13,6 +13,7 @@ return new class extends Migration {
     if (!Schema::hasTable('restaurants')) {
       Schema::create('restaurants', function (Blueprint $table) {
         $table->id();
+        $table->bigInteger('restaurant_parent_id')->default(0);
         $table->string('name');
         $table->bigInteger('count_foods')->default(0);
         $table->string('s3_bucket_name')->nullable();
@@ -73,6 +74,7 @@ return new class extends Migration {
       Schema::create('food_ingredients', function (Blueprint $table) {
         $table->id();
         $table->bigInteger('food_id');
+        $table->bigInteger('restaurant_parent_id')->default(0);
         $table->enum('ingredient_type', ['core', 'additive'])->default('additive');
         $table->bigInteger('ingredient_id');
         $table->bigInteger('ingredient_quantity')->default(1);

@@ -304,8 +304,6 @@ class GuestController extends Controller
       return false;
     }
 
-    $file_log = $api_core::_DEBUG_LOG_FOLDER . '/' . date('Y_m_d') . '/S3_CALLBACK/RESTAURANT_' . $restaurant->id;
-
     $api_core::_DEBUG ? Storage::append($file_log, '============================================') : $api_core->log_failed();
     $api_core::_DEBUG ? Storage::append($file_log, 'CRON_RUN_AT: ' . date('H:i:s')) : $api_core->log_failed();
     $api_core::_DEBUG ? Storage::append($file_log, 'WITH_PARAMS: ' . json_encode($values)) : $api_core->log_failed();
