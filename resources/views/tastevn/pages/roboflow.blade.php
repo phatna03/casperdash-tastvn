@@ -271,7 +271,7 @@
           if (xhr.responseJSON.status) {
 
             //foods
-            html += '<div class="text-dark fw-bold mb-1 mt-1">+ Roboflow found dishes</div>';
+            html += '<div class="text-primary fw-bold mb-1 mt-1">+ Roboflow found dishes</div>';
             if (xhr.responseJSON.data.rbf.foods_found && xhr.responseJSON.data.rbf.foods_found.length) {
               xhr.responseJSON.data.rbf.foods_found.forEach(function (v, k) {
                 html += '<div>'
@@ -284,7 +284,7 @@
             }
 
             //ingredients
-            html += '<div class="text-dark fw-bold mb-1 mt-1">+ Roboflow found ingredients</div>';
+            html += '<div class="text-primary fw-bold mb-1 mt-1">+ Roboflow found ingredients</div>';
             if (xhr.responseJSON.data.rbf.ingredients_found && xhr.responseJSON.data.rbf.ingredients_found.length) {
               xhr.responseJSON.data.rbf.ingredients_found.forEach(function (v, k) {
                 html += '<div>'

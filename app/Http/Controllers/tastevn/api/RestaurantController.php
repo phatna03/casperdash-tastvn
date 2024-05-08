@@ -659,9 +659,21 @@ class RestaurantController extends Controller
       if ($row->get_food()) {
 
         $food_name = $row->get_food()->name;
-        $food_photo = $row->get_food()->get_photo();
         $food_ingredients = $row->get_food()->get_ingredients();
         $food_recipes = $row->get_food()->get_recipes();
+
+        $restaurant_ids = Restaurant::where('deleted', 0)
+          ->select('id')
+          ->where('restaurant_parent_id', $restaurant->restaurant_parent_id);
+
+        $restaurant_food = RestaurantFood::where('deleted', 0)
+          ->whereIn('restaurant_id', $restaurant_ids)
+          ->where('food_id', $row->get_food()->id)
+          ->where('photo', '<>', NULL)
+          ->orderBy('updated_at', 'desc')
+          ->limit(1)
+          ->first();
+        $food_photo = $restaurant_food ? $restaurant_food->photo : $food_photo;
 
         $rbf_food = Food::find($row->rbf_predict);
         if ($rbf_food) {
