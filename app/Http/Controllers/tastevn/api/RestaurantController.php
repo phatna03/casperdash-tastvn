@@ -1049,6 +1049,43 @@ class RestaurantController extends Controller
     ], 200);
   }
 
+  public function food_scan_api(Request $request)
+  {
+    $values = $request->post();
+    $api_core = new SysCore();
+
+    $validator = Validator::make($values, [
+      'item' => 'required',
+    ]);
+    if ($validator->fails()) {
+      return response()->json($validator->errors(), 422);
+    }
+    //invalid
+    $row = RestaurantFoodScan::findOrFail((int)$values['item']);
+    if (!$row) {
+      return response()->json([
+        'error' => 'Invalid item'
+      ], 422);
+    }
+
+    $type = isset($values['type']) ? (int)$values['type'] : 1;
+
+    if ($type == 1) {
+      //re-predict
+      $row->predict_reset();
+      $row->predict_food([
+        'notification' => false,
+      ]);
+    } else {
+      //re-call
+      $api_core->v3_photo_scan($row);
+    }
+
+    return response()->json([
+      'status' => true,
+    ], 200);
+  }
+
   public function stats(Request $request)
   {
     $values = $request->all();

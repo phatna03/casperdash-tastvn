@@ -283,6 +283,7 @@ Route::post('/admin/restaurant/food/scan/info', [RestaurantController::class, 'f
 Route::post('/admin/restaurant/food/scan/get', [RestaurantController::class, 'food_scan_get']);
 Route::post('/admin/restaurant/food/scan/update', [RestaurantController::class, 'food_scan_update']);
 Route::post('/admin/restaurant/food/scan/error', [RestaurantController::class, 'food_scan_error']);
+Route::post('/admin/restaurant/food/scan/api', [RestaurantController::class, 'food_scan_api']);
 Route::get('/datatable/restaurant', function (Request $request) {
   $values = $request->all();
 

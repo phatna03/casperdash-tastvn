@@ -839,7 +839,18 @@
               }
             }
 
-            return ('<div class="cursor-pointer" onclick="restaurant_food_scan_result_info(' + full['id'] + ')">' + html + '</div>');
+            var html_admin = '<div></div>';
+            if (parseInt(acmcfs.rbf_auth)) {
+              html_admin = '<div>' +
+                '<button type="button" class="btn btn-sm btn-primary p-1 acm-mr-px-10" onclick="restaurant_food_scan_api(this, 1)"><i class="mdi mdi-food ic_current"></i></button>' +
+                '<button type="button" class="btn btn-sm btn-danger p-1"  onclick="restaurant_food_scan_api(this, 2)"><i class="mdi mdi-api ic_current"></i></button>' +
+                '</div>';
+            }
+
+            return ('<div class="cursor-pointer" onclick="restaurant_food_scan_result_info(' + full['id'] + ')">'
+              + html
+              + html_admin
+              + '</div>');
           }
         },
         {

@@ -1928,6 +1928,36 @@ function restaurant_food_scan_cmt(ele) {
   return false;
 }
 
+function restaurant_food_scan_api(ele, type) {
+  var bind = $(ele);
+  var tr = bind.closest('tr');
+
+  bind.find('.ic_current').addClass('d-none');
+  bind.append('<i class="mdi mdi-reload ic_loading"></i>');
+
+  axios.post('/admin/restaurant/food/scan/api', {
+    item: tr.attr('data-itd'),
+    type: type,
+  })
+    .then(response => {
+
+      bind.find('.ic_current').removeClass('d-none');
+      bind.find('.ic_loading').remove();
+
+      message_from_toast('success', acmcfs.message_title_success, acmcfs.message_description_success_update);
+
+    })
+    .catch(error => {
+      if (error.response.data && Object.values(error.response.data).length) {
+        Object.values(error.response.data).forEach(function (v, k) {
+          message_from_toast('error', acmcfs.message_title_error, v);
+        });
+      }
+    });
+
+  return false;
+}
+
 function restaurant_search_food_scan(ele) {
   var form = $(ele).closest('form');
   if (form.length) {

@@ -1168,6 +1168,47 @@ class SysCore
     }
   }
 
+  public function v3_photo_scan($rfs)
+  {
+    $api_core = new SysCore();
 
+    $rbf_dataset = $api_core->get_setting('rbf_dataset_scan');
+    $rbf_api_key = $api_core->get_setting('rbf_api_key');
+
+    $rfs_result = [];
+
+    if ($rfs && !empty($rbf_dataset) && !empty($rbf_api_key)) {
+
+      // URL for Http Request
+      $rbf_url = "https://detect.roboflow.com/" . $rbf_dataset
+        . "?api_key=" . $rbf_api_key
+        . "&image=" . urlencode($rfs->photo_url);
+
+      // Setup + Send Http request
+      $rbf_options = array(
+        'http' => array(
+          'header' => "Content-type: application/x-www-form-urlencoded\r\n",
+          'method' => 'POST'
+        ));
+
+      $rbf_context = stream_context_create($rbf_options);
+      $rbf_result = file_get_contents($rbf_url, false, $rbf_context);
+      if (!empty($rbf_result)) {
+        $rfs_result = (array)json_decode($rbf_result);
+      }
+
+      //step 2= photo scan
+      $rfs->update([
+        'time_scan' => date('Y-m-d H:i:s'),
+        'status' => count($rfs_result) ? 'scanned' : 'failed',
+        'rbf_api' => count($rfs_result) ? json_encode($rfs_result) : NULL,
+      ]);
+
+      //step 3= photo predict
+      $rfs->predict_food([
+        'notification' => false,
+      ]);
+    }
+  }
 
 }

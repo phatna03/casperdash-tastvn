@@ -51,6 +51,7 @@
     timeout_notification: 5000,
 
     rbf_model: null,
+    rbf_auth: 0,
 
     //speaker
     speaker: 0,
