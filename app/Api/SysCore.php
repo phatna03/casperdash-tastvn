@@ -1170,10 +1170,8 @@ class SysCore
 
   public function v3_photo_scan($rfs)
   {
-    $api_core = new SysCore();
-
-    $rbf_dataset = $api_core->get_setting('rbf_dataset_scan');
-    $rbf_api_key = $api_core->get_setting('rbf_api_key');
+    $rbf_dataset = $this->get_setting('rbf_dataset_scan');
+    $rbf_api_key = $this->get_setting('rbf_api_key');
 
     $rfs_result = [];
 
