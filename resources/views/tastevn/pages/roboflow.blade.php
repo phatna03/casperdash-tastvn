@@ -28,33 +28,47 @@
           <div class="row">
             <div class="col-lg-6">
               <div class="p-2 acm-border-css border-2 border-dark wrap-selected-food">
-                <div class="position-relative w-100">
-                  <div class="form-floating form-floating-outline mb-4 wrap-select-food">
-                    <div class="form-control acm-wrap-selectize" id="select-item-food">
-                      <select name="food" onchange="food_selected(this)"></select>
-                    </div>
-                    <label for="select-item-food">Select Dish</label>
-                  </div>
-                </div>
-
-                <div class="position-relative w-100">
-                  <div class="text-center w-auto">
-                    <h3 class="food-name">{{$pageConfigs['item']['food_4']->name}}</h3>
-                  </div>
-                </div>
 
                 <div class="row">
                   <div class="col-lg-6">
-                    <div class="position-relative w-100">
-                      <div class="text-center w-auto">
-                        <img class="w-100 mt-2 food-photo" src="{{url('uploaded/food/food_4.jpg')}}" />
+                    <div class="position-relative w-100 mt-2">
+                      <div class="form-floating form-floating-outline mb-4">
+                        <div class="form-control acm-wrap-selectize" id="select-item-restaurant">
+                          <select name="restaurant_parent_id" class="ajx_selectize" required
+                                  data-value="restaurant_parent" onchange="restaurant_selected(this)"
+                                  data-placeholder="Please choose restaurant..."
+                          ></select>
+                        </div>
+                        <label for="select-item-restaurant" class="text-danger">Restaurant</label>
+                      </div>
+                    </div>
+
+                    <div class="position-relative w-100 mt-2">
+                      <div class="form-floating form-floating-outline mb-4">
+                        <div class="form-control acm-wrap-selectize" id="select-item-food">
+                          <select name="food" class="opt_selectize" onchange="food_selected(this)"
+                                  data-placeholder="Please choose dish..."
+                          ></select>
+                        </div>
+                        <label for="select-item-food" class="text-danger">Dish</label>
                       </div>
                     </div>
                   </div>
+
                   <div class="col-lg-6">
-                    <div class="position-relative w-100 food-ingredients">
-                      @include('tastevn.htmls.item_food_selected', ['ingredients' => $pageConfigs['item']['food_4_ingredients']])
+                    <div class="position-relative w-100">
+                      <div class="text-center w-auto d-none">
+                        <h3 class="food-name"></h3>
+                      </div>
+
+                      <div class="text-center w-auto">
+                        <img class="w-100 mt-2 food-photo" src="{{url('custom/img/no_photo.png')}}" />
+                      </div>
                     </div>
+                  </div>
+
+                  <div class="col-lg-12 mt-3">
+                    <div class="position-relative w-100 wrap-ingredients"></div>
                   </div>
                 </div>
               </div>
@@ -166,14 +180,52 @@
         return false;
       }
 
-      axios.post('/admin/food/get', {
+      axios.post('/admin/roboflow/food/get/info', {
+        restaurant_parent_id: wrap.find('select[name=restaurant_parent_id]').val(),
         item: chosen,
       })
         .then(response => {
 
-          wrap.find('.food-name').empty().text(response.data.item.name);
-          wrap.find('.food-photo').attr('src', response.data.item_photo);
-          wrap.find('.food-ingredients').empty().append(response.data.html_selected);
+          wrap.find('.food-name').empty().text(response.data.food_name);
+          wrap.find('.food-photo').attr('src', response.data.food_photo);
+          wrap.find('.wrap-ingredients').empty().append(response.data.html_info);
+
+        })
+        .catch(error => {
+          if (error.response.data && Object.values(error.response.data).length) {
+            Object.values(error.response.data).forEach(function (v, k) {
+              message_from_toast('error', 'Invalid Credentials', v);
+            });
+          }
+        });
+
+      return false;
+    }
+
+    function restaurant_selected(ele) {
+      var wrap = $(ele).closest('.wrap-selected-food');
+
+      var chosen = $(ele).val();
+      if (!chosen || !parseInt(chosen)) {
+        wrap.find('select[name=food]').selectize()[0].selectize.destroy();
+        wrap.find('select[name=food]').selectize({});
+        return false;
+      }
+
+      axios.post('/admin/roboflow/restaurant/food/get', {
+        item: chosen,
+      })
+        .then(response => {
+
+          wrap.find('select[name=food]').selectize()[0].selectize.destroy();
+          wrap.find('select[name=food]').selectize({
+            maxItems: 1,
+            valueField: 'id',
+            labelField: 'name',
+            searchField: 'name',
+            options: response.data.items,
+            create: false,
+          });
 
         })
         .catch(error => {
@@ -218,12 +270,12 @@
 
           if (xhr.responseJSON.status) {
 
-            //rbf
-            html += '<div class="text-dark fw-bold mb-1 mt-1">+ Roboflow found ingredients</div>';
-            if (xhr.responseJSON.data.rbf.ingredients_found && xhr.responseJSON.data.rbf.ingredients_found.length) {
-              xhr.responseJSON.data.rbf.ingredients_found.forEach(function (v, k) {
+            //foods
+            html += '<div class="text-dark fw-bold mb-1 mt-1">+ Roboflow found dishes</div>';
+            if (xhr.responseJSON.data.rbf.foods_found && xhr.responseJSON.data.rbf.foods_found.length) {
+              xhr.responseJSON.data.rbf.foods_found.forEach(function (v, k) {
                 html += '<div>'
-                  + '- <b class="text-dark fw-bold">' + v.quantity + '</b> '
+                  + '- <b class="text-dark fw-bold">' + v.confidence + '</b>% '
                   + v.title
                   + '</div>';
               });
@@ -231,57 +283,13 @@
               html += '<div>---</div>';
             }
 
-            html += '<div class="text-dark fw-bold mb-1 mt-1">+ Roboflow predict core dish</div>';
-            if (xhr.responseJSON.data.rbf.food_id) {
-              html += '<div>'
-                + '- <b class="text-danger fw-bold">' + xhr.responseJSON.data.rbf.food_confidence + '%</b> - '
-                + xhr.responseJSON.data.rbf.food_name
-                + '</div>';
-            } else {
-              html += '<div>---</div>';
-            }
-
-            html += '<div class="text-dark fw-bold mb-1 mt-1">+ Ingredients Missing</div>';
-            if (xhr.responseJSON.data.rbf.ingredients_missing && xhr.responseJSON.data.rbf.ingredients_missing.length) {
-              xhr.responseJSON.data.rbf.ingredients_missing.forEach(function (v, k) {
+            //ingredients
+            html += '<div class="text-dark fw-bold mb-1 mt-1">+ Roboflow found ingredients</div>';
+            if (xhr.responseJSON.data.rbf.ingredients_found && xhr.responseJSON.data.rbf.ingredients_found.length) {
+              xhr.responseJSON.data.rbf.ingredients_found.forEach(function (v, k) {
                 html += '<div>'
                   + '- <b class="text-dark fw-bold">' + v.quantity + '</b> '
-                  + v.name + ' (' + v.name_vi + ')'
-                  + '</div>';
-              });
-            } else {
-              html += '<div>---</div>';
-            }
-
-            //sys
-            html += '<div class="text-primary fw-bold mb-1 mt-1">+ System predict core dishes</div>';
-            if (xhr.responseJSON.data.sys.foods_predict && xhr.responseJSON.data.sys.foods_predict.length) {
-              xhr.responseJSON.data.sys.foods_predict.forEach(function (v, k) {
-                html += '<div>'
-                  + '- <b class="text-danger fw-bold">' + v.confidence + '%</b> - '
-                  + v.food_name
-                  + '</div>';
-              });
-            } else {
-              html += '<div>---</div>';
-            }
-
-            html += '<div class="text-primary fw-bold mb-1 mt-1">+ System predict dish</div>';
-            if (xhr.responseJSON.data.sys.food_id) {
-              html += '<div>'
-                + '- <b class="text-danger fw-bold">' + xhr.responseJSON.data.sys.food_confidence + '%</b> - '
-                + xhr.responseJSON.data.sys.food_name
-                + '</div>';
-            } else {
-              html += '<div>---</div>';
-            }
-
-            html += '<div class="text-primary fw-bold mb-1 mt-1">+ Ingredients Missing</div>';
-            if (xhr.responseJSON.data.sys.ingredients_missing && xhr.responseJSON.data.sys.ingredients_missing.length) {
-              xhr.responseJSON.data.sys.ingredients_missing.forEach(function (v, k) {
-                html += '<div>'
-                  + '- <b class="text-dark fw-bold">' + v.quantity + '</b> '
-                  + v.name + ' (' + v.name_vi + ')'
+                  + v.title
                   + '</div>';
               });
             } else {

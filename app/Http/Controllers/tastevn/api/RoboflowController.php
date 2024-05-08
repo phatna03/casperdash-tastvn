@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\tastevn\api;
 
 use App\Http\Controllers\Controller;
+use App\Models\RestaurantFood;
+use App\Models\RestaurantParent;
 use Illuminate\Http\Request;
 
 use Illuminate\Support\Facades\App;
@@ -71,11 +73,7 @@ class RoboflowController extends Controller
     $rbf_dataset = $api_core->get_setting('rbf_dataset_scan');
     $rbf_api_key = $api_core->get_setting('rbf_api_key');
 
-    //check later = restaurant_id
-    $restaurant_id = isset($values['restaurant_id']) ? (int)$values['restaurant_id'] : 0;
-    $restaurant = Restaurant::find((int)$restaurant_id);
-
-    if (empty($rbf_dataset) || empty($rbf_dataset) || !$restaurant) {
+    if (empty($rbf_dataset) || empty($rbf_dataset)) {
       return response()->json([
         'status' => false,
         'error' => "Please contact admin for config valid settings!",
@@ -95,6 +93,7 @@ class RoboflowController extends Controller
     $rbf_food_confidence = 0;
     $rbf_ingredients_found = [];
     $rbf_ingredients_missing = [];
+    $rbf_food_found = [];
 
     $sys_food = NULL;
     $sys_food_id = 0;
@@ -173,61 +172,8 @@ class RoboflowController extends Controller
         $predictions = $result['predictions'];
         if (count($predictions)) {
 
-          //data
+          //ingredients
           $ingredients_found = $api_core->sys_ingredients_found($predictions);
-          $sys_food_predicts = $api_core->sys_predict_foods_by_ingredients($ingredients_found);
-          $sys_food_predict = $api_core->sys_predict_foods_by_ingredients($ingredients_found, true);
-          if (count($sys_food_predict)) {
-            $food_predict = Food::find($sys_food_predict['food']);
-            if ($food_predict) {
-              $sys_ingredients_missing = $food_predict->missing_ingredients([
-                'restaurant_parent_id' => $restaurant->restaurant_parent_id,
-                'ingredients' => $ingredients_found,
-              ]);
-            }
-          }
-
-          //find food
-          foreach ($predictions as $prediction) {
-            $prediction = (array)$prediction;
-            $confidence = (int)($prediction['confidence'] * 100);
-
-            $food = Food::whereRaw('LOWER(name) LIKE ?', strtolower(trim($prediction['class'])))
-              ->first();
-            if ($food && $confidence >= 50 && count($ingredients_found) && $restaurant->serve_food($food)) {
-              $rbf_food_confidence = $confidence;
-              break;
-            }
-          }
-
-          //rbf
-          if ($food) {
-
-            $rbf_food = $food;
-            $food_photo = $rbf_food->get_photo();
-
-            $rbf_food_id = $rbf_food->id;
-            $rbf_food_name = $rbf_food->name;
-
-            $rbf_ingredients_missing = $rbf_food->missing_ingredients([
-              'restaurant_parent_id' => $restaurant->restaurant_parent_id,
-              'ingredients' => $ingredients_found,
-            ]);
-          }
-          //sys
-          if ($food_predict) {
-            $sys_food = $food_predict;
-            $food_photo = $sys_food->get_photo();
-
-            $sys_food_id = $sys_food->id;
-            $sys_food_name = $sys_food->name;
-            $sys_food_confidence = count($sys_food_predict) ? $sys_food_predict['confidence'] : 0;
-
-            if (!$rbf_food) {
-              $food = $food_predict;
-            }
-          }
-
           if (count($ingredients_found)) {
             foreach ($ingredients_found as $temp) {
               $ing = Ingredient::find((int)$temp['id']);
@@ -237,6 +183,21 @@ class RoboflowController extends Controller
                   'title' => !empty($ing['name_vi']) ? $ing['name'] . ' - ' . $ing['name_vi'] : $ing['name'],
                 ];
               }
+            }
+          }
+
+          //foods
+          foreach ($predictions as $prediction) {
+            $prediction = (array)$prediction;
+            $confidence = (int)($prediction['confidence'] * 100);
+
+            $food = Food::whereRaw('LOWER(name) LIKE ?', strtolower(trim($prediction['class'])))
+              ->first();
+            if ($food) {
+              $rbf_food_found[] = [
+                'confidence' => $confidence,
+                'title' => $food->name,
+              ];
             }
           }
 
@@ -256,6 +217,7 @@ class RoboflowController extends Controller
         'food_name' => $rbf_food_name,
         'food_confidence' => $rbf_food_confidence,
 
+        'foods_found' => $rbf_food_found,
         'ingredients_found' => $rbf_ingredients_found,
         'ingredients_missing' => $rbf_ingredients_missing,
       ],
@@ -340,4 +302,107 @@ class RoboflowController extends Controller
 
     return response()->noContent();
   }
+
+  public function restaurant_food_get(Request $request)
+  {
+    $values = $request->post();
+
+    $validator = Validator::make($values, [
+      'item' => 'required',
+    ]);
+    if ($validator->fails()) {
+      return response()->json($validator->errors(), 422);
+    }
+
+    $restaurant_parent_id = isset($values['item']) ? (int)$values['item'] : 0;
+
+    $restaurant_ids = Restaurant::select('id')
+      ->where('deleted', 0)
+      ->where('restaurant_parent_id', $restaurant_parent_id);
+
+    $rows = RestaurantFood::query("restaurant_foods")
+      ->distinct()
+      ->select('foods.id', 'foods.name')
+      ->leftJoin('foods', 'foods.id', '=', 'restaurant_foods.food_id')
+      ->whereIn('restaurant_foods.restaurant_id', $restaurant_ids)
+      ->where('foods.deleted', 0)
+      ->where('restaurant_foods.deleted', 0)
+      ->orderByRaw('TRIM(LOWER(foods.name))')
+      ->get();
+
+    $items = [];
+    $count = 0;
+
+    if (count($rows)) {
+      foreach ($rows as $row) {
+
+        $count++;
+
+        $items[] = [
+          'id' => $row->id,
+          'name' => $count . '. ' . $row->name,
+        ];
+      }
+    }
+
+    return response()->json([
+      'status' => true,
+      'items' => $items,
+    ]);
+  }
+
+  public function food_get_info(Request $request)
+  {
+    $values = $request->post();
+    $user = Auth::user();
+
+    $validator = Validator::make($values, [
+      'item' => 'required',
+    ]);
+    if ($validator->fails()) {
+      return response()->json($validator->errors(), 422);
+    }
+
+    $restaurant_parent_id = isset($values['restaurant_parent_id']) ? (int)$values['restaurant_parent_id'] : 0;
+    $restaurant_parent = RestaurantParent::find($restaurant_parent_id);
+
+    //invalid
+    $row = Food::findOrFail((int)$values['item']);
+    if (!$row || !$restaurant_parent) {
+      return response()->json([
+        'error' => 'Invalid item'
+      ], 422);
+    }
+
+    $restaurant_ids = Restaurant::where('deleted', 0)
+      ->select('id')
+      ->where('restaurant_parent_id', $restaurant_parent_id);
+
+    $restaurant_food = RestaurantFood::where('deleted', 0)
+      ->whereIn('restaurant_id', $restaurant_ids)
+      ->where('food_id', $row->id)
+      ->where('photo', '<>', NULL)
+      ->orderBy('updated_at', 'desc')
+      ->limit(1)
+      ->first();
+    $food_photo = $restaurant_food ? $restaurant_food->photo : url('custom/img/no_photo.png');
+
+    //info
+    $html_info = view('tastevn.htmls.item_food_roboflow')
+      ->with('ingredients', $row->get_ingredients([
+        'restaurant_parent_id' => $restaurant_parent_id,
+      ]))
+      ->with('recipes', $row->get_recipes([
+        'restaurant_parent_id' => $restaurant_parent_id,
+      ]))
+      ->render();
+
+    return response()->json([
+      'food_name' => '[' . $restaurant_parent->name . '] ' . $row->name,
+      'food_photo' => $food_photo,
+
+      'html_info' => $html_info,
+    ]);
+  }
+
 }

@@ -554,8 +554,8 @@
 
 .selectize-control.multi .selectize-input input,
 .opt_selectize.single .selectize-input > * {
-  font-weight: bold;
-  font-size: 18px;
+  /*font-weight: bold;*/
+  /*font-size: 18px;*/
 }
 
 /*modal 2*/

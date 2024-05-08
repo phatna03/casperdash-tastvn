@@ -1202,6 +1202,8 @@ class SysCore
         'rbf_api' => count($rfs_result) ? json_encode($rfs_result) : NULL,
       ]);
 
+      $rfs->predict_reset();
+
       //step 3= photo predict
       $rfs->predict_food([
         'notification' => false,

@@ -371,11 +371,12 @@ class Food extends Model
       ->orderBy("{$tblFoodIngredient}.ingredient_quantity", "desc")
       ->orderBy("{$tblFoodIngredient}.id");
 
-    $rows = $select->get();
-
     if (isset($pars['restaurant_parent_id']) && !empty($pars['restaurant_parent_id'])) {
       $select->where("{$tblFoodIngredient}.restaurant_parent_id", (int)$pars['restaurant_parent_id']);
     }
+
+    $rows = $select->get();
+
     if (isset($pars['ingredient_id_only']) && (int)$pars['ingredient_id_only']) {
       $items = [];
 

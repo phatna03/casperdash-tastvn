@@ -708,6 +708,8 @@ Route::post('/admin/comment/note', [CommentController::class, 'note']);
 Route::get('/admin/roboflow', [RoboflowController::class, 'index']);
 Route::post('/admin/roboflow/detect', [RoboflowController::class, 'detect']);
 Route::post('/admin/roboflow/retrain', [RoboflowController::class, 'retrain']);
+Route::post('/admin/roboflow/restaurant/food/get', [RoboflowController::class, 'restaurant_food_get']);
+Route::post('/admin/roboflow/food/get/info', [RoboflowController::class, 'food_get_info']);
 
 //======================================================================================================================
 //theme material ui
