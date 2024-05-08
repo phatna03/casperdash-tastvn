@@ -2190,7 +2190,7 @@ function food_clear(frm) {
   var form = $(frm);
 
   form.find('input[name=name]').val('');
-  form.find('.wrap-add-item-ingredients .wrap-fetch').empty();
+  form.find('select[name=live_group]').selectize()[0].selectize.setValue(3);
 }
 
 function food_item(frm) {
@@ -2206,8 +2206,9 @@ function food_item(frm) {
           id: ing_name,
           quantity: input_number_only(tr.find('input[name=ing_quantity]').val())
             ? input_number_only(tr.find('input[name=ing_quantity]').val()) : 1,
-          color: tr.find('input[name=ing_color]').val(),
-          core: tr.find('input[name=ing_core]').is(':checked') ? 1 : 0,
+
+          color: tr.find('input[name=ing_color]').length ? tr.find('input[name=ing_color]').val() : '',
+          core: tr.find('input[name=ing_core]').length && tr.find('input[name=ing_core]').is(':checked') ? 1 : 0,
 
           old: tr.find('input[name=old]').length ? tr.find('input[name=old]').val() : 0,
         });
@@ -2218,24 +2219,36 @@ function food_item(frm) {
   return ingredients;
 }
 
+function food_add_clear() {
+  var form = $('#offcanvas_add_item form');
+
+  form.find('input[name=name]').val('');
+  form.find('select[name=live_group]').selectize()[0].selectize.setValue(3);
+
+  setTimeout(function () {
+    form.find('input[name=name]').focus();
+  }, acmcfs.timeout_quick);
+}
+
 function food_add(evt, frm) {
   evt.preventDefault();
   var form = $(frm);
 
-  var ingredients = food_item(frm);
-  if (!ingredients.length) {
-    message_from_toast('error', acmcfs.message_title_error, "Ingredients required", true);
-    return false;
-  }
+  // var ingredients = food_item(frm);
+  // if (!ingredients.length) {
+  //   message_from_toast('error', acmcfs.message_title_error, "Ingredients required", true);
+  //   return false;
+  // }
 
   const formData = new FormData();
   formData.append("name", form.find('input[name=name]').val());
-  formData.append("ingredients", JSON.stringify(ingredients));
+  formData.append("live_group", form.find('select[name=live_group]').val());
+  // formData.append("ingredients", JSON.stringify(ingredients));
 
   // Read selected files
-  if (form.find('input[type=file]')[0].files.length) {
-    formData.append('photo[]', form.find('input[type=file]')[0].files[0]);
-  }
+  // if (form.find('input[type=file]')[0].files.length) {
+  //   formData.append('photo[]', form.find('input[type=file]')[0].files[0]);
+  // }
 
   axios.post('/admin/food/store', formData)
     .then(response => {
@@ -2293,68 +2306,46 @@ function ingredient_item_remove(ele) {
   parent.remove();
 }
 
-function food_edit_prepare(ele) {
-  var tr = $(ele).closest('tr');
-  var form = $('#offcanvas_edit_item form');
+function recipe_item_add(ele) {
+  var form = $(ele).closest('form');
 
-  food_clear(form);
-
-  form.find('input[name=item]').val(tr.attr('data-id'));
-  form.find('input[name=name]').val(tr.attr('data-name'));
-
-  //photo
-  var img_photo = tr.attr('data-photo');
-  var img_src = acmcfs.link_base_url + '/custom/img/no_photo.png';
-  if (img_photo && img_photo !== '' && img_photo != 'null') {
-    img_src = acmcfs.link_base_url + img_photo;
-  }
-  form.find('.wrap-photo-preview img').attr('src', img_src);
-
-  setTimeout(function () {
-    form.find('input[name=name]').focus();
-  }, acmcfs.timeout_quick);
-
-  axios.post('/admin/food/get', {
-    item: tr.attr('data-id'),
-  })
+  axios.post('/admin/food/recipe/html', {})
     .then(response => {
 
-      form.find('.wrap-add-item-ingredients .wrap-fetch').append(response.data.html_ingredients);
+      form.find('.wrap-add-item-ingredients .wrap-fetch').append(response.data.html);
       bind_datad(form);
 
     })
     .catch(error => {
-      if (error.response.data && Object.values(error.response.data).length) {
-        Object.values(error.response.data).forEach(function (v, k) {
-          message_from_toast('error', acmcfs.message_title_error, v);
-        });
-      }
 
-      setTimeout(function () {
-        form.find('input[name=name]').focus();
-      }, acmcfs.timeout_quick);
     });
+
+  return false;
+}
+
+function food_edit_prepare(ele) {
+  var tr = $(ele).closest('tr');
+  var form = $('#offcanvas_edit_item form');
+
+  form.find('input[name=name]').val('');
+
+  form.find('input[name=item]').val(tr.attr('data-id'));
+  form.find('input[name=name]').val(tr.attr('data-name'));
+  form.find('select[name=live_group]').selectize()[0].selectize.setValue(tr.attr('data-live_group'));
+
+  setTimeout(function () {
+    form.find('input[name=name]').focus();
+  }, acmcfs.timeout_quick);
 }
 
 function food_edit(evt, frm) {
   evt.preventDefault();
   var form = $(frm);
 
-  var ingredients = food_item(frm);
-  if (!ingredients.length) {
-    message_from_toast('error', acmcfs.message_title_error, "Ingredients required", true);
-    return false;
-  }
-
   const formData = new FormData();
   formData.append("item", form.find('input[name=item]').val());
   formData.append("name", form.find('input[name=name]').val());
-  formData.append("ingredients", JSON.stringify(ingredients));
-
-  // Read selected files
-  if (form.find('input[type=file]')[0].files.length) {
-    formData.append('photo[]', form.find('input[type=file]')[0].files[0]);
-  }
+  formData.append("live_group", form.find('select[name=live_group]').val());
 
   axios.post('/admin/food/update', formData)
     .then(response => {
@@ -2362,7 +2353,7 @@ function food_edit(evt, frm) {
       message_from_toast('success', acmcfs.message_title_success, acmcfs.message_description_success_update, true);
 
       datatable_refresh();
-      offcanvas_close();
+      // offcanvas_close();
 
     })
     .catch(error => {
@@ -2384,8 +2375,11 @@ function food_info(id) {
   var popup = $('#modal_food_info');
 
   popup.find('.modal-header h4').text('Loading...');
-  popup.find('.modal-body').addClass('text-center').empty()
-    .append('<div class="m-auto">' + acmcfs.html_loading + '</div>');
+
+  popup.find('.modal-body .food_info_select select[name=restaurant_parent_id]').selectize()[0].selectize.setValue('');
+  popup.find('.modal-body .food_info_img img').removeAttr('src').attr('src', acmcfs.link_food_no_photo);
+  popup.find('.modal-body .food_info_ingredients').empty();
+  popup.find('.modal-body input[name=item]').val(id);
 
   axios.post('/admin/food/get', {
     item: id,
@@ -2393,11 +2387,50 @@ function food_info(id) {
     .then(response => {
 
       popup.find('.modal-header h4').text(response.data.item.name);
-      popup.find('.modal-body').removeClass('text-center').empty()
-        .append(response.data.html_info);
 
       bind_datad(popup);
       popup.modal('show');
+
+    })
+    .catch(error => {
+      if (error.response.data && Object.values(error.response.data).length) {
+        Object.values(error.response.data).forEach(function (v, k) {
+          message_from_toast('error', acmcfs.message_title_error, v);
+        });
+      }
+    });
+
+  return false;
+}
+
+function food_info_select(ele) {
+  var bind = $(ele);
+  var popup = bind.closest('.modal');
+
+  var selected = bind.val();
+  if (!selected || selected == '') {
+    return false;
+  }
+
+  popup.find('.modal-body .food_info_img img').removeAttr('src').attr('src', acmcfs.link_food_no_photo);
+  popup.find('.modal-body .food_info_ingredients').empty();
+
+  axios.post('/admin/food/get/info', {
+    item: popup.find('.modal-body input[name=item]').val(),
+    restaurant_parent_id: selected,
+  })
+    .then(response => {
+
+      if (response.data.food_photo && response.data.food_photo != '') {
+        popup.find('.modal-body .food_info_img img').removeAttr('src').attr('src', response.data.food_photo);
+      }
+
+      if (response.data.html_ingredient && response.data.html_ingredient != '') {
+        popup.find('.modal-body .food_roboflow').append(response.data.html_ingredient);
+      }
+      if (response.data.html_recipe && response.data.html_recipe != '') {
+        popup.find('.modal-body .food_recipe').append(response.data.html_recipe);
+      }
 
     })
     .catch(error => {
@@ -2452,6 +2485,166 @@ function food_import_recipe(evt, frm) {
       message_from_toast('success', acmcfs.message_title_success, acmcfs.message_description_success_add, true);
 
       datatable_refresh();
+
+    })
+    .catch(error => {
+      if (error.response.data && Object.values(error.response.data).length) {
+        Object.values(error.response.data).forEach(function (v, k) {
+          message_from_toast('error', acmcfs.message_title_error, v);
+        });
+      }
+    });
+
+  return false;
+}
+
+function food_edit_prepare_ingredient(ele) {
+  var tr = $(ele).closest('tr');
+  var form = $('#offcanvas_edit_ingredient form');
+
+  form.find('.wrap-edit-ingredients').addClass('d-none');
+  form.find('.wrap-add-item-ingredients .wrap-fetch').empty();
+  form.find('select[name=restaurant_parent_id]').selectize()[0].selectize.setValue('');
+
+  form.find('input[name=item]').val(tr.attr('data-id'));
+}
+
+function food_edit_select_ingredient(ele) {
+  var bind = $(ele);
+  var form = bind.closest('form');
+
+  form.find('.wrap-edit-ingredients').addClass('d-none');
+  form.find('.wrap-add-item-ingredients .wrap-fetch').empty();
+
+  var selected = bind.val();
+  if (!selected || selected == '') {
+    return false;
+  }
+
+  axios.post('/admin/food/get/ingredient', {
+    item: form.find('input[name=item]').val(),
+    restaurant_parent_id: selected,
+  })
+    .then(response => {
+
+      if (response.data.html && response.data.html != '') {
+        form.find('.wrap-edit-ingredients').removeClass('d-none');
+        form.find('.wrap-add-item-ingredients .wrap-fetch').append(response.data.html);
+        bind_datad(form);
+      }
+
+    })
+    .catch(error => {
+      if (error.response.data && Object.values(error.response.data).length) {
+        Object.values(error.response.data).forEach(function (v, k) {
+          message_from_toast('error', acmcfs.message_title_error, v);
+        });
+      }
+    });
+}
+
+function food_edit_ingredient(evt, frm) {
+  evt.preventDefault();
+  var form = $(frm);
+
+  var ingredients = food_item(frm);
+  if (!ingredients.length) {
+    message_from_toast('error', acmcfs.message_title_error, "Ingredients required", true);
+    return false;
+  }
+
+  const formData = new FormData();
+  formData.append("item", form.find('input[name=item]').val());
+  formData.append("restaurant_parent_id", form.find('select[name=restaurant_parent_id]').val());
+  formData.append("ingredients", JSON.stringify(ingredients));
+
+  axios.post('/admin/food/update/ingredient', formData)
+    .then(response => {
+
+      message_from_toast('success', acmcfs.message_title_success, acmcfs.message_description_success_update, true);
+
+      datatable_refresh();
+      // offcanvas_close();
+
+    })
+    .catch(error => {
+      if (error.response.data && Object.values(error.response.data).length) {
+        Object.values(error.response.data).forEach(function (v, k) {
+          message_from_toast('error', acmcfs.message_title_error, v);
+        });
+      }
+    });
+
+  return false;
+}
+
+function food_edit_prepare_recipe(ele) {
+  var tr = $(ele).closest('tr');
+  var form = $('#offcanvas_edit_recipe form');
+
+  form.find('.wrap-edit-ingredients').addClass('d-none');
+  form.find('.wrap-add-item-ingredients .wrap-fetch').empty();
+  form.find('select[name=restaurant_parent_id]').selectize()[0].selectize.setValue('');
+
+  form.find('input[name=item]').val(tr.attr('data-id'));
+}
+
+function food_edit_select_recipe(ele) {
+  var bind = $(ele);
+  var form = bind.closest('form');
+
+  form.find('.wrap-edit-ingredients').addClass('d-none');
+  form.find('.wrap-add-item-ingredients .wrap-fetch').empty();
+
+  var selected = bind.val();
+  if (!selected || selected == '') {
+    return false;
+  }
+
+  axios.post('/admin/food/get/recipe', {
+    item: form.find('input[name=item]').val(),
+    restaurant_parent_id: selected,
+  })
+    .then(response => {
+
+      if (response.data.html && response.data.html != '') {
+        form.find('.wrap-edit-ingredients').removeClass('d-none');
+        form.find('.wrap-add-item-ingredients .wrap-fetch').append(response.data.html);
+        bind_datad(form);
+      }
+
+    })
+    .catch(error => {
+      if (error.response.data && Object.values(error.response.data).length) {
+        Object.values(error.response.data).forEach(function (v, k) {
+          message_from_toast('error', acmcfs.message_title_error, v);
+        });
+      }
+    });
+}
+
+function food_edit_recipe(evt, frm) {
+  evt.preventDefault();
+  var form = $(frm);
+
+  var ingredients = food_item(frm);
+  if (!ingredients.length) {
+    message_from_toast('error', acmcfs.message_title_error, "Ingredients required", true);
+    return false;
+  }
+
+  const formData = new FormData();
+  formData.append("item", form.find('input[name=item]').val());
+  formData.append("restaurant_parent_id", form.find('select[name=restaurant_parent_id]').val());
+  formData.append("ingredients", JSON.stringify(ingredients));
+
+  axios.post('/admin/food/update/recipe', formData)
+    .then(response => {
+
+      message_from_toast('success', acmcfs.message_title_success, acmcfs.message_description_success_update, true);
+
+      datatable_refresh();
+      // offcanvas_close();
 
     })
     .catch(error => {

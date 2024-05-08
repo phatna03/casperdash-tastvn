@@ -268,6 +268,48 @@ class Log extends Model
           }
         }
         break;
+      case 'edit_food_ingredient':
+        $restaurant_parent_id = isset($params['before']['restaurant_parent_id']) ? (int)$params['before']['restaurant_parent_id'] : 0;
+        $restaurant_parent = RestaurantParent::find($restaurant_parent_id);
+
+        if ($restaurant_parent) {
+          $text .= ' updated the Roboflow ingredient of dish named: <b>' . $this->item()->name . '</b>' . ' at restaurant named: <b>' . $restaurant_parent->name . '</b>';
+        } else {
+          $text .= ' updated the Roboflow ingredient of dish named: <b>' . $this->item()->name . '</b>';
+        }
+
+        $rs = $this->compare_update($params);
+        if (count($rs)) {
+          foreach ($rs as $k => $v) {
+            if (is_numeric($k)) {
+              $text .= '<div class="acm-ml-px-10">- ' . $v . '</div>';
+            } else {
+              $text .= '<div>+ ' . $this->get_str($k) . ': ' . $v . '</div>';
+            }
+          }
+        }
+        break;
+      case 'edit_food_recipe':
+        $restaurant_parent_id = isset($params['before']['restaurant_parent_id']) ? (int)$params['before']['restaurant_parent_id'] : 0;
+        $restaurant_parent = RestaurantParent::find($restaurant_parent_id);
+
+        if ($restaurant_parent) {
+          $text .= ' updated the Recipe ingredient of dish named: <b>' . $this->item()->name . '</b>' . ' at restaurant named: <b>' . $restaurant_parent->name . '</b>';
+        } else {
+          $text .= ' updated the Recipe ingredient of dish named: <b>' . $this->item()->name . '</b>';
+        }
+
+        $rs = $this->compare_update($params);
+        if (count($rs)) {
+          foreach ($rs as $k => $v) {
+            if (is_numeric($k)) {
+              $text .= '<div class="acm-ml-px-10">- ' . $v . '</div>';
+            } else {
+              $text .= '<div>+ ' . $this->get_str($k) . ': ' . $v . '</div>';
+            }
+          }
+        }
+        break;
       case 'import_food':
         $text .= ' imported a new dish named: <b>' . $this->item()->name . '</b>';
         break;
@@ -481,9 +523,13 @@ class Log extends Model
         $arr = array_merge($arr1, $arr2);
         break;
       case 'edit_food':
-        $arr1 = $this->compare_array($pars['before'], $pars['after'], [
+        $arr = $this->compare_array($pars['before'], $pars['after'], [
           'name',
         ]);
+        break;
+      case 'edit_food_ingredient':
+      case 'edit_food_recipe':
+        $arr1 = [];
 
         $arr2 = [];
         if (json_encode($pars['before']['ingredients']) != json_encode($pars['after']['ingredients'])) {

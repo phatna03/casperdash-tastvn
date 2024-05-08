@@ -349,8 +349,8 @@
   height: auto !important;
 }
 
-.acm-wrap-selectize-focus {
-  border: 2px solid #666cff;
+.food_info_select .ajx_selectize.single > .selectize-input.items {
+  border: 2px solid #fa0000;
 }
 
 .acm-wrap-selectize .selectize-input.items {

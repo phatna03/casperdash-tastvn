@@ -514,9 +514,15 @@ Route::get('/datatable/restaurant-food-scan-errors', function (Request $request)
 
 Route::get('/admin/foods', [FoodController::class, 'index']);
 Route::post('/admin/food/get', [FoodController::class, 'get']);
+Route::post('/admin/food/get/info', [FoodController::class, 'get_info']);
+Route::post('/admin/food/get/ingredient', [FoodController::class, 'get_ingredient']);
+Route::post('/admin/food/get/recipe', [FoodController::class, 'get_recipe']);
 Route::post('/admin/food/ingredient/html', [FoodController::class, 'ingredient_html']);
+Route::post('/admin/food/recipe/html', [FoodController::class, 'recipe_html']);
 Route::post('/admin/food/store', [FoodController::class, 'store']);
 Route::post('/admin/food/update', [FoodController::class, 'update']);
+Route::post('/admin/food/update/ingredient', [FoodController::class, 'update_ingredient']);
+Route::post('/admin/food/update/recipe', [FoodController::class, 'update_recipe']);
 Route::post('/admin/food/import', [FoodController::class, 'import']);
 Route::post('/admin/food/import/recipe', [FoodController::class, 'import_recipe']);
 Route::post('/admin/food/selectize', [FoodController::class, 'selectize']);

@@ -42,6 +42,8 @@
     message_description_success_add: '{{config('tastevn.message_description_success_add')}}',
     message_description_success_update: '{{config('tastevn.message_description_success_update')}}',
 
+    link_food_no_photo: '{{url('custom/img/no_photo.png')}}',
+
     html_loading: '<div class="text-center m-auto"><div class="sk-wave sk-primary"><div class="sk-wave-rect"></div><div class="sk-wave-rect"></div><div class="sk-wave-rect"></div><div class="sk-wave-rect"></div><div class="sk-wave-rect"></div></div></div>',
 
     timeout_default: 2000,
@@ -179,7 +181,43 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
+          <input type="hidden" name="item" />
 
+          <div class="row">
+            <div class="col-lg-4 mb-2">
+              <div class="food_info_select">
+                <select class="ajx_selectize"
+                        data-value="restaurant_parent"
+                        name="restaurant_parent_id"
+                        onchange="food_info_select(this)"
+                >
+                  <option value="">Please choose valid restaurant</option>
+                </select>
+              </div>
+
+              <div class="food_info_img w-auto">
+                <img class="w-100" />
+              </div>
+            </div>
+            <div class="col-lg-4 mb-2">
+              <div class="row">
+                <div class="col-lg-12 mb-2">
+                  <div class="text-primary fw-bold">+ Roboflow Ingredients</div>
+
+                  <div class="food_info_ingredients food_roboflow"></div>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-4 mb-2">
+              <div class="row">
+                <div class="col-lg-12 mb-2">
+                  <div class="text-primary fw-bold">+ Recipe Ingredients</div>
+
+                  <div class="food_info_ingredients food_recipe"></div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

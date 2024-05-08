@@ -436,6 +436,8 @@ class RestaurantController extends Controller
         }
       }
 
+      $restaurant->count_foods();
+
       DB::commit();
 
     } catch (\Exception $e) {

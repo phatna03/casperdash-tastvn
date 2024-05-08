@@ -28,8 +28,20 @@ class Food extends Model
 
   public function get_log()
   {
+    return [
+//      'live_group' => $this->live_group,
+      'name' => $this->name,
+    ];
+  }
+
+  public function get_log_ingredient($pars = [])
+  {
+    $restaurant_parent_id = isset($pars['restaurant_parent_id']) ? (int)$pars['restaurant_parent_id'] : 0;
+
     $ingredients = [];
-    $arr = $this->get_ingredients();
+    $arr = $this->get_ingredients([
+      'restaurant_parent_id' => $restaurant_parent_id
+    ]);
     if (count($arr)) {
 
       $a1 = [];
@@ -49,7 +61,39 @@ class Food extends Model
     }
 
     return [
-      'name' => $this->name,
+      'restaurant_parent_id' => $restaurant_parent_id,
+      'ingredients' => $ingredients,
+    ];
+  }
+
+  public function get_log_recipe($pars = [])
+  {
+    $restaurant_parent_id = isset($pars['restaurant_parent_id']) ? (int)$pars['restaurant_parent_id'] : 0;
+
+    $ingredients = [];
+    $arr = $this->get_recipes([
+      'restaurant_parent_id' => $restaurant_parent_id
+    ]);
+    if (count($arr)) {
+
+      $a1 = [];
+      $a2 = [];
+
+      foreach ($arr as $key => $itm) {
+        $ingredients[] = [
+          'id' => $itm->id,
+          'quantity' => $itm->ingredient_quantity,
+        ];
+
+        $a1[$key] = $itm->id;
+        $a2[$key] = $itm->ingredient_quantity;
+      }
+
+      array_multisort($a1, SORT_ASC, $a2, SORT_DESC, $ingredients);
+    }
+
+    return [
+      'restaurant_parent_id' => $restaurant_parent_id,
       'ingredients' => $ingredients,
     ];
   }
@@ -131,8 +175,11 @@ class Food extends Model
     }
   }
 
-  public function update_ingredients($ingredients = [])
+  public function update_ingredients($pars = [])
   {
+    $restaurant_parent_id = isset($pars['restaurant_parent_id']) ? (int)$pars['restaurant_parent_id'] : 0;
+    $ingredients = isset($pars['ingredients']) ? (array)$pars['ingredients'] : [];
+
     //duplicate
     $ids = [];
     $keeps = [];
@@ -151,6 +198,7 @@ class Food extends Model
           $row = FoodIngredient::find((int)$ingredient['old']);
           if ($row) {
             $row->update([
+              'restaurant_parent_id' => $restaurant_parent_id,
               'ingredient_id' => (int)$ingredient['id'],
               'ingredient_type' => (int)$ingredient['core'] ? 'core' : 'additive',
               'ingredient_quantity' => (int)$ingredient['quantity'],
@@ -164,11 +212,13 @@ class Food extends Model
 
           //check deleted
           $row = FoodIngredient::where('food_id', $this->id)
+            ->where('restaurant_parent_id', $restaurant_parent_id)
             ->where('ingredient_id', (int)$ingredient['id'])
             ->first();
           if ($row) {
 
             $row->update([
+              'restaurant_parent_id' => $restaurant_parent_id,
               'deleted' => 0,
               'ingredient_type' => (int)$ingredient['core'] ? 'core' : 'additive',
               'ingredient_quantity' => (int)$ingredient['quantity'],
@@ -179,6 +229,7 @@ class Food extends Model
 
             //create
             $row = FoodIngredient::create([
+              'restaurant_parent_id' => $restaurant_parent_id,
               'food_id' => $this->id,
               'ingredient_id' => (int)$ingredient['id'],
               'ingredient_type' => (int)$ingredient['core'] ? 'core' : 'additive',
@@ -196,6 +247,80 @@ class Food extends Model
 
     //remove
     FoodIngredient::where('food_id', $this->id)
+      ->where('restaurant_parent_id', $restaurant_parent_id)
+      ->whereNotIn('id', $keeps)
+      ->update([
+        'deleted' => Auth::user() ? Auth::user()->id : 999999,
+      ]);
+  }
+
+  public function update_ingredients_recipe($pars = [])
+  {
+    $restaurant_parent_id = isset($pars['restaurant_parent_id']) ? (int)$pars['restaurant_parent_id'] : 0;
+    $ingredients = isset($pars['ingredients']) ? (array)$pars['ingredients'] : [];
+
+    //duplicate
+    $ids = [];
+    $keeps = [];
+
+    if (count($ingredients)) {
+      foreach ($ingredients as $ingredient) {
+        $ingredient = (array)$ingredient;
+
+        if (in_array((int)$ingredient['id'], $ids)) {
+          continue;
+        }
+
+        if ((int)$ingredient['old']) {
+
+          //update
+          $row = FoodRecipe::find((int)$ingredient['old']);
+          if ($row) {
+            $row->update([
+              'restaurant_parent_id' => $restaurant_parent_id,
+              'ingredient_id' => (int)$ingredient['id'],
+              'ingredient_quantity' => (int)$ingredient['quantity'],
+            ]);
+
+            $keeps[] = $row->id;
+          }
+
+        } else {
+
+          //check deleted
+          $row = FoodRecipe::where('food_id', $this->id)
+            ->where('restaurant_parent_id', $restaurant_parent_id)
+            ->where('ingredient_id', (int)$ingredient['id'])
+            ->first();
+          if ($row) {
+
+            $row->update([
+              'restaurant_parent_id' => $restaurant_parent_id,
+              'deleted' => 0,
+              'ingredient_quantity' => (int)$ingredient['quantity'],
+            ]);
+
+          } else {
+
+            //create
+            $row = FoodRecipe::create([
+              'restaurant_parent_id' => $restaurant_parent_id,
+              'food_id' => $this->id,
+              'ingredient_id' => (int)$ingredient['id'],
+              'ingredient_quantity' => (int)$ingredient['quantity'],
+            ]);
+          }
+
+          $keeps[] = $row->id;
+        }
+
+        $ids[] = (int)$ingredient['id'];
+      }
+    }
+
+    //remove
+    FoodRecipe::where('food_id', $this->id)
+      ->where('restaurant_parent_id', $restaurant_parent_id)
       ->whereNotIn('id', $keeps)
       ->update([
         'deleted' => Auth::user() ? Auth::user()->id : 999999,

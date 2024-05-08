@@ -1,8 +1,8 @@
 <?php
 
 namespace App\Http\Controllers\tastevn\api;
-
 use App\Http\Controllers\Controller;
+use App\Models\Restaurant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -12,6 +12,7 @@ use App\Excel\ImportData;
 
 use App\Models\Food;
 use App\Models\RestaurantFood;
+use App\Models\RestaurantParent;
 use App\Models\Ingredient;
 
 class FoodController extends Controller
@@ -68,11 +69,6 @@ class FoodController extends Controller
       return response()->json($validator->errors(), 422);
     }
 
-    //check later
-    return response()->json([
-      'error' => 'Invalid restaurant'
-    ], 422);
-
     //restore
     $row = Food::whereRaw('LOWER(name) LIKE ?', strtolower(trim($values['name'])))
       ->first();
@@ -84,20 +80,22 @@ class FoodController extends Controller
     }
 
     //ingredients
-    $ingredients = isset($values['ingredients']) && !empty($values['ingredients'])
-      ? (array)json_decode($values['ingredients'], true) : [];
-    if (!count($ingredients)) {
-      return response()->json([
-        'error' => 'Ingredients required'
-      ], 422);
-    }
+//    $ingredients = isset($values['ingredients']) && !empty($values['ingredients'])
+//      ? (array)json_decode($values['ingredients'], true) : [];
+//    if (!count($ingredients)) {
+//      return response()->json([
+//        'error' => 'Ingredients required'
+//      ], 422);
+//    }
 
     $row = Food::create([
       'name' => ucwords(strtolower(trim($values['name']))),
       'creator_id' => $user->id,
+
+      'live_group' => isset($values['live_group']) && (int)$values['live_group'] < 4 ? (int)$values['live_group'] : 3,
     ]);
 
-    $row->add_ingredients($ingredients);
+//    $row->add_ingredients($ingredients);
 
     $user->add_log([
       'type' => 'add_' . $row->get_type(),
@@ -106,27 +104,27 @@ class FoodController extends Controller
     ]);
 
     //photo
-    $file_photo = $request->file('photo');
-    if (!empty($file_photo)) {
-      foreach ($file_photo as $file) {
-        $file_path = '/uploaded/food/';
-        $full_path = public_path($file_path);
-        //os
-        if (strtoupper(substr(PHP_OS, 0, 3)) == 'WIN') {
-          $full_path = str_replace('/', '\\', $full_path);
-        }
-        if (!file_exists($full_path)) {
-          mkdir($full_path, 0777, true);
-        }
-
-        $file_name = 'food_' . $row->id . '.' . $file->getClientOriginalExtension();
-        $file->move(public_path($file_path), $file_name);
-
-        $row->update([
-          'photo' => $file_path . $file_name
-        ]);
-      }
-    }
+//    $file_photo = $request->file('photo');
+//    if (!empty($file_photo)) {
+//      foreach ($file_photo as $file) {
+//        $file_path = '/uploaded/food/';
+//        $full_path = public_path($file_path);
+//        //os
+//        if (strtoupper(substr(PHP_OS, 0, 3)) == 'WIN') {
+//          $full_path = str_replace('/', '\\', $full_path);
+//        }
+//        if (!file_exists($full_path)) {
+//          mkdir($full_path, 0777, true);
+//        }
+//
+//        $file_name = 'food_' . $row->id . '.' . $file->getClientOriginalExtension();
+//        $file->move(public_path($file_path), $file_name);
+//
+//        $row->update([
+//          'photo' => $file_path . $file_name
+//        ]);
+//      }
+//    }
 
     return response()->json([
       'status' => true,
@@ -166,11 +164,6 @@ class FoodController extends Controller
       return response()->json($validator->errors(), 422);
     }
 
-    //check later
-    return response()->json([
-      'error' => 'Invalid restaurant'
-    ], 422);
-
     //invalid
     $row = Food::findOrFail((int)$values['item']);
     if (!$row) {
@@ -197,6 +190,94 @@ class FoodController extends Controller
     }
 
     //ingredients
+//    $ingredients = isset($values['ingredients']) && !empty($values['ingredients'])
+//      ? (array)json_decode($values['ingredients'], true) : [];
+//    if (!count($ingredients)) {
+//      return response()->json([
+//        'error' => 'Ingredients required'
+//      ], 422);
+//    }
+
+    $diffs['before'] = $row->get_log();
+
+    $row->update([
+      'name' => ucwords(strtolower(trim($values['name']))),
+
+      'live_group' => isset($values['live_group']) && (int)$values['live_group'] < 4 ? (int)$values['live_group'] : 3,
+    ]);
+
+//    $row->update_ingredients($ingredients);
+
+    //photo
+//    $file_photo = $request->file('photo');
+//    if (!empty($file_photo)) {
+//      foreach ($file_photo as $file) {
+//        $file_path = '/uploaded/food/';
+//        $full_path = public_path($file_path);
+//        //os
+//        if (strtoupper(substr(PHP_OS, 0, 3)) == 'WIN') {
+//          $full_path = str_replace('/', '\\', $full_path);
+//        }
+//        if (!file_exists($full_path)) {
+//          mkdir($full_path, 0777, true);
+//        }
+//
+//        $file_name = 'food_' . $row->id . '.' . $file->getClientOriginalExtension();
+//        $file->move(public_path($file_path), $file_name);
+//
+//        $row->update([
+//          'photo' => $file_path . $file_name
+//        ]);
+//      }
+//    }
+
+    $row = Food::find($row->id);
+    $diffs['after'] = $row->get_log();
+    if (json_encode($diffs['before']) !== json_encode($diffs['after'])) {
+      $user->add_log([
+        'type' => 'edit_' . $row->get_type(),
+        'item_id' => (int)$row->id,
+        'item_type' => $row->get_type(),
+        'params' => json_encode($diffs),
+      ]);
+    }
+
+    return response()->json([
+      'status' => true,
+      'item' => $row->name,
+    ], 200);
+  }
+
+  public function update_ingredient(Request $request)
+  {
+    $values = $request->post();
+    $user = Auth::user();
+    //required
+    $validator = Validator::make($values, [
+      'item' => 'required',
+      'restaurant_parent_id' => 'required',
+    ]);
+    if ($validator->fails()) {
+      return response()->json($validator->errors(), 422);
+    }
+
+    //invalid
+    $row = Food::findOrFail((int)$values['item']);
+    if (!$row) {
+      return response()->json([
+        'error' => 'Invalid item'
+      ], 422);
+    }
+
+    //restaurant_parent_id
+    $restaurant_parent_id = (int)$values['restaurant_parent_id'];
+    if (!$restaurant_parent_id) {
+      return response()->json([
+        'error' => 'Invalid restaurant'
+      ], 422);
+    }
+
+    //ingredients
     $ingredients = isset($values['ingredients']) && !empty($values['ingredients'])
       ? (array)json_decode($values['ingredients'], true) : [];
     if (!count($ingredients)) {
@@ -205,42 +286,88 @@ class FoodController extends Controller
       ], 422);
     }
 
-    $diffs['before'] = $row->get_log();
-
-    $row->update([
-      'name' => ucwords(strtolower(trim($values['name']))),
+    $diffs['before'] = $row->get_log_ingredient([
+      'restaurant_parent_id' => $restaurant_parent_id,
     ]);
 
-    $row->update_ingredients($ingredients);
-
-    //photo
-    $file_photo = $request->file('photo');
-    if (!empty($file_photo)) {
-      foreach ($file_photo as $file) {
-        $file_path = '/uploaded/food/';
-        $full_path = public_path($file_path);
-        //os
-        if (strtoupper(substr(PHP_OS, 0, 3)) == 'WIN') {
-          $full_path = str_replace('/', '\\', $full_path);
-        }
-        if (!file_exists($full_path)) {
-          mkdir($full_path, 0777, true);
-        }
-
-        $file_name = 'food_' . $row->id . '.' . $file->getClientOriginalExtension();
-        $file->move(public_path($file_path), $file_name);
-
-        $row->update([
-          'photo' => $file_path . $file_name
-        ]);
-      }
-    }
+    $row->update_ingredients([
+      'ingredients' => $ingredients,
+      'restaurant_parent_id' => $restaurant_parent_id,
+    ]);
 
     $row = Food::find($row->id);
-    $diffs['after'] = $row->get_log();
+    $diffs['after'] = $row->get_log_ingredient([
+      'restaurant_parent_id' => $restaurant_parent_id,
+    ]);
     if (json_encode($diffs['before']) !== json_encode($diffs['after'])) {
       $user->add_log([
-        'type' => 'edit_' . $row->get_type(),
+        'type' => 'edit_' . $row->get_type() . '_ingredient',
+        'item_id' => (int)$row->id,
+        'item_type' => $row->get_type(),
+        'params' => json_encode($diffs),
+      ]);
+    }
+
+    return response()->json([
+      'status' => true,
+      'item' => $row->name,
+    ], 200);
+  }
+
+  public function update_recipe(Request $request)
+  {
+    $values = $request->post();
+    $user = Auth::user();
+    //required
+    $validator = Validator::make($values, [
+      'item' => 'required',
+      'restaurant_parent_id' => 'required',
+    ]);
+    if ($validator->fails()) {
+      return response()->json($validator->errors(), 422);
+    }
+
+    //invalid
+    $row = Food::findOrFail((int)$values['item']);
+    if (!$row) {
+      return response()->json([
+        'error' => 'Invalid item'
+      ], 422);
+    }
+
+    //restaurant_parent_id
+    $restaurant_parent_id = (int)$values['restaurant_parent_id'];
+    if (!$restaurant_parent_id) {
+      return response()->json([
+        'error' => 'Invalid restaurant'
+      ], 422);
+    }
+
+    //ingredients
+    $ingredients = isset($values['ingredients']) && !empty($values['ingredients'])
+      ? (array)json_decode($values['ingredients'], true) : [];
+    if (!count($ingredients)) {
+      return response()->json([
+        'error' => 'Ingredients required'
+      ], 422);
+    }
+
+    $diffs['before'] = $row->get_log_recipe([
+      'restaurant_parent_id' => $restaurant_parent_id,
+    ]);
+
+    $row->update_ingredients_recipe([
+      'ingredients' => $ingredients,
+      'restaurant_parent_id' => $restaurant_parent_id,
+    ]);
+
+    $row = Food::find($row->id);
+    $diffs['after'] = $row->get_log_recipe([
+      'restaurant_parent_id' => $restaurant_parent_id,
+    ]);
+    if (json_encode($diffs['before']) !== json_encode($diffs['after'])) {
+      $user->add_log([
+        'type' => 'edit_' . $row->get_type() . '_recipe',
         'item_id' => (int)$row->id,
         'item_type' => $row->get_type(),
         'params' => json_encode($diffs),
@@ -310,6 +437,13 @@ class FoodController extends Controller
     ]);
   }
 
+  public function recipe_html(Request $request)
+  {
+    return response()->json([
+      'html' => view('tastevn.htmls.item_ingredient_recipe_input')->render(),
+    ]);
+  }
+
   public function get(Request $request)
   {
     $values = $request->all();
@@ -366,6 +500,130 @@ class FoodController extends Controller
       'html_info' => $html_info,
       'html_ingredients' => $html_edit,
       'html_selected' => $html_selected,
+    ]);
+  }
+
+  public function get_info(Request $request)
+  {
+    $values = $request->all();
+    $user = Auth::user();
+
+    $validator = Validator::make($values, [
+      'item' => 'required',
+      'restaurant_parent_id' => 'required',
+    ]);
+    if ($validator->fails()) {
+      return response()->json($validator->errors(), 422);
+    }
+    //invalid
+    $row = Food::findOrFail((int)$values['item']);
+    if (!$row) {
+      return response()->json([
+        'error' => 'Invalid item'
+      ], 422);
+    }
+
+    $restaurant_parent_id = isset($values['restaurant_parent_id']) ? (int)$values['restaurant_parent_id'] : 0;
+    $restaurant_ids = Restaurant::where('deleted', 0)
+      ->select('id')
+      ->where('restaurant_parent_id', $restaurant_parent_id);
+
+    $restaurant_food = RestaurantFood::where('deleted', 0)
+      ->whereIn('restaurant_id', $restaurant_ids)
+      ->where('food_id', $row->id)
+      ->where('photo', '<>', NULL)
+      ->orderBy('updated_at', 'desc')
+      ->limit(1)
+      ->first();
+    $food_photo = $restaurant_food ? $restaurant_food->photo : '';
+
+    //info
+    $html_ingredient = view('tastevn.htmls.item_food_info_ingredient')
+      ->with('ingredients', $row->get_ingredients([
+        'restaurant_parent_id' => $restaurant_parent_id
+      ]))
+      ->render();
+
+    $html_recipe = view('tastevn.htmls.item_food_info_recipe')
+      ->with('ingredients', $row->get_recipes([
+        'restaurant_parent_id' => $restaurant_parent_id
+      ]))
+      ->render();
+
+    return response()->json([
+      'item' => $row,
+      'food_photo' => $food_photo,
+
+      'html_ingredient' => $html_ingredient,
+      'html_recipe' => $html_recipe,
+    ]);
+  }
+
+  public function get_ingredient(Request $request)
+  {
+    $values = $request->post();
+    $user = Auth::user();
+
+    $validator = Validator::make($values, [
+      'item' => 'required',
+      'restaurant_parent_id' => 'required',
+    ]);
+    if ($validator->fails()) {
+      return response()->json($validator->errors(), 422);
+    }
+    //invalid
+    $row = Food::findOrFail((int)$values['item']);
+    $restaurant_parent_id = (int)$values['restaurant_parent_id'];
+    if (!$row || !$restaurant_parent_id) {
+      return response()->json([
+        'error' => 'Invalid item'
+      ], 422);
+    }
+
+    //edit
+    $html = view('tastevn.htmls.item_ingredient_input')
+      ->with('ingredients', $row->get_ingredients([
+        'restaurant_parent_id' => $restaurant_parent_id
+      ]))
+      ->render();
+
+    return response()->json([
+      'item' => $row,
+      'html' => $html,
+    ]);
+  }
+
+  public function get_recipe(Request $request)
+  {
+    $values = $request->post();
+    $user = Auth::user();
+
+    $validator = Validator::make($values, [
+      'item' => 'required',
+      'restaurant_parent_id' => 'required',
+    ]);
+    if ($validator->fails()) {
+      return response()->json($validator->errors(), 422);
+    }
+    //invalid
+    $row = Food::findOrFail((int)$values['item']);
+    $restaurant_parent_id = (int)$values['restaurant_parent_id'];
+    if (!$row || !$restaurant_parent_id) {
+      return response()->json([
+        'error' => 'Invalid item'
+      ], 422);
+    }
+
+    //edit
+    $html = view('tastevn.htmls.item_ingredient_recipe_input')
+      ->with('ingredients', $row->get_recipes([
+        'restaurant_parent_id' => $restaurant_parent_id
+      ]))
+      ->render();
+
+    return response()->json([
+      'item' => $row,
+      'html' => $html,
     ]);
   }
 

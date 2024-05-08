@@ -44,39 +44,20 @@
     </div>
     <div class="offcanvas-body mx-0 flex-grow-0 h-100">
       <form class="pt-0" onsubmit="return food_add(event, this);">
-        <div class="row wrap-photo-upload">
-          <div class="col-lg-6">
-            <div class="form-floating form-floating-outline mb-4">
-              <input type="file" class="form-control" id="add-item-file" name="photo" />
-              <label for="add-item-file">Photo</label>
-            </div>
-          </div>
-          <div class="col-lg-6">
-            <div class="wrap-photo-preview">
-              <div class="text-center w-auto">
-                <img width="80" src="{{url('custom/img/no_photo.png')}}" />
-              </div>
-            </div>
-          </div>
-        </div>
         <div class="form-floating form-floating-outline mb-4">
           <input type="text" class="form-control" id="add-item-name" name="name" />
           <label for="add-item-name">Name <b class="text-danger">*</b></label>
         </div>
-        <div class="form-floating form-floating-outline mb-4">
-          <div class="form-control acm-height-px-auto p-1" id="add-item-food-ingredient-custom">
-            <div class="wrap-add-item-ingredients">
-              <div class="wrap-ingredients wrap-custom p-1">
-                <div class="ingredient-item-add mb-1 acm-text-right">
-                  <button class="btn btn-sm btn-info me-sm-3 me-1" type="button" onclick="ingredient_item_add(this)"><i class="mdi mdi-plus me-0 me-sm-1"></i> Add Ingredient</button>
-                </div>
-              </div>
-              <div class="wrap-ingredients wrap-fetch p-1">
-
-              </div>
-            </div>
+        <div class="form-floating form-floating-outline mb-4" id="add-item-live-group">
+          <div class="form-control acm-wrap-selectize">
+            <select name="live_group" class="opt_selectize"
+            >
+              @for($i=1;$i<=3;$i++)
+                <option value="{{$i}}">Group {{$i}}</option>
+              @endfor
+            </select>
           </div>
-          <label for="add-item-food-ingredient-custom" class="text-danger">Ingredients</label>
+          <label for="add-item-live-group">Confidence</label>
         </div>
         <button class="btn btn-primary me-sm-3 me-1 data-submit" type="submit">Submit</button>
         <button type="reset" class="btn btn-outline-secondary" data-bs-dismiss="offcanvas">Cancel</button>
@@ -86,31 +67,92 @@
   <!-- offcanvas to edit item -->
   <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvas_edit_item" aria-labelledby="offcanvas_edit_item_label">
     <div class="offcanvas-header">
-      <h5 id="offcanvas_edit_item_label" class="offcanvas-title">Edit Dish</h5>
+      <h5 id="offcanvas_edit_item_label" class="offcanvas-title">Edit Dish Name</h5>
       <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
     <div class="offcanvas-body mx-0 flex-grow-0 h-100">
       <form class="pt-0" onsubmit="return food_edit(event, this);">
-        <div class="row wrap-photo-upload">
-          <div class="col-lg-6">
-            <div class="form-floating form-floating-outline mb-4">
-              <input type="file" class="form-control" id="edit-item-file" name="photo" />
-              <label for="edit-item-file">Photo</label>
-            </div>
-          </div>
-          <div class="col-lg-6">
-            <div class="wrap-photo-preview">
-              <div class="text-center w-auto">
-                <img width="80" src="{{url('custom/img/no_photo.png')}}" />
-              </div>
-            </div>
-          </div>
-        </div>
         <div class="form-floating form-floating-outline mb-4">
           <input type="text" class="form-control" id="edit-item-name" name="name" />
           <label for="edit-item-name">Name <b class="text-danger">*</b></label>
         </div>
+        <div class="form-floating form-floating-outline mb-4" id="edit-item-live-group">
+          <div class="form-control acm-wrap-selectize">
+            <select name="live_group" class="opt_selectize"
+            >
+              @for($i=1;$i<=3;$i++)
+              <option value="{{$i}}">Group {{$i}}</option>
+              @endfor
+            </select>
+          </div>
+          <label for="edit-item-live-group">Confidence</label>
+        </div>
+        <button class="btn btn-primary me-sm-3 me-1 data-submit" type="submit">Submit</button>
+        <button type="reset" class="btn btn-outline-secondary" data-bs-dismiss="offcanvas">Cancel</button>
+        <input type="hidden" name="item" />
+      </form>
+    </div>
+  </div>
+  <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvas_edit_recipe" aria-labelledby="offcanvas_edit_recipe_label">
+    <div class="offcanvas-header">
+      <h5 id="offcanvas_edit_recipe_label" class="offcanvas-title">Edit Dish Recipe</h5>
+      <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body mx-0 flex-grow-0 h-100">
+      <form class="pt-0" onsubmit="return food_edit_recipe(event, this);">
         <div class="form-floating form-floating-outline mb-4">
+          <div class="form-control acm-wrap-selectize" id="edit-item-restaurant-recipe">
+            <select class="ajx_selectize" required
+                    data-value="restaurant_parent"
+                    name="restaurant_parent_id"
+                    onchange="food_edit_select_recipe(this)"
+            >
+              <option value="">Please choose valid restaurant</option>
+            </select>
+          </div>
+          <label for="edit-item-restaurant-recipe" class="text-danger">Restaurant</label>
+        </div>
+        <div class="form-floating form-floating-outline mb-4 wrap-edit-ingredients">
+          <div class="form-control acm-height-px-auto p-1" id="edit-item-food-recipe-custom">
+            <div class="wrap-add-item-ingredients">
+              <div class="wrap-ingredients wrap-custom p-1">
+                <div class="ingredient-item-add mb-1 acm-text-right">
+                  <button class="btn btn-sm btn-info me-sm-3 me-1" type="button" onclick="recipe_item_add(this)"><i class="mdi mdi-plus me-0 me-sm-1"></i> Add Ingredient</button>
+                </div>
+              </div>
+              <div class="wrap-ingredients wrap-fetch p-1">
+
+              </div>
+            </div>
+          </div>
+          <label for="edit-item-food-recipe-custom" class="text-danger">Recipe Ingredients</label>
+        </div>
+        <button class="btn btn-primary me-sm-3 me-1 data-submit" type="submit">Submit</button>
+        <button type="reset" class="btn btn-outline-secondary" data-bs-dismiss="offcanvas">Cancel</button>
+        <input type="hidden" name="item" />
+      </form>
+    </div>
+  </div>
+  <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvas_edit_ingredient" aria-labelledby="offcanvas_edit_ingredient_label">
+    <div class="offcanvas-header">
+      <h5 id="offcanvas_edit_ingredient_label" class="offcanvas-title">Edit Dish Roboflow</h5>
+      <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body mx-0 flex-grow-0 h-100">
+      <form class="pt-0" onsubmit="return food_edit_ingredient(event, this);">
+        <div class="form-floating form-floating-outline mb-4">
+          <div class="form-control acm-wrap-selectize" id="edit-item-restaurant-ingredient">
+            <select class="ajx_selectize" required
+                    data-value="restaurant_parent"
+                    name="restaurant_parent_id"
+                    onchange="food_edit_select_ingredient(this)"
+            >
+              <option value="">Please choose valid restaurant</option>
+            </select>
+          </div>
+          <label for="edit-item-restaurant-ingredient" class="text-danger">Restaurant</label>
+        </div>
+        <div class="form-floating form-floating-outline mb-4 wrap-edit-ingredients">
           <div class="form-control acm-height-px-auto p-1" id="edit-item-food-ingredient-custom">
             <div class="wrap-add-item-ingredients">
               <div class="wrap-ingredients wrap-custom p-1">
@@ -123,7 +165,7 @@
               </div>
             </div>
           </div>
-          <label for="edit-item-food-ingredient-custom" class="text-danger">Ingredients</label>
+          <label for="edit-item-food-ingredient-custom" class="text-danger">Roboflow Ingredients</label>
         </div>
         <button class="btn btn-primary me-sm-3 me-1 data-submit" type="submit">Submit</button>
         <button type="reset" class="btn btn-outline-secondary" data-bs-dismiss="offcanvas">Cancel</button>
@@ -209,59 +251,6 @@
     var $ = jQuery.noConflict();
     $(document).ready(function() {
 
-      //photo upload
-      var formAdd = $('#offcanvas_add_item form');
-      formAdd.find('input[type=file]').change(function () {
-        var input = this;
-        var url = $(this).val();
-        var ext = url.substring(url.lastIndexOf('.') + 1).toLowerCase();
-        var filed = jQuery(this);
-        var valid_exts = ['png', 'jpeg', 'jpg', 'webp'];
-
-        if (!valid_exts.includes(ext)) {
-          filed.val("");
-          message_from_toast('error', acmcfs.message_title_error, 'Error image upload');
-          return false;
-        }
-
-        if (input.files && input.files[0]) {
-          var filesAmount = input.files.length;
-          for (var i = 0; i < filesAmount; i++) {
-            var reader = new FileReader();
-            reader.onload = function (e) {
-              formAdd.find('.wrap-photo-preview img').attr('src', e.target.result);
-            }
-            reader.readAsDataURL(input.files[i]);
-          }
-        }
-      });
-
-      var formEdit = $('#offcanvas_edit_item form');
-      formEdit.find('input[type=file]').change(function () {
-        var input = this;
-        var url = $(this).val();
-        var ext = url.substring(url.lastIndexOf('.') + 1).toLowerCase();
-        var filed = jQuery(this);
-        var valid_exts = ['png', 'jpeg', 'jpg', 'webp'];
-
-        if (!valid_exts.includes(ext)) {
-          filed.val("");
-          message_from_toast('error', acmcfs.message_title_error, 'Error image upload');
-          return false;
-        }
-
-        if (input.files && input.files[0]) {
-          var filesAmount = input.files.length;
-          for (var i = 0; i < filesAmount; i++) {
-            var reader = new FileReader();
-            reader.onload = function (e) {
-              formEdit.find('.wrap-photo-preview img').attr('src', e.target.result);
-            }
-            reader.readAsDataURL(input.files[i]);
-          }
-        }
-      });
-
       //datatable
       datatable_listing = $('#datatable-listing').DataTable(Object.assign(datatable_cfs, acmcfs.datatable_init));
 
@@ -274,6 +263,7 @@
         $(row).attr('data-id', data.id);
         $(row).attr('data-name', data.name);
         $(row).attr('data-photo', data.photo);
+        $(row).attr('data-live_group', data.live_group);
       },
       "columns": [
         //stt
@@ -286,15 +276,8 @@
         {
           targets: 1,
           render: function (data, type, full, meta) {
-            var img_src = acmcfs.link_base_url + '/custom/img/no_photo.png';
-            if (full['photo'] && full['photo'] !== '' && full['photo'] != 'null') {
-              img_src = acmcfs.link_base_url + full['photo'];
-            }
             return (
               '<div class="cursor-pointer" onclick="food_info(' + full['id'] + ')">' +
-              '<span class="acm-mr-px-10">' +
-              '<img width="50" src="' + img_src + '" />' +
-              '</span>' +
               '<span>' + full['name'] + '</span>' +
               '</div>'
             );
@@ -316,7 +299,9 @@
               '<div class="dropdown">' +
               '<button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown"><i class="mdi mdi-dots-vertical"></i></button>' +
               '<div class="dropdown-menu">' +
-              '<a class="dropdown-item" href="javascript:void(0);" data-bs-toggle="offcanvas" data-bs-target="#offcanvas_edit_item" onclick="food_edit_prepare(this)"><i class="mdi mdi-pencil-outline me-1"></i> Edit</a>' +
+              '<a class="dropdown-item" href="javascript:void(0);" data-bs-toggle="offcanvas" data-bs-target="#offcanvas_edit_item" onclick="food_edit_prepare(this)"><i class="mdi mdi-pencil-outline me-1"></i> Edit Dish Name</a>' +
+              '<a class="dropdown-item" href="javascript:void(0);" data-bs-toggle="offcanvas" data-bs-target="#offcanvas_edit_ingredient" onclick="food_edit_prepare_ingredient(this)"><i class="mdi mdi-robot me-1"></i> Edit Dish Roboflow</a>' +
+              '<a class="dropdown-item" href="javascript:void(0);" data-bs-toggle="offcanvas" data-bs-target="#offcanvas_edit_recipe" onclick="food_edit_prepare_recipe(this)"><i class="mdi mdi-hoop-house me-1"></i> Edit Dish Recipe</a>' +
               '</div>' +
               '</div>'
             );
@@ -350,7 +335,7 @@
           attr: {
             'data-bs-toggle': 'offcanvas',
             'data-bs-target': '#offcanvas_add_item',
-            'onclick': 'setTimeout(function () { $("#offcanvas_add_item form input[name=name]").focus(); }, 500)',
+            'onclick': 'food_add_clear()',
           }
         },
         @endif

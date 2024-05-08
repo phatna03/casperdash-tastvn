@@ -21,4 +21,8 @@ class FoodIngredient extends Model
     'deleted',
   ];
 
+  public function get_ingredient()
+  {
+    return Ingredient::find($this->ingredient_id);
+  }
 }
