@@ -1,6 +1,6 @@
 @extends('tastevn/layouts/layoutMaster')
 
-@section('title', 'Admin - Dashboard')
+@section('title', 'Admin - Restaurants')
 
 @section('vendor-style')
   <link rel="stylesheet" href="{{asset('assets/vendor/libs/datatables-bs5/datatables.bootstrap5.css')}}">
@@ -208,7 +208,7 @@
           orderable: false,
           render: function (data, type, full, meta) {
             @if($viewer->is_admin())
-              return (
+            return (
               '<div class="dropdown">' +
               '<button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown"><i class="mdi mdi-dots-vertical"></i></button>' +
               '<div class="dropdown-menu">' +
@@ -218,13 +218,13 @@
               '</div>'
             );
             @else
-              return ('<div></div>');
+            return ('<div></div>');
             @endif
           }
         }
       ],
       buttons: [
-          @if($viewer->is_admin())
+        @if($viewer->is_admin())
         {
           text: '<i class="mdi mdi-plus me-0 me-sm-1"></i><span class="d-none d-sm-inline-block">Add Restaurant</span>',
           className: 'add-new btn btn-primary waves-effect waves-light acm-mr-px-10',
@@ -234,7 +234,7 @@
             'onclick': 'setTimeout(function () { $("#offcanvas_add_item form input[name=name]").focus(); }, 500)',
           }
         },
-          @endif
+        @endif
         {
           text: '<i class="mdi mdi-reload me-0 me-sm-1"></i><span class="d-none d-sm-inline-block">Refresh</span>',
           className: 'add-new btn btn-dark waves-effect waves-light',

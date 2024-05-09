@@ -106,8 +106,8 @@
                   <div class="col-md-3">
                     <div class="form-check">
                       <input class="form-check-input" type="checkbox" name="{{$notify . '_receive'}}" id="setting-notify-receive-{{$notify}}"
-                             @if($viewer->get_setting($notify . '_receive') || $notify == 'photo_comment') checked @endif
-                             @if($notify == 'photo_comment') disabled @endif
+                             @if($viewer->get_setting($notify . '_receive') || $notify == 'photo_comment' || $notify == 'missing_ingredient') checked @endif
+                             @if($notify == 'photo_comment' || $notify == 'missing_ingredient') disabled @endif
                       />
                       <label class="form-check-label" for="setting-notify-receive-{{$notify}}">Receive alert notification</label>
                     </div>

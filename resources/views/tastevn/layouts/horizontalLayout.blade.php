@@ -59,9 +59,9 @@
 
           <!-- Content -->
           @if ($isFlex)
-            <div class="{{$container}} d-flex align-items-stretch flex-grow-1 p-0">
+            <div class="{{$container}} d-flex align-items-stretch flex-grow-1 p-0 page_main_content">
               @else
-                <div class="{{$container}} flex-grow-1 container-p-y">
+                <div class="{{$container}} flex-grow-1 container-p-y page_main_content">
                   @endif
 
                   @yield('content')

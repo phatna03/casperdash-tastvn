@@ -197,7 +197,7 @@ class User extends Authenticatable
       //check spam action
       $minutes = 3;
       $type1s = [
-        'login', 'logout', 'view_profile_info', 'view_profile_setting',
+        'login', 'logout', 'view_profile_info', 'view_profile_setting', 'view_dashboard',
         'view_listing_notification', 'view_listing_restaurant', 'view_listing_user',
         'view_listing_food_category', 'view_listing_ingredient',
         'view_listing_food', 'view_listing_photo',
@@ -271,4 +271,30 @@ class User extends Authenticatable
   {
     return $this->role == 'superadmin';
   }
+
+  public function get_sensors()
+  {
+    $roles = ['superadmin', 'admin'];
+
+    if ($this->access_full || in_array($this->role, $roles)) {
+      $rows = Restaurant::distinct()
+        ->select('id', 'name')
+        ->where('deleted', 0)
+        ->get();
+    }
+    else {
+
+      $rows = Restaurant::distinct()
+        ->select('id', 'name')
+        ->whereIn('id', function ($q) {
+          $q->select('restaurant_id')
+            ->from('restaurant_access')
+            ->where('user_id', $this->id);
+        })
+        ->where('deleted', 0)
+        ->get();
+    }
+    return $rows;
+  }
+
 }

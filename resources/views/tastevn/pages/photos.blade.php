@@ -43,7 +43,7 @@
           <div class="col-md-6 mb-2">
             <div class="form-floating form-floating-outline">
               <div class="form-control acm-wrap-selectize" id="filter-search-restaurants">
-                <select class="ajx_selectize"
+                <select class="ajx_selectize multi_selectize"
                         data-value="restaurant"
                         name="restaurants" multiple onchange="form_photos_filter()">
                   <option value="">All</option>

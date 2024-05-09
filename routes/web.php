@@ -199,12 +199,17 @@ Route::post('/auth/logout', [AuthController::class, 'logout']);
 
 Route::get('/', [DashboardController::class, 'index']);
 Route::get('/admin', [DashboardController::class, 'index']);
+Route::get('/admin/sensor', [DashboardController::class, 'sensor']);
+Route::post('/admin/dashboard/restaurant/food/get', [DashboardController::class, 'restaurant_food_get']);
+Route::post('/admin/dashboard/food/get/info', [DashboardController::class, 'food_get_info']);
 
 Route::get('/admin/notifications', [DashboardController::class, 'notification']);
 Route::post('/admin/notification/read', [DashboardController::class, 'notification_read']);
 Route::post('/admin/notification/read/all', [DashboardController::class, 'notification_read_all']);
 Route::post('/admin/notification/latest', [DashboardController::class, 'notification_latest']);
 Route::post('/admin/notification/newest', [DashboardController::class, 'notification_newest']);
+Route::post('/admin/notification/dashboard', [DashboardController::class, 'notification_dashboard']);
+Route::post('/admin/sensor/kitchen', [DashboardController::class, 'sensor_kitchen']);
 
 Route::get('/guide/printer', [GuestController::class, 'guide_printer']);
 Route::get('/guide/speaker', [GuestController::class, 'guide_speaker']);

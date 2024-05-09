@@ -278,6 +278,8 @@
         valueField: 'id',
         labelField: 'name',
         searchField: 'name',
+        //multi_selectize
+        plugins: ["remove_button"],
         preload: true,
         clearCache: function (template) {},
         load: function (query, callback) {

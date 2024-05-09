@@ -314,7 +314,7 @@
       buttons: [
         @if($viewer->is_admin())
         {
-          text: '<i class="mdi mdi-plus me-0 me-sm-1"></i><span class="d-none d-sm-inline-block">Import Ingredients</span>',
+          text: '<i class="mdi mdi-plus me-0 me-sm-1"></i><span class="d-none d-sm-inline-block">Ingredients</span>',
           className: 'add-new btn btn-info waves-effect waves-light',
           attr: {
             'data-bs-toggle': 'modal',
@@ -322,7 +322,7 @@
           }
         },
         {
-          text: '<i class="mdi mdi-plus me-0 me-sm-1"></i><span class="d-none d-sm-inline-block">Import Recipes</span>',
+          text: '<i class="mdi mdi-plus me-0 me-sm-1"></i><span class="d-none d-sm-inline-block">Recipes</span>',
           className: 'add-new btn btn-warning waves-effect waves-light',
           attr: {
             'data-bs-toggle': 'modal',

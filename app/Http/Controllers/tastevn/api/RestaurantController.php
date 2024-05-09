@@ -44,7 +44,7 @@ class RestaurantController extends Controller
     $user = Auth::user();
     $invalid_roles = ['user'];
     if (in_array($user->role, $invalid_roles)) {
-      return redirect('page_not_found');
+      return redirect('admin/photos');
     }
 
     $pageConfigs = [
@@ -56,7 +56,7 @@ class RestaurantController extends Controller
       'type' => 'view_listing_restaurant',
     ]);
 
-    return view('tastevn.pages.dashboard', ['pageConfigs' => $pageConfigs]);
+    return view('tastevn.pages.restaurants', ['pageConfigs' => $pageConfigs]);
   }
 
   /**

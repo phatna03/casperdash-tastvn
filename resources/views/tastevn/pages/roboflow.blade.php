@@ -144,33 +144,6 @@
         }
       });
 
-      var selectize_food = $('.wrap-select-food select');
-      selectize_food.selectize({
-        valueField: 'id',
-        labelField: 'name',
-        searchField: 'name',
-        preload: true,
-        clearCache: function (template) {},
-        load: function (query, callback) {
-          jQuery.ajax({
-            url: acmcfs.link_base_url + '/admin/food/selectize',
-            type: 'post',
-            data: {
-              keyword: query,
-              restaurant: selectize_food.attr('data-restaurant'),
-              _token: acmcfs.var_csrf,
-            },
-            complete: function (xhr, textStatus) {
-              var rsp = xhr.responseJSON;
-
-              if (xhr.status == 200) {
-                selectize_food.options = rsp.items;
-                callback(rsp.items);
-              }
-            },
-          });
-        },
-      });
     });
 
     function food_selected(ele) {

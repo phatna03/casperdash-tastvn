@@ -2,34 +2,49 @@
   "menu": [
     {
       "name": "Dashboard",
-      "icon": "menu-icon tf-icons mdi mdi-home-outline no_user",
+      "icon": "menu-icon tf-icons mdi mdi-home-outline",
       "url": "admin",
       "slug": "admin"
     },
     {
       "name": "Users",
-      "icon": "menu-icon tf-icons mdi mdi-account-group no_moderator no_user",
+      "icon": "menu-icon tf-icons mdi mdi-account-group no_user no_moderator",
       "url": "admin/users",
       "slug": "admin-users"
     },
     {
-      "name": "Categories",
-      "icon": "menu-icon tf-icons mdi mdi-list-box no_user",
-      "url": "admin/food-categories",
-      "slug": "admin-food-categories"
+      "name": "Sensor Kitchen",
+      "icon": "menu-icon tf-icons mdi mdi-chef-hat",
+      "url": "admin/sensor",
+      "slug": "admin-sensor"
     },
+
     {
-      "name": "Dishes",
-      "icon": "menu-icon tf-icons mdi mdi-food no_user",
-      "url": "admin/foods",
-      "slug": "admin-foods"
+      "name": "Foods",
+      "icon": "menu-icon tf-icons mdi mdi-room-service no_user no_moderator",
+      "slug": "dashboard",
+      "submenu": [
+        {
+          "url": "admin/foods",
+          "name": "Dishes",
+          "icon": "menu-icon tf-icons mdi mdi-food",
+          "slug": "admin-restaurants"
+        },
+        {
+          "url": "admin/ingredients",
+          "name": "Ingredients",
+          "icon": "menu-icon tf-icons mdi mdi-food-outline",
+          "slug": "admin-ingredients"
+        },
+        {
+          "url": "admin/food-categories",
+          "name": "Categories",
+          "icon": "menu-icon mdi mdi-list-box",
+          "slug": "admin-food-categories"
+        }
+      ]
     },
-    {
-      "name": "Ingredients",
-      "icon": "menu-icon tf-icons mdi mdi-food-outline no_user",
-      "url": "admin/ingredients",
-      "slug": "admin-ingredients"
-    },
+
     {
       "name": "Album Photos",
       "icon": "menu-icon tf-icons mdi mdi-image-album",
@@ -37,28 +52,36 @@
       "slug": "admin-photos"
     },
     {
-      "name": "Settings",
-      "icon": "menu-icon tf-icons mdi mdi-cogs no_moderator no_admin no_user",
-      "url": "admin/settings",
-      "slug": "admin-settings"
-    },
-    {
-      "name": "Text Notes",
-      "icon": "menu-icon tf-icons mdi mdi-list-box-outline no_user",
-      "url": "admin/texts",
-      "slug": "admin-texts"
-    },
-    {
-      "name": "Logs",
-      "icon": "menu-icon tf-icons mdi mdi-math-log no_user no_moderator",
-      "url": "admin/logs",
-      "slug": "admin-logs"
-    },
-    {
       "name": "Modal Testing",
-      "icon": "menu-icon tf-icons mdi mdi-robot-angry no_user",
+      "icon": "menu-icon tf-icons mdi mdi-robot no_user no_moderator",
       "url": "admin/roboflow",
       "slug": "admin-roboflow"
+    },
+
+    {
+      "name": "Settings",
+      "icon": "menu-icon tf-icons mdi mdi-cogs no_user no_moderator",
+      "slug": "dashboard",
+      "submenu": [
+        {
+          "url": "admin/texts",
+          "name": "Text Notes",
+          "icon": "menu-icon tf-icons mdi mdi-text-box-edit",
+          "slug": "admin-texts"
+        },
+        {
+          "url": "admin/logs",
+          "name": "Logs",
+          "icon": "menu-icon tf-icons mdi mdi-math-log",
+          "slug": "admin-logs"
+        },
+        {
+          "url": "admin/settings",
+          "name": "Configurations",
+          "icon": "menu-icon mdi mdi-cog",
+          "slug": "admin-settings"
+        }
+      ]
     }
   ]
 }

@@ -6,8 +6,13 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
+use Validator;
 use App\Api\SysCore;
 
+use App\Models\Food;
+use App\Models\Restaurant;
+use App\Models\RestaurantFood;
+use App\Models\RestaurantParent;
 use App\Models\RestaurantFoodScan;
 
 class DashboardController extends Controller
@@ -35,10 +40,26 @@ class DashboardController extends Controller
     ];
 
     $user->add_log([
-      'type' => 'view_listing_restaurant',
+      'type' => 'view_dashboard',
     ]);
 
     return view('tastevn.pages.dashboard', ['pageConfigs' => $pageConfigs]);
+  }
+
+  public function sensor(Request $request)
+  {
+    $user = Auth::user();
+
+    $pageConfigs = [
+      'myLayout' => 'horizontal',
+      'hasCustomizer' => false,
+    ];
+
+    $user->add_log([
+      'type' => 'view_dashboard',
+    ]);
+
+    return view('tastevn.pages.dashboard_sensor', ['pageConfigs' => $pageConfigs]);
   }
 
   public function notification(Request $request)
@@ -124,12 +145,15 @@ class DashboardController extends Controller
     $printer = false;
     $text_to_speech = false;
     $text_to_speak = '';
-    $valid_types = [];
+    $valid_types = [
+      //force
+      'App\Notifications\IngredientMissing'
+    ];
 
     //user_setting
-    if ((int)$user->get_setting('missing_ingredient_receive')) {
-      $valid_types[] = 'App\Notifications\IngredientMissing';
-    }
+//    if ((int)$user->get_setting('missing_ingredient_receive')) {
+//      $valid_types[] = 'App\Notifications\IngredientMissing';
+//    }
 
     //speaker
     if ((int)$user->get_setting('missing_ingredient_alert_speaker')) {
@@ -217,6 +241,299 @@ class DashboardController extends Controller
       'speaker' => $text_to_speech && !empty($text_to_speak),
       'speaker_text' => $text_to_speak,
       'printer' => $printer,
+    ]);
+  }
+
+  public function notification_dashboard(Request $request)
+  {
+    $values = $request->post();
+
+    $restaurant_id = isset($values['restaurant_id']) ? (int)$values['restaurant_id'] : 0;
+    $restaurant = Restaurant::find($restaurant_id);
+    if (!$restaurant) {
+      return response()->json([
+        'status' => false,
+        'error' => 'Invalid restaurant sensor'
+      ]);
+    }
+
+    $user = Auth::user();
+    $api_core = new SysCore();
+
+    $items = [];
+    $ids = [];
+    $notify = [];
+
+    $printer = false;
+    $text_to_speech = false;
+    $text_to_speak = '';
+    $valid_types = [
+      //force
+      'App\Notifications\IngredientMissing'
+    ];
+
+    //user_setting
+//    if ((int)$user->get_setting('missing_ingredient_receive')) {
+//      $valid_types[] = 'App\Notifications\IngredientMissing';
+//    }
+
+    //speaker
+    if ((int)$user->get_setting('missing_ingredient_alert_speaker')) {
+      $text_to_speech = true;
+    }
+
+    //printer
+    if ((int)$user->get_setting('missing_ingredient_alert_printer')) {
+      $printer = true;
+    }
+
+    if (!empty($user->time_notification)) {
+
+      $search = '"type":"ingredient_missing","restaurant_id":' . $restaurant->id . ',';
+
+      $select = $user->notifications()
+        ->whereIn('type', $valid_types)
+        ->where('data', 'LIKE', '%' . $search . '%')
+        ->where('created_at', '>', $user->time_notification)
+        ->orderBy('id', 'desc')
+        ->limit(1);
+
+      $notifications = $select->get();
+      if (count($notifications)) {
+        foreach ($notifications as $notification) {
+          $row = RestaurantFoodScan::find($notification->data['restaurant_food_scan_id']);
+          if (!$row || empty($row->photo_url)) {
+            continue;
+          }
+
+          $ingredients = array_filter(explode('&nbsp', $row->missing_texts));
+          if (!count($ingredients)) {
+            continue;
+          }
+
+          $notify = [
+            'itd' => $row->id,
+            'photo_url' => $row->photo_url,
+            'food_name' => $row->get_food()->name,
+            'food_photo' => $row->get_food()->get_photo_standard($row->get_restaurant()),
+            'ingredients_missing' => $ingredients,
+          ];
+
+          $items[] = [
+            'itd' => $row->id,
+            'photo_url' => $row->photo_url,
+            'restaurant_name' => $row->get_restaurant()->name,
+            'food_name' => $row->get_food()->name,
+            'food_confidence' => $row->confidence,
+            'ingredients' => $ingredients,
+          ];
+
+          $ids[] = $row->id;
+
+          $user->update([
+            'time_notification' => date('Y-m-d H:i:s')
+          ]);
+
+          if ($text_to_speech) {
+
+            $text_ingredients_missing = '';
+            foreach ($row->get_ingredients_missing() as $ing) {
+              $text_ingredients_missing .= $ing['ingredient_quantity'] . ' ' . $ing['name'] . ', ';
+            }
+
+            $text_to_speak = '[alert]'
+              . $row->get_restaurant()->name . ' occurred at '
+              . date('H:i')
+              . ", Ingredients Missing, "
+              . $text_ingredients_missing;
+
+            $api_core->s3_polly([
+              'text_to_speak' => $text_to_speak,
+            ]);
+          }
+        }
+
+      }
+      else {
+
+        $user->update([
+          'time_notification' => date('Y-m-d H:i:s')
+        ]);
+      }
+
+    }
+    else {
+
+      $user->update([
+        'time_notification' => date('Y-m-d H:i:s')
+      ]);
+    }
+
+    return response()->json([
+      'status' => true,
+      'items' => $items,
+      'ids' => $ids,
+//      'role' => $user->role,
+      'speaker' => $text_to_speech && !empty($text_to_speak),
+      'speaker_text' => $text_to_speak,
+      'printer' => $printer,
+    ]);
+  }
+
+  public function sensor_kitchen(Request $request)
+  {
+    $values = $request->post();
+
+    $user = Auth::user();
+    $api_core = new SysCore();
+
+    $restaurant_id = isset($values['restaurant_id']) ? (int)$values['restaurant_id'] : 0;
+    $restaurant = Restaurant::find($restaurant_id);
+    if (!$restaurant) {
+      return response()->json([
+        'status' => false,
+        'error' => 'Invalid restaurant sensor'
+      ]);
+    }
+
+    $itd = isset($values['itd']) ? (int)$values['itd'] : 0;
+    $row = RestaurantFoodScan::find($itd);
+
+    if (!$row) {
+      $row = RestaurantFoodScan::where('deleted', 0)
+        ->where('restaurant_id', $restaurant->id)
+        ->whereIn('status', ['checked', 'failed', 'edited'])
+        ->orderBy('id', 'desc')
+        ->limit(1)
+        ->first();
+    }
+
+    $food = $row->get_food();
+    $ingredients = [];
+
+    if (!empty($row->missing_texts)) {
+      $datas = array_filter(explode('&nbsp', $row->missing_texts));
+      if (count($datas)) {
+        foreach ($datas as $dt) {
+          if (!empty($dt) && !empty(trim($dt))) {
+            $ingredients[] = trim($dt);
+          }
+        }
+      }
+    }
+
+    $item = [
+      'itd' => $row->id,
+      'photo_url' => $row->photo_url,
+      'food_name' => $food ? $food->name : '',
+      'food_photo' => $food ? $food->get_photo_standard($restaurant) : '',
+      'ingredients_missing' => $ingredients,
+
+      'status' => $row->status,
+    ];
+
+    return response()->json([
+      'status' => true,
+      'item' => $item,
+    ]);
+  }
+
+  public function restaurant_food_get(Request $request)
+  {
+    $values = $request->post();
+
+    $validator = Validator::make($values, [
+      'item' => 'required',
+    ]);
+    if ($validator->fails()) {
+      return response()->json($validator->errors(), 422);
+    }
+
+    $restaurant_parent_id = isset($values['item']) ? (int)$values['item'] : 0;
+
+    $restaurant_ids = Restaurant::select('id')
+      ->where('deleted', 0)
+      ->where('restaurant_parent_id', $restaurant_parent_id);
+
+    $rows = RestaurantFood::query("restaurant_foods")
+      ->distinct()
+      ->select('foods.id', 'foods.name')
+      ->leftJoin('foods', 'foods.id', '=', 'restaurant_foods.food_id')
+      ->whereIn('restaurant_foods.restaurant_id', $restaurant_ids)
+      ->where('foods.deleted', 0)
+      ->where('restaurant_foods.deleted', 0)
+      ->orderByRaw('TRIM(LOWER(foods.name))')
+      ->get();
+
+    $items = [];
+    $count = 0;
+
+    if (count($rows)) {
+      foreach ($rows as $row) {
+
+        $count++;
+
+        $items[] = [
+          'id' => $row->id,
+          'name' => $count . '. ' . $row->name,
+        ];
+      }
+    }
+
+    return response()->json([
+      'status' => true,
+      'items' => $items,
+    ]);
+  }
+
+  public function food_get_info(Request $request)
+  {
+    $values = $request->post();
+    $user = Auth::user();
+
+    $validator = Validator::make($values, [
+      'item' => 'required',
+    ]);
+    if ($validator->fails()) {
+      return response()->json($validator->errors(), 422);
+    }
+
+    $restaurant_parent_id = isset($values['restaurant_parent_id']) ? (int)$values['restaurant_parent_id'] : 0;
+    $restaurant_parent = RestaurantParent::find($restaurant_parent_id);
+
+    //invalid
+    $row = Food::findOrFail((int)$values['item']);
+    if (!$row || !$restaurant_parent) {
+      return response()->json([
+        'error' => 'Invalid item'
+      ], 422);
+    }
+
+    $restaurant_ids = Restaurant::where('deleted', 0)
+      ->select('id')
+      ->where('restaurant_parent_id', $restaurant_parent_id);
+
+    $restaurant_food = RestaurantFood::where('deleted', 0)
+      ->whereIn('restaurant_id', $restaurant_ids)
+      ->where('food_id', $row->id)
+      ->where('photo', '<>', NULL)
+      ->orderBy('updated_at', 'desc')
+      ->limit(1)
+      ->first();
+    $food_photo = $restaurant_food ? $restaurant_food->photo : url('custom/img/no_photo.png');
+
+    //info
+    $html_info = view('tastevn.htmls.item_food_dashboard')
+      ->with('recipes', $row->get_recipes([
+        'restaurant_parent_id' => $restaurant_parent_id,
+      ]))
+      ->render();
+
+    return response()->json([
+      'food_name' => '[' . $restaurant_parent->name . '] ' . $row->name,
+      'food_photo' => $food_photo,
+
+      'html_info' => $html_info,
     ]);
   }
 

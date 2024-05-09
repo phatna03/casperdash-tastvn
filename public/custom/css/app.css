@@ -241,6 +241,14 @@
   min-height: 30px;
 }
 
+.acm-height-450-min {
+  min-height: 450px;
+}
+
+.acm-height-500-min {
+  min-height: 500px;
+}
+
 .acm-height-50-max {
   max-height: 50px;
 }
@@ -558,9 +566,23 @@
   /*font-size: 18px;*/
 }
 
+.layout-page.hidden_header {
+  padding-top: 0 !important;
+}
+
+.page_main_content.hidden_header {
+  padding-top: 1.5rem !important;
+}
+
 /*modal 2*/
 .layout-navbar-fixed body:not(.modal-open) .layout-navbar-full .layout-navbar,
 .layout-menu-fixed body:not(.modal-open) .layout-navbar-full .layout-navbar,
 .layout-menu-fixed-offcanvas body:not(.modal-open) .layout-navbar-full .layout-navbar {
   z-index: 10;
+}
+
+@media only screen and (min-width: 1200px) {
+  .layout-menu-fixed .layout-horizontal .layout-page .page_main_content.hidden_header {
+    padding-top: 1.5rem !important;
+  }
 }

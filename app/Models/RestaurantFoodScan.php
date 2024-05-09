@@ -337,10 +337,11 @@ class RestaurantFoodScan extends Model
           }
 
           //user_setting
-          $valid_setting = false;
-          if ((int)$user->get_setting('missing_ingredient_receive')) {
-            $valid_setting = true;
-          }
+          $valid_setting = true;
+          //force
+//          if ((int)$user->get_setting('missing_ingredient_receive')) {
+//            $valid_setting = true;
+//          }
 
           if (!$valid_group || !$valid_setting) {
             continue;
@@ -348,6 +349,7 @@ class RestaurantFoodScan extends Model
 
           Notification::sendNow($user, new IngredientMissing([
             'type' => 'ingredient_missing',
+            'restaurant_id' => $this->get_restaurant()->id,
             'restaurant_food_scan_id' => $this->id,
             'user' => $user,
           ]), ['database']);

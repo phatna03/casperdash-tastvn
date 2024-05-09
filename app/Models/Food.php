@@ -98,6 +98,32 @@ class Food extends Model
     ];
   }
 
+  public function get_photo_standard($restaurant)
+  {
+    $photo = url('custom/img/no_photo.png');
+
+    if ($restaurant) {
+
+      $restaurant_ids = Restaurant::where('deleted', 0)
+        ->select('id')
+        ->where('restaurant_parent_id', $restaurant->restaurant_parent_id);
+
+      $restaurant_food = RestaurantFood::where('deleted', 0)
+        ->whereIn('restaurant_id', $restaurant_ids)
+        ->where('food_id', $this->id)
+        ->where('photo', '<>', NULL)
+        ->orderBy('updated_at', 'desc')
+        ->limit(1)
+        ->first();
+
+      if ($restaurant_food) {
+        $photo = $restaurant_food->photo;
+      }
+    }
+
+    return $photo;
+  }
+
   public function add_recipes($pars = [])
   {
     $ingredients = isset($pars['ingredients']) ? (array)$pars['ingredients'] : [];

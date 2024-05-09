@@ -40,7 +40,7 @@
               <div class="form-control acm-wrap-selectize" id="log-search-user">
                 <select name="users"
                         data-value="user"
-                        class="ajx_selectize" multiple onchange="datatable_refresh()">
+                        class="ajx_selectize multi_selectize" multiple onchange="datatable_refresh()">
                   <option value="">All</option>
                 </select>
               </div>
@@ -50,7 +50,7 @@
           <div class="col-md-6 mb-2 d-none">
             <div class="form-floating form-floating-outline">
               <div class="form-control acm-wrap-selectize" id="log-search-type">
-                <select name="types" class="opt_selectize" multiple onchange="datatable_refresh()">
+                <select name="types" class="opt_selectize multi_selectize" multiple onchange="datatable_refresh()">
                   <option value="">All</option>
                   @foreach($pageConfigs['options_type'] as $k => $option)
                     <option value="{{$k}}">{{$option}}</option>
@@ -65,7 +65,7 @@
               <div class="form-control acm-wrap-selectize" id="log-search-restaurant">
                 <select name="restaurants"
                         data-value="restaurant"
-                        class="ajx_selectize" multiple onchange="datatable_refresh()">
+                        class="ajx_selectize multi_selectize" multiple onchange="datatable_refresh()">
                   <option value="">All</option>
                 </select>
               </div>
@@ -75,7 +75,7 @@
           <div class="col-md-6 mb-2">
             <div class="form-floating form-floating-outline">
               <div class="form-control acm-wrap-selectize" id="log-search-item">
-                <select name="items" class="opt_selectize" multiple onchange="datatable_refresh()">
+                <select name="items" class="opt_selectize multi_selectize" multiple onchange="datatable_refresh()">
                   <option value="">All</option>
                   @foreach($pageConfigs['options_item'] as $k => $option)
                     <option value="{{$k}}">{{$option}}</option>

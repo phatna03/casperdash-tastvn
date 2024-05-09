@@ -48,7 +48,9 @@
 
     timeout_default: 2000,
     timeout_quick: 500,
-    timeout_notification: 5000,
+    timeout_notification: 2000,
+
+    notify_running: 0,
 
     rbf_model: null,
     rbf_auth: 0,
@@ -89,6 +91,8 @@
     }
   }
 
+  var notify_realtime = null;
+
   $(document).ready(function () {
 
     //auto bind
@@ -97,8 +101,7 @@
 
     @auth
     //notify
-    notification_newest();
-    setInterval(function () {
+    notify_realtime = setInterval(function () {
       notification_newest();
     }, acmcfs.timeout_notification);
 

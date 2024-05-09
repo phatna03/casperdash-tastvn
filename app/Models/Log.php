@@ -62,6 +62,9 @@ class Log extends Model
       case 'view_profile_setting':
         $text .= ' accessed the profile setting page';
         break;
+      case 'view_dashboard':
+        $text .= ' accessed the dashboard page';
+        break;
       case 'view_listing_notification':
         $text .= ' accessed the listing notification page';
         break;
