@@ -122,8 +122,9 @@ class GuestController extends Controller
     $date = isset($values['date']) ? $values['date'] : date('Y-m-d');
     $dated = isset($values['date']) ? $values['date'] : date('Y_m_d');
 
-    $restaurants = isset($values['restaurants']) ? (array)explode(',', $values['restaurants']) : [];
     $restaurant_id = isset($values['restaurant_id']) ? (int)$values['restaurant_id'] : 0;
+    $restaurants = isset($values['restaurants']) ? $values['restaurants'] : NULL;
+    $restaurants = !empty($restaurants) ? array_filter(explode(',', $restaurants)) : [];
 
     $select = RestaurantFoodScan::where('deleted', 0)
       ->whereIn('status', ['checked', 'edited', 'failed'])

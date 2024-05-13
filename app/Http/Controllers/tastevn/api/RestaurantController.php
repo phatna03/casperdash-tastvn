@@ -403,7 +403,7 @@ class RestaurantController extends Controller
               ->first();
             if (!$food_category) {
               $food_category = FoodCategory::create([
-                'name' => strtolower($temp['category']),
+                'name' => ucwords($temp['category']),
                 'restaurant_id' => $restaurant->id,
                 'creator_id' => $user->id,
               ]);
