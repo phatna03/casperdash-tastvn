@@ -29,4 +29,17 @@ class FoodCategory extends Model
       'name' => $this->name
     ];
   }
+
+  public function count_restaurants()
+  {
+    $rows = RestaurantFood::distinct()
+      ->select('food_id')
+      ->where('deleted', 0)
+      ->where('food_category_id', $this->id)
+      ->get();
+
+    $this->update([
+      'count_restaurants' => count($rows),
+    ]);
+  }
 }

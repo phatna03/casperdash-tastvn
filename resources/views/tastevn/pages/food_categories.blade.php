@@ -27,7 +27,7 @@
         <tr>
           <th></th>
           <th>Name</th>
-          <th>Total restaurants</th>
+          <th>Total dishes</th>
           <th>Latest updated</th>
           <th></th>
         </tr>

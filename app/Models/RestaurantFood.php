@@ -36,12 +36,14 @@ class RestaurantFood extends Model
     //food category
     $row = FoodCategory::find($this->food_category_id);
     if ($row) {
-      $count = RestaurantFood::where('deleted', 0)
+      $rows = RestaurantFood::distinct()
+        ->select('food_id')
+        ->where('deleted', 0)
         ->where('food_category_id', $row->id)
-        ->count();
+        ->get();
 
       $row->update([
-        'count_restaurants' => $count,
+        'count_restaurants' => count($rows),
       ]);
     }
   }
