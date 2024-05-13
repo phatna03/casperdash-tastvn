@@ -33,32 +33,32 @@ class Kernel extends ConsoleKernel
     //cargo
     $schedule->command('tastevn:s3todo', [1, 1])
       ->withoutOverlapping()
-      ->everyFiveSeconds()
+      ->everyTwoSeconds()
       ->runInBackground();
 
     $schedule->command('tastevn:s3todo', [1, 2])
       ->withoutOverlapping()
-      ->everyFiveSeconds()
+      ->everyTwoSeconds()
       ->runInBackground();
     //deli
     $schedule->command('tastevn:s3todo', [1, 3])
       ->withoutOverlapping()
-      ->everyTenSeconds()
+      ->everyFiveSeconds()
       ->runInBackground();
 
     $schedule->command('tastevn:s3todo', [1, 4])
       ->withoutOverlapping()
-      ->everyTenSeconds()
+      ->everyFiveSeconds()
       ->runInBackground();
     //market
     $schedule->command('tastevn:s3todo', [1, 5])
       ->withoutOverlapping()
-      ->everyTenSeconds()
+      ->everyFiveSeconds()
       ->runInBackground();
     //poison
     $schedule->command('tastevn:s3todo', [1, 6])
       ->withoutOverlapping()
-      ->everyTenSeconds()
+      ->everyFiveSeconds()
       ->runInBackground();
 
 

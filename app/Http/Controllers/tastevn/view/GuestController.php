@@ -122,6 +122,7 @@ class GuestController extends Controller
     $date = isset($values['date']) ? $values['date'] : date('Y-m-d');
     $dated = isset($values['date']) ? $values['date'] : date('Y_m_d');
 
+    $restaurants = isset($values['restaurants']) ? (array)explode(',', $values['restaurants']) : [];
     $restaurant_id = isset($values['restaurant_id']) ? (int)$values['restaurant_id'] : 0;
 
     $select = RestaurantFoodScan::where('deleted', 0)
@@ -133,6 +134,8 @@ class GuestController extends Controller
 
     if ($restaurant_id) {
       $select->where('restaurant_id', $restaurant_id);
+    } elseif (count($restaurants)) {
+      $select->whereIn('restaurant_id', $restaurants);
     }
 
     $items = [];
@@ -171,6 +174,9 @@ class GuestController extends Controller
         $items[] = [
           'id' => $row->id,
           'photo_url' => $row->photo_url,
+
+          'restaurant_name' => $row->get_restaurant()->name,
+          'error_s3' => strtotime($time_s3) < strtotime($time_photo) ? 'device time error' : '',
 
           'time_photo' => $time_photo,
           'time_s3' => $time_s3,

@@ -8,8 +8,10 @@ if (!isset($items) || !count($items)) {
 <table>
   <tr>
     <td>Photo URL</td>
+    <td>Restaurant</td>
     <td>Time photo screenshot</td>
     <td>Time photo uploaded to S3</td>
+    <td></td>
     <td>Time photo stored on the web</td>
     <td>Time photo scanned by Roboflow</td>
     <td>Time system predict dish</td>
@@ -22,8 +24,10 @@ if (!isset($items) || !count($items)) {
   @foreach($items as $item)
     <tr>
       <td>{{$item['id'] . ' - ' . $item['photo_url']}}</td>
+      <td>{{$item['restaurant_name']}}</td>
       <td>{{$item['time_photo']}}</td>
       <td>{{$item['time_s3']}}</td>
+      <td>{{$item['error_s3']}}</td>
       <td>{{$item['time_web']}}</td>
       <td>{{$item['time_scan']}}</td>
       <td>{{$item['time_end']}}</td>

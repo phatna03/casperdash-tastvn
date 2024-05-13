@@ -299,7 +299,7 @@
                     <div class="col-md-6 mb-2">
                       <div class="form-floating form-floating-outline">
                         <div class="form-control acm-wrap-selectize" id="scan-search-status">
-                          <select name="statuses" class="opt_selectize" multiple onchange="restaurant_search_food_scan(this)">
+                          <select name="statuses" class="opt_selectize multi_selectize" multiple onchange="restaurant_search_food_scan(this)">
                             <option value="">All</option>
                             <option value="checked" selected="selected">checked</option>
                             <option value="failed">no data</option>
@@ -325,7 +325,7 @@
                       <div class="form-floating form-floating-outline wrap-select-users">
                         <div class="form-control acm-wrap-selectize" id="scan-search-users">
                           <select name="users" multiple onchange="restaurant_search_food_scan(this)"
-                                  data-value="user" class="ajx_selectize"
+                                  data-value="user" class="ajx_selectize multi_selectize"
                           >
                             <option value="">All</option>
                           </select>
