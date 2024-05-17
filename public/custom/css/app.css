@@ -369,6 +369,10 @@
   height: auto !important;
 }
 
+.acm-th-first {
+  max-width: 60px;
+}
+
 .food_info_select .ajx_selectize.single > .selectize-input.items {
   border: 2px solid #fa0000;
 }
@@ -417,6 +421,14 @@
   -webkit-box-orient: vertical;
   overflow: hidden;
   min-height: 42px;
+}
+
+.acm-max-line-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 63px;
 }
 
 .acm-lbl-dark {

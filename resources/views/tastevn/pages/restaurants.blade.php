@@ -25,7 +25,7 @@
       <table class="table table-hover" id="datatable-listing">
         <thead class="table-light">
         <tr>
-          <th class="acm-width-50-max"></th>
+          <th class="acm-th-first"></th>
           <th>Name</th>
           <th class="@if($isMobi) d-none @endif">S3 Configuration</th>
           <th class="@if($isMobi) d-none @endif">Roboflow Scan?</th>
@@ -221,7 +221,7 @@
             var html = '';
 
             @if($viewer->is_admin())
-              html += '<div class="d-inline-block dropdown acm-mr-px-10">' +
+              html += '<div class="d-inline-block dropdown acm-mr-px-5">' +
               '<button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown"><i class="mdi mdi-dots-vertical"></i></button>' +
               '<div class="dropdown-menu">' +
               '<a class="dropdown-item" href="javascript:void(0);" data-bs-toggle="offcanvas" data-bs-target="#offcanvas_edit_item" onclick="sensor_edit_prepare(this)"><i class="mdi mdi-pencil-outline me-1"></i> Edit</a>' +

@@ -120,12 +120,6 @@ class Restaurant extends Model
 
   }
 
-  //optimze
-
-
-
-
-
   public function access_by_users()
   {
     $users = User::where('access_full', 0)
@@ -141,6 +135,16 @@ class Restaurant extends Model
       }
     }
   }
+
+
+
+  //optimze
+
+
+
+
+
+
 
   public function add_foods($food_ids = [], $category_id = 0)
   {

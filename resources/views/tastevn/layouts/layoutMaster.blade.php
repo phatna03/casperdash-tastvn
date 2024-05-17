@@ -54,7 +54,7 @@
     notify_running: 0,
 
     rbf_model: null,
-    rbf_auth: 0,
+    rbf_auth: 1,
 
     //speaker
     speaker: 0,
@@ -238,10 +238,10 @@
 
         </div>
 
-        <div class="acm-modal-arrow acm-modal-arrow-prev" onclick="restaurant_food_scan_result_info_action()">
+        <div class="acm-modal-arrow acm-modal-arrow-prev" onclick="sensor_food_scan_info_action()">
           <img src="{{url('custom/img/arrow_left.png')}}" />
         </div>
-        <div class="acm-modal-arrow acm-modal-arrow-next" onclick="restaurant_food_scan_result_info_action(1)">
+        <div class="acm-modal-arrow acm-modal-arrow-next" onclick="sensor_food_scan_info_action(1)">
           <img src="{{url('custom/img/arrow_right.png')}}" />
         </div>
 

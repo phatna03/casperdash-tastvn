@@ -383,7 +383,7 @@
 
               notify_itd = v.itd;
 
-              var html_toast = '<div class="cursor-pointer" onclick="restaurant_food_scan_result_info(' + v.itd + ')">';
+              var html_toast = '<div class="cursor-pointer" onclick="sensor_food_scan_info(' + v.itd + ')">';
               html_toast += '<div class="acm-fs-13">+ Predicted Dish: <b><span class="acm-mr-px-5 text-danger">' + v.food_confidence + '%</span><span>' + v.food_name + '</span></b></div>';
 
               html_toast += '<div class="acm-fs-13">+ Ingredients Missing:</div>';

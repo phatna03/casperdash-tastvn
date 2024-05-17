@@ -1,6 +1,6 @@
 @extends('tastevn/layouts/layoutMaster')
 
-@section('title', 'Admin - Restaurant: ' . $pageConfigs['item']->name)
+@section('title', 'Admin - Sensor: ' . $pageConfigs['item']->name)
 
 @section('vendor-style')
   <link rel="stylesheet" href="{{asset('assets/vendor/libs/datatables-bs5/datatables.bootstrap5.css')}}">
@@ -28,10 +28,10 @@
 
 @section('content')
 
-  <h4 class="mb-2"><span class="text-muted fw-light">Admin /</span> Restaurant: {{$pageConfigs['item']->name}}</h4>
+  <h4 class="mb-2"><span class="text-muted fw-light">Admin /</span> Sensor: {{$pageConfigs['item']->name}}</h4>
   <input type="hidden" name="current_restaurant" value="{{$pageConfigs['item']->id}}"/>
 
-  <div class="row g-4 mb-2">
+  <div class="row g-4 mb-4">
     <div class="col-lg-12 wrap-stats" id="wrap-stats-total">
       <div class="card h-100">
         <div class="card-header">
@@ -47,7 +47,7 @@
                   <div class="form-floating form-floating-outline">
                     <input type="text" class="form-control text-center date_time_picker" name="search_time"
                            autocomplete="off"
-                           onchange="stats_total()"
+                           onchange="sensor_stats()"
                            data-value="last_and_current_day"
                     />
                     <label>Date Time Range</label>
@@ -67,7 +67,7 @@
               <div class="mb-0">
                 <div class="d-inline-block search-time"></div>
                 <div class="d-inline-block">
-                  <button type="button" class="btn btn-danger btn-sm p-1" onclick="stats_clear(this)">
+                  <button type="button" class="btn btn-danger btn-sm p-1" onclick="sensor_stats_clear(this)">
                     <i class="mdi mdi-trash-can"></i>
                   </button>
                 </div>
@@ -151,291 +151,192 @@
   </div>
 
   <div class="nav-align-top mb-4">
-    <div class="card mb-4">
-
-      <div class="card-header p-0">
-        <div class="nav-align-top">
-          <ul class="nav nav-tabs nav-fill" role="tablist">
-            <li class="nav-item">
-              <button type="button" class="nav-link active" role="tab"
-                      data-bs-toggle="tab" data-bs-target="#datatable-listing-scan"
-                      aria-controls="datatable-listing-scan" aria-selected="true">
-                <i class="tf-icons mdi mdi-view-list me-1"></i> List of scanned
-                <span class="badge rounded-pill badge-center h-px-20 w-px-20 bg-danger ms-1 d-none">3</span>
-              </button>
-            </li>
-            <li class="nav-item">
-              <button type="button" class="nav-link" role="tab"
-                      data-bs-toggle="tab" data-bs-target="#datatable-listing-error"
-                      aria-controls="datatable-listing-error" aria-selected="false">
-                <i class="tf-icons mdi mdi-view-list me-1"></i> List of errors
-              </button>
-            </li>
-            <li class="nav-item">
-              <button type="button" class="nav-link " role="tab"
-                      data-bs-toggle="tab" data-bs-target="#datatable-listing-food"
-                      aria-controls="datatable-listing-food" aria-selected="false">
-                <i class="tf-icons mdi mdi-view-list me-1"></i> List of dishes
-              </button>
-            </li>
-          </ul>
-        </div>
-      </div>
-
-      <div class="card-body p-0">
-        <div class="tab-content">
-          <div class="tab-pane fade show active" id="datatable-listing-scan" role="tabpanel">
-            <div class="card mb-4">
-              <div class="card-header border-bottom wrap-search-form">
-                <h5 class="card-title">Search Conditions</h5>
-
-                <form onsubmit="event.preventDefault(); return datatable_listing_scan_refresh();">
-                  <div class="d-flex justify-content-between align-items-center row py-1 gap-3 gap-md-0">
-                    <div class="col-md-6 mb-2">
-                      <div class="form-floating form-floating-outline wrap-select-food-category">
-                        <div class="form-control acm-wrap-selectize" id="scan-search-food-category">
-                          <select name="categories" multiple onchange="restaurant_search_food_scan(this)">
-                            <option value="">All</option>
-                          </select>
-                        </div>
-                        <label for="scan-search-food-category">Dish Categories</label>
-                      </div>
-                    </div>
-                    <div class="col-md-6 mb-2">
-                      <div class="form-floating form-floating-outline wrap-select-food">
-                        <div class="form-control acm-wrap-selectize" id="scan-search-food">
-                          <select name="foods" multiple onchange="restaurant_search_food_scan(this)">
-                            <option value="">All</option>
-                          </select>
-                        </div>
-                        <label for="scan-search-food">Dishes</label>
-                      </div>
-                    </div>
-                    <div class="col-md-6 mb-2">
-                      <div class="form-floating form-floating-outline">
-                        <input type="text" class="form-control text-center date_time_picker" name="time_upload"
-                               id="scan-search-time-upload" autocomplete="off" data-value="last_and_current_day"
-                               onchange="restaurant_search_food_scan(this)"/>
-                        <label for="scan-search-time-upload">Time upload</label>
-                      </div>
-                    </div>
-                    <div class="col-md-6 mb-2">
-                      <div class="form-floating form-floating-outline">
-                        <input type="text" class="form-control text-center date_time_picker" name="time_scan"
-                               id="scan-search-time-scan" autocomplete="off" data-value="last_and_current_day"
-                               onchange="restaurant_search_food_scan(this)"/>
-                        <label for="scan-search-time-scan">Time scanned</label>
-                      </div>
-                    </div>
-                    <div class="col-md-6 mb-2">
-                      <div class="form-floating form-floating-outline">
-                        <div class="form-control acm-wrap-selectize" id="scan-search-status">
-                          <select name="statuses" class="opt_selectize multi_selectize" multiple onchange="restaurant_search_food_scan(this)">
-                            <option value="">All</option>
-                            <option value="checked" selected="selected">checked</option>
-                            <option value="failed">no data</option>
-                            <option value="edited" selected="selected">edited</option>
-                          </select>
-                        </div>
-                        <label for="scan-search-status">Statuses</label>
-                      </div>
-                    </div>
-                    <div class="col-md-6 mb-2">
-                      <div class="form-floating form-floating-outline">
-                        <div class="form-control acm-wrap-selectize" id="scan-search-missing">
-                          <select name="missing" class="opt_selectize" onchange="restaurant_search_food_scan(this)">
-                            <option value="">All dishes</option>
-                            <option value="yes">Dish with missing ingredients only</option>
-                            <option value="no">Dish has all the ingredients</option>
-                          </select>
-                        </div>
-                        <label for="scan-search-missing">Type</label>
-                      </div>
-                    </div>
-                    <div class="col-md-12 mb-2">
-                      <div class="form-floating form-floating-outline wrap-select-users">
-                        <div class="form-control acm-wrap-selectize" id="scan-search-users">
-                          <select name="users" multiple onchange="restaurant_search_food_scan(this)"
-                                  data-value="user" class="ajx_selectize multi_selectize"
-                          >
-                            <option value="">All</option>
-                          </select>
-                        </div>
-                        <label for="scan-search-users">Commentators</label>
-                      </div>
-                    </div>
+    <ul class="nav nav-pills nav-fill mb-1" role="tablist">
+      <li class="nav-item">
+        <button type="button" class="nav-link active" role="tab"
+                data-bs-toggle="tab" data-bs-target="#datatable-listing-scan"
+                aria-controls="datatable-listing-scan" aria-selected="true">
+          <i class="tf-icons mdi mdi-view-list me-1"></i> List of scanned
+          <span class="badge rounded-pill badge-center h-px-20 w-px-20 bg-danger ms-1 d-none">3</span>
+        </button>
+      </li>
+      <li class="nav-item">
+        <button type="button" class="nav-link" role="tab"
+                data-bs-toggle="tab" data-bs-target="#datatable-listing-error"
+                aria-controls="datatable-listing-error" aria-selected="false">
+          <i class="tf-icons mdi mdi-view-list me-1"></i> List of errors
+        </button>
+      </li>
+    </ul>
+    <div class="tab-content mb-4">
+      <div class="tab-pane fade show active" id="datatable-listing-scan" role="tabpanel">
+        <div class="wrap-search-form">
+          <h5 class="card-title">Search Conditions</h5>
+          <form onsubmit="event.preventDefault(); return datatable_listing_scan_refresh();">
+            <div class="d-flex justify-content-between align-items-center row py-1 gap-3 gap-md-0">
+              <div class="col-md-6 mb-2">
+                <div class="form-floating form-floating-outline wrap-select-food-category">
+                  <div class="form-control acm-wrap-selectize" id="scan-search-food-category">
+                    <select name="categories" multiple onchange="restaurant_search_food_scan(this)">
+                      <option value="">All</option>
+                    </select>
                   </div>
-                </form>
+                  <label for="scan-search-food-category">Dish Categories</label>
+                </div>
               </div>
-
-              <div class="card-datatable table-responsive">
-                <table class="table table-hover">
-                  <thead class="table-light">
-                  <tr>
-                    <th></th>
-                    <th>Status</th>
-                    <th class="acm-width-300-min">Dish</th>
-                    <th>Confidence</th>
-                    <th class="acm-width-300-min">Ingredients missing</th>
-                    <th class="acm-width-120-min">Time upload</th>
-                    <th class="acm-width-120-min">Time scanned</th>
-                    <th class="acm-width-400-min">Note</th>
-                    <th class="acm-width-200-min">Category</th>
-                    <th class="d-none"></th>
-                  </tr>
-                  </thead>
-                </table>
-              </div>
-            </div>
-          </div>
-
-          <div class="tab-pane fade" id="datatable-listing-error" role="tabpanel">
-            <div class="card mb-4">
-              <div class="card-header border-bottom wrap-search-form">
-                <h5 class="card-title">Search Conditions</h5>
-
-                <form onsubmit="event.preventDefault(); return datatable_listing_error_refresh();">
-                  <div class="d-flex justify-content-between align-items-center row py-1 gap-3 gap-md-0">
-                    <div class="col-md-6 mb-2">
-                      <div class="form-floating form-floating-outline wrap-select-food-category">
-                        <div class="form-control acm-wrap-selectize" id="error-search-food-category">
-                          <select name="categories" multiple
-                                  onchange="restaurant_search_food_scan_error(this)">
-                            <option value="">All</option>
-                          </select>
-                        </div>
-                        <label for="error-search-food-category">Dish Categories</label>
-                      </div>
-                    </div>
-                    <div class="col-md-6 mb-2">
-                      <div class="form-floating form-floating-outline wrap-select-food">
-                        <div class="form-control acm-wrap-selectize" id="error-search-food">
-                          <select name="foods" multiple onchange="restaurant_search_food_scan_error(this)">
-                            <option value="">All</option>
-                          </select>
-                        </div>
-                        <label for="error-search-food">Dishes</label>
-                      </div>
-                    </div>
-                    <div class="col-md-6 mb-2">
-                      <div class="form-floating form-floating-outline">
-                        <input type="text" class="form-control text-center date_time_picker" name="time_upload"
-                               id="error-search-time-upload" autocomplete="off" data-value="last_and_current_day"
-                               onchange="restaurant_search_food_scan_error(this)"/>
-                        <label for="error-search-time-upload">Time upload</label>
-                      </div>
-                    </div>
-                    <div class="col-md-6 mb-2">
-                      <div class="form-floating form-floating-outline">
-                        <input type="text" class="form-control text-center date_time_picker" name="time_scan"
-                               id="error-search-time-scan" autocomplete="off" data-value="last_and_current_day"
-                               onchange="restaurant_search_food_scan_error(this)"/>
-                        <label for="error-search-time-scan">Time scanned</label>
-                      </div>
-                    </div>
+              <div class="col-md-6 mb-2">
+                <div class="form-floating form-floating-outline wrap-select-food">
+                  <div class="form-control acm-wrap-selectize" id="scan-search-food">
+                    <select name="foods" multiple onchange="restaurant_search_food_scan(this)">
+                      <option value="">All</option>
+                    </select>
                   </div>
-                </form>
+                  <label for="scan-search-food">Dishes</label>
+                </div>
               </div>
-
-              <div class="card-datatable table-responsive">
-                <table class="table table-hover">
-                  <thead class="table-light">
-                  <tr>
-                    <th></th>
-                    <th>Category</th>
-                    <th>Dish</th>
-                    <th>Ingredients missing</th>
-                    <th>Total number of errors</th>
-                  </tr>
-                  </thead>
-                </table>
+              <div class="col-md-6 mb-2">
+                <div class="form-floating form-floating-outline">
+                  <input type="text" class="form-control text-center date_time_picker" name="time_upload"
+                         id="scan-search-time-upload" autocomplete="off" data-value="last_and_current_day"
+                         onchange="restaurant_search_food_scan(this)"/>
+                  <label for="scan-search-time-upload">Time upload</label>
+                </div>
+              </div>
+              <div class="col-md-6 mb-2">
+                <div class="form-floating form-floating-outline">
+                  <input type="text" class="form-control text-center date_time_picker" name="time_scan"
+                         id="scan-search-time-scan" autocomplete="off" data-value="last_and_current_day"
+                         onchange="restaurant_search_food_scan(this)"/>
+                  <label for="scan-search-time-scan">Time scanned</label>
+                </div>
+              </div>
+              <div class="col-md-6 mb-2">
+                <div class="form-floating form-floating-outline">
+                  <div class="form-control acm-wrap-selectize" id="scan-search-status">
+                    <select name="statuses" class="opt_selectize multi_selectize" multiple onchange="restaurant_search_food_scan(this)">
+                      <option value="">All</option>
+                      <option value="checked" selected="selected">checked</option>
+                      <option value="failed">no data</option>
+                      <option value="edited" selected="selected">edited</option>
+                    </select>
+                  </div>
+                  <label for="scan-search-status">Statuses</label>
+                </div>
+              </div>
+              <div class="col-md-6 mb-2">
+                <div class="form-floating form-floating-outline">
+                  <div class="form-control acm-wrap-selectize" id="scan-search-missing">
+                    <select name="missing" class="opt_selectize" onchange="restaurant_search_food_scan(this)">
+                      <option value="">All dishes</option>
+                      <option value="yes">Dish with missing ingredients only</option>
+                      <option value="no">Dish has all the ingredients</option>
+                    </select>
+                  </div>
+                  <label for="scan-search-missing">Type</label>
+                </div>
+              </div>
+              <div class="col-md-12 mb-2">
+                <div class="form-floating form-floating-outline wrap-select-users">
+                  <div class="form-control acm-wrap-selectize" id="scan-search-users">
+                    <select name="users" multiple onchange="restaurant_search_food_scan(this)"
+                            data-value="user" class="ajx_selectize multi_selectize"
+                    >
+                      <option value="">All</option>
+                    </select>
+                  </div>
+                  <label for="scan-search-users">Commentators</label>
+                </div>
               </div>
             </div>
+          </form>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead class="table-light">
+            <tr>
+              <th class="acm-th-first"></th>
+              <th>Status</th>
+              <th>Dish</th>
+              <th>Confidence</th>
+              <th>Ingredients missing</th>
+              <th>Time upload</th>
+              <th>Time scanned</th>
+              <th>Note</th>
+              <th class="d-none"></th>
+              <th class="d-none"></th>
+            </tr>
+            </thead>
+          </table>
+        </div>
+      </div>
+
+      <div class="tab-pane fade" id="datatable-listing-error" role="tabpanel">
+        <div class="card mb-4">
+          <div class="card-header border-bottom wrap-search-form">
+            <h5 class="card-title">Search Conditions</h5>
+
+            <form onsubmit="event.preventDefault(); return datatable_listing_error_refresh();">
+              <div class="d-flex justify-content-between align-items-center row py-1 gap-3 gap-md-0">
+                <div class="col-md-6 mb-2">
+                  <div class="form-floating form-floating-outline wrap-select-food-category">
+                    <div class="form-control acm-wrap-selectize" id="error-search-food-category">
+                      <select name="categories" multiple
+                              onchange="restaurant_search_food_scan_error(this)">
+                        <option value="">All</option>
+                      </select>
+                    </div>
+                    <label for="error-search-food-category">Dish Categories</label>
+                  </div>
+                </div>
+                <div class="col-md-6 mb-2">
+                  <div class="form-floating form-floating-outline wrap-select-food">
+                    <div class="form-control acm-wrap-selectize" id="error-search-food">
+                      <select name="foods" multiple onchange="restaurant_search_food_scan_error(this)">
+                        <option value="">All</option>
+                      </select>
+                    </div>
+                    <label for="error-search-food">Dishes</label>
+                  </div>
+                </div>
+                <div class="col-md-6 mb-2">
+                  <div class="form-floating form-floating-outline">
+                    <input type="text" class="form-control text-center date_time_picker" name="time_upload"
+                           id="error-search-time-upload" autocomplete="off" data-value="last_and_current_day"
+                           onchange="restaurant_search_food_scan_error(this)"/>
+                    <label for="error-search-time-upload">Time upload</label>
+                  </div>
+                </div>
+                <div class="col-md-6 mb-2">
+                  <div class="form-floating form-floating-outline">
+                    <input type="text" class="form-control text-center date_time_picker" name="time_scan"
+                           id="error-search-time-scan" autocomplete="off" data-value="last_and_current_day"
+                           onchange="restaurant_search_food_scan_error(this)"/>
+                    <label for="error-search-time-scan">Time scanned</label>
+                  </div>
+                </div>
+              </div>
+            </form>
           </div>
 
-          <div class="tab-pane fade" id="datatable-listing-food" role="tabpanel">
-            <div class="card mb-4">
-              <div class="card-header border-bottom d-none">
-                <h5 class="card-title">List of dishes</h5>
-              </div>
-              <div class="card-datatable table-responsive">
-                <table class="table table-hover">
-                  <thead class="table-light">
-                  <tr>
-                    <th></th>
-                    <th>Category</th>
-                    <th>Dish</th>
-                    <th>Latest updated</th>
-                    <th></th>
-                  </tr>
-                  </thead>
-                </table>
-              </div>
-            </div>
+          <div class="card-datatable table-responsive">
+            <table class="table table-hover">
+              <thead class="table-light">
+              <tr>
+                <th></th>
+                <th>Category</th>
+                <th>Dish</th>
+                <th>Ingredients missing</th>
+                <th>Total number of errors</th>
+              </tr>
+              </thead>
+            </table>
           </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Offcanvas to add food into restaurant -->
-  <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvas_add_foods"
-       aria-labelledby="offcanvas_add_foods_label">
-    <div class="offcanvas-header">
-      <h5 id="offcanvas_add_foods_label" class="offcanvas-title">Add Dishes To Restaurant</h5>
-      <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-    </div>
-    <div class="offcanvas-body mx-0 flex-grow-0 h-100">
-      <form class="pt-0" onsubmit="return restaurant_add_foods(event, this);">
-        <div class="form-floating form-floating-outline mb-4 wrap-select-food-category">
-          <div class="form-control acm-wrap-selectize" id="add-item-category">
-            <select name="category"></select>
-          </div>
-          <label for="add-item-category">Select Category</label>
-        </div>
-        <div class="form-floating form-floating-outline mb-4 wrap-select-food">
-          <div class="form-control acm-wrap-selectize" id="add-item-food">
-            <select name="foods" multiple required
-                    data-restaurant="{{$pageConfigs['item']->id}}"
-            ></select>
-          </div>
-          <label for="add-item-food">Dishes <b class="text-danger">*</b></label>
-        </div>
-
-        <button class="btn btn-primary me-sm-3 me-1 data-submit">Submit</button>
-        <button type="reset" class="btn btn-outline-secondary" data-bs-dismiss="offcanvas">Cancel</button>
-
-        <input type="hidden" name="item" value="{{$pageConfigs['item']->id}}"/>
-      </form>
-    </div>
-  </div>
-  <!-- modal confirm to delete food from restaurant -->
-  <div class="modal animate__animated animate__rollIn" id="modal_delete_food_out_restaurant" tabindex="-1"
-       aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h4 class="modal-title">Remove Confirmation?</h4>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <div class="row">
-            <div class="col mb-12 mt-2">
-              <div class="alert alert-danger">Are you sure you want to remove this item?</div>
-            </div>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
-          <button type="button" onclick="restaurant_delete_food(this)" class="btn btn-primary" data-bs-dismiss="modal">
-            Confirm
-          </button>
-          <input type="hidden" name="restaurant_id" value="{{$pageConfigs['item']->id}}"/>
-          <input type="hidden" name="food_id"/>
-        </div>
-      </div>
-    </div>
-  </div>
   <!-- modal confirm to retrain roboflow -->
   <div class="modal animate__animated animate__rollIn" id="modal_roboflow_retraining" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
@@ -454,10 +355,11 @@
           </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
-          <button type="button" onclick="roboflow_retraining()" class="btn btn-primary" data-bs-dismiss="modal">
-            Confirm
-          </button>
+          <div class="wrap-btns">
+            @include('tastevn.htmls.form_button_loading')
+            <button type="button" class="btn btn-primary btn-ok btn-submit acm-float-right" onclick="sensor_retraining(this)">Submit</button>
+            <button type="button" class="btn btn-outline-secondary btn-ok btn-cancel" data-bs-dismiss="modal">Cancel</button>
+          </div>
         </div>
       </div>
     </div>
@@ -478,58 +380,30 @@
       </div>
     </div>
   </div>
-  <!-- modal confirm to delete food scan result restaurant -->
-  <div class="modal animate__animated animate__rollIn" id="modal_delete_food_scan" tabindex="-1" aria-hidden="true">
+  <!-- modal confirm to delete item -->
+  <div class="modal animate__animated animate__rollIn" id="modal_delete_item" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
       <div class="modal-content">
         <div class="modal-header">
-          <h4 class="modal-title">Remove Confirmation?</h4>
+          <h4 class="modal-title">Delete Confirmation?</h4>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
           <div class="row">
             <div class="col mb-12 mt-2">
-              <div class="alert alert-danger">Are you sure you want to remove this item?</div>
+              <div class="alert alert-danger">Are you sure you want to delete this item?</div>
             </div>
           </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
-          <button type="button" onclick="restaurant_delete_food_scan(this)" class="btn btn-primary"
-                  data-bs-dismiss="modal">Confirm
-          </button>
-          <input type="hidden" name="itd"/>
-        </div>
-      </div>
-    </div>
-  </div>
-  <!-- modal to import food into restaurant -->
-  <div class="modal animate__animated animate__rollIn" id="modal_import_food_into_restaurant" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
-      <div class="modal-content">
-        <form onsubmit="return restaurant_import_foods(event, this);">
-          <div class="modal-header">
-            <h4 class="modal-title">Import Excel</h4>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          <div class="wrap-btns">
+            @include('tastevn.htmls.form_button_loading')
+            <button type="button" class="btn btn-primary btn-ok btn-submit acm-float-right" onclick="sensor_delete_food_scan(this)">Submit</button>
+            <button type="button" class="btn btn-outline-secondary btn-ok btn-cancel" data-bs-dismiss="modal">Cancel</button>
           </div>
-          <div class="modal-body">
-            <div class="row">
-              <a class="text-primary fw-bold" href="{{url('import_food_to_restaurant.xlsx')}}" download="" style="margin-bottom: 10px;">Download excel template file</a>
 
-              <div class="col-12">
-                <input name="file" type="file"
-                       accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
-                       required onchange="excel_check(this)" class="form-control"
-                />
-              </div>
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
-            <button type="submit" class="btn btn-primary">Confirm</button>
-            <input type="hidden" name="restaurant_id" value="{{$pageConfigs['item']->id}}"/>
-          </div>
-        </form>
+          <input type="hidden" name="item" />
+        </div>
       </div>
     </div>
   </div>
@@ -541,7 +415,7 @@
     $(document).ready(function () {
 
       //stats
-      stats_total();
+      sensor_stats();
 
       //selectize
       var selectize_food_category = $('.wrap-select-food-category select');
@@ -620,7 +494,6 @@
       });
 
       //datatable
-      datatable_listing_food = $('#datatable-listing-food table').DataTable(Object.assign(datatable_listing_food_cfs, acmcfs.datatable_init));
       datatable_listing_scan = $('#datatable-listing-scan table').DataTable(Object.assign(datatable_listing_scan_cfs, acmcfs.datatable_init));
       datatable_listing_error = $('#datatable-listing-error table').DataTable(Object.assign(datatable_listing_error_cfs, acmcfs.datatable_init));
 
@@ -629,86 +502,19 @@
         // console.log(e.keyCode);
         if ($('#modal_food_scan_info').hasClass('show')) {
           if (e.keyCode == 37) {
-            restaurant_food_scan_result_info_action();
+            sensor_food_scan_info_action();
           } else if (e.keyCode == 39) {
-            restaurant_food_scan_result_info_action(1);
+            sensor_food_scan_info_action(1);
           }
         }
       });
 
     });
 
-    var datatable_listing_food;
-    var datatable_listing_food_cfs = {
-      "ajax": "{{ url('datatable/restaurant-foods?restaurant=' . $pageConfigs['item']->id) }}",
-      "createdRow": function (row, data, dataIndex) {
-        $(row).attr('data-restaurant_id', '{{$pageConfigs['item']->id}}');
-        $(row).attr('data-food_id', data.food_id);
-      },
-      "columns": [
-        //stt
-        {data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false},
-        {data: 'category_name', name: 'food_categories.name'},
-        {data: 'food_name', name: 'foods.name'},
-        {data: 'updated_at', name: 'updated_at'},
-        {data: null},
-      ],
-      columnDefs: [
-        {
-          targets: 3,
-          render: $.fn.dataTable.render.moment('YYYY-MM-DDTHH:mm:ss.SSSSZ', 'DD/MM/YY HH:mm:ss')
-        },
-        {
-          // Actions
-          targets: 4,
-          title: '',
-          searchable: false,
-          orderable: false,
-          render: function (data, type, full, meta) {
-            return (
-              '<div class="dropdown">' +
-              '<button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown"><i class="mdi mdi-dots-vertical"></i></button>' +
-              '<div class="dropdown-menu">' +
-              // '<a class="dropdown-item" href="javascript:void(0);" data-bs-toggle="offcanvas" data-bs-target="#offcanvas_edit_item" onclick="restaurant_edit_prepare(this)"><i class="mdi mdi-pencil-outline me-1"></i> Edit</a>' +
-              '<a class="dropdown-item" href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#modal_delete_food_out_restaurant" onclick="restaurant_delete_food_confirm(this)"><i class="mdi mdi-trash-can-outline me-1"></i> Remove</a>' +
-              '</div>' +
-              '</div>'
-            );
-          }
-        }
-      ],
-      buttons: [
-        // {
-        //   text: '<i class="mdi mdi-plus me-0 me-sm-1"></i><span class="d-none d-sm-inline-block">Add Dishes To Restaurant</span>',
-        //   className: 'add-new btn btn-primary waves-effect waves-light acm-mr-px-10',
-        //   attr: {
-        //     'data-bs-toggle': 'offcanvas',
-        //     'data-bs-target': '#offcanvas_add_foods',
-        //     'onclick': 'setTimeout(function () { $("#offcanvas_add_foods form select[name=foods]").selectize()[0].selectize.focus(); }, 500)',
-        //   }
-        // },
-        {
-          text: '<i class="mdi mdi-plus me-0 me-sm-1"></i><span class="d-none d-sm-inline-block">Import Dishes To Restaurant</span>',
-          className: 'add-new btn btn-warning waves-effect waves-light',
-          attr: {
-            'data-bs-toggle': 'modal',
-            'data-bs-target': '#modal_import_food_into_restaurant',
-          }
-        },
-        {
-          text: '<i class="mdi mdi-reload me-0 me-sm-1"></i><span class="d-none d-sm-inline-block">Refresh</span>',
-          className: 'add-new btn btn-dark waves-effect waves-light',
-          attr: {
-            'onclick': 'datatable_listing_food_refresh()',
-          }
-        }
-      ],
-    };
-
     var datatable_listing_scan;
     var datatable_listing_scan_cfs = {
       "ajax": {
-        'url': '{{url('datatable/restaurant-food-scans')}}',
+        'url': '{{url('datatable/sensor-food-scans')}}',
         "data": function (d) {
           d.restaurant = '{{$pageConfigs['item']->id}}';
           d.statuses = $('#datatable-listing-scan .wrap-search-form form select[name=statuses]').val();
@@ -738,7 +544,7 @@
       "columns": [
         //stt
         {data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false},
-        {data: 'text_texts', name: 'text_texts'},
+        {data: 'status', name: 'status'},
         {data: 'food_name', name: 'foods.name'},
         {data: 'confidence', name: 'confidence'},
         {data: 'missing_texts', name: 'missing_texts'},
@@ -746,13 +552,34 @@
         {data: 'time_scan', name: 'time_scan'},
         {data: 'note', name: 'note'},
         {data: 'id', name: 'id'},
+        {data: 'text_texts', name: 'text_texts'},
       ],
       columnDefs: [
+        {
+          targets: 0,
+          render: function (data, type, full, meta) {
+            var html = '';
+
+            @if($viewer->id == 5) //dev
+              html += '<div class="d-inline-block dropdown acm-mr-px-5">' +
+              '<button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown"><i class="mdi mdi-dots-vertical"></i></button>' +
+              '<div class="dropdown-menu">' +
+              '<a class="dropdown-item" href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#modal_delete_item" onclick="sensor_delete_food_scan_prepare(this)"><i class="mdi mdi-trash-can-outline me-1"></i> Delete</a>' +
+              '</div>' +
+              '</div>';
+            @endif
+
+              html += '<div class="d-inline-block">' +
+              '<span class="badge bg-secondary">' + full['DT_RowIndex'] + '</span>' +
+              '</div>';
+
+            return ('<div>' + html + '</div>');
+          }
+        },
         {
           targets: 1,
           render: function (data, type, full, meta) {
             var html = '';
-            var retrain = parseInt(full['rbf_retrain']);
 
             if (full['status'] == 'new') {
               html = '<div><span class="badge bg-warning">' + full['status'] + '</span></div>';
@@ -766,23 +593,17 @@
               html = '<div><span class="badge bg-info">' + full['status'] + '</span></div>';
             }
 
-            if (retrain) {
-              switch (retrain) {
-                case 1:
-                  html += '<div class="mt-1"><span class="badge bg-primary">retraining</span></div>';
-                  break;
-              }
-            }
-
             var html_admin = '<div></div>';
             if (parseInt(acmcfs.rbf_auth)) {
-              html_admin = '<div>' +
-                '<button type="button" class="btn btn-sm btn-primary p-1 acm-mr-px-10" onclick="restaurant_food_scan_api(this, 1)"><i class="mdi mdi-food ic_current"></i></button>' +
-                '<button type="button" class="btn btn-sm btn-danger p-1"  onclick="restaurant_food_scan_api(this, 2)"><i class="mdi mdi-api ic_current"></i></button>' +
+              html_admin = '<div class="mt-1">' +
+                '<button type="button" class="btn btn-sm btn-primary p-1 acm-mr-px-10" onclick="sensor_food_scan_api(this, 1)"><i class="mdi mdi-food ic_current"></i> re-predict</button>' +
+                '</div>' +
+                '<div class="mt-1">' +
+                '<button type="button" class="btn btn-sm btn-danger p-1"  onclick="sensor_food_scan_api(this, 2)"><i class="mdi mdi-api ic_current"></i> re-scan-api</button>' +
                 '</div>';
             }
 
-            return ('<div class="cursor-pointer" onclick="restaurant_food_scan_result_info(' + full['id'] + ')">'
+            return ('<div>'
               + html
               + html_admin
               + '</div>');
@@ -792,23 +613,20 @@
           targets: 2,
           render: function (data, type, full, meta) {
 
-            var food_name = !full['food_name'] || full['food_name'] === 'null' ? 'Unknown...'
-              : full['food_name'];
+            var food_name = !full['food_name'] || full['food_name'] === 'null'
+              ? 'Unknown...' : full['food_name'];
+            var food_category = !full['category_name'] || full['category_name'] === 'null'
+              ? '' : '(' + full['category_name'] + ')';
 
             return (
-              // '<div class="dropdown z-5">' +
-              // '<button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown"><i class="mdi mdi-dots-vertical"></i></button>' +
-              // '<div class="dropdown-menu">' +
-              // '<a class="dropdown-item" href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#modal_delete_food_scan" onclick="restaurant_delete_food_scan_confirm(this)"><i class="mdi mdi-trash-can-outline me-1"></i> Remove</a>' +
-              // '</div>' +
-              // '</div>' +
-              '<div class="clearfix cursor-pointer" onclick="restaurant_food_scan_result_info(' + full['id'] + ')">' +
+              '<div class="clearfix cursor-pointer" onclick="sensor_food_scan_info(' + full['id'] + ')">' +
               '<div class="acm-float-left acm-mr-px-5">' +
-              '<img class="acm-border-css" loading="lazy" width="50" height="50px" src="' + full['photo_url'] + '" />' +
+              '<img class="acm-border-css" loading="lazy" width="100" height="70px" src="' + full['photo_url'] + '" />' +
               '</div>' +
-              '<div class="overflow-hidden acm-max-line-2">' +
+              '<div class="overflow-hidden acm-max-line-3">' +
               '<div>ID: ' + full['id'] + '</div>' +
               '<div>' + food_name + '</div>' +
+              '<div class="acm-text-italic">' + food_category + '</div>' +
               '</div>' +
               '</div>'
             );
@@ -818,10 +636,21 @@
           targets: 3,
           render: function (data, type, full, meta) {
             var html = '';
+            var retrain = parseInt(full['rbf_retrain']);
+
             if (full['confidence'] && parseInt(full['confidence'])) {
               html = full['confidence'] + '%';
             }
-            return ('<div class="cursor-pointer" onclick="restaurant_food_scan_result_info(' + full['id'] + ')">' + html + '</div>');
+
+            if (retrain) {
+              switch (retrain) {
+                case 1:
+                  html += '<div class="mt-1"><span class="badge bg-info">re-training</span></div>';
+                  break;
+              }
+            }
+
+            return ('<div class="cursor-pointer" onclick="sensor_food_scan_info(' + full['id'] + ')">' + html + '</div>');
           }
         },
         {
@@ -851,7 +680,7 @@
                   });
                 }
               }
-              return ('<div class="cursor-pointer" onclick="restaurant_food_scan_result_info(' + full['id'] + ')">' + html + '</div>');
+              return ('<div class="cursor-pointer" onclick="sensor_food_scan_info(' + full['id'] + ')">' + html + '</div>');
             }
           }
         },
@@ -866,7 +695,7 @@
             } else {
               html = full['time_photo'];
             }
-            return ('<div class="cursor-pointer" onclick="restaurant_food_scan_result_info(' + full['id'] + ')">' + html + '</div>');
+            return ('<div class="cursor-pointer" onclick="sensor_food_scan_info(' + full['id'] + ')">' + html + '</div>');
           }
         },
         {
@@ -880,7 +709,7 @@
             } else {
               html = full['time_scan'];
             }
-            return ('<div class="cursor-pointer" onclick="restaurant_food_scan_result_info(' + full['id'] + ')">' + html + '</div>');
+            return ('<div class="cursor-pointer" onclick="sensor_food_scan_info(' + full['id'] + ')">' + html + '</div>');
           }
         },
         {
@@ -915,19 +744,30 @@
                 html += '<div>+ ' + full['note'] + '</div>';
               }
 
-              return ('<div class="cursor-pointer" onclick="restaurant_food_scan_result_info(' + full['id'] + ')">' + html + '</div>');
+              return ('<div class="cursor-pointer" onclick="sensor_food_scan_info(' + full['id'] + ')">' + html + '</div>');
             }
           }
         },
+        {
+          targets: 8,
+          className: 'd-none',
+        },
+        {
+          targets: 9,
+          className: 'd-none',
+        },
       ],
       buttons: [
-        // {
-        //   text: '<i class="mdi mdi-robot-confused me-0 me-sm-1"></i><span class="d-none d-sm-inline-block">Re-train Roboflow</span>',
-        //   className: 'add-new btn btn-danger waves-effect waves-light acm-mr-px-10',
-        //   attr: {
-        //     'onclick': 'roboflow_retraining_confirm()',
-        //   }
-        // },
+        @if($viewer->is_super_admin() || $viewer->id == 5)
+        {
+          text: '<i class="mdi mdi-robot-confused me-0 me-sm-1"></i><span class="d-none d-sm-inline-block">Re-train Roboflow</span>',
+          className: 'add-new btn btn-danger waves-effect waves-light acm-mr-px-10',
+          attr: {
+            'data-bs-toggle': 'modal',
+            'data-bs-target': '#modal_roboflow_retraining',
+          }
+        },
+        @endif
         {
           text: '<i class="mdi mdi-reload me-0 me-sm-1"></i><span class="d-none d-sm-inline-block">Refresh</span>',
           className: 'add-new btn btn-dark waves-effect waves-light',
@@ -996,10 +836,6 @@
         }
       ],
     };
-
-    function datatable_listing_food_refresh() {
-      datatable_listing_food.ajax.reload();
-    }
 
     function datatable_listing_scan_refresh() {
       datatable_listing_scan.ajax.reload();

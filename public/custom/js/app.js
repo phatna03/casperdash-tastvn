@@ -1398,7 +1398,7 @@ function restaurant_get_scan_results(ele, id) {
       }
 
       if (response.data.notify && parseInt(response.data.notify)) {
-        var htmlToast = '<div class="cursor-pointer" onclick="restaurant_food_scan_result_info(' + response.data.notify + ')">Dish found error</div>';
+        var htmlToast = '<div class="cursor-pointer" onclick="sensor_food_scan_info(' + response.data.notify + ')">Dish found error</div>';
         message_from_toast('error', 'Notification', htmlToast);
       }
     })
@@ -1413,156 +1413,7 @@ function restaurant_get_scan_results(ele, id) {
   return false;
 }
 
-function restaurant_food_scan_result_info(id) {
-  var popup = $('#modal_food_scan_info');
-  popup.find('input[name=popup_view_id_itm]').val(id);
 
-  var hidden_btns = true;
-  var table1 = $('#datatable-listing-scan table');
-  if (table1.length) {
-    var count = 0;
-    var ids = '';
-    if (table1.find('tbody tr').length) {
-      table1.find('tbody tr').each(function (k, v) {
-        if (parseInt($(v).attr('data-itd'))) {
-          ids += parseInt($(v).attr('data-itd')) + ';';
-          count++;
-        }
-      });
-    }
-
-    if (ids && ids != '') {
-      popup.find('input[name=popup_view_ids]').val(ids);
-    }
-    if (count > 1) {
-      hidden_btns = false;
-    }
-  }
-
-  var table2 = $('#wrap-notifications');
-  if (table2.length) {
-    var count = 0;
-    var ids = '';
-    if (table2.find('.acm-itm-notify').length) {
-      table2.find('.acm-itm-notify').each(function (k, v) {
-        if (parseInt($(v).attr('data-rfs-id'))) {
-          ids += parseInt($(v).attr('data-rfs-id')) + ';';
-          count++;
-        }
-      });
-    }
-
-    if (ids && ids != '') {
-      popup.find('input[name=popup_view_ids]').val(ids);
-    }
-    if (count > 1) {
-      hidden_btns = false;
-    }
-  }
-
-  popup.find('.acm-modal-arrow').removeClass('d-none');
-  if (hidden_btns) {
-    popup.find('.acm-modal-arrow').addClass('d-none');
-  }
-
-  popup.find('.modal-header h4').text('Loading...');
-  popup.find('.modal-body').addClass('text-center').empty()
-    .append('<div class="m-auto">' + acmcfs.html_loading + '</div>');
-
-  axios.post('/admin/restaurant/food/scan/info', {
-    item: id,
-  })
-    .then(response => {
-
-      var title = response.data.restaurant.name + ' <span class="badge acm-ml-px-10 bg-primary">ID: ' + response.data.item.id + '</span>';
-      popup.find('.modal-header h4').empty().append(title);
-
-      popup.find('.modal-body').removeClass('text-center').empty()
-        .append(response.data.html_info);
-
-      bind_datad(popup);
-      popup.modal('show');
-
-
-
-    })
-    .catch(error => {
-      if (error.response.data && Object.values(error.response.data).length) {
-        Object.values(error.response.data).forEach(function (v, k) {
-          message_from_toast('error', acmcfs.message_title_error, v);
-        });
-      }
-    });
-
-  return false;
-}
-
-function restaurant_food_scan_result_info_action(next = 0) {
-  var popup = $('#modal_food_scan_info');
-  var arr = popup.find('input[name=popup_view_ids]').val().split(';').filter(Boolean);
-  var view_current = parseInt(popup.find('input[name=popup_view_id_itm]').val());
-  var view_next = 0;
-
-  if (arr.length) {
-    if (next) {
-      for (var i = 0; i < arr.length; ++i) {
-        if (parseInt(arr[i]) == view_current) {
-          if (arr[i + 1]) {
-            view_next = arr[i + 1];
-          } else {
-            view_next = arr[0];
-          }
-        }
-      }
-    } else {
-      for (var i = 0; i < arr.length; ++i) {
-        if (parseInt(arr[i]) == view_current) {
-          if (arr[i - 1]) {
-            view_next = arr[i - 1];
-          } else {
-            view_next = arr[arr.length - 1];
-          }
-        }
-      }
-    }
-
-    popup.find('input[name=popup_view_id_itm]').val(view_next);
-
-    //rebind
-    restaurant_food_scan_result_info_rebind(view_next);
-  }
-}
-
-function restaurant_food_scan_result_info_rebind(id) {
-  var popup = $('#modal_food_scan_info');
-
-  popup.find('.modal-body').addClass('text-center').empty()
-    .append('<div class="m-auto">' + acmcfs.html_loading + '</div>');
-
-  axios.post('/admin/restaurant/food/scan/info', {
-    item: id,
-  })
-    .then(response => {
-
-      var title = response.data.restaurant.name + ' <span class="badge acm-ml-px-10 bg-primary">ID: ' + response.data.item.id + '</span>';
-      popup.find('.modal-header h4').empty().append(title);
-
-      popup.find('.modal-body').removeClass('text-center').empty()
-        .append(response.data.html_info);
-
-      bind_datad(popup);
-
-    })
-    .catch(error => {
-      if (error.response.data && Object.values(error.response.data).length) {
-        Object.values(error.response.data).forEach(function (v, k) {
-          message_from_toast('error', acmcfs.message_title_error, v);
-        });
-      }
-    });
-
-  return false;
-}
 
 function restaurant_food_scan_result_select(ele) {
   var bind = $(ele);
@@ -1663,7 +1514,7 @@ function restaurant_food_scan_result_update(evt, frm) {
     .then(response => {
 
       message_from_toast('success', acmcfs.message_title_success, acmcfs.message_description_success_add, true);
-      restaurant_food_scan_result_info_rebind(view_current);
+      sensor_food_scan_info_rebind(view_current);
 
     })
     .catch(error => {
@@ -1753,35 +1604,7 @@ function restaurant_food_scan_cmt(ele) {
   return false;
 }
 
-function restaurant_food_scan_api(ele, type) {
-  var bind = $(ele);
-  var tr = bind.closest('tr');
 
-  bind.find('.ic_current').addClass('d-none');
-  bind.append('<i class="mdi mdi-reload ic_loading"></i>');
-
-  axios.post('/admin/restaurant/food/scan/api', {
-    item: tr.attr('data-itd'),
-    type: type,
-  })
-    .then(response => {
-
-      bind.find('.ic_current').removeClass('d-none');
-      bind.find('.ic_loading').remove();
-
-      message_from_toast('success', acmcfs.message_title_success, acmcfs.message_description_success_update);
-
-    })
-    .catch(error => {
-      if (error.response.data && Object.values(error.response.data).length) {
-        Object.values(error.response.data).forEach(function (v, k) {
-          message_from_toast('error', acmcfs.message_title_error, v);
-        });
-      }
-    });
-
-  return false;
-}
 
 function restaurant_search_food_scan(ele) {
   var form = $(ele).closest('form');
@@ -1805,40 +1628,6 @@ function restaurant_search_food_scan_error(ele) {
   }
 }
 
-function restaurant_delete_food_scan_confirm(ele) {
-  var tr = $(ele).closest('tr');
-  var popup = $('#modal_delete_food_scan');
-
-  popup.find('input[name=itd]').val(tr.attr('data-itd'));
-}
-
-function restaurant_delete_food_scan(ele) {
-  var popup = $(ele).closest('.modal');
-
-  axios.post('/admin/restaurant/food/scan/delete', {
-    item: popup.find('input[name=itd]').val(),
-  })
-    .then(response => {
-
-      message_from_toast('success', acmcfs.message_title_success, acmcfs.message_description_success_update, true);
-
-      if (typeof datatable_listing_scan_refresh() !== "undefined") {
-        datatable_listing_scan_refresh();
-      }
-
-    })
-    .catch(error => {
-
-      if (error.response.data && Object.values(error.response.data).length) {
-        Object.values(error.response.data).forEach(function (v, k) {
-          message_from_toast('error', acmcfs.message_title_error, v);
-        });
-      }
-
-    });
-
-  return false;
-}
 
 //sensor
 
@@ -2324,36 +2113,6 @@ function sensor_food_scan_cmt(ele) {
   return false;
 }
 
-function sensor_food_scan_api(ele, type) {
-  var bind = $(ele);
-  var tr = bind.closest('tr');
-
-  bind.find('.ic_current').addClass('d-none');
-  bind.append('<i class="mdi mdi-reload ic_loading"></i>');
-
-  axios.post('/admin/restaurant/food/scan/api', {
-    item: tr.attr('data-itd'),
-    type: type,
-  })
-    .then(response => {
-
-      bind.find('.ic_current').removeClass('d-none');
-      bind.find('.ic_loading').remove();
-
-      message_from_toast('success', acmcfs.message_title_success, acmcfs.message_description_success_update);
-
-    })
-    .catch(error => {
-      if (error.response.data && Object.values(error.response.data).length) {
-        Object.values(error.response.data).forEach(function (v, k) {
-          message_from_toast('error', acmcfs.message_title_error, v);
-        });
-      }
-    });
-
-  return false;
-}
-
 function sensor_search_food_scan(ele) {
   var form = $(ele).closest('form');
   if (form.length) {
@@ -2374,41 +2133,6 @@ function sensor_search_food_scan_error(ele) {
       }
     }, acmcfs.timeout_default);
   }
-}
-
-function sensor_delete_food_scan_confirm(ele) {
-  var tr = $(ele).closest('tr');
-  var popup = $('#modal_delete_food_scan');
-
-  popup.find('input[name=itd]').val(tr.attr('data-itd'));
-}
-
-function sensor_delete_food_scan(ele) {
-  var popup = $(ele).closest('.modal');
-
-  axios.post('/admin/restaurant/food/scan/delete', {
-    item: popup.find('input[name=itd]').val(),
-  })
-    .then(response => {
-
-      message_from_toast('success', acmcfs.message_title_success, acmcfs.message_description_success_update, true);
-
-      if (typeof datatable_listing_scan_refresh() !== "undefined") {
-        datatable_listing_scan_refresh();
-      }
-
-    })
-    .catch(error => {
-
-      if (error.response.data && Object.values(error.response.data).length) {
-        Object.values(error.response.data).forEach(function (v, k) {
-          message_from_toast('error', acmcfs.message_title_error, v);
-        });
-      }
-
-    });
-
-  return false;
 }
 
 //food category
@@ -3164,7 +2888,7 @@ function notification_newest() {
 
         response.data.items.forEach(function (v, k) {
 
-          var html_toast = '<div class="cursor-pointer" onclick="restaurant_food_scan_result_info(' + v.itd + ')">';
+          var html_toast = '<div class="cursor-pointer" onclick="sensor_food_scan_info(' + v.itd + ')">';
           html_toast += '<div class="acm-fs-13">+ Predicted Dish: <b><span class="acm-mr-px-5 text-danger">' + v.food_confidence + '%</span><span>' + v.food_name + '</span></b></div>';
 
           html_toast += '<div class="acm-fs-13">+ Ingredients Missing:</div>';
@@ -3209,155 +2933,11 @@ function roboflow_retraining_confirm() {
   return false;
 }
 
-function roboflow_retraining() {
-  var tbl = $('#datatable-listing-scan');
-  var ids = [];
 
-  if (tbl.find('table tbody tr').length) {
-    tbl.find('table tbody tr').each(function (k, v) {
-      var bind = $(v);
-      var itd = parseInt(bind.attr('data-itd'));
 
-      if (itd) {
-        ids.push(itd);
-      }
-    });
-  }
 
-  if (!ids.length) {
-    message_from_toast('error', acmcfs.message_title_error, 'Item not found');
-    return false;
-  }
 
-  axios.post('/admin/roboflow/retrain', {
-    items: ids,
-  })
-    .then(response => {
 
-      message_from_toast('success', acmcfs.message_title_success, acmcfs.message_description_success_update);
-
-      if (typeof datatable_listing_scan_refresh !== "undefined") {
-        datatable_listing_scan_refresh();
-      }
-
-    })
-    .catch(error => {
-
-    });
-}
-
-function stats_clear(ele, type) {
-  var wrap = $(ele).closest('.wrap-stats');
-
-  wrap.find('input[name=search_time]').val('').trigger('change');
-}
-
-function stats_total() {
-  var wrap = $('#wrap-stats-total');
-
-  var times = wrap.find('input[name=search_time]').val();
-
-  wrap.find('.wrap-search-condition').addClass('d-none');
-  if (times && times !== '') {
-    wrap.find('.wrap-search-condition').removeClass('d-none');
-    wrap.find('.wrap-search-condition .search-time').empty().text(times);
-  }
-
-  axios.post('/admin/restaurant/stats', {
-    item: $('body input[name=current_restaurant]').val(),
-    times: times,
-    type: 'total',
-  })
-    .then(response => {
-
-      // console.log(response.data.stats.sql1);
-
-      wrap.find('.stats-total-found-count').text(response.data.stats.total_found);
-
-      wrap.find('.stats-today-found .fnumber').text(response.data.stats.today_found);
-      wrap.find('.stats-today-found').removeClass('d-none');
-      if (times && times !== '') {
-        wrap.find('.stats-today-found').addClass('d-none');
-      }
-
-      wrap.find('.stats-food-category-count').text(response.data.stats.category_error);
-      wrap.find('.stats-food-category-percent').text(response.data.stats.category_error_percent > 0
-        ? '(' + response.data.stats.category_error_percent + '%)' : '');
-
-      wrap.find('.stats-food-category-list').addClass('d-none');
-      if (response.data.stats.category_error_list.length) {
-        var html = '';
-
-        response.data.stats.category_error_list.forEach(function (v, k) {
-          var title = v.food_category_name && v.food_category_name !== '' && v.food_category_name !== 'null'
-            ? v.food_category_name : 'Not group food category yet';
-          html += '<li><a class="dropdown-item" href="javascript:void(0);">' + title + '</a></li>';
-        });
-
-        wrap.find('.stats-food-category-list').empty()
-          .removeClass('d-none').append(html);
-      }
-
-      wrap.find('.stats-food-count').text(response.data.stats.food_error);
-      wrap.find('.stats-food-percent').text(response.data.stats.food_error_percent > 0
-        ? '(' + response.data.stats.food_error_percent + '%)' : '');
-
-      wrap.find('.stats-food-list').addClass('d-none');
-      if (response.data.stats.food_error_list.length) {
-        var html = '';
-
-        response.data.stats.food_error_list.forEach(function (v, k) {
-          var title = v.food_name && v.food_name !== '' && v.food_name !== 'null'
-            ? v.food_name : 'No food found';
-          html += '<li><a class="dropdown-item" href="javascript:void(0);"><b class="acm-mr-px-5">' + v.total_error + '</b>' + v.food_name + '</a></li>';
-        });
-
-        wrap.find('.stats-food-list').empty()
-          .removeClass('d-none').append(html);
-      }
-
-      wrap.find('.stats-ingredients-missing-count').text(response.data.stats.ingredient_missing);
-      wrap.find('.stats-ingredients-missing-percent').text(response.data.stats.ingredient_missing_percent > 0
-        ? '(' + response.data.stats.ingredient_missing_percent + '%)' : '');
-
-      wrap.find('.stats-ingredients-missing-list').addClass('d-none');
-      if (response.data.stats.ingredient_missing_list.length) {
-        var html = '';
-
-        response.data.stats.ingredient_missing_list.forEach(function (v, k) {
-          var title = v.ingredient_name && v.ingredient_name !== '' && v.ingredient_name !== 'null'
-            ? v.ingredient_name : 'No ingredient found';
-          html += '<li><a class="dropdown-item" href="javascript:void(0);"><b class="acm-mr-px-5">' + v.total_error + '</b>' + v.ingredient_name + '</a></li>';
-        });
-
-        wrap.find('.stats-ingredients-missing-list').empty()
-          .removeClass('d-none').append(html);
-      }
-
-      wrap.find('.stats-time-frames-count').text(response.data.stats.time_frame);
-
-      wrap.find('.stats-time-frames-list').addClass('d-none');
-      if (response.data.stats.time_frame_list.length) {
-        var html = '';
-
-        response.data.stats.time_frame_list.forEach(function (v, k) {
-          var title = v.hour_error < 10
-            ? '0' + v.hour_error + ':00 - ' + '0' + v.hour_error + ':59'
-            : v.hour_error + ':00 - ' + v.hour_error + ':59';
-          html += '<li><a class="dropdown-item" href="javascript:void(0);"><b class="acm-mr-px-5">' + v.total_error + '</b>' + title + '</a></li>';
-        });
-
-        wrap.find('.stats-time-frames-list').empty()
-          .removeClass('d-none').append(html);
-      }
-
-      bind_datad(wrap);
-
-    })
-    .catch(error => {
-
-    });
-}
 
 function stats_total_by_date(start_date, end_date) {
   // console.log(start_date, start_date);

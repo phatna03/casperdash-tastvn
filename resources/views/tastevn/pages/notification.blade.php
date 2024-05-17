@@ -66,7 +66,7 @@
   <script type="text/javascript">
     $(document).ready(function() {
       @if(count($pageConfigs['vars']) && isset($pageConfigs['vars']['rid']))
-        restaurant_food_scan_result_info('{{(int)$pageConfigs['vars']['rid']}}');
+        sensor_food_scan_info('{{(int)$pageConfigs['vars']['rid']}}');
       @endif
     });
   </script>
