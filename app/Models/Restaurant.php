@@ -37,6 +37,7 @@ class Restaurant extends Model
   public function get_log()
   {
     return [
+      'restaurant_parent_id' => $this->restaurant_parent_id,
       'name' => $this->name,
       's3_bucket_name' => $this->s3_bucket_name,
       's3_bucket_address' => $this->s3_bucket_address,
@@ -47,6 +48,58 @@ class Restaurant extends Model
   public function creator()
   {
     return $this->belongsTo('App\Models\User', 'creator_id');
+  }
+
+  public function import_foods($datas = [])
+  {
+    $user = Auth::user();
+
+    if (count($datas)) {
+
+      //import only
+      foreach ($datas as $data) {
+
+        $row = RestaurantFood::where('restaurant_id', $this->id)
+          ->where('food_id', (int)$data['food_id'])
+          ->first();
+        if (!$row) {
+          $row = RestaurantFood::create([
+            'restaurant_id' => $this->id,
+            'food_id' => (int)$data['food_id'],
+            'creator_id' => $user->id,
+          ]);
+        }
+
+        $row->update([
+          'food_category_id' => (int)$data['food_category_id'],
+          'photo' => $data['photo'],
+          'live_group' => $data['live_group'],
+          'deleted' => 0,
+        ]);
+
+      }
+    }
+
+  }
+
+  public function count_foods()
+  {
+    $count = RestaurantFood::distinct()
+      ->select('food_id')
+      ->where('restaurant_id', $this->id)
+      ->where('deleted', 0)
+      ->count();
+
+    $this->update([
+      'count_foods' => $count,
+    ]);
+
+    return $count;
+  }
+
+  public function on_create_after($pars = [])
+  {
+
   }
 
   public function on_update_after($pars = [])
@@ -62,6 +115,17 @@ class Restaurant extends Model
     $this->access_by_users();
   }
 
+  public function on_restore_after($pars = [])
+  {
+
+  }
+
+  //optimze
+
+
+
+
+
   public function access_by_users()
   {
     $users = User::where('access_full', 0)
@@ -76,22 +140,6 @@ class Restaurant extends Model
         $user->access_restaurants();
       }
     }
-  }
-
-  public function count_foods()
-  {
-    $rows = RestaurantFood::where('restaurant_id', $this->id)
-      ->where('deleted', 0)
-      ->get();
-    if (count($rows)) {
-      foreach ($rows as $row) {
-        $row->count_restaurants();
-      }
-    }
-
-    $this->update([
-      'count_foods' => count($rows),
-    ]);
   }
 
   public function add_foods($food_ids = [], $category_id = 0)

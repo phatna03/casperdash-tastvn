@@ -20,15 +20,40 @@
     },
 
     {
-      "name": "Foods",
+      "name": "Album Photos",
+      "icon": "menu-icon tf-icons mdi mdi-image-album",
+      "url": "admin/photos",
+      "slug": "admin-photos"
+    },
+    {
+      "name": "Modal Testing",
+      "icon": "menu-icon tf-icons mdi mdi-robot no_user no_moderator",
+      "url": "admin/roboflow",
+      "slug": "admin-roboflow"
+    },
+
+    {
+      "name": "Restaurants",
       "icon": "menu-icon tf-icons mdi mdi-room-service no_user no_moderator",
       "slug": "dashboard",
       "submenu": [
         {
+          "url": "admin/restaurants",
+          "name": "Restaurants",
+          "icon": "menu-icon tf-icons mdi mdi-silverware-fork-knife",
+          "slug": "admin-restaurants"
+        },
+        {
+          "url": "admin/sensors",
+          "name": "Sensors",
+          "icon": "menu-icon tf-icons mdi mdi-cctv",
+          "slug": "admin-sensors"
+        },
+        {
           "url": "admin/foods",
           "name": "Dishes",
           "icon": "menu-icon tf-icons mdi mdi-food",
-          "slug": "admin-restaurants"
+          "slug": "admin-foods"
         },
         {
           "url": "admin/ingredients",
@@ -43,19 +68,6 @@
           "slug": "admin-food-categories"
         }
       ]
-    },
-
-    {
-      "name": "Album Photos",
-      "icon": "menu-icon tf-icons mdi mdi-image-album",
-      "url": "admin/photos",
-      "slug": "admin-photos"
-    },
-    {
-      "name": "Modal Testing",
-      "icon": "menu-icon tf-icons mdi mdi-robot no_user no_moderator",
-      "url": "admin/roboflow",
-      "slug": "admin-roboflow"
     },
 
     {

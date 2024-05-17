@@ -19,6 +19,9 @@ class RestaurantParent extends Model
 
   protected $fillable = [
     'name',
+    'count_sensors',
+    'count_foods',
+    'creator_id',
     'deleted',
   ];
 
@@ -27,4 +30,104 @@ class RestaurantParent extends Model
     return 'restaurant_parent';
   }
 
+  public function get_log()
+  {
+    return [
+      'name' => $this->name,
+    ];
+  }
+
+  public function on_create_after($pars = [])
+  {
+
+  }
+
+  public function on_update_after($pars = [])
+  {
+
+  }
+
+  public function on_delete_after($pars = [])
+  {
+
+  }
+
+  public function on_restore_after($pars = [])
+  {
+
+  }
+
+  public function re_count($pars = [])
+  {
+    $this->count_sensors();
+    $this->count_foods();
+  }
+
+  public function count_sensors()
+  {
+    $count = Restaurant::distinct()
+      ->select('id')
+      ->where('restaurant_parent_id', $this->id)
+      ->where('deleted', 0)
+      ->count();
+
+    $this->update([
+      'count_sensors' => $count,
+    ]);
+  }
+
+  public function get_sensors($pars = [])
+  {
+    $deleted = isset($pars['deleted']) && (int)$pars['deleted'] ? (int)$pars['deleted'] : 0;
+
+    $select = Restaurant::where('restaurant_parent_id', $this->id);
+
+    if ($deleted) {
+      $select->where('deleted', '>', 0);
+    } else {
+      $select->where('deleted', 0);
+    }
+
+    return $select->get();
+  }
+
+  public function count_foods()
+  {
+    //all sensors use same food list
+    $count = 0;
+
+    $sensors = Restaurant::where('restaurant_parent_id', $this->id)
+      ->get();
+    if (count($sensors)) {
+      foreach ($sensors as $sensor) {
+        $count = $sensor->count_foods();
+      }
+    }
+
+    $this->update([
+      'count_foods' => $count,
+    ]);
+  }
+
+  public function get_food_datas($pars = [])
+  {
+    //all sensors use same food list
+    $select = RestaurantFood::query('restaurant_foods')
+      ->distinct()
+      ->select(
+        'restaurant_foods.food_id', 'foods.name as food_name',
+        'restaurant_foods.photo as food_photo', 'restaurant_foods.live_group as food_live_group',
+        'restaurant_foods.food_category_id', 'food_categories.name as food_category_name'
+      )
+      ->leftJoin('foods', 'foods.id', '=', 'restaurant_foods.food_id')
+      ->leftJoin('food_categories', 'food_categories.id', '=', 'restaurant_foods.food_category_id')
+      ->whereIn('restaurant_foods.restaurant_id', function ($q) {
+        $q->select('id')
+          ->from('restaurants')
+          ->where('restaurant_parent_id', $this->id);
+      })
+      ->orderByRaw('TRIM(LOWER(foods.name))');
+
+    return $select->get();
+  }
 }

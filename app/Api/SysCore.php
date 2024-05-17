@@ -1,7 +1,6 @@
 <?php
 
 namespace App\Api;
-
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -14,6 +13,7 @@ use App\Jobs\PhotoScan;
 use App\Jobs\PhotoPredict;
 
 use App\Models\Restaurant;
+use App\Models\RestaurantParent;
 use App\Models\RestaurantFoodScan;
 use App\Models\SysSetting;
 use App\Models\SysBug;
@@ -756,6 +756,9 @@ class SysCore
       case 'restaurant':
         $item = Restaurant::find((int)$item_id);
         break;
+      case 'restaurant_parent':
+        $item = RestaurantParent::find((int)$item_id);
+        break;
       case 'restaurant_food_scan':
         $item = RestaurantFoodScan::find((int)$item_id);
         break;
@@ -884,6 +887,18 @@ class SysCore
 
       'percent_checked_missing' => $percent_checked_missing,
     ];
+  }
+
+  public function sys_stats_count()
+  {
+    //RestaurantParent
+    //count_sensors, count_foods
+    $rows = RestaurantParent::all();
+    if (count($rows)) {
+      foreach ($rows as $row) {
+        $row->re_count();
+      }
+    }
   }
 
   //v2

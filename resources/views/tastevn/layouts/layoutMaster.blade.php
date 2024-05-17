@@ -27,6 +27,7 @@
 <script src="{{url('custom/library/selectize/selectize.min.js')}}"></script>
 <script src="{{url('custom/library/axios/axios.min.js')}}"></script>
 <script src="{{url('custom/js/app.js')}}"></script>
+<script src="{{url('custom/js/item.js')}}"></script>
 
 <script type="text/javascript">
   //tastevn
