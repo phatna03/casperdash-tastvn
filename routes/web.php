@@ -219,9 +219,12 @@ Route::post('/admin/sensor/restore', [SensorController::class, 'restore']);
 Route::post('/admin/sensor/selectize', [SensorController::class, 'selectize']);
 Route::get('/admin/sensor/info/{id}', [SensorController::class, 'show']);
 Route::post('/admin/sensor/stats', [SensorController::class, 'stats']);
+Route::post('/admin/sensor/food/scan/get', [SensorController::class, 'food_scan_get']);
+Route::post('/admin/sensor/food/scan/update', [SensorController::class, 'food_scan_update']);
 Route::post('/admin/sensor/food/scan/delete', [SensorController::class, 'food_scan_delete']);
 Route::post('/admin/sensor/food/scan/api', [SensorController::class, 'food_scan_api']);
 Route::post('/admin/sensor/food/scan/info', [SensorController::class, 'food_scan_info']);
+Route::post('/admin/sensor/food/scan/error', [SensorController::class, 'food_scan_error']);
 
 //roboflow
 Route::post('/admin/roboflow/retraining', [RoboflowController::class, 'retraining']);
@@ -237,9 +240,7 @@ Route::post('/admin/sensor/food/import', [SensorController::class, 'food_import'
 Route::post('/admin/sensor/food/add', [SensorController::class, 'food_add']);
 Route::post('/admin/sensor/food/delete', [SensorController::class, 'food_delete']);
 Route::post('/admin/sensor/food/scan', [SensorController::class, 'food_scan']);
-Route::post('/admin/sensor/food/scan/get', [SensorController::class, 'food_scan_get']);
-Route::post('/admin/sensor/food/scan/update', [SensorController::class, 'food_scan_update']);
-Route::post('/admin/sensor/food/scan/error', [SensorController::class, 'food_scan_error']);
+
 Route::get('/datatable/sensor-foods', function (Request $request) {
   $values = $request->all();
   $restaurant = isset($values['restaurant']) ? (int)$values['restaurant'] : 0;
@@ -275,68 +276,7 @@ Route::get('/datatable/sensor-foods', function (Request $request) {
 
   return DataTables::of($select)->addIndexColumn()->toJson();
 });
-Route::get('/datatable/sensor-food-scan-errors', function (Request $request) {
-  $values = $request->all();
-  $api_core = new SysCore();
-//echo '<pre>';var_dump($values);die;
 
-  $order_default = true;
-  if (isset($values['order']) && count($values['order']) && isset($values['order'][0])) {
-    if (isset($values['order'][0]['column']) && (int)$values['order'][0]['column']) {
-      $order_default = false;
-    }
-  }
-
-  $restaurant = isset($values['restaurant']) ? (int)$values['restaurant'] : 0;
-  $food_catetories = isset($values['categories']) ? (array)$values['categories'] : [];
-  $foods = isset($values['foods']) ? (array)$values['foods'] : [];
-  $time_upload = isset($values['time_upload']) && !empty($values['time_upload']) ? $values['time_upload'] : NULL;
-  $time_scan = isset($values['time_scan']) && !empty($values['time_scan']) ? $values['time_scan'] : NULL;
-
-  $select = App\Models\RestaurantFoodScan::query('restaurant_food_scans')
-    ->leftJoin('foods', 'foods.id', '=', 'restaurant_food_scans.food_id')
-    ->leftJoin('food_categories', 'food_categories.id', '=', 'restaurant_food_scans.food_category_id')
-    ->select('restaurant_food_scans.food_id', 'restaurant_food_scans.missing_ids', 'restaurant_food_scans.missing_texts', 'foods.name as food_name', 'food_categories.name as food_category_name')
-    ->selectRaw('COUNT(restaurant_food_scans.id) as total_error')
-    ->where('restaurant_food_scans.deleted', 0)
-    ->where('restaurant_food_scans.food_id', '>', 0)
-    ->where('restaurant_food_scans.missing_ids', '<>', NULL)
-    ->groupBy(['restaurant_food_scans.food_id', 'restaurant_food_scans.missing_ids', 'restaurant_food_scans.missing_texts', 'foods.name', 'food_categories.name']);
-
-  if ($order_default) {
-    $select->orderBy('total_error', 'desc');
-  }
-
-  if ($restaurant) {
-    $select->where("restaurant_food_scans.restaurant_id", $restaurant);
-  }
-  if (count($food_catetories)) {
-    $select->whereIn("restaurant_food_scans.food_category_id", $food_catetories);
-  }
-  if (count($foods)) {
-    $select->whereIn("restaurant_food_scans.food_id", $foods);
-  }
-  if (!empty($time_scan)) {
-    $times = $api_core->parse_date_range($time_scan);
-    if (!empty($times['time_from'])) {
-      $select->where('restaurant_food_scans.time_scan', '>=', $times['time_from']);
-    }
-    if (!empty($times['time_to'])) {
-      $select->where('restaurant_food_scans.time_scan', '<=', $times['time_to']);
-    }
-  }
-  if (!empty($time_upload)) {
-    $times = $api_core->parse_date_range($time_upload);
-    if (!empty($times['time_from'])) {
-      $select->where('restaurant_food_scans.time_photo', '>=', $times['time_from']);
-    }
-    if (!empty($times['time_to'])) {
-      $select->where('restaurant_food_scans.time_photo', '<=', $times['time_to']);
-    }
-  }
-
-  return DataTables::of($select)->addIndexColumn()->toJson();
-});
 
 //datatable
 Route::get('/datatable/restaurant', function (Request $request) {
@@ -499,6 +439,68 @@ Route::get('/datatable/sensor-food-scans', function (Request $request) {
   }
 
 //  echo '<pre>';var_dump($api_core->parse_to_query($select));die;
+
+  return DataTables::of($select)->addIndexColumn()->toJson();
+});
+Route::get('/datatable/sensor-food-scan-errors', function (Request $request) {
+  $values = $request->all();
+  $api_core = new SysCore();
+//echo '<pre>';var_dump($values);die;
+
+  $order_default = true;
+  if (isset($values['order']) && count($values['order']) && isset($values['order'][0])) {
+    if (isset($values['order'][0]['column']) && (int)$values['order'][0]['column']) {
+      $order_default = false;
+    }
+  }
+
+  $restaurant = isset($values['restaurant']) ? (int)$values['restaurant'] : 0;
+  $food_catetories = isset($values['categories']) ? (array)$values['categories'] : [];
+  $foods = isset($values['foods']) ? (array)$values['foods'] : [];
+  $time_upload = isset($values['time_upload']) && !empty($values['time_upload']) ? $values['time_upload'] : NULL;
+  $time_scan = isset($values['time_scan']) && !empty($values['time_scan']) ? $values['time_scan'] : NULL;
+
+  $select = App\Models\RestaurantFoodScan::query('restaurant_food_scans')
+    ->leftJoin('foods', 'foods.id', '=', 'restaurant_food_scans.food_id')
+    ->leftJoin('food_categories', 'food_categories.id', '=', 'restaurant_food_scans.food_category_id')
+    ->select('restaurant_food_scans.food_id', 'restaurant_food_scans.missing_ids', 'restaurant_food_scans.missing_texts', 'foods.name as food_name', 'food_categories.name as food_category_name')
+    ->selectRaw('COUNT(restaurant_food_scans.id) as total_error')
+    ->where('restaurant_food_scans.deleted', 0)
+    ->where('restaurant_food_scans.food_id', '>', 0)
+    ->where('restaurant_food_scans.missing_ids', '<>', NULL)
+    ->groupBy(['restaurant_food_scans.food_id', 'restaurant_food_scans.missing_ids', 'restaurant_food_scans.missing_texts', 'foods.name', 'food_categories.name']);
+
+  if ($order_default) {
+    $select->orderBy('total_error', 'desc');
+  }
+
+  if ($restaurant) {
+    $select->where("restaurant_food_scans.restaurant_id", $restaurant);
+  }
+  if (count($food_catetories)) {
+    $select->whereIn("restaurant_food_scans.food_category_id", $food_catetories);
+  }
+  if (count($foods)) {
+    $select->whereIn("restaurant_food_scans.food_id", $foods);
+  }
+  if (!empty($time_scan)) {
+    $times = $api_core->parse_date_range($time_scan);
+    if (!empty($times['time_from'])) {
+      $select->where('restaurant_food_scans.time_scan', '>=', $times['time_from']);
+    }
+    if (!empty($times['time_to'])) {
+      $select->where('restaurant_food_scans.time_scan', '<=', $times['time_to']);
+    }
+  }
+  if (!empty($time_upload)) {
+    $times = $api_core->parse_date_range($time_upload);
+    if (!empty($times['time_from'])) {
+      $select->where('restaurant_food_scans.time_photo', '>=', $times['time_from']);
+    }
+    if (!empty($times['time_to'])) {
+      $select->where('restaurant_food_scans.time_photo', '<=', $times['time_to']);
+    }
+  }
 
   return DataTables::of($select)->addIndexColumn()->toJson();
 });

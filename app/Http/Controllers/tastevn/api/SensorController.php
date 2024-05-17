@@ -61,7 +61,7 @@ class SensorController extends Controller
 
   public function store(Request $request)
   {
-    $values = $request->post();;
+    $values = $request->post();
     $user = Auth::user();
     //required
     $validator = Validator::make($values, [
@@ -113,7 +113,7 @@ class SensorController extends Controller
 
   public function update(Request $request)
   {
-    $values = $request->post();;
+    $values = $request->post();
     $user = Auth::user();
     //required
     $validator = Validator::make($values, [
@@ -181,7 +181,7 @@ class SensorController extends Controller
 
   public function delete(Request $request)
   {
-    $values = $request->post();;
+    $values = $request->post();
     $user = Auth::user();
     //required
     $validator = Validator::make($values, [
@@ -219,7 +219,7 @@ class SensorController extends Controller
 
   public function restore(Request $request)
   {
-    $values = $request->post();;
+    $values = $request->post();
     $user = Auth::user();
     //required
     $validator = Validator::make($values, [
@@ -258,7 +258,7 @@ class SensorController extends Controller
 
   public function selectize(Request $request)
   {
-    $values = $request->post();;
+    $values = $request->post();
     $keyword = isset($values['keyword']) && !empty($values['keyword']) ? $values['keyword'] : NULL;
 
     $select = Restaurant::select('id', 'name')
@@ -375,7 +375,7 @@ class SensorController extends Controller
 
   public function food_scan_info(Request $request)
   {
-    $values = $request->post();;
+    $values = $request->post();
     $user = Auth::user();
     $api_core = new SysCore();
 
@@ -552,282 +552,9 @@ class SensorController extends Controller
     ], 200);
   }
 
-
-
-
-
-
-  public function selectize_parent(Request $request)
-  {
-    $values = $request->post();;
-    $keyword = isset($values['keyword']) && !empty($values['keyword']) ? $values['keyword'] : NULL;
-
-    $select = RestaurantParent::select('id', 'name')
-      ->where('deleted', 0);
-    if (!empty($keyword)) {
-      $select->where('name', 'LIKE', "%{$keyword}%");
-    }
-
-    return response()->json([
-      'items' => $select->get()->toArray()
-    ]);
-  }
-
-  public function food_import(Request $request)
+  public function food_scan_error(Request $request)
   {
     $values = $request->post();
-    $restaurant_id = isset($values['restaurant_id']) ? (int)$values['restaurant_id'] : 0;
-    $restaurant = Restaurant::find($restaurant_id);
-
-    $datas = (new ImportData())->toArray($request->file('excel'));
-    if (!count($datas) || !count($datas[0]) || !$restaurant) {
-      return response()->json([
-        'error' => 'Invalid data'
-      ], 404);
-    }
-
-    $user = Auth::user();
-    $faileds = [];
-    $temp_count = 0;
-    $temps = [];
-    $food_count = 0;
-
-    DB::beginTransaction();
-    try {
-
-      foreach ($datas[0] as $k => $data) {
-
-        $col1 = trim($data[0]);
-        $col2 = isset($data[1]) && !empty(trim($data[1])) ? trim($data[1]) : NULL;
-        $col3 = isset($data[2]) && !empty(trim($data[2])) ? trim($data[2]) : NULL;
-
-        if (empty($col1)) {
-          continue;
-        }
-
-        $col1 = str_replace('&', '-', $col1);
-
-        $temps[] = [
-          'food' => $col1,
-          'category' => $col2,
-          'photo' => $col3,
-        ];
-      }
-
-      if (count($temps)) {
-        foreach ($temps as $temp) {
-
-          $food = Food::whereRaw('LOWER(name) LIKE ?', strtolower($temp['food']))
-            ->first();
-          if (!$food) {
-            continue;
-          }
-
-          $food_category = NULL;
-          if (!empty($temp['category'])) {
-            $food_category = FoodCategory::whereRaw('LOWER(name) LIKE ?', strtolower($temp['category']))
-              ->first();
-            if (!$food_category) {
-              $food_category = FoodCategory::create([
-                'name' => ucwords($temp['category']),
-                'restaurant_id' => $restaurant->id,
-                'creator_id' => $user->id,
-              ]);
-            }
-          }
-
-          $row = RestaurantFood::where('restaurant_id', $restaurant->id)
-            ->where('food_id', $food->id)
-            ->first();
-          if (!$row) {
-            $row = RestaurantFood::create([
-              'restaurant_id' => $restaurant->id,
-              'food_id' => $food->id,
-              'creator_id' => $user->id,
-            ]);
-          }
-
-          $food_count++;
-
-          $row->update([
-            'food_category_id' => $food_category ? $food_category->id : 0,
-            'photo' => !empty($temp['photo']) && @getimagesize($temp['photo']) ? $temp['photo'] : NULL,
-          ]);
-
-//          $user->add_log([
-//            'type' => 'import_food_to_restaurant' . $row->get_type(),
-//            'item_id' => (int)$row->id,
-//            'item_type' => $row->get_type(),
-//          ]);
-        }
-      }
-
-      $restaurant->count_foods();
-
-      DB::commit();
-
-    } catch (\Exception $e) {
-      DB::rollback();
-
-      return response()->json([
-        'error' => 'Error transaction! Please try again later.', //$e->getMessage()
-      ], 422);
-    }
-
-    if ($food_count) {
-      return response()->json([
-        'status' => true,
-        'message' => 'import food= ' . $food_count,
-      ], 200);
-    }
-
-    return response()->json([
-      'error' => 'Invalid data or dishes existed',
-    ], 422);
-  }
-
-  public function food_add(Request $request)
-  {
-    $values = $request->post();;
-    $user = Auth::user();
-    //required
-    $validator = Validator::make($values, [
-      'item' => 'required',
-    ]);
-    if ($validator->fails()) {
-      return response()->json($validator->errors(), 422);
-    }
-
-    //check later
-    return response()->json([
-      'error' => 'Invalid restaurant'
-    ], 422);
-
-    $row = Restaurant::findOrFail((int)$values['item']);
-    if (!$row) {
-      return response()->json([
-        'error' => 'Invalid item'
-      ], 422);
-    }
-
-    //foods
-    $foods = isset($values['foods']) && count($values['foods']) ? $values['foods'] : [];
-    if (!count($foods)) {
-      return response()->json([
-        'error' => 'Foods required'
-      ], 422);
-    }
-
-    $category = isset($values['category']) && !empty($values['category']) ? (int)$values['category'] : 0;
-
-    $row->add_foods($foods, $category);
-
-    $user->add_log([
-      'type' => 'add_restaurant_dish',
-      'restaurant_id' => (int)$row->id,
-      'params' => json_encode([
-        'category' => $category,
-        'foods' => $foods,
-      ])
-    ]);
-
-    return response()->json([
-      'status' => true,
-      'item' => $row->name,
-    ], 200);
-  }
-
-  public function food_delete(Request $request)
-  {
-    $values = $request->post();;
-    $user = Auth::user();
-    //required
-    $validator = Validator::make($values, [
-      'item' => 'required',
-      'food' => 'required',
-    ]);
-    if ($validator->fails()) {
-      return response()->json($validator->errors(), 422);
-    }
-
-    $row = Restaurant::findOrFail((int)$values['item']);
-    $food = Food::findOrFail((int)$values['food']);
-    if (!$row && !$food) {
-      return response()->json([
-        'error' => 'Invalid item'
-      ], 422);
-    }
-
-    $row->delete_food($food);
-
-    $user->add_log([
-      'type' => 'delete_restaurant_dish',
-      'restaurant_id' => (int)$row->id,
-      'params' => json_encode([
-        'food' => $food->id,
-      ])
-    ]);
-
-    return response()->json([
-      'status' => true,
-      'item' => $row->name,
-    ], 200);
-  }
-
-  public function food_scan(Request $request)
-  {
-    $values = $request->post();;
-//    echo '<pre>';var_dump($values);die;
-    //required
-    $validator = Validator::make($values, [
-      'item' => 'required',
-    ]);
-    if ($validator->fails()) {
-      return response()->json($validator->errors(), 422);
-    }
-
-    $row = Restaurant::findOrFail((int)$values['item']);
-    if (!$row) {
-      return response()->json([
-        'error' => 'Invalid item'
-      ], 422);
-    }
-
-    $imgs = RestaurantFoodScan::where('status', 'new')
-      ->where('restaurant_id', $row->id)
-      ->orderBy('id', 'asc')
-      ->get();
-
-    //scannnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn
-    $api_core = new SysCore();
-
-//    if (!count($imgs)) {
-//      $api_core->s3_get_photos([
-//        'restaurant_id' => $row->id,
-//        'scan_date' => isset($values['date']) && !empty($values['date']) ? $values['date'] : NULL,
-//        'scan_hour' => isset($values['hour']) && !empty($values['hour']) ? $values['hour'] : NULL,
-//      ]);
-//    }
-//
-//    $api_core->rbf_scan_photos([
-//      'restaurant_id' => $row->id,
-//    ]);
-//
-//    $api_core->sys_predict_photos([
-//      'restaurant_id' => $row->id,
-//    ]);
-
-    return response()->json([
-      'status' => true,
-//      'notify' => $notify ? $notify->id : 0,
-    ], 200);
-  }
-
-
-
-  public function food_scan_get(Request $request)
-  {
-    $values = $request->post();;
     $api_core = new SysCore();
 
     $validator = Validator::make($values, [
@@ -837,38 +564,59 @@ class SensorController extends Controller
       return response()->json($validator->errors(), 422);
     }
     //invalid
-    $row = RestaurantFoodScan::findOrFail((int)$values['item']);
+    $row = Restaurant::findOrFail((int)$values['item']);
     if (!$row) {
       return response()->json([
         'error' => 'Invalid item'
       ], 422);
     }
 
-    $ingredients_missing = [];
-    if ($row->get_food()) {
-      $ingredients_missing = $row->get_ingredients_missing();
+    $food = Food::findOrFail((int)$values['food']);
+    if (!$food) {
+      return response()->json([
+        'error' => 'Invalid item'
+      ], 422);
     }
 
-    $texts = Text::where('deleted', 0)
-      ->orderByRaw('TRIM(LOWER(name)) + 0')
-      ->get();
+    $time_upload = isset($values['time_upload']) && !empty($values['time_upload']) ? $values['time_upload'] : NULL;
+    $time_scan = isset($values['time_scan']) && !empty($values['time_scan']) ? $values['time_scan'] : NULL;
 
-    $text_ids = [];
-    $arr = $row->get_texts(['text_id_only' => 1]);
-    if (count($arr)) {
-      $text_ids = $arr->toArray();
-      $text_ids = array_map('current', $text_ids);
+    $select = RestaurantFoodScan::select('id', 'photo_url')
+      ->distinct()
+      ->where('restaurant_id', $row->id)
+      ->where('food_id', $food->id)
+      ->where('deleted', 0)
+      ->where('missing_ids', '<>', NULL)
+      ->where('missing_ids', '=', $values['missing_ids']);
+
+    if (!empty($time_scan)) {
+      $times = $api_core->parse_date_range($time_scan);
+      if (!empty($times['time_from'])) {
+        $select->where('time_scan', '>=', $times['time_from']);
+      }
+      if (!empty($times['time_to'])) {
+        $select->where('time_scan', '<=', $times['time_to']);
+      }
+    }
+    if (!empty($time_upload)) {
+      $times = $api_core->parse_date_range($time_upload);
+      if (!empty($times['time_from'])) {
+        $select->where('time_photo', '>=', $times['time_from']);
+      }
+      if (!empty($times['time_to'])) {
+        $select->where('time_photo', '<=', $times['time_to']);
+      }
     }
 
     //info
-    $html_info = view('tastevn.htmls.item_food_scan_get')
-      ->with('item', $row)
-      ->with('ingredients', $ingredients_missing)
-      ->with('texts', $texts)
-      ->with('text_ids', $text_ids)
+    $html_info = view('tastevn.htmls.item_food_scan_error')
+      ->with('restaurant', $row)
+      ->with('food', $food)
+      ->with('rows', $select->get())
       ->render();
 
     return response()->json([
+      'restaurant' => $row,
       'html_info' => $html_info,
 
       'status' => true,
@@ -877,8 +625,9 @@ class SensorController extends Controller
 
   public function food_scan_update(Request $request)
   {
-    $values = $request->post();;
+    $values = $request->post();
     $user = Auth::user();
+
     $validator = Validator::make($values, [
       'item' => 'required',
     ]);
@@ -1010,9 +759,278 @@ class SensorController extends Controller
     ], 200);
   }
 
-  public function food_scan_error(Request $request)
+
+
+
+  public function selectize_parent(Request $request)
   {
-    $values = $request->post();;
+    $values = $request->post();
+    $keyword = isset($values['keyword']) && !empty($values['keyword']) ? $values['keyword'] : NULL;
+
+    $select = RestaurantParent::select('id', 'name')
+      ->where('deleted', 0);
+    if (!empty($keyword)) {
+      $select->where('name', 'LIKE', "%{$keyword}%");
+    }
+
+    return response()->json([
+      'items' => $select->get()->toArray()
+    ]);
+  }
+
+  public function food_import(Request $request)
+  {
+    $values = $request->post();
+    $restaurant_id = isset($values['restaurant_id']) ? (int)$values['restaurant_id'] : 0;
+    $restaurant = Restaurant::find($restaurant_id);
+
+    $datas = (new ImportData())->toArray($request->file('excel'));
+    if (!count($datas) || !count($datas[0]) || !$restaurant) {
+      return response()->json([
+        'error' => 'Invalid data'
+      ], 404);
+    }
+
+    $user = Auth::user();
+    $faileds = [];
+    $temp_count = 0;
+    $temps = [];
+    $food_count = 0;
+
+    DB::beginTransaction();
+    try {
+
+      foreach ($datas[0] as $k => $data) {
+
+        $col1 = trim($data[0]);
+        $col2 = isset($data[1]) && !empty(trim($data[1])) ? trim($data[1]) : NULL;
+        $col3 = isset($data[2]) && !empty(trim($data[2])) ? trim($data[2]) : NULL;
+
+        if (empty($col1)) {
+          continue;
+        }
+
+        $col1 = str_replace('&', '-', $col1);
+
+        $temps[] = [
+          'food' => $col1,
+          'category' => $col2,
+          'photo' => $col3,
+        ];
+      }
+
+      if (count($temps)) {
+        foreach ($temps as $temp) {
+
+          $food = Food::whereRaw('LOWER(name) LIKE ?', strtolower($temp['food']))
+            ->first();
+          if (!$food) {
+            continue;
+          }
+
+          $food_category = NULL;
+          if (!empty($temp['category'])) {
+            $food_category = FoodCategory::whereRaw('LOWER(name) LIKE ?', strtolower($temp['category']))
+              ->first();
+            if (!$food_category) {
+              $food_category = FoodCategory::create([
+                'name' => ucwords($temp['category']),
+                'restaurant_id' => $restaurant->id,
+                'creator_id' => $user->id,
+              ]);
+            }
+          }
+
+          $row = RestaurantFood::where('restaurant_id', $restaurant->id)
+            ->where('food_id', $food->id)
+            ->first();
+          if (!$row) {
+            $row = RestaurantFood::create([
+              'restaurant_id' => $restaurant->id,
+              'food_id' => $food->id,
+              'creator_id' => $user->id,
+            ]);
+          }
+
+          $food_count++;
+
+          $row->update([
+            'food_category_id' => $food_category ? $food_category->id : 0,
+            'photo' => !empty($temp['photo']) && @getimagesize($temp['photo']) ? $temp['photo'] : NULL,
+          ]);
+
+//          $user->add_log([
+//            'type' => 'import_food_to_restaurant' . $row->get_type(),
+//            'item_id' => (int)$row->id,
+//            'item_type' => $row->get_type(),
+//          ]);
+        }
+      }
+
+      $restaurant->count_foods();
+
+      DB::commit();
+
+    } catch (\Exception $e) {
+      DB::rollback();
+
+      return response()->json([
+        'error' => 'Error transaction! Please try again later.', //$e->getMessage()
+      ], 422);
+    }
+
+    if ($food_count) {
+      return response()->json([
+        'status' => true,
+        'message' => 'import food= ' . $food_count,
+      ], 200);
+    }
+
+    return response()->json([
+      'error' => 'Invalid data or dishes existed',
+    ], 422);
+  }
+
+  public function food_add(Request $request)
+  {
+    $values = $request->post();
+    $user = Auth::user();
+    //required
+    $validator = Validator::make($values, [
+      'item' => 'required',
+    ]);
+    if ($validator->fails()) {
+      return response()->json($validator->errors(), 422);
+    }
+
+    //check later
+    return response()->json([
+      'error' => 'Invalid restaurant'
+    ], 422);
+
+    $row = Restaurant::findOrFail((int)$values['item']);
+    if (!$row) {
+      return response()->json([
+        'error' => 'Invalid item'
+      ], 422);
+    }
+
+    //foods
+    $foods = isset($values['foods']) && count($values['foods']) ? $values['foods'] : [];
+    if (!count($foods)) {
+      return response()->json([
+        'error' => 'Foods required'
+      ], 422);
+    }
+
+    $category = isset($values['category']) && !empty($values['category']) ? (int)$values['category'] : 0;
+
+    $row->add_foods($foods, $category);
+
+    $user->add_log([
+      'type' => 'add_restaurant_dish',
+      'restaurant_id' => (int)$row->id,
+      'params' => json_encode([
+        'category' => $category,
+        'foods' => $foods,
+      ])
+    ]);
+
+    return response()->json([
+      'status' => true,
+      'item' => $row->name,
+    ], 200);
+  }
+
+  public function food_delete(Request $request)
+  {
+    $values = $request->post();
+    $user = Auth::user();
+    //required
+    $validator = Validator::make($values, [
+      'item' => 'required',
+      'food' => 'required',
+    ]);
+    if ($validator->fails()) {
+      return response()->json($validator->errors(), 422);
+    }
+
+    $row = Restaurant::findOrFail((int)$values['item']);
+    $food = Food::findOrFail((int)$values['food']);
+    if (!$row && !$food) {
+      return response()->json([
+        'error' => 'Invalid item'
+      ], 422);
+    }
+
+    $row->delete_food($food);
+
+    $user->add_log([
+      'type' => 'delete_restaurant_dish',
+      'restaurant_id' => (int)$row->id,
+      'params' => json_encode([
+        'food' => $food->id,
+      ])
+    ]);
+
+    return response()->json([
+      'status' => true,
+      'item' => $row->name,
+    ], 200);
+  }
+
+  public function food_scan(Request $request)
+  {
+    $values = $request->post();
+//    echo '<pre>';var_dump($values);die;
+    //required
+    $validator = Validator::make($values, [
+      'item' => 'required',
+    ]);
+    if ($validator->fails()) {
+      return response()->json($validator->errors(), 422);
+    }
+
+    $row = Restaurant::findOrFail((int)$values['item']);
+    if (!$row) {
+      return response()->json([
+        'error' => 'Invalid item'
+      ], 422);
+    }
+
+    $imgs = RestaurantFoodScan::where('status', 'new')
+      ->where('restaurant_id', $row->id)
+      ->orderBy('id', 'asc')
+      ->get();
+
+    //scannnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn
+    $api_core = new SysCore();
+
+//    if (!count($imgs)) {
+//      $api_core->s3_get_photos([
+//        'restaurant_id' => $row->id,
+//        'scan_date' => isset($values['date']) && !empty($values['date']) ? $values['date'] : NULL,
+//        'scan_hour' => isset($values['hour']) && !empty($values['hour']) ? $values['hour'] : NULL,
+//      ]);
+//    }
+//
+//    $api_core->rbf_scan_photos([
+//      'restaurant_id' => $row->id,
+//    ]);
+//
+//    $api_core->sys_predict_photos([
+//      'restaurant_id' => $row->id,
+//    ]);
+
+    return response()->json([
+      'status' => true,
+//      'notify' => $notify ? $notify->id : 0,
+    ], 200);
+  }
+
+  public function food_scan_get(Request $request)
+  {
+    $values = $request->post();
     $api_core = new SysCore();
 
     $validator = Validator::make($values, [
@@ -1022,70 +1040,47 @@ class SensorController extends Controller
       return response()->json($validator->errors(), 422);
     }
     //invalid
-    $row = Restaurant::findOrFail((int)$values['item']);
+    $row = RestaurantFoodScan::findOrFail((int)$values['item']);
     if (!$row) {
       return response()->json([
         'error' => 'Invalid item'
       ], 422);
     }
 
-    $food = Food::findOrFail((int)$values['food']);
-    if (!$food) {
-      return response()->json([
-        'error' => 'Invalid item'
-      ], 422);
+    $ingredients_missing = [];
+    if ($row->get_food()) {
+      $ingredients_missing = $row->get_ingredients_missing();
     }
 
-    $time_upload = isset($values['time_upload']) && !empty($values['time_upload']) ? $values['time_upload'] : NULL;
-    $time_scan = isset($values['time_scan']) && !empty($values['time_scan']) ? $values['time_scan'] : NULL;
+    $texts = Text::where('deleted', 0)
+      ->orderByRaw('TRIM(LOWER(name)) + 0')
+      ->get();
 
-    $select = RestaurantFoodScan::select('id', 'photo_url')
-      ->distinct()
-      ->where('restaurant_id', $row->id)
-      ->where('food_id', $food->id)
-      ->where('deleted', 0)
-      ->where('missing_ids', '<>', NULL)
-      ->where('missing_ids', '=', $values['missing_ids']);
-
-    if (!empty($time_scan)) {
-      $times = $api_core->parse_date_range($time_scan);
-      if (!empty($times['time_from'])) {
-        $select->where('time_scan', '>=', $times['time_from']);
-      }
-      if (!empty($times['time_to'])) {
-        $select->where('time_scan', '<=', $times['time_to']);
-      }
-    }
-    if (!empty($time_upload)) {
-      $times = $api_core->parse_date_range($time_upload);
-      if (!empty($times['time_from'])) {
-        $select->where('time_photo', '>=', $times['time_from']);
-      }
-      if (!empty($times['time_to'])) {
-        $select->where('time_photo', '<=', $times['time_to']);
-      }
+    $text_ids = [];
+    $arr = $row->get_texts(['text_id_only' => 1]);
+    if (count($arr)) {
+      $text_ids = $arr->toArray();
+      $text_ids = array_map('current', $text_ids);
     }
 
     //info
-    $html_info = view('tastevn.htmls.item_food_scan_error')
-      ->with('restaurant', $row)
-      ->with('food', $food)
-      ->with('rows', $select->get())
+    $html_info = view('tastevn.htmls.item_food_scan_get')
+      ->with('item', $row)
+      ->with('ingredients', $ingredients_missing)
+      ->with('texts', $texts)
+      ->with('text_ids', $text_ids)
       ->render();
 
     return response()->json([
-      'restaurant' => $row,
       'html_info' => $html_info,
 
       'status' => true,
     ], 200);
   }
 
-
-
   public function stats(Request $request)
   {
-    $values = $request->post();;
+    $values = $request->post();
 
     $validator = Validator::make($values, [
       'item' => 'required',

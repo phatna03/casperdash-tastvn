@@ -177,7 +177,7 @@
               <div class="col-md-6 mb-2">
                 <div class="form-floating form-floating-outline wrap-select-food-category">
                   <div class="form-control acm-wrap-selectize" id="scan-search-food-category">
-                    <select name="categories" multiple onchange="restaurant_search_food_scan(this)">
+                    <select name="categories" multiple onchange="sensor_search_food_scan(this)">
                       <option value="">All</option>
                     </select>
                   </div>
@@ -187,7 +187,7 @@
               <div class="col-md-6 mb-2">
                 <div class="form-floating form-floating-outline wrap-select-food">
                   <div class="form-control acm-wrap-selectize" id="scan-search-food">
-                    <select name="foods" multiple onchange="restaurant_search_food_scan(this)">
+                    <select name="foods" multiple onchange="sensor_search_food_scan(this)">
                       <option value="">All</option>
                     </select>
                   </div>
@@ -198,7 +198,7 @@
                 <div class="form-floating form-floating-outline">
                   <input type="text" class="form-control text-center date_time_picker" name="time_upload"
                          id="scan-search-time-upload" autocomplete="off" data-value="last_and_current_day"
-                         onchange="restaurant_search_food_scan(this)"/>
+                         onchange="sensor_search_food_scan(this)"/>
                   <label for="scan-search-time-upload">Time upload</label>
                 </div>
               </div>
@@ -206,14 +206,14 @@
                 <div class="form-floating form-floating-outline">
                   <input type="text" class="form-control text-center date_time_picker" name="time_scan"
                          id="scan-search-time-scan" autocomplete="off" data-value="last_and_current_day"
-                         onchange="restaurant_search_food_scan(this)"/>
+                         onchange="sensor_search_food_scan(this)"/>
                   <label for="scan-search-time-scan">Time scanned</label>
                 </div>
               </div>
               <div class="col-md-6 mb-2">
                 <div class="form-floating form-floating-outline">
                   <div class="form-control acm-wrap-selectize" id="scan-search-status">
-                    <select name="statuses" class="opt_selectize multi_selectize" multiple onchange="restaurant_search_food_scan(this)">
+                    <select name="statuses" class="opt_selectize multi_selectize" multiple onchange="sensor_search_food_scan(this)">
                       <option value="">All</option>
                       <option value="checked" selected="selected">checked</option>
                       <option value="failed">no data</option>
@@ -226,7 +226,7 @@
               <div class="col-md-6 mb-2">
                 <div class="form-floating form-floating-outline">
                   <div class="form-control acm-wrap-selectize" id="scan-search-missing">
-                    <select name="missing" class="opt_selectize" onchange="restaurant_search_food_scan(this)">
+                    <select name="missing" class="opt_selectize" onchange="sensor_search_food_scan(this)">
                       <option value="">All dishes</option>
                       <option value="yes">Dish with missing ingredients only</option>
                       <option value="no">Dish has all the ingredients</option>
@@ -238,7 +238,7 @@
               <div class="col-md-12 mb-2">
                 <div class="form-floating form-floating-outline wrap-select-users">
                   <div class="form-control acm-wrap-selectize" id="scan-search-users">
-                    <select name="users" multiple onchange="restaurant_search_food_scan(this)"
+                    <select name="users" multiple onchange="sensor_search_food_scan(this)"
                             data-value="user" class="ajx_selectize multi_selectize"
                     >
                       <option value="">All</option>
@@ -272,66 +272,63 @@
       </div>
 
       <div class="tab-pane fade" id="datatable-listing-error" role="tabpanel">
-        <div class="card mb-4">
-          <div class="card-header border-bottom wrap-search-form">
-            <h5 class="card-title">Search Conditions</h5>
-
-            <form onsubmit="event.preventDefault(); return datatable_listing_error_refresh();">
-              <div class="d-flex justify-content-between align-items-center row py-1 gap-3 gap-md-0">
-                <div class="col-md-6 mb-2">
-                  <div class="form-floating form-floating-outline wrap-select-food-category">
-                    <div class="form-control acm-wrap-selectize" id="error-search-food-category">
-                      <select name="categories" multiple
-                              onchange="restaurant_search_food_scan_error(this)">
-                        <option value="">All</option>
-                      </select>
-                    </div>
-                    <label for="error-search-food-category">Dish Categories</label>
+        <div class="wrap-search-form">
+          <h5 class="card-title">Search Conditions</h5>
+          <form onsubmit="event.preventDefault(); return datatable_listing_error_refresh();">
+            <div class="d-flex justify-content-between align-items-center row py-1 gap-3 gap-md-0">
+              <div class="col-md-6 mb-2">
+                <div class="form-floating form-floating-outline wrap-select-food-category">
+                  <div class="form-control acm-wrap-selectize" id="error-search-food-category">
+                    <select name="categories" multiple
+                            onchange="sensor_search_food_scan_error(this)">
+                      <option value="">All</option>
+                    </select>
                   </div>
-                </div>
-                <div class="col-md-6 mb-2">
-                  <div class="form-floating form-floating-outline wrap-select-food">
-                    <div class="form-control acm-wrap-selectize" id="error-search-food">
-                      <select name="foods" multiple onchange="restaurant_search_food_scan_error(this)">
-                        <option value="">All</option>
-                      </select>
-                    </div>
-                    <label for="error-search-food">Dishes</label>
-                  </div>
-                </div>
-                <div class="col-md-6 mb-2">
-                  <div class="form-floating form-floating-outline">
-                    <input type="text" class="form-control text-center date_time_picker" name="time_upload"
-                           id="error-search-time-upload" autocomplete="off" data-value="last_and_current_day"
-                           onchange="restaurant_search_food_scan_error(this)"/>
-                    <label for="error-search-time-upload">Time upload</label>
-                  </div>
-                </div>
-                <div class="col-md-6 mb-2">
-                  <div class="form-floating form-floating-outline">
-                    <input type="text" class="form-control text-center date_time_picker" name="time_scan"
-                           id="error-search-time-scan" autocomplete="off" data-value="last_and_current_day"
-                           onchange="restaurant_search_food_scan_error(this)"/>
-                    <label for="error-search-time-scan">Time scanned</label>
-                  </div>
+                  <label for="error-search-food-category">Dish Categories</label>
                 </div>
               </div>
-            </form>
-          </div>
+              <div class="col-md-6 mb-2">
+                <div class="form-floating form-floating-outline wrap-select-food">
+                  <div class="form-control acm-wrap-selectize" id="error-search-food">
+                    <select name="foods" multiple onchange="sensor_search_food_scan_error(this)">
+                      <option value="">All</option>
+                    </select>
+                  </div>
+                  <label for="error-search-food">Dishes</label>
+                </div>
+              </div>
+              <div class="col-md-6 mb-2">
+                <div class="form-floating form-floating-outline">
+                  <input type="text" class="form-control text-center date_time_picker" name="time_upload"
+                         id="error-search-time-upload" autocomplete="off" data-value="last_and_current_day"
+                         onchange="sensor_search_food_scan_error(this)"/>
+                  <label for="error-search-time-upload">Time upload</label>
+                </div>
+              </div>
+              <div class="col-md-6 mb-2">
+                <div class="form-floating form-floating-outline">
+                  <input type="text" class="form-control text-center date_time_picker" name="time_scan"
+                         id="error-search-time-scan" autocomplete="off" data-value="last_and_current_day"
+                         onchange="sensor_search_food_scan_error(this)"/>
+                  <label for="error-search-time-scan">Time scanned</label>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
 
-          <div class="card-datatable table-responsive">
-            <table class="table table-hover">
-              <thead class="table-light">
-              <tr>
-                <th></th>
-                <th>Category</th>
-                <th>Dish</th>
-                <th>Ingredients missing</th>
-                <th>Total number of errors</th>
-              </tr>
-              </thead>
-            </table>
-          </div>
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead class="table-light">
+            <tr>
+              <th class="acm-th-first"></th>
+              <th>Category</th>
+              <th>Dish</th>
+              <th>Ingredients missing</th>
+              <th>Total errors</th>
+            </tr>
+            </thead>
+          </table>
         </div>
       </div>
     </div>
@@ -781,7 +778,7 @@
     var datatable_listing_error;
     var datatable_listing_error_cfs = {
       "ajax": {
-        'url': '{{url('datatable/restaurant-food-scan-errors')}}',
+        'url': '{{url('datatable/sensor-food-scan-errors')}}',
         "data": function (d) {
           d.restaurant = '{{$pageConfigs['item']->id}}';
           d.categories = $('#datatable-listing-error .wrap-search-form form select[name=categories]').val();
@@ -796,10 +793,9 @@
         $(row).attr('data-restaurant_id', {{$pageConfigs['item']->id}});
 
         $(row).addClass('cursor-pointer');
-        $(row).attr('onclick', 'restaurant_food_scan_error_info(this)');
+        $(row).attr('onclick', 'sensor_food_scan_error_info(this)');
       },
       "columns": [
-        //stt
         {data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false},
         {data: 'food_category_name', name: 'food_categories.name'},
         {data: 'food_name', name: 'foods.name'},
@@ -807,6 +803,18 @@
         {data: 'total_error', name: 'total_error'},
       ],
       columnDefs: [
+        {
+          targets: 0,
+          render: function (data, type, full, meta) {
+            var html = '';
+
+              html += '<div class="d-inline-block">' +
+              '<span class="badge bg-secondary">' + full['DT_RowIndex'] + '</span>' +
+              '</div>';
+
+            return ('<div>' + html + '</div>');
+          }
+        },
         {
           targets: 3,
           render: function (data, type, full, meta) {

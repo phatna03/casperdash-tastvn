@@ -257,13 +257,16 @@
           <h4 class="modal-title fw-bold">Update</h4>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-        <form onsubmit="return restaurant_food_scan_result_update(event, this);">
+        <form onsubmit="return sensor_food_scan_update(event, this);">
           <div class="modal-body">
 
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
-            <button type="submit" class="btn btn-primary" data-bs-dismiss="modal">Confirm</button>
+            <div class="wrap-btns">
+              @include('tastevn.htmls.form_button_loading')
+              <button type="submit" class="btn btn-primary btn-ok btn-submit acm-float-right">Submit</button>
+              <button type="button" class="btn btn-outline-secondary btn-ok btn-cancel" data-bs-dismiss="modal">Cancel</button>
+            </div>
           </div>
         </form>
       </div>
