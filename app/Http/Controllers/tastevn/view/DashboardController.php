@@ -437,6 +437,9 @@ class DashboardController extends Controller
       'ingredients_missing' => $ingredients,
 
       'status' => $row->status,
+
+      'view_food_id' => $food ? $food->id : '',
+      'view_restaurant_parent_id' => $restaurant ? $restaurant->restaurant_parent_id : '',
     ];
 
     return response()->json([

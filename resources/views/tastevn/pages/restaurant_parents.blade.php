@@ -247,7 +247,7 @@
               '<button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown"><i class="mdi mdi-dots-vertical"></i></button>' +
               '<div class="dropdown-menu">' +
               '<a class="dropdown-item" href="javascript:void(0);" data-bs-toggle="offcanvas" data-bs-target="#offcanvas_edit_item" onclick="restaurant_edit_prepare(this)"><i class="mdi mdi-pencil-outline me-1"></i> Edit</a>' +
-              '<a class="dropdown-item" href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#modal_import_food_into_restaurant" onclick="restaurant_food_import_prepare(this)"><i class="mdi mdi-file-excel me-1"></i> Import Food</a>' +
+              '<a class="dropdown-item" href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#modal_food_import" onclick="restaurant_food_import_prepare(this)"><i class="mdi mdi-file-excel me-1"></i> Import Food</a>' +
               '<a class="dropdown-item" href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#modal_delete_item" onclick="restaurant_delete_prepare(this)"><i class="mdi mdi-trash-can-outline me-1"></i> Delete</a>' +
               '</div>' +
               '</div>';

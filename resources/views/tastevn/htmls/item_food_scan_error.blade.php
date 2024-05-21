@@ -10,7 +10,7 @@
         <div class="col-6 mb-1">
           <div class="text-center w-auto p-1">
             <div class="text-uppercase fw-bold text-dark">photo standard</div>
-            <img class="w-100 acm-height-300-max" src="{{$food->get_photo()}}" />
+            <img class="w-100 acm-height-300-max" src="{{$food->get_photo_standard($restaurant)}}" />
           </div>
         </div>
         <div class="col-6 mb-1">

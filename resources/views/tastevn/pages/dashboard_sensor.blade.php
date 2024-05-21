@@ -62,10 +62,13 @@
                           ></select>
                         </div>
                         <label for="select-item-food" class="text-danger">Dish</label>
+
+                        <input type="hidden" name="current_food" />
+                        <input type="hidden" name="current_restaurant_parent_id" />
                       </div>
                     </div>
 
-                    <div class="col-lg-6 mb-1 position-relative">
+                    <div class="col-lg-12 mb-1 position-relative">
                       <div class="text-center w-auto d-none">
                         <h3 class="food-name"></h3>
                       </div>
@@ -75,7 +78,7 @@
                       </div>
                     </div>
 
-                    <div class="col-lg-6 mb-1">
+                    <div class="col-lg-12 mb-1">
                       <div class="position-relative w-100 wrap-ingredients"></div>
                     </div>
                   </div>
@@ -114,7 +117,7 @@
                       </div>
                     </div>
 
-                    <div class="col-lg-6 mb-2 wrap_notify_result d-none result_photo_sensor">
+                    <div class="col-lg-12 mb-2 wrap_notify_result d-none result_photo_sensor">
                       <div class="w-100">
                         <img class="w-100" src="" />
                       </div>
@@ -195,10 +198,20 @@
       if (!chosen || !parseInt(chosen)) {
         return false;
       }
+      var restaurant_parent_id = wrap.find('select[name=restaurant_parent_id]').val();
+
+      wrap.find('input[name=current_food]').val(chosen);
+      wrap.find('input[name=current_restaurant_parent_id]').val(restaurant_parent_id);
+
+      food_get_by_datas(chosen, restaurant_parent_id);
+    }
+
+    function food_get_by_datas(food_id, restaurant_parent_id) {
+      var wrap = $('.wrap-selected-food');
 
       axios.post('/admin/dashboard/food/get/info', {
-        restaurant_parent_id: wrap.find('select[name=restaurant_parent_id]').val(),
-        item: chosen,
+        restaurant_parent_id: restaurant_parent_id,
+        item: food_id,
       })
         .then(response => {
 
@@ -309,7 +322,7 @@
               $('.result_photo_sensor img').removeAttr().attr('src', response.data.item.photo_url);
               $('.result_photo_sensor').removeClass('d-none');
 
-              $('.result_photo_sensor').removeClass('col-lg-6').addClass('col-lg-12');
+              // $('.result_photo_sensor').removeClass('col-lg-6').addClass('col-lg-12');
 
               //status
               $('.result_unknown_data').removeClass('d-none');
@@ -317,14 +330,14 @@
             } else {
 
               //food standard
-              $('.result_photo_standard img').removeAttr().attr('src', response.data.item.food_photo);
-              $('.result_photo_standard').removeClass('d-none');
+              // $('.result_photo_standard img').removeAttr().attr('src', response.data.item.food_photo);
+              // $('.result_photo_standard').removeClass('d-none');
 
               //photo sensor
               $('.result_photo_sensor img').removeAttr().attr('src', response.data.item.photo_url);
               $('.result_photo_sensor').removeClass('d-none');
 
-              $('.result_photo_sensor').removeClass('col-lg-12').addClass('col-lg-6');
+              // $('.result_photo_sensor').removeClass('col-lg-12').addClass('col-lg-6');
 
               //predicted_dish
               if (response.data.item.food_name != '') {
@@ -344,6 +357,18 @@
               if (html && html != '') {
                 $('.result_ingredients_missing .data_result').empty().append(html);
                 $('.result_ingredients_missing').removeClass('d-none');
+              }
+
+              //get food standard
+              if (response.data.item.view_food_id && response.data.item.view_restaurant_parent_id) {
+                var current_food_id = $('.wrap-selected-food').find('input[name=current_food_id]').val();
+                var current_restaurant_parent_id = $('.wrap-selected-food').find('input[name=current_restaurant_parent_id]').val();
+
+                if (parseInt(response.data.item.view_food_id) != parseInt(current_food_id)
+                  || parseInt(response.data.item.view_restaurant_parent_id) != parseInt(current_restaurant_parent_id)
+                ) {
+                  food_get_by_datas(response.data.item.view_food_id, response.data.item.view_restaurant_parent_id);
+                }
               }
             }
           }

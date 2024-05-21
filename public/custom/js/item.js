@@ -748,14 +748,17 @@ function sensor_food_scan_update_select(ele) {
     return false;
   }
 
-  axios.post('/admin/food/get', {
-    item: chosen,
+  var view_current = parseInt($('body input[name=popup_view_id_itm]').val());
+
+  axios.post('/admin/sensor/food/scan/get/food', {
+    food: chosen,
+    rfs: view_current,
   })
     .then(response => {
 
       form.find('.wrap-ingredients').removeClass('d-none')
         .empty()
-        .append(response.data.html_scan_update);
+        .append(response.data.html);
       bind_datad(form);
 
     })

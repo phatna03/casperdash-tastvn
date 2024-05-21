@@ -322,7 +322,7 @@
             <thead class="table-light">
             <tr>
               <th class="acm-th-first"></th>
-              <th>Category</th>
+{{--              <th>Category</th>--}}
               <th>Dish</th>
               <th>Ingredients missing</th>
               <th>Total errors</th>
@@ -797,7 +797,7 @@
       },
       "columns": [
         {data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false},
-        {data: 'food_category_name', name: 'food_categories.name'},
+        // {data: 'food_category_name', name: 'food_categories.name'},
         {data: 'food_name', name: 'foods.name'},
         {data: 'missing_texts', name: 'missing_texts'},
         {data: 'total_error', name: 'total_error'},
@@ -816,7 +816,7 @@
           }
         },
         {
-          targets: 3,
+          targets: 2,
           render: function (data, type, full, meta) {
             var html = '';
             if (full['missing_texts'] && full['missing_texts'] !== '' && full['missing_texts'] !== 'NULL') {

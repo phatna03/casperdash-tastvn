@@ -199,6 +199,8 @@ Route::post('/auth/send-code', [AuthController::class, 'send_code']);
 Route::post('/auth/update-pwd', [AuthController::class, 'update_pwd']);
 Route::post('/auth/logout', [AuthController::class, 'logout']);
 //optimize
+Route::get('/', [SensorController::class, 'index']);
+Route::get('/admin', [SensorController::class, 'index']);
 //restaurant (restaurant_parent) //add later
 Route::get('/admin/restaurants', [RestaurantController::class, 'index']);
 Route::post('/admin/restaurant/store', [RestaurantController::class, 'store']);
@@ -211,6 +213,9 @@ Route::post('/admin/restaurant/food/import', [RestaurantController::class, 'food
 Route::post('/admin/restaurant/food/remove', [RestaurantController::class, 'food_remove']);
 Route::post('/admin/restaurant/food/group', [RestaurantController::class, 'food_group']);
 //restaurant = sensor
+Route::get('/admin/sensor', [DashboardController::class, 'sensor']);
+Route::post('/admin/sensor/kitchen', [DashboardController::class, 'sensor_kitchen']);
+
 Route::get('/admin/sensors', [SensorController::class, 'index']);
 Route::post('/admin/sensor/store', [SensorController::class, 'store']);
 Route::post('/admin/sensor/update', [SensorController::class, 'update']);
@@ -225,6 +230,7 @@ Route::post('/admin/sensor/food/scan/delete', [SensorController::class, 'food_sc
 Route::post('/admin/sensor/food/scan/api', [SensorController::class, 'food_scan_api']);
 Route::post('/admin/sensor/food/scan/info', [SensorController::class, 'food_scan_info']);
 Route::post('/admin/sensor/food/scan/error', [SensorController::class, 'food_scan_error']);
+Route::post('/admin/sensor/food/scan/get/food', [SensorController::class, 'food_scan_get_food']);
 
 //roboflow
 Route::post('/admin/roboflow/retraining', [RoboflowController::class, 'retraining']);
@@ -506,9 +512,7 @@ Route::get('/datatable/sensor-food-scan-errors', function (Request $request) {
 });
 //optimize
 
-Route::get('/', [DashboardController::class, 'index']);
-Route::get('/admin', [DashboardController::class, 'index']);
-Route::get('/admin/sensor', [DashboardController::class, 'sensor']);
+
 Route::post('/admin/dashboard/restaurant/food/get', [DashboardController::class, 'restaurant_food_get']);
 Route::post('/admin/dashboard/food/get/info', [DashboardController::class, 'food_get_info']);
 
@@ -518,7 +522,7 @@ Route::post('/admin/notification/read/all', [DashboardController::class, 'notifi
 Route::post('/admin/notification/latest', [DashboardController::class, 'notification_latest']);
 Route::post('/admin/notification/newest', [DashboardController::class, 'notification_newest']);
 Route::post('/admin/notification/dashboard', [DashboardController::class, 'notification_dashboard']);
-Route::post('/admin/sensor/kitchen', [DashboardController::class, 'sensor_kitchen']);
+
 
 Route::get('/guide/printer', [GuestController::class, 'guide_printer']);
 Route::get('/guide/speaker', [GuestController::class, 'guide_speaker']);

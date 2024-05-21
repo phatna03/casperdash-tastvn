@@ -41,14 +41,7 @@ class TesterController extends Controller
     echo '<pre>';
     $api_core = new SysCore();
 
-    $date = '2024-05-16';
 
-    $rows = Log::where('id', '>', 10737)
-      ->get();
-
-    foreach ($rows as $row) {
-      $row->set_text();
-    }
 
     echo '<br />';
     die('test ok...');

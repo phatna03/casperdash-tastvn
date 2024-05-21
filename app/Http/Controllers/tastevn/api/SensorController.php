@@ -759,6 +759,38 @@ class SensorController extends Controller
     ], 200);
   }
 
+  public function food_scan_get_food(Request $request)
+  {
+    $values = $request->all();
+    $user = Auth::user();
+
+    $validator = Validator::make($values, [
+      'rfs' => 'required',
+      'food' => 'required',
+    ]);
+    if ($validator->fails()) {
+      return response()->json($validator->errors(), 422);
+    }
+    //invalid
+    $rfs = RestaurantFoodScan::findOrFail((int)$values['rfs']);
+    $food = Food::findOrFail((int)$values['food']);
+    if (!$rfs || !$food) {
+      return response()->json([
+        'error' => 'Invalid item'
+      ], 422);
+    }
+
+    //scan update
+    $html = view('tastevn.htmls.item_ingredient_select')
+      ->with('ingredients', $food->get_ingredients([
+        'restaurant_parent_id' => $rfs->get_restaurant()->restaurant_parent_id
+      ]))
+      ->render();
+
+    return response()->json([
+      'html' => $html,
+    ]);
+  }
 
 
 
