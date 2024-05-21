@@ -277,6 +277,18 @@
   max-width: 100%;
 }
 
+.acm-width-40-max {
+  max-width: 40px;
+}
+
+.acm-width-50-max {
+  max-width: 50px;
+}
+
+.acm-width-100-max {
+  max-width: 100px;
+}
+
 .acm-width-120-max {
   max-width: 120px;
 }
@@ -357,6 +369,10 @@
   height: auto !important;
 }
 
+.acm-th-first {
+  max-width: 60px;
+}
+
 .food_info_select .ajx_selectize.single > .selectize-input.items {
   border: 2px solid #fa0000;
 }
@@ -407,11 +423,23 @@
   min-height: 42px;
 }
 
+.acm-max-line-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 63px;
+}
+
 .acm-lbl-dark {
   text-transform: uppercase;
   font-weight: bold;
   font-size: 13px;
   color: #111;
+}
+
+.acm-text-italic {
+  font-style: italic;
 }
 
 #custCarousel .carousel-indicators {
@@ -572,6 +600,13 @@
 
 .page_main_content.hidden_header {
   padding-top: 1.5rem !important;
+}
+
+.wrap-btns {
+  width: 100%;
+  position: relative;
+  clear: both;
+  overflow: hidden;
 }
 
 /*modal 2*/

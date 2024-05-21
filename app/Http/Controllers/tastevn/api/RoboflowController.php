@@ -278,7 +278,7 @@ class RoboflowController extends Controller
     return $arr;
   }
 
-  public function retrain(Request $request)
+  public function retraining(Request $request)
   {
     $values = $request->post();
     $ids = isset($values['items']) ? (array)$values['items'] : [];

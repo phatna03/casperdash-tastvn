@@ -199,7 +199,7 @@ class User extends Authenticatable
       $type1s = [
         'login', 'logout', 'view_profile_info', 'view_profile_setting', 'view_dashboard',
         'view_listing_notification', 'view_listing_restaurant', 'view_listing_user',
-        'view_listing_food_category', 'view_listing_ingredient',
+        'view_listing_food_category', 'view_listing_ingredient', 'view_listing_sensor',
         'view_listing_food', 'view_listing_photo',
         'view_listing_text', 'view_listing_setting',
         'view_listing_log', 'view_modal_testing',

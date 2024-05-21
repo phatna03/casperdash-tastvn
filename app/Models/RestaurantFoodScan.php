@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 use Illuminate\Support\Facades\Notification;
 use App\Notifications\IngredientMissing;
+use App\Notifications\IngredientMissingMail;
 
 use App\Api\SysCore;
 
@@ -347,12 +348,46 @@ class RestaurantFoodScan extends Model
             continue;
           }
 
+          //notify db
           Notification::sendNow($user, new IngredientMissing([
-            'type' => 'ingredient_missing',
-            'restaurant_id' => $this->get_restaurant()->id,
             'restaurant_food_scan_id' => $this->id,
-            'user' => $user,
           ]), ['database']);
+
+          //notify mail
+          if ((int)$user->get_setting('missing_ingredient_alert_email')) {
+            $user->notify((new IngredientMissingMail([
+              'type' => 'ingredient_missing',
+              'restaurant_id' => $this->get_restaurant()->id,
+              'restaurant_food_scan_id' => $this->id,
+              'user' => $user,
+            ]))->delay([
+              'mail' => now()->addMinutes(5),
+            ]));
+          }
+
+          //notify db update
+          $rows = $user->notifications()
+            ->whereIn('type', ['App\Notifications\IngredientMissing'])
+            ->where('data', 'LIKE', '%{"restaurant_food_scan_id":' . $this->id . '}%')
+            ->where('restaurant_food_scan_id', 0)
+            ->get();
+          if (count($rows)) {
+            foreach ($rows as $row) {
+              $notify = SysNotification::find($row->id);
+              if ($notify) {
+                $notify->update([
+                  'restaurant_food_scan_id' => $this->id,
+                  'restaurant_id' => $this->get_restaurant()->id,
+                  'food_id' => $this->get_food()->id,
+                  'object_type' => 'restaurant_food_scan',
+                  'object_id' => $this->id,
+                  'data' => json_encode([
+                    'status' => 'valid'
+                  ]),
+                ]);
+              }
+            }
+          }
         }
       }
     }

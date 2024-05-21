@@ -34,6 +34,7 @@ class Log extends Model
 
   public function restaurant()
   {
+    //sensor
     return Restaurant::find($this->restaurant_id);
   }
 
@@ -71,6 +72,9 @@ class Log extends Model
       case 'view_listing_restaurant':
         $text .= ' accessed the restaurant management page';
         break;
+      case 'view_listing_sensor':
+        $text .= ' accessed the sensor management page';
+        break;
       case 'view_listing_user':
         $text .= ' accessed the user management page ';
         break;
@@ -99,16 +103,16 @@ class Log extends Model
         $text .= ' accessed the modal testing page';
         break;
       case 'view_item_restaurant':
-        $text .= ' viewed the restaurant information page for <b>' . $this->restaurant()->name . '</b>';
+        $text .= ' viewed the restaurant sensor information page for <b>' . $this->restaurant()->name . '</b>';
         break;
       case 'view_item_food':
         $text .= ' viewed the recipe for <b>' . $this->item()->name . '</b> dish';
         break;
       case 'view_item_photo':
-        $text .= ' viewed the photo with <b>ID: ' . $this->item()->id . '</b> of <b>' . $this->restaurant()->name . '</b>';
+        $text .= ' viewed the photo with <b>ID: ' . $this->item()->id . '</b> of sensor name: <b>' . $this->restaurant()->name . '</b>';
         break;
       case 'view_item_restaurant_food_scan':
-        $text .= ' viewed the photo scan result with <b>ID: ' . $this->item()->id . '</b> of <b>' . $this->restaurant()->name . '</b>';
+        $text .= ' viewed the photo scan result with <b>ID: ' . $this->item()->id . '</b> of sensor name: <b>' . $this->restaurant()->name . '</b>';
         break;
       case 'edit_profile_info':
         $text .= ' updated their contact information: <br />';
@@ -129,11 +133,28 @@ class Log extends Model
       case 'edit_profile_notification':
         $text .= ' updated their profile notifications';
         break;
+      case 'add_restaurant_parent':
+        $text .= ' added a new restaurant named: <b>' . $this->item()->name . '</b>';
+        break;
+      case 'edit_restaurant_parent':
+        $text .= ' updated the information of restaurant named: <b>' . $this->item()->name . '</b> <br />';
+
+        $rs = $this->compare_update($params);
+        if (count($rs)) {
+          foreach ($rs as $k => $v) {
+            $text .= '<div>+ ' . $this->get_str($k) . ': ' . $v . '</div>';
+          }
+        }
+
+        break;
+      case 'delete_restaurant_parent':
+        $text .= ' deleted the restaurant named: <b>' . $this->item()->name . '</b>';
+        break;
       case 'add_restaurant':
-        $text .= ' added a new restaurant named: <b>' . $this->restaurant()->name . '</b>';
+        $text .= ' added a new restaurant sensor named: <b>' . $this->restaurant()->name . '</b>';
         break;
       case 'edit_restaurant':
-        $text .= ' updated the information of restaurant named: <b>' . $this->restaurant()->name . '</b> <br />';
+        $text .= ' updated the information of restaurant sensor named: <b>' . $this->restaurant()->name . '</b> <br />';
 
         $rs = $this->compare_update($params);
         if (count($rs)) {
@@ -144,10 +165,10 @@ class Log extends Model
 
         break;
       case 'delete_restaurant':
-        $text .= ' deleted the restaurant named: <b>' . $this->restaurant()->name . '</b>';
+        $text .= ' deleted the restaurant sensor named: <b>' . $this->restaurant()->name . '</b>';
         break;
       case 'edit_result':
-        $text .= ' updated the photo scan result with <b>ID: ' . $this->item()->id . '</b> of <b>' . $this->restaurant()->name . '</b> <br />';
+        $text .= ' updated the photo scan result with <b>ID: ' . $this->item()->id . '</b> of sensor named: <b>' . $this->restaurant()->name . '</b> <br />';
 
         $rs = $this->compare_update($params);
         if (count($rs)) {
@@ -161,7 +182,7 @@ class Log extends Model
         }
         break;
       case 'add_restaurant_dish':
-        $text .= ' added dishes to restaurant named: <b>' . $this->restaurant()->name . '</b>';
+        $text .= ' added dishes to restaurant sensor named: <b>' . $this->restaurant()->name . '</b>';
 
         if (isset($params['category']) && (int)$params['category']) {
           $food_category = FoodCategory::find((int)$params['category']);
@@ -180,7 +201,7 @@ class Log extends Model
         }
         break;
       case 'delete_restaurant_dish':
-        $text .= ' deleted dishes from restaurant named: <b>' . $this->restaurant()->name . '</b>';
+        $text .= ' deleted dishes from restaurant sensor named: <b>' . $this->restaurant()->name . '</b>';
         break;
       case 'add_food_category':
         $text .= ' added a new category named: <b>' . $this->item()->name . '</b>';
@@ -222,10 +243,10 @@ class Log extends Model
         }
         break;
       case 'add_photo_note':
-        $text .= ' added new note for photo with <b>ID: ' . $this->item()->id . '</b> of <b>' . $this->restaurant()->name . '</b>';
+        $text .= ' added new note for photo with <b>ID: ' . $this->item()->id . '</b> of sensor named: <b>' . $this->restaurant()->name . '</b>';
         break;
       case 'edit_photo_note':
-        $text .= ' updated note for photo with <b>ID: ' . $this->item()->id . '</b> of <b>' . $this->restaurant()->name . '</b>';
+        $text .= ' updated note for photo with <b>ID: ' . $this->item()->id . '</b> of sensor named: <b>' . $this->restaurant()->name . '</b>';
 
         $rs = $this->compare_update($params);
         if (count($rs)) {
@@ -334,9 +355,21 @@ class Log extends Model
         ]);
         break;
       case 'edit_restaurant':
-        $arr = $this->compare_array($pars['before'], $pars['after'], [
+        $arr1 = [];
+
+        if (isset($pars['before']['restaurant_parent_id']) && isset($pars['after']['restaurant_parent_id'])
+          && (int)$pars['before']['restaurant_parent_id'] != (int)$pars['after']['restaurant_parent_id']) {
+          $res1 = RestaurantParent::find($pars['before']['restaurant_parent_id']);
+          $res2 = RestaurantParent::find($pars['after']['restaurant_parent_id']);
+
+          $arr1['restaurant_parent'] = '<span class="acm-text-line-through">' . $res1->name . '</span> ---> <b>' . $res2->name . '</b>';
+        }
+
+        $arr2 = $this->compare_array($pars['before'], $pars['after'], [
           'name', 's3_bucket_name', 's3_bucket_address'
         ]);
+
+        $arr = array_merge($arr1, $arr2);
         break;
       case 'edit_result':
         //food
@@ -600,6 +633,9 @@ class Log extends Model
     $text = ucfirst($key);
 
     switch ($key) {
+      case 'restaurant_parent':
+        $text = 'Restaurant';
+        break;
       case 's3_bucket_name':
         $text = 'S3 bucket name';
         break;
@@ -613,7 +649,7 @@ class Log extends Model
         $text = 'Ingredients missing';
         break;
       case 'access_to_restaurant':
-        $text = 'List of restaurants accessed';
+        $text = 'List of sensors accessed';
         break;
     }
 

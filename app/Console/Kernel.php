@@ -18,18 +18,6 @@ class Kernel extends ConsoleKernel
   protected function schedule(Schedule $schedule): void
   {
     //custome
-//    $limit = 1;
-//    $page = 6; //current go live restaurant
-//
-//    for ($i = 1; $i <= $page; $i++) {
-//      $schedule->command('tastevn:s3todo', [$limit, $i])
-//        ->withoutOverlapping()
-////        ->everyTwoSeconds()
-//        ->everyFiveSeconds()
-//        ->runInBackground();
-//    }
-
-    //v2
     //cargo
     $schedule->command('tastevn:s3todo', [1, 1])
       ->withoutOverlapping()

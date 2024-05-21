@@ -308,7 +308,7 @@
           <div class="row">
             <div class="col-12 mb-1 text-center position-relative clearfix overflow-hidden acm-height-30-min">
               <div class="position-absolute acm-top-0">
-                <button type="button" class="btn btn-sm btn-danger p-1" onclick="restaurant_food_scan_result_update_confirm()">
+                <button type="button" class="btn btn-sm btn-danger p-1" onclick="sensor_food_scan_update_prepare()">
                   Update Result
                 </button>
               </div>

@@ -27,6 +27,7 @@
 <script src="{{url('custom/library/selectize/selectize.min.js')}}"></script>
 <script src="{{url('custom/library/axios/axios.min.js')}}"></script>
 <script src="{{url('custom/js/app.js')}}"></script>
+<script src="{{url('custom/js/item.js')}}"></script>
 
 <script type="text/javascript">
   //tastevn
@@ -53,7 +54,7 @@
     notify_running: 0,
 
     rbf_model: null,
-    rbf_auth: 0,
+    rbf_auth: 1,
 
     //speaker
     speaker: 0,
@@ -237,10 +238,10 @@
 
         </div>
 
-        <div class="acm-modal-arrow acm-modal-arrow-prev" onclick="restaurant_food_scan_result_info_action()">
+        <div class="acm-modal-arrow acm-modal-arrow-prev" onclick="sensor_food_scan_info_action()">
           <img src="{{url('custom/img/arrow_left.png')}}" />
         </div>
-        <div class="acm-modal-arrow acm-modal-arrow-next" onclick="restaurant_food_scan_result_info_action(1)">
+        <div class="acm-modal-arrow acm-modal-arrow-next" onclick="sensor_food_scan_info_action(1)">
           <img src="{{url('custom/img/arrow_right.png')}}" />
         </div>
 
@@ -256,13 +257,16 @@
           <h4 class="modal-title fw-bold">Update</h4>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-        <form onsubmit="return restaurant_food_scan_result_update(event, this);">
+        <form onsubmit="return sensor_food_scan_update(event, this);">
           <div class="modal-body">
 
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
-            <button type="submit" class="btn btn-primary" data-bs-dismiss="modal">Confirm</button>
+            <div class="wrap-btns">
+              @include('tastevn.htmls.form_button_loading')
+              <button type="submit" class="btn btn-primary btn-ok btn-submit acm-float-right">Submit</button>
+              <button type="button" class="btn btn-outline-secondary btn-ok btn-cancel" data-bs-dismiss="modal">Cancel</button>
+            </div>
           </div>
         </form>
       </div>

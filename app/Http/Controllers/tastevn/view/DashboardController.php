@@ -176,7 +176,7 @@ class DashboardController extends Controller
 
       if (count($notifications)) {
         foreach ($notifications as $notification) {
-          $row = RestaurantFoodScan::find($notification->data['restaurant_food_scan_id']);
+          $row = RestaurantFoodScan::find($notification->restaurant_food_scan_id);
           if (!$row || empty($row->photo_url)) {
             continue;
           }
@@ -257,12 +257,24 @@ class DashboardController extends Controller
       ]);
     }
 
+    $live_sensors = [5, 6];
+    if (!in_array($restaurant->id, $live_sensors)) {
+      return response()->json([
+        'status' => false,
+        'error' => 'Invalid restaurant sensor live run'
+      ]);
+    }
+
+    //custom table notifications - add column - restaurant_id + food_id + object_type + object_id
+    $live_group_ids = Food::select('id')
+      ->where('deleted', 0)
+      ->where('live_group', 1);
+
     $user = Auth::user();
     $api_core = new SysCore();
 
     $items = [];
     $ids = [];
-    $notify = [];
 
     $printer = false;
     $text_to_speech = false;
@@ -289,11 +301,10 @@ class DashboardController extends Controller
 
     if (!empty($user->time_notification)) {
 
-      $search = '"type":"ingredient_missing","restaurant_id":' . $restaurant->id . ',';
-
       $select = $user->notifications()
         ->whereIn('type', $valid_types)
-        ->where('data', 'LIKE', '%' . $search . '%')
+        ->where('restaurant_id', $restaurant->id)
+        ->whereIn('food_id', $live_group_ids)
         ->where('created_at', '>', $user->time_notification)
         ->orderBy('id', 'desc')
         ->limit(1);
@@ -301,7 +312,7 @@ class DashboardController extends Controller
       $notifications = $select->get();
       if (count($notifications)) {
         foreach ($notifications as $notification) {
-          $row = RestaurantFoodScan::find($notification->data['restaurant_food_scan_id']);
+          $row = RestaurantFoodScan::find($notification->restaurant_food_scan_id);
           if (!$row || empty($row->photo_url)) {
             continue;
           }
@@ -311,13 +322,9 @@ class DashboardController extends Controller
             continue;
           }
 
-          $notify = [
-            'itd' => $row->id,
-            'photo_url' => $row->photo_url,
-            'food_name' => $row->get_food()->name,
-            'food_photo' => $row->get_food()->get_photo_standard($row->get_restaurant()),
-            'ingredients_missing' => $ingredients,
-          ];
+          if ($row->get_food()->live_group > 1) {
+            continue;
+          }
 
           $items[] = [
             'itd' => $row->id,
@@ -430,6 +437,9 @@ class DashboardController extends Controller
       'ingredients_missing' => $ingredients,
 
       'status' => $row->status,
+
+      'view_food_id' => $food ? $food->id : '',
+      'view_restaurant_parent_id' => $restaurant ? $restaurant->restaurant_parent_id : '',
     ];
 
     return response()->json([

@@ -3,57 +3,62 @@
       return;
   }
 
+  $type1s = ['App\Notifications\PhotoComment'];
+  $type2s = ['App\Notifications\IngredientMissing'];
+
     foreach($notifications as $notification):
-    $item = App\Models\RestaurantFoodScan::find($notification->data['restaurant_food_scan_id']);
-    if (!$item || empty($item->photo_url)) {
+    $rfs = $api_core->get_item($notification->restaurant_food_scan_id, 'restaurant_food_scan');
+    if (!$rfs || empty($rfs->photo_url)) {
         continue;
     }
 @endphp
-<li class="list-group-item list-group-item-action dropdown-notifications-item cursor-pointer p-1 @if(!empty($notification->read_at)) @else bg-primary-subtle @endif "
-    onclick="notification_read(this); restaurant_food_scan_result_info({{$notification->data['restaurant_food_scan_id']}})"
-    data-itd="{{$notification->id}}"
+<li
+  class="list-group-item list-group-item-action dropdown-notifications-item cursor-pointer p-1 @if(!empty($notification->read_at)) @else bg-primary-subtle @endif "
+  onclick="notification_read(this); sensor_food_scan_info({{$rfs->id}})"
+  data-itd="{{$notification->id}}"
 >
   <div class="d-flex gap-2">
     <div class="flex-shrink-0">
       <div class="text-center w-px-50 h-px-50 me-1">
-        <img class="w-100 h-100" style="border-radius: 50%;" src="{{$item->photo_url}}" />
+        <img class="w-100 h-100" style="border-radius: 50%;" src="{{$rfs->photo_url}}"/>
       </div>
     </div>
     <div class="d-flex flex-column flex-grow-1 overflow-hidden w-px-200">
-      <h6 class="mb-1 text-primary fw-bold acm-fs-13">{{$item->get_restaurant()->name}}</h6>
+      <h6 class="mb-1 text-primary fw-bold acm-fs-13">{{$rfs->get_restaurant()->name}}</h6>
 
-      @if($notification->type == 'App\Notifications\PhotoComment')
+      @if(in_array($notification->type, $type1s))
         @php
-        $type = $notification->data['typed'];
+          $type = $notification->data['typed'];
 
-        $owner = $api_core->get_item($notification->data['owner_id'], 'user');
-        $comment = $api_core->get_item($notification->data['comment_id'], 'comment');
+          $owner = $api_core->get_item($notification->data['owner_id'], 'user');
+          $comment = $api_core->get_item($notification->object_id, $notification->object_type);
 
-        $text1 = 'added new note for the photo with ID:';
-        if ($type == 'photo_comment_edit') {
-            $text1 = 'updated their note for the photo with ID:';
-        }
+          $text1 = 'added new note for the photo with ID:';
+          if ($type == 'photo_comment_edit') {
+              $text1 = 'updated their note for the photo with ID:';
+          }
         @endphp
         <div class="text-dark acm-fs-13">
-          <b><span class="acm-mr-px-5">{{$owner->name}}</span></b> {{$text1}} <b><span class="acm-ml-px-5">{{$item->id}}</span></b>
+          <b><span class="acm-mr-px-5">{{$owner->name}}</span></b> {{$text1}} <b><span
+              class="acm-ml-px-5">{{$rfs->id}}</span></b>
         </div>
         <div class="text-dark acm-fs-13">
-          <?php echo nl2br($comment->content);?>
+            <?php echo nl2br($comment->content); ?>
         </div>
-      @else
+      @elseif(in_array($notification->type, $type2s))
         <div class="text-dark acm-fs-13">
-          @if($item->confidence)
-            @if($item->get_food())
-              Predicted Dish: <b><span class="acm-mr-px-5 text-danger">{{$item->confidence}}%</span><span
-                  class="acm-mr-px-5">{{$item->get_food()->name}}</span></b>
+          @if($rfs->confidence)
+            @if($rfs->get_food())
+              Predicted Dish: <b><span class="acm-mr-px-5 text-danger">{{$rfs->confidence}}%</span><span
+                  class="acm-mr-px-5">{{$rfs->get_food()->name}}</span></b>
             @endif
           @else
-            Predicted Dish: <b><span class="acm-mr-px-5">{{$item->get_food()->name}}</span></b>
+            Predicted Dish: <b><span class="acm-mr-px-5">{{$rfs->get_food()->name}}</span></b>
           @endif
         </div>
         @php
-          $texts = array_filter(explode('&nbsp', $item->missing_texts));
-            if(!empty($item->missing_texts) && count($texts)):
+          $texts = array_filter(explode('&nbsp', $rfs->missing_texts));
+            if(!empty($rfs->missing_texts) && count($texts)):
         @endphp
         <div class="text-dark acm-fs-13">
           <div>Ingredients Missing:</div>
@@ -63,7 +68,7 @@
             @endif
           @endforeach
         </div>
-        @endif
+      @endif
       @endif
     </div>
   </div>

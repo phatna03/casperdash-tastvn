@@ -38,6 +38,6 @@ return new class extends Migration {
   public function down(): void
   {
     Schema::dropIfExists('food_recipes');
-//    Schema::dropIfExists('user_settings');
+    Schema::dropIfExists('restaurant_parents');
   }
 };
