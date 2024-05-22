@@ -216,6 +216,11 @@ Route::post('/admin/restaurant/food/group', [RestaurantController::class, 'food_
 Route::get('/admin/sensor', [DashboardController::class, 'sensor']);
 Route::post('/admin/sensor/kitchen', [DashboardController::class, 'sensor_kitchen']);
 
+//opt
+Route::get('/admin/sensor/tester', [DashboardController::class, 'sensor_tester']);
+Route::post('/admin/sensor/tester/checker', [DashboardController::class, 'sensor_tester_checker']);
+Route::post('/admin/sensor/tester/predict', [DashboardController::class, 'sensor_tester_predict']);
+
 Route::get('/admin/sensors', [SensorController::class, 'index']);
 Route::post('/admin/sensor/store', [SensorController::class, 'store']);
 Route::post('/admin/sensor/update', [SensorController::class, 'update']);

@@ -591,14 +591,14 @@
             }
 
             var html_admin = '<div></div>';
-            if (parseInt(acmcfs.rbf_auth)) {
-              html_admin = '<div class="mt-1">' +
-                '<button type="button" class="btn btn-sm btn-primary p-1 acm-mr-px-10" onclick="sensor_food_scan_api(this, 1)"><i class="mdi mdi-food ic_current"></i> re-predict</button>' +
-                '</div>' +
-                '<div class="mt-1">' +
-                '<button type="button" class="btn btn-sm btn-danger p-1"  onclick="sensor_food_scan_api(this, 2)"><i class="mdi mdi-api ic_current"></i> re-scan-api</button>' +
-                '</div>';
-            }
+            // if (parseInt(acmcfs.rbf_auth)) {
+            //   html_admin = '<div class="mt-1">' +
+            //     '<button type="button" class="btn btn-sm btn-primary p-1 acm-mr-px-10" onclick="sensor_food_scan_api(this, 1)"><i class="mdi mdi-food ic_current"></i> re-predict</button>' +
+            //     '</div>' +
+            //     '<div class="mt-1">' +
+            //     '<button type="button" class="btn btn-sm btn-danger p-1"  onclick="sensor_food_scan_api(this, 2)"><i class="mdi mdi-api ic_current"></i> re-scan-api</button>' +
+            //     '</div>';
+            // }
 
             return ('<div>'
               + html

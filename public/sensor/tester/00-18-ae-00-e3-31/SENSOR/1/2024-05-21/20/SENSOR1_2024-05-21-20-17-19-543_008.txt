@@ -1,0 +1,1 @@
+﻿device name: kitchendeli1 mac: 00-18-ae-00-e3-31 SENSOR1 time: 2024-05-21 20:17:19

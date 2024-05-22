@@ -9,7 +9,7 @@ return [
   "templateSuffix" => "TasteVN System",
   "templateVersion" => "1.0.1",
   "templateFree" => false,
-  "templateDescription" => "TasteVN System",
+  "templateDescription" => "Taste Vietnam by Ms Vy includes businesses in the restaurant industry of acclaimed chef, restaurateur and author Trinh Diem Vy. It employs over 450 people ...",
   "templateKeyword" => "",
   "licenseUrl" => "https://casperdash.io/",
 
