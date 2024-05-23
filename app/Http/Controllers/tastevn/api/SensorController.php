@@ -5,6 +5,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 use Validator;
 use App\Api\SysCore;
@@ -792,6 +793,218 @@ class SensorController extends Controller
     ]);
   }
 
+  public function kitchen(string $id)
+  {
+    $row = Restaurant::find((int)$id);
+    if (!$row) {
+      return redirect('page_not_found');
+    }
+
+    $user = Auth::user();
+
+    $pageConfigs = [
+      'myLayout' => 'horizontal',
+      'hasCustomizer' => false,
+
+      'item' => $row,
+    ];
+
+    return view('tastevn.pages.dashboard_kitchen', ['pageConfigs' => $pageConfigs]);
+  }
+
+  public function kitchen_checker(Request $request)
+  {
+    $api_core = new SysCore();
+    $values = $request->post();
+
+    $validator = Validator::make($values, [
+      'item' => 'required',
+    ]);
+    if ($validator->fails()) {
+      return response()->json($validator->errors(), 422);
+    }
+    //invalid
+    $row = Restaurant::findOrFail((int)$values['item']);
+    if (!$row) {
+      return response()->json([
+        'error' => 'Invalid item'
+      ], 422);
+    }
+
+    $restaurant = $row;
+
+    $cur_date = date('Y-m-d');
+    $cur_hour = (int)date('H');
+
+    $temps = [];
+    $filed = '';
+
+    $folder_setting = $api_core->parse_s3_bucket_address($restaurant->s3_bucket_address);
+    $directory = 'photos/' . $folder_setting . '/' . $cur_date . '/' . $cur_hour . '/';
+
+    $files = Storage::disk('sensor')->files($directory);
+    if (count($files)) {
+      $files = array_reverse($files);
+
+      foreach ($files as $file) {
+        $ext = array_filter(explode('.', $file));
+        if (!count($ext) || $ext[count($ext) - 1] != 'jpg') {
+          continue;
+        }
+
+        $filed = $file;
+        break;
+      }
+    }
+
+    return response()->json([
+      'status' => true,
+
+      'file' => $filed,
+      'file_url' => url('sensor') . '/' . $filed,
+      'file_id' => time(),
+    ]);
+  }
+
+  public function kitchen_predict(Request $request)
+  {
+    $api_core = new SysCore();
+    $values = $request->post();
+    $datas = isset($values['datas']) ? (array)$values['datas'] : [];
+//    echo '<pre>';
+    $validator = Validator::make($values, [
+      'item' => 'required',
+    ]);
+    if ($validator->fails()) {
+      return response()->json($validator->errors(), 422);
+    }
+    //invalid
+    $row = Restaurant::findOrFail((int)$values['item']);
+    if (!$row) {
+      return response()->json([
+        'error' => 'Invalid item'
+      ], 422);
+    }
+
+    $restaurant = $row;
+
+    $ingredients_found = [];
+    $rbf_ingredients_found = [];
+    $rbf_ingredients_missing = [];
+    $rbf_food_found = [];
+    $food = NULL;
+
+    $html_info = '';
+    $food_id = 0;
+    $food_name = '';
+    $food_photo = '';
+
+
+    if (count($datas)) {
+//      foreach ($datas as $class) {
+//        var_dump('===========');
+//        var_dump($class);
+//      }
+
+      $predictions = $datas;
+
+      //ingredients
+      $ingredients_found = $api_core->sys_ingredients_found($predictions);
+      if (count($ingredients_found)) {
+        foreach ($ingredients_found as $temp) {
+          $ing = Ingredient::find((int)$temp['id']);
+          if ($ing) {
+            $rbf_ingredients_found[] = [
+              'quantity' => $temp['quantity'],
+              'title' => !empty($ing['name_vi']) ? $ing['name'] . ' - ' . $ing['name_vi'] : $ing['name'],
+            ];
+          }
+        }
+      }
+
+      //foods
+      foreach ($predictions as $prediction) {
+        $prediction = (array)$prediction;
+        $confidence = (int)($prediction['confidence'] * 100);
+
+        $food = Food::whereRaw('LOWER(name) LIKE ?', strtolower(trim($prediction['class'])))
+          ->first();
+        if ($food) {
+          $rbf_food_found[] = [
+            'confidence' => $confidence,
+            'title' => $food->name,
+          ];
+
+          break;
+        }
+      }
+
+      if ($food) {
+
+        $food_id = $food->id;
+
+        $ingredients_found = $food->get_ingredients_info([
+          'restaurant_parent_id' => 1,
+          'ingredients' => $ingredients_found,
+        ]);
+        $rbf_ingredients_missing = $food->missing_ingredients([
+          'restaurant_parent_id' => 1,
+          'ingredients' => $ingredients_found,
+        ]);
+
+        //standard
+        $restaurant_ids = Restaurant::where('deleted', 0)
+          ->select('id')
+          ->where('restaurant_parent_id', 1);
+
+        $restaurant_food = RestaurantFood::where('deleted', 0)
+          ->whereIn('restaurant_id', $restaurant_ids)
+          ->where('food_id', $food->id)
+          ->where('photo', '<>', NULL)
+          ->orderBy('updated_at', 'desc')
+          ->limit(1)
+          ->first();
+        $food_photo = $restaurant_food ? $restaurant_food->photo : url('custom/img/no_photo.png');
+
+        //info recipe
+        $html_info = view('tastevn.htmls.item_food_dashboard')
+          ->with('recipes', $food->get_recipes([
+            'restaurant_parent_id' => 1,
+          ]))
+          ->render();
+
+        $restaurant_parent = RestaurantParent::find(1);
+        $food_name = '[' . $restaurant_parent->name . '] ' . $food->name;
+      }
+    }
+
+//    var_dump('================');
+//    var_dump($rbf_food_found);
+//
+//    var_dump('================');
+//    var_dump($rbf_ingredients_missing);
+//
+//    var_dump('================');
+//    var_dump($rbf_ingredients_found);
+//    die;
+
+    return response()->json([
+      'status' => true,
+
+      'food_id' => $food_id,
+
+      'food_photo' => $food_photo,
+      'food_name' => $food_name,
+      'html_info' => $html_info,
+
+      'ingredients_missing' => $rbf_ingredients_missing,
+      'ingredients_found' => $rbf_ingredients_found,
+
+    ]);
+  }
+
+
+  ///////////////////
 
 
   public function selectize_parent(Request $request)
