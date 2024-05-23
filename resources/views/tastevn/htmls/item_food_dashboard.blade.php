@@ -3,7 +3,7 @@
   <div class="acm-clearfix">
   @foreach($recipes as $ite)
     <div class="acm-float-left w-50">
-      - <b>{{$ite->ingredient_quantity}}</b> {{$ite->name}}
+      - {{$ite->name}}
     </div>
   @endforeach
   </div>

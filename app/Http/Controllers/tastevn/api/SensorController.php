@@ -895,6 +895,8 @@ class SensorController extends Controller
     $api_core = new SysCore();
     $values = $request->post();
 
+    $user = Auth::user();
+
     $validator = Validator::make($values, [
       'item' => 'required',
       'restaurant_id' => 'required',
@@ -926,20 +928,102 @@ class SensorController extends Controller
       ]);
 
       //step 3= photo predict
-      $row->predict_food([
-        'notification' => false,
-      ]);
+      $row->predict_food();
     }
 
     //refresh
     $row = RestaurantFoodScan::find($row->id);
 
+    //notify
+    $notifys = [];
+    $notify_ids = [];
+    $valid_types = [
+      //force
+      'App\Notifications\IngredientMissing'
+    ];
+
+    //speaker
+    $text_to_speak = '';
+    $text_to_speech = false;
+    if ((int)$user->get_setting('missing_ingredient_alert_speaker')) {
+      $text_to_speech = true;
+    }
+
+    //printer
+    $printer = false;
+    if ((int)$user->get_setting('missing_ingredient_alert_printer')) {
+      $printer = true;
+    }
+
+    $notifications = $user->notifications()
+      ->whereIn('type', $valid_types)
+      ->where('created_at', '>', $user->time_notification)
+      ->orderBy('id', 'desc')
+      ->limit(1)
+      ->get();
+
+    if (count($notifications)) {
+      foreach ($notifications as $notification) {
+        $row = RestaurantFoodScan::find($notification->restaurant_food_scan_id);
+        if (!$row) {
+          continue;
+        }
+
+        $ingredients = array_filter(explode('&nbsp', $row->missing_texts));
+        if (!count($ingredients)) {
+          continue;
+        }
+
+        $notifys[] = [
+          'itd' => $row->id,
+          'photo_url' => $row->get_photo(),
+          'restaurant_name' => $row->get_restaurant()->name,
+          'food_name' => $row->get_food()->name,
+          'food_confidence' => $row->confidence,
+          'ingredients' => $ingredients,
+        ];
+
+        $notify_ids[] = $row->id;
+
+        $user->update([
+          'time_notification' => $notification->created_at->format('Y-m-d H:i:s')
+        ]);
+
+        if ($text_to_speech) {
+
+          $text_ingredients_missing = '';
+          foreach ($row->get_ingredients_missing() as $ing) {
+            $text_ingredients_missing .= $ing['ingredient_quantity'] . ' ' . $ing['name'] . ', ';
+          }
+
+          $text_to_speak = '[alert]'
+            . $row->get_restaurant()->name
+//            . ' occurred at ' . date('H:i')
+            . ", Predicted Dish, "
+            . ", " . $row->get_food()->name
+            . ", Ingredients Missing, "
+            . $text_ingredients_missing;
+
+          $api_core->s3_polly([
+            'text_to_speak' => $text_to_speak,
+          ]);
+        }
+      }
+
+    }
+
     return response()->json([
       'status' => true,
 
+      //data
       'food_id' => $row->get_food() ? $row->get_food()->id : 0,
-
       'datas' => $this->kitchen_food_datas($row),
+      //notify
+      'notifys' => $notifys,
+      'notify_ids' => $notify_ids,
+      'speaker' => $text_to_speech && !empty($text_to_speak),
+      'speaker_text' => $text_to_speak,
+      'printer' => $printer,
     ]);
   }
 
@@ -952,8 +1036,8 @@ class SensorController extends Controller
     $restaurant = $row->get_restaurant();
     $food = $row->get_food() ? $row->get_food() : NULL;
 
-    $result1s = (array)json_decode($this->rbf_api, true);
-    $result2s = (array)json_decode($this->rbf_api_js, true);
+    $result1s = (array)json_decode($row->rbf_api, true);
+    $result2s = (array)json_decode($row->rbf_api_js, true);
     $predictions = count($result1s) ? (array)$result1s['predictions'] : [];
     if (!count($predictions) && count($result2s)) {
       $predictions = $result2s;
