@@ -329,7 +329,7 @@ class SysCore
           // URL for Http Request
           $url = "https://detect.roboflow.com/" . $rbf_dataset
             . "?api_key=" . $rbf_api_key
-            . "&image=" . urlencode($row->photo_url);
+            . "&image=" . urlencode($row->get_photo());
 
           // Setup + Send Http request
           $options = array(
@@ -416,7 +416,7 @@ class SysCore
             . "?api_key=" . $rbf_api_key
             . "&name=re_training_" . date('Y_m_d_H_i_s') . "_" . $count . "." . $row->photo_ext
             . "&split=train"
-            . "&image=" . urlencode($row->photo_url);
+            . "&image=" . urlencode($row->get_photo());
 
           // Setup + Send Http request
           $options = array(
@@ -1195,7 +1195,7 @@ class SysCore
       // URL for Http Request
       $rbf_url = "https://detect.roboflow.com/" . $rbf_dataset
         . "?api_key=" . $rbf_api_key
-        . "&image=" . urlencode($rfs->photo_url);
+        . "&image=" . urlencode($rfs->get_photo());
 
       // Setup + Send Http request
       $rbf_options = array(

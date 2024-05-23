@@ -543,7 +543,7 @@ class Restaurant extends Model
       // URL for Http Request
       $rbf_url = "https://detect.roboflow.com/" . $rbf_dataset
         . "?api_key=" . $rbf_api_key
-        . "&image=" . urlencode($rfs->photo_url);
+        . "&image=" . urlencode($rfs->get_photo());
 
       // Setup + Send Http request
       $rbf_options = array(

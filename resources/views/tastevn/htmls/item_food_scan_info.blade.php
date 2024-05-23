@@ -20,7 +20,7 @@
             <span class="badge bg-danger cmt-count">{{count($comments) . ' notes'}}</span>
           @endif
         </div>
-        <img class="acm-width-max-100 h-auto acm-border-css" src="{{$item['photo_url']}}"/>
+        <img class="acm-width-max-100 h-auto acm-border-css" src="{{$item->get_photo()}}"/>
       </div>
 
       @if(count($comments))

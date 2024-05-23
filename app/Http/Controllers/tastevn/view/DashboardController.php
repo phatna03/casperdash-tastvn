@@ -179,7 +179,7 @@ class DashboardController extends Controller
       if (count($notifications)) {
         foreach ($notifications as $notification) {
           $row = RestaurantFoodScan::find($notification->restaurant_food_scan_id);
-          if (!$row || empty($row->photo_url)) {
+          if (!$row) {
             continue;
           }
 
@@ -190,7 +190,7 @@ class DashboardController extends Controller
 
           $items[] = [
             'itd' => $row->id,
-            'photo_url' => $row->photo_url,
+            'photo_url' => $row->get_photo(),
             'restaurant_name' => $row->get_restaurant()->name,
             'food_name' => $row->get_food()->name,
             'food_confidence' => $row->confidence,
@@ -315,7 +315,7 @@ class DashboardController extends Controller
       if (count($notifications)) {
         foreach ($notifications as $notification) {
           $row = RestaurantFoodScan::find($notification->restaurant_food_scan_id);
-          if (!$row || empty($row->photo_url)) {
+          if (!$row) {
             continue;
           }
 
@@ -330,7 +330,7 @@ class DashboardController extends Controller
 
           $items[] = [
             'itd' => $row->id,
-            'photo_url' => $row->photo_url,
+            'photo_url' => $row->get_photo(),
             'restaurant_name' => $row->get_restaurant()->name,
             'food_name' => $row->get_food()->name,
             'food_confidence' => $row->confidence,
@@ -433,7 +433,7 @@ class DashboardController extends Controller
 
     $item = [
       'itd' => $row->id,
-      'photo_url' => $row->photo_url,
+      'photo_url' => $row->get_photo(),
       'food_name' => $food ? $food->name : '',
       'food_photo' => $food ? $food->get_photo_standard($restaurant) : '',
       'ingredients_missing' => $ingredients,

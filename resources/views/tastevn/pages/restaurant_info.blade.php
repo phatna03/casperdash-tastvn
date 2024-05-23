@@ -614,11 +614,15 @@
               ? 'Unknown...' : full['food_name'];
             var food_category = !full['category_name'] || full['category_name'] === 'null'
               ? '' : '(' + full['category_name'] + ')';
+            var photo_url = full['photo_url'];
+            if (parseInt(full['local_storage'])) {
+              photo_url = acmcfs.link_base_url + '/sensors/' + full['photo_name'];
+            }
 
             return (
               '<div class="clearfix cursor-pointer" onclick="sensor_food_scan_info(' + full['id'] + ')">' +
               '<div class="acm-float-left acm-mr-px-5">' +
-              '<img class="acm-border-css" loading="lazy" width="100" height="70px" src="' + full['photo_url'] + '" />' +
+              '<img class="acm-border-css" loading="lazy" width="100" height="70px" src="' + photo_url + '" />' +
               '</div>' +
               '<div class="overflow-hidden acm-max-line-3">' +
               '<div>ID: ' + full['id'] + '</div>' +

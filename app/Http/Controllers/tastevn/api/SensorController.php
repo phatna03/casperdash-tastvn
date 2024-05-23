@@ -283,15 +283,19 @@ class SensorController extends Controller
 
   public function show(string $id)
   {
-    $row = Restaurant::find((int)$id);
-    if (!$row) {
-      return redirect('page_not_found');
-    }
-
     $user = Auth::user();
     $invalid_roles = ['user'];
     if (in_array($user->role, $invalid_roles)) {
       return redirect('page_not_found');
+    }
+
+    $row = Restaurant::find((int)$id);
+    if (!$row || $row->deleted) {
+      if ($user->id == 5) {
+
+      } else {
+        return redirect('page_not_found');
+      }
     }
 
     if (!$user->can_access_restaurant($row)) {
@@ -501,6 +505,19 @@ class SensorController extends Controller
             ];
           }
         }
+      }
+    }
+
+    //v2
+    $data2s = $this->kitchen_food_datas($row);
+    if (count($data2s) && count($data2s['ingredients_found'])) {
+      $rbf_ingredients_found = [];
+
+      foreach ($data2s['ingredients_found'] as $ing) {
+        $rbf_ingredients_found[] = [
+          'quantity' => $ing['quantity'],
+          'title' => $ing['name'],
+        ];
       }
     }
 

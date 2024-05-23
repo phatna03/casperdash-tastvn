@@ -61,7 +61,9 @@ class PhotoController extends Controller
     $time_upload = isset($values['time_upload']) && !empty($values['time_upload']) ? $values['time_upload'] : NULL;
 
     $select = RestaurantFoodScan::query('restaurant_food_scans')
-      ->select('restaurant_food_scans.id', 'restaurant_food_scans.photo_url', 'restaurant_food_scans.time_photo', 'restaurants.name as restaurant_name')
+      ->select('restaurant_food_scans.id',
+        'restaurant_food_scans.photo_url', 'restaurant_food_scans.photo_name', 'restaurant_food_scans.local_storage',
+        'restaurant_food_scans.time_photo', 'restaurants.name as restaurant_name')
       ->leftJoin('restaurants', 'restaurant_food_scans.restaurant_id', '=', 'restaurants.id')
 //      ->where('restaurant_food_scans.deleted', 0)
       ->orderBy('restaurant_food_scans.time_photo', 'desc')

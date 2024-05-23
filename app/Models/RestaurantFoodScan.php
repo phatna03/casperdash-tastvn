@@ -96,7 +96,7 @@ class RestaurantFoodScan extends Model
   public function get_photo()
   {
     $photo = $this->photo_url;
-    if ($this->local_storage || !empty($photo)) {
+    if ($this->local_storage || empty($photo)) {
       $photo = url('sensors') . '/' . $this->photo_name;
     }
 

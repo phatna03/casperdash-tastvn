@@ -174,7 +174,7 @@ class GuestController extends Controller
 
         $items[] = [
           'id' => $row->id,
-          'photo_url' => $row->photo_url,
+          'photo_url' => $row->get_photo(),
 
           'restaurant_name' => $row->get_restaurant()->name,
           'error_s3' => strtotime($time_s3) < strtotime($time_photo) ? 'device time error' : '',

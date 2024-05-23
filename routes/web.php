@@ -386,9 +386,9 @@ Route::get('/datatable/sensor-food-scans', function (Request $request) {
   $time_scan = isset($values['time_scan']) && !empty($values['time_scan']) ? $values['time_scan'] : NULL;
 
   $select = App\Models\RestaurantFoodScan::query("restaurant_food_scans")
-    ->select("restaurant_food_scans.id", "restaurant_food_scans.photo_url", "restaurant_food_scans.confidence",
+    ->select("restaurant_food_scans.id", "restaurant_food_scans.photo_url", "restaurant_food_scans.photo_name", "restaurant_food_scans.local_storage",
       "restaurant_food_scans.time_scan", "restaurant_food_scans.time_photo", "restaurant_food_scans.missing_texts", "restaurant_food_scans.text_texts",
-      "restaurant_food_scans.status", "restaurant_food_scans.found_by", "restaurant_food_scans.note",
+      "restaurant_food_scans.status", "restaurant_food_scans.found_by", "restaurant_food_scans.note", "restaurant_food_scans.confidence",
       "restaurant_food_scans.food_id", "restaurant_food_scans.food_category_id", "restaurant_food_scans.rbf_retrain",
       "foods.name as food_name", "food_categories.name as category_name",
     )
