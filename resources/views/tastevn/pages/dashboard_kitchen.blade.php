@@ -196,6 +196,11 @@
 
   <script type="text/javascript">
     $(document).ready(function() {
+
+      if (notify_realtime) {
+        clearInterval(notify_realtime);
+      }
+
       toggle_header();
 
       // sensor_checker();
@@ -206,13 +211,12 @@
         }
       }, 2000);
 
-      if (notify_realtime) {
-        clearInterval(notify_realtime);
-      }
-
     });
 
-    //roboflow
+    var sys_running = 0;
+    var sys_ready = 0;
+
+    //roboflow init
     roboflow.auth({
       publishable_key: "rf_3DtUFXV7oiSXMh2VkXK8d0EHcRD2"
     });
@@ -223,8 +227,8 @@
       });
 
       model.configure({
-        threshold: 0.5,
-        overlap: 0.5,
+        threshold: 0.3,
+        overlap: 0.6,
         max_objects: 50
       });
 
@@ -232,10 +236,8 @@
 
       return model;
     }
-
-    // Call the async function
+    //roboflow check ready
     rbf_load_model().then(model => {
-
       console.log("==============================================");
       console.log("RBF load success......");
 
@@ -247,83 +249,25 @@
       sys_ready = 1;
 
     }).catch(error => {
+      console.log("==============================================");
       console.error('Error loading model:', error);
     });
 
-    var sys_running = 0;
-    var sys_ready = 0;
-    var sys_count = -1;
-    var sys_images = [
-      'http://s3.ap-southeast-1.amazonaws.com/cargo.tastevietnam.asia/58-5b-69-19-ad-83/SENSOR/1/2024-05-20/20/SENSOR_2024-05-20-20-30-27-069_024.jpg',
-      'http://s3.ap-southeast-1.amazonaws.com/cargo.tastevietnam.asia/58-5b-69-19-ad-83/SENSOR/1/2024-05-20/18/SENSOR_2024-05-20-18-51-25-471_007.jpg',
-      'http://s3.ap-southeast-1.amazonaws.com/cargo.tastevietnam.asia/58-5b-69-19-ad-83/SENSOR/1/2024-05-19/20/SENSOR_2024-05-19-20-20-13-109_1986.jpg',
-      'http://s3.ap-southeast-1.amazonaws.com/cargo.tastevietnam.asia/58-5b-69-19-ad-83/SENSOR/1/2024-05-18/19/SENSOR_2024-05-18-19-20-05-988_1941.jpg',
-      'http://s3.ap-southeast-1.amazonaws.com/cargo.tastevietnam.asia/58-5b-69-19-ad-83/SENSOR/1/2024-05-18/18/SENSOR_2024-05-18-18-53-21-335_1936.jpg',
-      'http://s3.ap-southeast-1.amazonaws.com/cargo.tastevietnam.asia/58-5b-69-19-ad-83/SENSOR/1/2024-05-17/20/SENSOR_2024-05-17-20-36-16-049_1922.jpg',
-    ];
-
-    function food_predict_by_datas(datas) {
+    function food_predict_by_datas(item_id, datas) {
       var wrap = $('.wrap-selected-food');
-
-      $('.result_photo_sensor img').attr('src', sys_images[sys_count]);
 
       $('.result_photo_status .data_result').empty()
         .append('<div class="badge bg-success fw-bold acm-ml-px-10 acm-fs-15">predicting...</div>');
 
       axios.post('/admin/kitchen/predict', {
-        item: '{{$pageConfigs['item']->id}}',
+        item: item_id,
+        restaurant_id: '{{$pageConfigs['item']->id}}',
         datas: datas,
       })
         .then(response => {
 
-          if (response.data.food_id) {
-
-            //standard
-            wrap.find('.food-name').empty().text(response.data.food_name);
-            wrap.find('.food-photo').attr('src', response.data.food_photo);
-            wrap.find('.wrap-ingredients').empty().append(response.data.html_info);
-
-            //sensor
-            $('.result_photo_status .data_result').empty()
-              .append('<div class="badge bg-primary fw-bold acm-ml-px-10 acm-fs-15">checked</div>');
-
-            //predicted_dish
-            if (response.data.food_name != '') {
-              $('.result_predicted_dish .data_result').empty().append('<div class="text-danger fw-bold acm-ml-px-10">' + response.data.food_name + '</div>');
-              $('.result_predicted_dish').removeClass('d-none');
-            }
-
-            console.log(response.data.ingredients_missing);
-            console.log(response.data.ingredients_found);
-            //ingredients_missing
-            var html = '';
-            if (response.data.ingredients_missing.length) {
-              response.data.ingredients_missing.forEach(function (v, k) {
-                html += '<div class="text-danger acm-ml-px-10">- <b class="text-danger acm-mr-px-5">' + v.quantity + '</b> ' + v.name + '</div>';
-              });
-            }
-            if (html && html != '') {
-              $('.result_ingredients_missing .data_result').empty().append(html);
-              $('.result_ingredients_missing').removeClass('d-none');
-            }
-
-            //ingredients_found
-            html = '';
-            if (response.data.ingredients_found.length) {
-              response.data.ingredients_found.forEach(function (v, k) {
-                html += '<div class="text-dark acm-ml-px-10">- <b class="text-danger acm-mr-px-5">' + v.quantity + '</b> ' + v.title + '</div>';
-              });
-            }
-            if (html && html != '') {
-              $('.result_ingredients_found .data_result').empty().append(html);
-              $('.result_ingredients_found').removeClass('d-none');
-            }
-          }
-          else {
-
-            $('.result_photo_status .data_result').empty()
-              .append('<div class="badge bg-danger fw-bold acm-ml-px-10 acm-fs-15">invalid photo</div>');
-          }
+          //show data
+          food_datas(response.data.datas);
 
           sys_ready = 1;
 
@@ -335,7 +279,6 @@
       return false;
     }
 
-    //opt
     function sensor_checker() {
 
       if (sys_running) {
@@ -345,66 +288,62 @@
 
       axios.post('/admin/kitchen/checker', {
         item: '{{$pageConfigs['item']->id}}',
-        {{--restaurant_parent_id: '{{$pageConfigs['item']->restaurant_parent_id}}',--}}
       })
         .then(response => {
 
           var current_file_id = $('.wrap_food_tester input[name=current_file_id]').val();
           var current_file_url = $('.wrap_food_tester input[name=current_file_url]').val();
 
-          if (response.data.status) {
-            if (response.data.file && response.data.file != ''
-              && current_file_url != response.data.file
-            ) {
+          if (response.data.file && response.data.file != '' && current_file_url != response.data.file) {
 
-              $('.wrap_notify_result').addClass('d-none');
+            $('.wrap_food_tester input[name=current_file_id]').val(response.data.file_id);
 
-              $('.wrap_food_tester input[name=current_file_url]').val(response.data.file);
+            $('.wrap_notify_result').addClass('d-none');
 
-              $('.result_photo_sensor img').attr('src', response.data.file_url);
-              $('.result_photo_sensor').removeClass('d-none');
+            $('.wrap_food_tester input[name=current_file_url]').val(response.data.file);
 
-              $('.result_photo_itd .data_result').empty()
-                .append('<div class="text-danger fw-bold acm-ml-px-10 acm-fs-15">' + response.data.file_id + '</div>');
-              $('.result_photo_itd').removeClass('d-none');
+            $('.result_photo_sensor img').attr('src', response.data.file_url);
+            $('.result_photo_sensor').removeClass('d-none');
 
-              $('.result_photo_status .data_result').empty()
-                .append('<div class="badge bg-info fw-bold acm-ml-px-10 acm-fs-15">checking...</div>');
-              $('.result_photo_status').removeClass('d-none');
+            $('.result_photo_itd .data_result').empty()
+              .append('<div class="text-danger fw-bold acm-ml-px-10 acm-fs-15">' + response.data.file_id + '</div>');
+            $('.result_photo_itd').removeClass('d-none');
 
-              if (sys_ready) {
-                sys_ready = 0;
+            $('.result_photo_status .data_result').empty()
+              .append('<div class="badge bg-info fw-bold acm-ml-px-10 acm-fs-15">checking...</div>');
+            $('.result_photo_status').removeClass('d-none');
 
-                sys_count++;
-                if (sys_count > 5) {
-                  sys_count = 0;
-                }
-                console.log('sys_count= ' + sys_count);
+            if (sys_ready && response.data.status == 'new') {
+              sys_ready = 0;
 
-                var photo_img = new Image();
-                photo_img.crossOrigin = "anonymous";
-                photo_img.src = sys_images[sys_count];
+              var photo_img = new Image();
+              photo_img.crossOrigin = "anonymous";
+              photo_img.src = response.data.file_url;
 
-                console.log("==============================================");
-                console.log("RBF start......");
+              console.log("==============================================");
+              console.log("RBF start......");
 
-                if (acmcfs.rbf_model) {
-                  console.log(acmcfs.rbf_model);
+              if (acmcfs.rbf_model) {
 
-                  setTimeout(function () {
-                    acmcfs.rbf_model.detect(photo_img).then(function (predictions) {
-                      console.log("Predictions:", predictions);
-                      if (predictions && predictions.length) {
-                        food_predict_by_datas(predictions);
-                      }
+                setTimeout(function () {
+                  acmcfs.rbf_model.detect(photo_img).then(function (predictions) {
+                    console.log("Predictions:", predictions);
 
-                    });
-                  }, 888);
-                }
+                    food_predict_by_datas(response.data.file_id, predictions);
+
+                  });
+                }, 888);
               }
             }
-          }
+            else {
 
+              //show data
+              if (response.data.datas && response.data.datas.length) {
+                food_datas(response.data.datas);
+              }
+            }
+
+          }
         })
         .catch(error => {
           if (error.response.data && Object.values(error.response.data).length) {
@@ -418,6 +357,61 @@
         });
 
       return false;
+    }
+
+    function food_datas(datas) {
+
+      console.log('**************************');
+      console.log(datas);
+
+      // if (response.data.food_id) {
+      //
+      //   //standard
+      //   wrap.find('.food-name').empty().text(response.data.food_name);
+      //   wrap.find('.food-photo').attr('src', response.data.food_photo);
+      //   wrap.find('.wrap-ingredients').empty().append(response.data.html_info);
+      //
+      //   //sensor
+      //   $('.result_photo_status .data_result').empty()
+      //     .append('<div class="badge bg-primary fw-bold acm-ml-px-10 acm-fs-15">checked</div>');
+      //
+      //   //predicted_dish
+      //   if (response.data.food_name != '') {
+      //     $('.result_predicted_dish .data_result').empty().append('<div class="text-danger fw-bold acm-ml-px-10">' + response.data.food_name + '</div>');
+      //     $('.result_predicted_dish').removeClass('d-none');
+      //   }
+      //
+      //   console.log(response.data.ingredients_missing);
+      //   console.log(response.data.ingredients_found);
+      //   //ingredients_missing
+      //   var html = '';
+      //   if (response.data.ingredients_missing.length) {
+      //     response.data.ingredients_missing.forEach(function (v, k) {
+      //       html += '<div class="text-danger acm-ml-px-10">- <b class="text-danger acm-mr-px-5">' + v.quantity + '</b> ' + v.name + '</div>';
+      //     });
+      //   }
+      //   if (html && html != '') {
+      //     $('.result_ingredients_missing .data_result').empty().append(html);
+      //     $('.result_ingredients_missing').removeClass('d-none');
+      //   }
+      //
+      //   //ingredients_found
+      //   html = '';
+      //   if (response.data.ingredients_found.length) {
+      //     response.data.ingredients_found.forEach(function (v, k) {
+      //       html += '<div class="text-dark acm-ml-px-10">- <b class="text-danger acm-mr-px-5">' + v.quantity + '</b> ' + v.title + '</div>';
+      //     });
+      //   }
+      //   if (html && html != '') {
+      //     $('.result_ingredients_found .data_result').empty().append(html);
+      //     $('.result_ingredients_found').removeClass('d-none');
+      //   }
+      // }
+      // else {
+      //
+      //   $('.result_photo_status .data_result').empty()
+      //     .append('<div class="badge bg-danger fw-bold acm-ml-px-10 acm-fs-15">No dish found</div>');
+      // }
     }
 
   </script>

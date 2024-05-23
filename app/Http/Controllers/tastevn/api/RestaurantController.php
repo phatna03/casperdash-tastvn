@@ -250,11 +250,20 @@ class RestaurantController extends Controller
 
   public function selectize(Request $request)
   {
+    $user = Auth::user();
+
     $values = $request->post();
     $keyword = isset($values['keyword']) && !empty($values['keyword']) ? $values['keyword'] : NULL;
 
-    $select = RestaurantParent::select('id', 'name')
-      ->where('deleted', 0);
+    $select = RestaurantParent::select('id', 'name');
+
+    //tester
+    if ($user && $user->id == 5) {
+
+    } else {
+      $select->where('deleted', 0);
+    }
+
     if (!empty($keyword)) {
       $select->where('name', 'LIKE', "%{$keyword}%");
     }

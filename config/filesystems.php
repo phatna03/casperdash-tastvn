@@ -30,6 +30,15 @@ return [
 
   'disks' => [
 
+    //live
+    'sensors' => [
+      'driver' => 'local',
+      'root' => public_path('sensors'),
+      'throw' => false,
+      'visibility' => 'public',
+    ],
+
+    //tester
     'sensor' => [
       'driver' => 'local',
       'root' => public_path('sensor'),

@@ -136,7 +136,10 @@ class Restaurant extends Model
     }
   }
 
-
+  public function get_parent()
+  {
+    return RestaurantParent::find($this->restaurant_parent_id);
+  }
 
   //optimze
 
@@ -514,7 +517,9 @@ class Restaurant extends Model
         'restaurant_id' => $this->id,
         'status' => 'new',
 
-        'photo_url' => $pars['photo_url'],
+        'photo_url' => isset($pars['photo_url']) ? $pars['photo_url'] : NULL,
+        'local_storage' => isset($pars['local_storage']) ? (int)$pars['local_storage'] : 0,
+
         'photo_name' => $pars['photo_name'],
         'photo_ext' => $pars['photo_ext'],
         'time_photo' => $pars['time_photo'],

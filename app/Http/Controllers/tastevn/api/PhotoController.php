@@ -54,6 +54,7 @@ class PhotoController extends Controller
     $values = $request->all();
     $api_core = new SysCore();
 //    echo '<pre>';var_dump($values);die;
+    $user = Auth::user();
 
     $existed = isset($values['existed']) ? (array)$values['existed'] : [];
     $restaurants = isset($values['restaurants']) ? (array)$values['restaurants'] : [];
@@ -62,11 +63,19 @@ class PhotoController extends Controller
     $select = RestaurantFoodScan::query('restaurant_food_scans')
       ->select('restaurant_food_scans.id', 'restaurant_food_scans.photo_url', 'restaurant_food_scans.time_photo', 'restaurants.name as restaurant_name')
       ->leftJoin('restaurants', 'restaurant_food_scans.restaurant_id', '=', 'restaurants.id')
-      ->where('restaurant_food_scans.deleted', 0)
+//      ->where('restaurant_food_scans.deleted', 0)
       ->orderBy('restaurant_food_scans.time_photo', 'desc')
       ->orderBy('restaurant_food_scans.id', 'desc')
       ->limit(24)
     ;
+
+    //tester
+    if ($user && $user->id == 5) {
+
+    } else {
+      $select->where('restaurants.deleted', 0)
+        ->where('restaurant_food_scans.deleted', 0);
+    }
 
     if (count($existed)) {
       $select->whereNotIn("restaurant_food_scans.id", $existed);

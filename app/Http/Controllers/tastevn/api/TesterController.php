@@ -41,6 +41,7 @@ class TesterController extends Controller
     echo '<pre>';
     $api_core = new SysCore();
 
+    $row = RestaurantFoodScan::find(34057);
 
 
     echo '<br />';

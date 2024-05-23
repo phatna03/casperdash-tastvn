@@ -21,9 +21,12 @@ class RestaurantFoodScan extends Model
     'restaurant_id',
     'food_category_id',
     'food_id',
+
+    'local_storage',
     'photo_url',
     'photo_name',
     'photo_ext',
+
     'confidence',
     'found_by',
     'status',
@@ -90,6 +93,16 @@ class RestaurantFoodScan extends Model
     ];
   }
 
+  public function get_photo()
+  {
+    $photo = $this->photo_url;
+    if ($this->local_storage || !empty($photo)) {
+      $photo = url('sensors') . '/' . $this->photo_name;
+    }
+
+    return $photo;
+  }
+
   public function get_food()
   {
     return Food::find($this->food_id);
@@ -150,18 +163,29 @@ class RestaurantFoodScan extends Model
   {
     $api_core = new SysCore();
 
-    $result = (array)json_decode($this->rbf_api, true);
     $notification = isset($pars['notification']) ? (bool)$pars['notification'] : true;
     $restaurant = $this->get_restaurant();
 
-    if (count($result)) {
+    $result1s = (array)json_decode($this->rbf_api, true);
+    $result2s = (array)json_decode($this->rbf_api_js, true);
+
+    $rbf_time = 0;
+    if (count($result1s)) {
+      $rbf_time = $result1s['time'];
+    }
+
+    $predictions = count($result1s) ? (array)$result1s['predictions'] : [];
+    if (!count($predictions) && count($result2s)) {
+      $predictions = $result2s;
+    }
+
+    if (count($predictions)) {
 
       $food = NULL;
       $foods = [];
-      $ingredients_found = $api_core->sys_ingredients_found($result['predictions']);
+      $ingredients_found = $api_core->sys_ingredients_found($predictions);
 
       //find food
-      $predictions = $result['predictions'];
       if (count($predictions)) {
         foreach ($predictions as $prediction) {
           $prediction = (array)$prediction;
@@ -259,7 +283,7 @@ class RestaurantFoodScan extends Model
       //other params
       $this->update([
         'food_category_id' => (int)$this->find_food_category($food),
-        'total_seconds' => $result['time'],
+        'total_seconds' => $rbf_time,
         'status' => 'checked',
 
         'time_end' => date('Y-m-d H:i:s'),

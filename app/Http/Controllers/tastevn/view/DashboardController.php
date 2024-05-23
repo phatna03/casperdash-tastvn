@@ -568,8 +568,8 @@ class DashboardController extends Controller
 
     $restaurant = Restaurant::find(7);
 
-    $cur_date = date('Y-m-d');
-    $cur_hour = (int)date('H');
+    $cur_date = '2024-05-22'; //date('Y-m-d');
+    $cur_hour = 14; //(int)date('H');
 
     $temps = [];
     $filed = '';
