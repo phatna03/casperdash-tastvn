@@ -1126,6 +1126,28 @@ class SensorController extends Controller
       if (count($temps)) {
         foreach ($temps as $ing) {
           if (count($ids) && in_array($ing->id, $ids)) {
+
+            if ($ing->ingredient_quantity > 1) {
+
+              $quantity = 0;
+              if (count($ingredients_missing)) {
+                foreach ($ingredients_missing as $missing) {
+                  if ($missing['id'] == $ing->id) {
+                    $quantity = $missing['quantity'];
+                    break;
+                  }
+                }
+              }
+
+              $ingredients_found[] = [
+                'id' => $ing->id,
+                'quantity' => $ing->ingredient_quantity - $quantity,
+                'name' => $ing->name,
+                'name_vi' => $ing->name_vi,
+                'type' => $ing->ingredient_type,
+              ];
+            }
+
             continue;
           }
 
