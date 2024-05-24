@@ -502,6 +502,9 @@ function sensor_restore(ele) {
 function sensor_info(itd) {
   page_url(acmcfs.link_base_url + '/admin/sensor/info/' + itd);
 }
+function sensor_kitchen(itd) {
+  page_url(acmcfs.link_base_url + '/admin/kitchen/' + itd);
+}
 function sensor_stats() {
   var wrap = $('#wrap-stats-total');
 

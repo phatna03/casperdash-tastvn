@@ -511,13 +511,34 @@ class SensorController extends Controller
     //v2
     $data2s = $this->kitchen_food_datas($row);
     if (count($data2s) && count($data2s['ingredients_found'])) {
-      $rbf_ingredients_found = [];
 
+      //rbf
+      if ($data2s['food_id']) {
+        $rbf_food_id = $data2s['food_id'];
+        $food_photo = $data2s['food_photo'];
+
+        $rbf_food_name = $row->get_food_rbf() ? $row->get_food_rbf()->name : $row->get_food()->name;
+        $rbf_food_confidence = $row->rbf_confidence;
+      }
+
+      $rbf_ingredients_found = [];
       foreach ($data2s['ingredients_found'] as $ing) {
         $rbf_ingredients_found[] = [
           'quantity' => $ing['quantity'],
           'title' => $ing['name'],
         ];
+      }
+
+      if (count($data2s['ingredients_missing'])) {
+        $rbf_ingredients_missing = $data2s['ingredients_missing'];
+      }
+
+      //usr
+      $usr_food = Food::find($row->usr_predict);
+      if ($usr_food) {
+        $usr_food_id = $usr_food->id;
+
+        $usr_ingredients_missing = $row->get_ingredients_missing();
       }
     }
 
@@ -820,12 +841,16 @@ class SensorController extends Controller
 
   public function kitchen(string $id)
   {
-    $row = Restaurant::find((int)$id);
-    if (!$row) {
-      return redirect('page_not_found');
-    }
-
     $user = Auth::user();
+
+    $row = Restaurant::find((int)$id);
+    if (!$row || $row->deleted) {
+      if ($user->id == 5) {
+
+      } else {
+        return redirect('page_not_found');
+      }
+    }
 
     $pageConfigs = [
       'myLayout' => 'horizontal',
@@ -972,24 +997,11 @@ class SensorController extends Controller
       $printer = true;
     }
 
-    $notifications = $user->notifications()
-      ->whereIn('type', $valid_types)
-      ->where('created_at', '>', $user->time_notification)
-      ->orderBy('id', 'desc')
-      ->limit(1)
-      ->get();
+    //notify
+    if (!empty($row->missing_texts)) {
 
-    if (count($notifications)) {
-      foreach ($notifications as $notification) {
-        $row = RestaurantFoodScan::find($notification->restaurant_food_scan_id);
-        if (!$row) {
-          continue;
-        }
-
-        $ingredients = array_filter(explode('&nbsp', $row->missing_texts));
-        if (!count($ingredients)) {
-          continue;
-        }
+      $ingredients = array_filter(explode('&nbsp', $row->missing_texts));
+      if (count($ingredients)) {
 
         $notifys[] = [
           'itd' => $row->id,
@@ -1002,10 +1014,6 @@ class SensorController extends Controller
 
         $notify_ids[] = $row->id;
 
-        $user->update([
-          'time_notification' => $notification->created_at->format('Y-m-d H:i:s')
-        ]);
-
         if ($text_to_speech) {
 
           $text_ingredients_missing = '';
@@ -1013,20 +1021,20 @@ class SensorController extends Controller
             $text_ingredients_missing .= $ing['ingredient_quantity'] . ' ' . $ing['name'] . ', ';
           }
 
-          $text_to_speak = '[alert]'
+          $text_to_speak = '[alert], '
             . $row->get_restaurant()->name
 //            . ' occurred at ' . date('H:i')
-            . ", Predicted Dish, "
-            . ", " . $row->get_food()->name
+//            . ", Predicted Dish, "
+//            . ", " . $row->get_food()->name
             . ", Ingredients Missing, "
             . $text_ingredients_missing;
 
           $api_core->s3_polly([
             'text_to_speak' => $text_to_speak,
+            'text_rate' => 'slow',
           ]);
         }
       }
-
     }
 
     return response()->json([
@@ -1100,8 +1108,11 @@ class SensorController extends Controller
       if (count($temps)) {
         foreach ($temps as $ing) {
           $ingredients_missing[] = [
+            'id' => $ing->id,
             'quantity' => $ing->ingredient_quantity,
             'name' => $ing->name,
+            'name_vi' => $ing->name_vi,
+            'type' => $ing->ingredient_type,
           ];
 
           $ids[] = $ing->id;
@@ -1119,8 +1130,11 @@ class SensorController extends Controller
           }
 
           $ingredients_found[] = [
+            'id' => $ing->id,
             'quantity' => $ing->ingredient_quantity,
             'name' => $ing->name,
+            'name_vi' => $ing->name_vi,
+            'type' => $ing->ingredient_type,
           ];
         }
       }

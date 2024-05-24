@@ -2113,16 +2113,18 @@ function notification_newest() {
         });
 
 
-        if (response.data.printer) {
-          page_open(acmcfs.link_base_url + '/printer?ids=' + response.data.ids.toString());
-        }
+        //temp off
+        // if (response.data.printer) {
+        //   page_open(acmcfs.link_base_url + '/printer?ids=' + response.data.ids.toString());
+        // }
       }
 
-      if (response.data.speaker) {
-        setTimeout(function () {
-          speaker_play();
-        }, acmcfs.timeout_quick);
-      }
+      //temp off
+      // if (response.data.speaker) {
+      //   setTimeout(function () {
+      //     speaker_play();
+      //   }, acmcfs.timeout_quick);
+      // }
 
       if (response.data.role) {
         bind_staff(response.data.role);

@@ -108,6 +108,11 @@ class RestaurantFoodScan extends Model
     return Food::find($this->food_id);
   }
 
+  public function get_food_rbf()
+  {
+    return Food::find($this->rbf_predict);
+  }
+
   public function get_food_category()
   {
     return FoodCategory::find($this->food_category_id);
