@@ -628,7 +628,7 @@ class SensorController extends Controller
     $time_upload = isset($values['time_upload']) && !empty($values['time_upload']) ? $values['time_upload'] : NULL;
     $time_scan = isset($values['time_scan']) && !empty($values['time_scan']) ? $values['time_scan'] : NULL;
 
-    $select = RestaurantFoodScan::select('id', 'photo_url')
+    $select = RestaurantFoodScan::select('id', 'photo_url', 'photo_name', 'local_storage')
       ->distinct()
       ->where('restaurant_id', $row->id)
       ->where('food_id', $food->id)

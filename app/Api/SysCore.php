@@ -1154,6 +1154,7 @@ class SysCore
     DB::beginTransaction();
     try {
 
+      //api
       $restaurant->photo_s3([
         's3_region' => $s3_region,
         's3_api_key' => $s3_api_key,
@@ -1166,6 +1167,40 @@ class SysCore
 
         'file_log' => $file_log,
       ]);
+
+      //api js
+      if ($restaurant->id == 5) {
+
+        $folder_setting = $this->parse_s3_bucket_address($restaurant->s3_bucket_address);
+        $directory = $folder_setting . '/' . $scan_date . '/' . $scan_hour . '/';
+
+        $files = Storage::disk('sensors')->files($directory);
+        if (count($files)) {
+
+          //step 1= photo check again
+          foreach ($files as $file) {
+            $ext = array_filter(explode('.', $file));
+            if (!count($ext) || $ext[count($ext) - 1] != 'jpg') {
+              continue;
+            }
+
+            //check exist
+            $row = RestaurantFoodScan::where('restaurant_id', $restaurant->id)
+              ->where('photo_name', $file)
+              ->first();
+            if (!$row) {
+
+              $row = $restaurant->photo_save([
+                'local_storage' => 1,
+                'photo_url' => NULL,
+                'photo_name' => $file,
+                'photo_ext' => 'jpg',
+                'time_photo' => date('Y-m-d H:i:s'),
+              ]);
+            }
+          }
+        }
+      }
 
       DB::commit();
 

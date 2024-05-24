@@ -71,9 +71,15 @@ class DashboardController extends Controller
 
     $page = isset($values['page']) && (int)$values['page'] > 1 ? (int)$values['page'] : 1;
 
-    $notifications = Auth::user()->notifications()
-      ->orderBy('id', 'desc')
-      ->paginate(10, ['*'], 'page', $page);
+    $select = $user->notifications()
+      ->orderBy('id', 'desc');
+
+    //tester
+    if ($user && $user->id != 5) {
+      $select->where('restaurant_id', '<>', 7);
+    }
+
+    $notifications = $select->paginate(10, ['*'], 'page', $page);
 
     $pageConfigs = [
       'myLayout' => 'horizontal',
@@ -120,15 +126,27 @@ class DashboardController extends Controller
 
   public function notification_latest(Request $request)
   {
-    $notifications = Auth::user()->notifications()
-      ->orderBy('id', 'desc')
-      ->paginate(5, ['*'], 'page', 1);
+    $user = Auth::user();
 
     $html = '';
-    if (count($notifications)) {
-      $html = view('tastevn.htmls.item_notification_navbar')
-        ->with('notifications', $notifications)
-        ->render();
+
+    if ($user) {
+
+      $select = $user->notifications()
+        ->orderBy('id', 'desc');
+
+      //tester
+      if ($user && $user->id != 5) {
+        $select->where('restaurant_id', '<>', 7);
+      }
+
+      $notifications = $select->paginate(5, ['*'], 'page', 1);
+
+      if (count($notifications)) {
+        $html = view('tastevn.htmls.item_notification_navbar')
+          ->with('notifications', $notifications)
+          ->render();
+      }
     }
 
     return response()->json([
@@ -169,13 +187,18 @@ class DashboardController extends Controller
 
     if (!empty($user->time_notification)) {
 
-      $notifications = $user->notifications()
+      $select = $user->notifications()
         ->whereIn('type', $valid_types)
         ->where('created_at', '>', $user->time_notification)
         ->orderBy('id', 'asc')
-        ->limit(1)
-        ->get();
+        ->limit(1);
 
+      //tester
+      if ($user && $user->id != 5) {
+        $select->where('restaurant_id', '<>', 7);
+      }
+
+      $notifications = $select->get();
       if (count($notifications)) {
         foreach ($notifications as $notification) {
           $row = RestaurantFoodScan::find($notification->restaurant_food_scan_id);
@@ -310,6 +333,11 @@ class DashboardController extends Controller
         ->where('created_at', '>', $user->time_notification)
         ->orderBy('id', 'desc')
         ->limit(1);
+
+      //tester
+      if ($user && $user->id != 5) {
+        $select->where('restaurant_id', '<>', 7);
+      }
 
       $notifications = $select->get();
       if (count($notifications)) {
