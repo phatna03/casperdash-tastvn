@@ -281,8 +281,9 @@ class SensorController extends Controller
     ]);
   }
 
-  public function show(string $id)
+  public function show(string $id, Request $request)
   {
+    $values = $request->all();
     $user = Auth::user();
     $invalid_roles = ['user'];
     if (in_array($user->role, $invalid_roles)) {
@@ -302,11 +303,17 @@ class SensorController extends Controller
       return redirect('page_not_found');
     }
 
+    //search
+    $debug = isset($values['debug']) ? (int)$values['debug'] : 0;
+
+
     $pageConfigs = [
       'myLayout' => 'horizontal',
       'hasCustomizer' => false,
 
       'item' => $row,
+
+      'debug' => $debug,
     ];
 
     $user->add_log([
@@ -1139,13 +1146,15 @@ class SensorController extends Controller
                 }
               }
 
-              $ingredients_found[] = [
-                'id' => $ing->id,
-                'quantity' => $ing->ingredient_quantity - $quantity,
-                'name' => $ing->name,
-                'name_vi' => $ing->name_vi,
-                'type' => $ing->ingredient_type,
-              ];
+              if ($ing->ingredient_quantity - $quantity) {
+                $ingredients_found[] = [
+                  'id' => $ing->id,
+                  'quantity' => $ing->ingredient_quantity - $quantity,
+                  'name' => $ing->name,
+                  'name_vi' => $ing->name_vi,
+                  'type' => $ing->ingredient_type,
+                ];
+              }
             }
 
             continue;

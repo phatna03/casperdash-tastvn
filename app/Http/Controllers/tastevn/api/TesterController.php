@@ -41,7 +41,10 @@ class TesterController extends Controller
     echo '<pre>';
     $api_core = new SysCore();
 
-//    var_dump($datas);
+    $row = RestaurantFoodScan::find(30451);
+    $result1s = (array)json_decode($row->rbf_api, true);
+
+    var_dump($result1s);
 
     echo '<br />';
     die('test ok...');

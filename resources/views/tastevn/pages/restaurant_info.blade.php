@@ -30,6 +30,7 @@
 
   <h4 class="mb-2"><span class="text-muted fw-light">Admin /</span> Sensor: {{$pageConfigs['item']->name}}</h4>
   <input type="hidden" name="current_restaurant" value="{{$pageConfigs['item']->id}}"/>
+  <input type="hidden" name="debug" value="{{$pageConfigs['debug']}}"/>
 
   <div class="row g-4 mb-4">
     <div class="col-lg-12 wrap-stats" id="wrap-stats-total">
@@ -590,15 +591,16 @@
               html = '<div><span class="badge bg-info">' + full['status'] + '</span></div>';
             }
 
+            var debug = $('input[name=debug]').val();
             var html_admin = '<div></div>';
-            // if (parseInt(acmcfs.rbf_auth)) {
-            //   html_admin = '<div class="mt-1">' +
-            //     '<button type="button" class="btn btn-sm btn-primary p-1 acm-mr-px-10" onclick="sensor_food_scan_api(this, 1)"><i class="mdi mdi-food ic_current"></i> re-predict</button>' +
-            //     '</div>' +
-            //     '<div class="mt-1">' +
-            //     '<button type="button" class="btn btn-sm btn-danger p-1"  onclick="sensor_food_scan_api(this, 2)"><i class="mdi mdi-api ic_current"></i> re-scan-api</button>' +
-            //     '</div>';
-            // }
+            if (parseInt(debug)) {
+              html_admin = '<div class="mt-1">' +
+                '<button type="button" class="btn btn-sm btn-primary p-1 acm-mr-px-10" onclick="sensor_food_scan_api(this, 1)"><i class="mdi mdi-food ic_current"></i> re-predict</button>' +
+                '</div>' +
+                '<div class="mt-1">' +
+                '<button type="button" class="btn btn-sm btn-danger p-1"  onclick="sensor_food_scan_api(this, 2)"><i class="mdi mdi-api ic_current"></i> re-scan-api</button>' +
+                '</div>';
+            }
 
             return ('<div>'
               + html
