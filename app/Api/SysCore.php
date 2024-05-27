@@ -154,7 +154,7 @@ class SysCore
     if (count($pars) && isset($pars['scan_date'])) {
       $scan_date = $pars['scan_date'];
     }
-    $scan_hour = date('H');
+    $scan_hour = (int)date('H');
     if (count($pars) && isset($pars['scan_hour'])) {
       $scan_hour = $pars['scan_hour'];
     }
@@ -1144,7 +1144,7 @@ class SysCore
     if (count($pars) && isset($pars['scan_date'])) {
       $scan_date = $pars['scan_date'];
     }
-    $scan_hour = date('H');
+    $scan_hour = (int)date('H');
     if (count($pars) && isset($pars['scan_hour'])) {
       $scan_hour = $pars['scan_hour'];
     }
@@ -1173,6 +1173,11 @@ class SysCore
 
         $folder_setting = $this->parse_s3_bucket_address($restaurant->s3_bucket_address);
         $directory = $folder_setting . '/' . $scan_date . '/' . $scan_hour . '/';
+
+        $path = public_path('sensors') . '/' . $directory;
+        if (!file_exists($path)) {
+          mkdir($path, 0777, true);
+        }
 
         $files = Storage::disk('sensors')->files($directory);
         if (count($files)) {
