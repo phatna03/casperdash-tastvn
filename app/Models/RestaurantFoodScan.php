@@ -312,6 +312,11 @@ class RestaurantFoodScan extends Model
         $this->add_ingredients_missing($food, $ingredients_missing, $notification);
       }
     }
+    else {
+      $this->update([
+        'status' => 'failed',
+      ]);
+    }
   }
 
   public function find_food_category($food)
