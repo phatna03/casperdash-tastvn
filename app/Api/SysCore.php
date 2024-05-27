@@ -1169,41 +1169,40 @@ class SysCore
       ]);
 
       //api js
-      if ($restaurant->id == 5) {
+      $folder_setting = $this->parse_s3_bucket_address($restaurant->s3_bucket_address);
+      $directory = $folder_setting . '/' . $scan_date . '/' . $scan_hour . '/';
 
-        $folder_setting = $this->parse_s3_bucket_address($restaurant->s3_bucket_address);
-        $directory = $folder_setting . '/' . $scan_date . '/' . $scan_hour . '/';
+      $path = public_path('sensors') . '/' . $directory;
+      if (!file_exists($path)) {
+        mkdir($path, 0777, true);
+      }
 
-        $path = public_path('sensors') . '/' . $directory;
-        if (!file_exists($path)) {
-          mkdir($path, 0777, true);
-        }
+      $files = Storage::disk('sensors')->files($directory);
+      if (count($files)) {
 
-        $files = Storage::disk('sensors')->files($directory);
-        if (count($files)) {
-
-          //step 1= photo check again
-          foreach ($files as $file) {
-            $ext = array_filter(explode('.', $file));
-            if (!count($ext) || $ext[count($ext) - 1] != 'jpg') {
-              continue;
-            }
-
-            //check exist
-            $row = RestaurantFoodScan::where('restaurant_id', $restaurant->id)
-              ->where('photo_name', $file)
-              ->first();
-            if (!$row) {
-
-              $row = $restaurant->photo_save([
-                'local_storage' => 1,
-                'photo_url' => NULL,
-                'photo_name' => $file,
-                'photo_ext' => 'jpg',
-                'time_photo' => date('Y-m-d H:i:s'),
-              ]);
-            }
+        //step 1= photo check again
+        foreach ($files as $file) {
+          $ext = array_filter(explode('.', $file));
+          if (!count($ext) || $ext[count($ext) - 1] != 'jpg') {
+            continue;
           }
+
+          //check exist
+          $row = RestaurantFoodScan::where('restaurant_id', $restaurant->id)
+            ->where('photo_name', $file)
+            ->first();
+          if (!$row) {
+
+            $row = $restaurant->photo_save([
+              'local_storage' => 1,
+              'photo_url' => NULL,
+              'photo_name' => $file,
+              'photo_ext' => 'jpg',
+              'time_photo' => date('Y-m-d H:i:s'),
+            ]);
+          }
+
+          $restaurant->photo_scan($row);
         }
       }
 

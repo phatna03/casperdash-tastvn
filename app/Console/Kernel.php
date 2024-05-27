@@ -21,12 +21,12 @@ class Kernel extends ConsoleKernel
     //cargo
     $schedule->command('tastevn:s3todo', [1, 1])
       ->withoutOverlapping()
-      ->everyTwoSeconds()
+      ->everyFiveSeconds()
       ->runInBackground();
 
     $schedule->command('tastevn:s3todo', [1, 2])
       ->withoutOverlapping()
-      ->everyTwoSeconds()
+      ->everyFiveSeconds()
       ->runInBackground();
     //deli
     $schedule->command('tastevn:s3todo', [1, 3])
