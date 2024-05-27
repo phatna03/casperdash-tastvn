@@ -349,7 +349,7 @@
       model.configure({
         threshold: 0.3,
         overlap: 0.6,
-        max_objects: 30
+        max_objects: 100
       });
 
       acmcfs.rbf_model = model;

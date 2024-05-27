@@ -1174,7 +1174,7 @@ class SysCore
 
       $path = public_path('sensors') . '/' . $directory;
       if (!file_exists($path)) {
-        mkdir($path, 0777, true);
+//        mkdir($path, 0777, true);
       }
 
       $files = Storage::disk('sensors')->files($directory);
