@@ -41,10 +41,27 @@ class TesterController extends Controller
     echo '<pre>';
     $api_core = new SysCore();
 
-    $row = RestaurantFoodScan::find(30451);
-    $result1s = (array)json_decode($row->rbf_api, true);
 
-    var_dump($result1s);
+
+//    $URL1 = 'http://192.168.1.22:9001';
+//    $image = 'https://s3.ap-southeast-1.amazonaws.com/cargo.tastevietnam.asia/58-5b-69-19-ad-67/SENSOR/1/2024-05-26/19/SENSOR_2024-05-26-19-59-04-857_065.jpg';
+//
+//    $URL = $URL1 . '/missing-dish-ingredients/29?api_key=uYUCzsUbWxWRrO15iar5&image=' . $image;
+//
+//    $curl = curl_init();
+//
+//    curl_setopt_array($curl, Array(
+//      CURLOPT_URL            => $URL,
+//      CURLOPT_RETURNTRANSFER => TRUE,
+//      CURLOPT_ENCODING       => 'UTF-8'
+//    ));
+//
+//    $data = curl_exec($curl);
+//    curl_close($curl);
+//
+//    $data = (array)json_decode($data, true);
+//
+//    var_dump($data);
 
     echo '<br />';
     die('test ok...');

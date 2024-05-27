@@ -277,6 +277,8 @@ class FoodController extends Controller
       ], 422);
     }
 
+    $restaurant_parent = RestaurantParent::find($restaurant_parent_id);
+
     //ingredients
     $ingredients = isset($values['ingredients']) && !empty($values['ingredients'])
       ? (array)json_decode($values['ingredients'], true) : [];
@@ -300,6 +302,18 @@ class FoodController extends Controller
       'restaurant_parent_id' => $restaurant_parent_id,
     ]);
     if (json_encode($diffs['before']) !== json_encode($diffs['after'])) {
+
+      //serve
+      $items = [];
+      $items[] = [
+        'food_id' => $row->id,
+      ];
+
+      $sensors = $restaurant_parent->get_sensors();
+      foreach ($sensors as $sensor) {
+        $sensor->import_foods($items);
+      }
+
       $user->add_log([
         'type' => 'edit_' . $row->get_type() . '_ingredient',
         'item_id' => (int)$row->id,

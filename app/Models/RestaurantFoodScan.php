@@ -191,50 +191,48 @@ class RestaurantFoodScan extends Model
       $ingredients_found = $api_core->sys_ingredients_found($predictions);
 
       //find food
-      if (count($predictions)) {
-        foreach ($predictions as $prediction) {
-          $prediction = (array)$prediction;
+      foreach ($predictions as $prediction) {
+        $prediction = (array)$prediction;
 
-          $confidence = (int)($prediction['confidence'] * 100);
+        $confidence = (int)($prediction['confidence'] * 100);
 
-          $found = Food::whereRaw('LOWER(name) LIKE ?', strtolower(trim($prediction['class'])))
-            ->first();
-          if ($found && $confidence >= 50 && count($ingredients_found) && $restaurant->serve_food($found)) {
+        $found = Food::whereRaw('LOWER(name) LIKE ?', strtolower(trim($prediction['class'])))
+          ->first();
+        if ($found && $confidence >= 50 && count($ingredients_found) && $restaurant->serve_food($found)) {
 
-            //check valid ingredient
-            $valid_food = true;
-            $food_ingredients = $found->get_ingredients([
-              'restaurant_parent_id' => $restaurant->restaurant_parent_id,
-            ]);
-            if (!count($food_ingredients)) {
-              $valid_food = false;
-            }
+          //check valid ingredient
+          $valid_food = true;
+          $food_ingredients = $found->get_ingredients([
+            'restaurant_parent_id' => $restaurant->restaurant_parent_id,
+          ]);
+          if (!count($food_ingredients)) {
+            $valid_food = false;
+          }
 
-            //check core ingredient
-            $valid_core = true;
-            $core_ids = $found->get_ingredients_core([
-              'restaurant_parent_id' => $restaurant->restaurant_parent_id,
-              'ingredient_id_only' => 1,
-            ]);
-            if (count($core_ids)) {
-              $found_ids = array_column($ingredients_found, 'id');
-              $found_count = 0;
-              foreach ($found_ids as $found_id) {
-                if (in_array($found_id, $core_ids)) {
-                  $found_count++;
-                }
-              }
-              if ($found_count != count($core_ids)) {
-                $valid_core = false;
+          //check core ingredient
+          $valid_core = true;
+          $core_ids = $found->get_ingredients_core([
+            'restaurant_parent_id' => $restaurant->restaurant_parent_id,
+            'ingredient_id_only' => 1,
+          ]);
+          if (count($core_ids)) {
+            $found_ids = array_column($ingredients_found, 'id');
+            $found_count = 0;
+            foreach ($found_ids as $found_id) {
+              if (in_array($found_id, $core_ids)) {
+                $found_count++;
               }
             }
-
-            if ($valid_core && $valid_food) {
-              $foods[] = [
-                'food' => $found->id,
-                'confidence' => $confidence,
-              ];
+            if ($found_count != count($core_ids)) {
+              $valid_core = false;
             }
+          }
+
+          if ($valid_core && $valid_food) {
+            $foods[] = [
+              'food' => $found->id,
+              'confidence' => $confidence,
+            ];
           }
         }
       }

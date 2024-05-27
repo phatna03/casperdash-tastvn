@@ -71,9 +71,9 @@ class Restaurant extends Model
         }
 
         $row->update([
-          'food_category_id' => (int)$data['food_category_id'],
-          'photo' => $data['photo'],
-          'live_group' => $data['live_group'],
+          'food_category_id' => isset($data['food_category_id']) ? (int)$data['food_category_id'] : 0,
+          'photo' => isset($data['photo']) ? $data['photo'] : NULL,
+          'live_group' => isset($data['live_group']) ? (int)$data['live_group'] : 3,
           'deleted' => 0,
         ]);
 
