@@ -36,11 +36,15 @@ class RoboflowController extends Controller
 
   public function index(Request $request)
   {
+    $values = $request->all();
+
     $user = Auth::user();
     $invalid_roles = ['user'];
     if (in_array($user->role, $invalid_roles)) {
       return redirect('page_not_found');
     }
+
+    $debug = isset($values['debug']) ? (int)$values['debug'] : 0;
 
     $food = Food::where('deleted', 0)
       ->orderByDesc('id')
@@ -51,10 +55,7 @@ class RoboflowController extends Controller
       'myLayout' => 'horizontal',
       'hasCustomizer' => false,
 
-      'item' => [
-        'food_4' => $food,
-        'food_4_ingredients' => $food->get_ingredients(),
-      ]
+      'debug' => $debug
     ];
 
     $user->add_log([

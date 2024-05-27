@@ -224,7 +224,7 @@
     async function rbf_load_model() {
       var model = await roboflow.load({
         model: "missing-dish-ingredients",
-        version: 27
+        version: 29
       });
 
       model.configure({

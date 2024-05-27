@@ -2,18 +2,6 @@
 
 @section('title', 'Admin - Roboflow')
 
-@section('vendor-style')
-{{--  <link rel="stylesheet" href="{{asset('assets/vendor/libs/spinkit/spinkit.css')}}" />--}}
-@endsection
-
-@section('vendor-script')
-{{--  <script src="{{asset('assets/vendor/libs/dropzone/dropzone.js')}}"></script>--}}
-@endsection
-
-@section('page-script')
-{{--  <script src="{{asset('assets/js/forms-file-upload.js')}}"></script>--}}
-@endsection
-
 @section('content')
   <h4 class="mb-2">
     <span class="text-muted fw-light">Admin /</span> Roboflow
@@ -86,25 +74,32 @@
                         <input type="file" name="thumb" accept=".gif,.jpg,.jpeg,.png,.bmp,.webp"
                                id="img_roboflow" required class="form-control" />
                       </div>
-                      <div class="position-relative w-100 mb-2 d-none" id="wrap_img">
+                      <div class="position-relative w-100 mb-2" id="wrap_img">
                         <div class="text-center w-auto">
-                          <img class="w-100 mt-2" src="{{url('uploaded/food/food_4.jpg')}}" />
+                          <img class="w-100 mt-2" src="{{url('custom/img/no_photo.png')}}" />
                         </div>
-                        <div class="mt-2" id="wrap_return"></div>
                       </div>
                     </form>
                   </div>
 
                   <div class="col-lg-6">
-                    <div class="position-relative w-100 mt-2" id="wrap_results">
-
-                    </div>
+                    <div class="position-relative w-100 mt-2" id="wrap_results"></div>
                   </div>
                 </div>
               </div>
 
-            </div>
+              <div class="row">
+                <div class="@if($pageConfigs['debug']) col-lg-6 @else col-lg-12 @endif">
+                  <div class="mt-2" id="wrap_return"></div>
+                </div>
 
+                @if($pageConfigs['debug'])
+                <div class="col-lg-6">
+                  <div class="mt-2 d-none" id="wrap_return_js"></div>
+                </div>
+                @endif
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -114,6 +109,11 @@
 @endsection
 
 @section('js_end')
+
+  @if($pageConfigs['debug'])
+    <script src="{{url('custom/library/roboflow/roboflow.js')}}"></script>
+  @endif
+
   <script type="text/javascript">
     $(document).ready(function() {
 
@@ -241,6 +241,39 @@
           var html = '';
           var htmlReturn = '';
 
+          $('#wrap_return_js').addClass('d-none');
+
+          @if($pageConfigs['debug'])
+          var photo_img = new Image();
+          photo_img.crossOrigin = "anonymous";
+          photo_img.src = acmcfs.link_base_url + '/roboflow/test/roboflow_detect.jpg';
+
+          setTimeout(function () {
+            acmcfs.rbf_model.detect(photo_img).then(function (predictions) {
+              console.log("Predictions: ", predictions);
+
+              var htmlJS = '';
+
+              htmlJS = '<div class="text-primary fw-bold mb-1 mt-1">+ Roboflow JS</div>';
+              if (predictions.length) {
+                predictions.forEach(function (v, k) {
+                  htmlJS += '<div>- <b class="text-danger fw-bold">' + parseInt(v.confidence * 100) + '%</b> - ' + v.class + '</div>';
+                  // htmlJS += '<div><span class="acm-mr-px-10">[x = ' + v.x + ']</span>';
+                  // htmlJS += '<span>[y = ' + v.y + '</span>]</div>';
+                  // htmlJS += '<div><span class="acm-mr-px-10">[width = ' + v.width + ']</span>';
+                  // htmlJS += '<span>[height = ' + v.height + ']</span></div>'
+                  ;
+                });
+              } else {
+                htmlJS += '<div>---</div>';
+              }
+
+              $('#wrap_return_js').removeClass('d-none');
+              $('#wrap_return_js').empty().append(htmlJS);
+            });
+          }, 888);
+          @endif
+
           if (xhr.responseJSON.status) {
 
             //foods
@@ -269,14 +302,15 @@
               html += '<div>---</div>';
             }
 
-            htmlReturn += '<div class="text-primary fw-bold mb-1 mt-1">+ Roboflow API return</div>';
+            htmlReturn += '<div class="text-primary fw-bold mb-1 mt-1">+ Roboflow API</div>';
             if (xhr.responseJSON.data.food.predictions && xhr.responseJSON.data.food.predictions.length) {
               xhr.responseJSON.data.food.predictions.forEach(function (v, k) {
                 htmlReturn += '<div>- <b class="text-danger fw-bold">' + parseInt(v.confidence * 100) + '%</b> - ' + v.class + '</div>';
-                htmlReturn += '<div><span class="acm-mr-px-10">[x = ' + v.x + ']</span>';
-                htmlReturn += '<span>[y = ' + v.y + '</span>]</div>';
-                htmlReturn += '<div><span class="acm-mr-px-10">[width = ' + v.width + ']</span>';
-                htmlReturn += '<span>[height = ' + v.height + ']</span></div>';
+                // htmlReturn += '<div><span class="acm-mr-px-10">[x = ' + v.x + ']</span>';
+                // htmlReturn += '<span>[y = ' + v.y + '</span>]</div>';
+                // htmlReturn += '<div><span class="acm-mr-px-10">[width = ' + v.width + ']</span>';
+                // htmlReturn += '<span>[height = ' + v.height + ']</span></div>'
+                ;
               });
             } else {
               htmlReturn += '<div>---</div>';
@@ -300,5 +334,44 @@
 
       return false;
     }
+
+    @if($pageConfigs['debug'])
+    //roboflow init
+    roboflow.auth({
+      publishable_key: "rf_3DtUFXV7oiSXMh2VkXK8d0EHcRD2"
+    });
+    async function rbf_load_model() {
+      var model = await roboflow.load({
+        model: "missing-dish-ingredients",
+        version: 29
+      });
+
+      model.configure({
+        threshold: 0.3,
+        overlap: 0.6,
+        max_objects: 30
+      });
+
+      acmcfs.rbf_model = model;
+
+      return model;
+    }
+    //roboflow check ready
+    rbf_load_model().then(model => {
+      console.log("==============================================");
+      console.log("RBF load success......");
+
+      // Do something with the model
+      console.log(model.getMetadata());
+      console.log(model.getConfiguration());
+      console.log('ok...');
+
+      sys_ready = 1;
+
+    }).catch(error => {
+      console.log("==============================================");
+      console.error('Error loading model:', error);
+    });
+    @endif
   </script>
 @endsection

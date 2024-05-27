@@ -448,4 +448,19 @@ class GuestController extends Controller
       'status' => true,
     ], 200);
   }
+
+  //guide
+  public function guide()
+  {
+    if (!Auth::user()) {
+      return redirect('/login');
+    }
+
+    $pageConfigs = [
+      'myLayout' => 'horizontal',
+      'hasCustomizer' => false,
+    ];
+    return view('tastevn.pages.guide', ['pageConfigs' => $pageConfigs]);
+  }
+
 }

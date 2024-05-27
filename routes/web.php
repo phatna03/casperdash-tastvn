@@ -532,7 +532,7 @@ Route::post('/admin/notification/latest', [DashboardController::class, 'notifica
 Route::post('/admin/notification/newest', [DashboardController::class, 'notification_newest']);
 Route::post('/admin/notification/dashboard', [DashboardController::class, 'notification_dashboard']);
 
-
+Route::get('/guide', [GuestController::class, 'guide']);
 Route::get('/guide/printer', [GuestController::class, 'guide_printer']);
 Route::get('/guide/speaker', [GuestController::class, 'guide_speaker']);
 
