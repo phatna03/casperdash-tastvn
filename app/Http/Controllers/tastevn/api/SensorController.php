@@ -962,22 +962,31 @@ class SensorController extends Controller
       ], 422);
     }
 
-    $datas = isset($values['datas']) ? (array)$values['datas'] : [];
-    if (count($datas)) {
-//      foreach ($datas as $class) {
-//        var_dump('===========');
-//        var_dump($class);
-//      }
+    $type = isset($values['type']) ? $values['type'] : NULL;
 
-      //step 2= photo scan
-      $row->update([
-        'time_scan' => date('Y-m-d H:i:s'),
-        'status' => count($datas) ? 'scanned' : 'failed',
-        'rbf_api_js' => count($datas) ? json_encode($datas) : NULL,
-      ]);
+    switch ($type) {
+      case 'api':
 
-      //step 3= photo predict
-      $row->predict_food();
+        if ($row->status == 'new') {
+          $restaurant->photo_scan($row);
+        }
+
+        break;
+
+      default:
+
+        $datas = isset($values['datas']) ? (array)$values['datas'] : [];
+        if (count($datas)) {
+          //step 2= photo scan
+          $row->update([
+            'time_scan' => date('Y-m-d H:i:s'),
+            'status' => count($datas) ? 'scanned' : 'failed',
+            'rbf_api_js' => count($datas) ? json_encode($datas) : NULL,
+          ]);
+
+          //step 3= photo predict
+          $row->predict_food();
+        }
     }
 
     //refresh

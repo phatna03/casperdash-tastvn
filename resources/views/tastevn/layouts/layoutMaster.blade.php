@@ -55,6 +55,7 @@
 
     rbf_model: null,
     rbf_auth: 1,
+    rbf_js: 1,
 
     //speaker
     speaker: 0,

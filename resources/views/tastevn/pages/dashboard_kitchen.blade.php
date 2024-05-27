@@ -312,6 +312,64 @@
       return false;
     }
 
+    function food_predict_by_api(item_id) {
+      var wrap = $('.wrap-selected-food');
+
+      $('.result_photo_status .data_result').empty()
+        .append('<div class="badge bg-success fw-bold acm-ml-px-10 acm-fs-15">predicting...</div>');
+
+      axios.post('/admin/kitchen/predict', {
+        item: item_id,
+        restaurant_id: '{{$pageConfigs['item']->id}}',
+        type: 'api',
+      })
+        .then(response => {
+
+          //show data
+          food_datas(response.data.datas);
+
+          //notify
+          if (response.data.notifys && response.data.notifys.length) {
+
+            response.data.notifys.forEach(function (v, k) {
+
+              var html_toast = '<div class="cursor-pointer" onclick="sensor_food_scan_info(' + v.itd + ')">';
+              html_toast += '<div class="acm-fs-13">+ Predicted Dish: <b><span class="acm-mr-px-5 text-danger">' + v.food_confidence + '%</span><span>' + v.food_name + '</span></b></div>';
+
+              html_toast += '<div class="acm-fs-13">+ Ingredients Missing:</div>';
+              v.ingredients.forEach(function (v1, k1) {
+                if (v1 && v1 !== '' && v1.trim() !== '') {
+                  html_toast += '<div class="acm-fs-13 acm-ml-px-10">- ' + v1 + '</div>';
+                }
+              });
+
+              html_toast += '</div>';
+              message_from_toast('info', v.restaurant_name, html_toast, true);
+            });
+
+
+            if (response.data.printer) {
+              page_open(acmcfs.link_base_url + '/printer?ids=' + response.data.notify_ids.toString());
+            }
+          }
+
+          if (response.data.speaker) {
+            setTimeout(function () {
+              speaker_play();
+            }, 888);
+          }
+
+          //end
+          sys_ready = 1;
+
+        })
+        .catch(error => {
+          console.log(error);
+        });
+
+      return false;
+    }
+
     function sensor_checker() {
 
       if (sys_running) {
@@ -354,36 +412,39 @@
             if (sys_ready && response.data.status == 'new') {
               sys_ready = 0;
 
-              var photo_img = new Image();
-              photo_img.crossOrigin = "anonymous";
-              photo_img.src = response.data.file_url;
+              if (parseInt(acmcfs.rbf_js)) {
+                var photo_img = new Image();
+                photo_img.crossOrigin = "anonymous";
+                photo_img.src = response.data.file_url;
 
-              console.log("==============================================");
-              console.log("RBF start......");
+                console.log("==============================================");
+                console.log("RBF start......");
 
-              if (acmcfs.rbf_model) {
+                if (acmcfs.rbf_model) {
 
-                setTimeout(function () {
-                  acmcfs.rbf_model.detect(photo_img).then(function (predictions) {
-                    console.log("Photo URL: ", response.data.file_url);
-                    console.log("Predictions: ", predictions);
-                    food_predict_by_datas(response.data.file_id, predictions);
+                  setTimeout(function () {
+                    acmcfs.rbf_model.detect(photo_img).then(function (predictions) {
+                      console.log("Photo URL: ", response.data.file_url);
+                      console.log("Predictions: ", predictions);
+                      food_predict_by_datas(response.data.file_id, predictions);
 
-                  });
-                }, 888);
+                    });
+                  }, 888);
+                }
+              } else {
+                food_predict_by_api(response.data.file_id);
               }
             }
-
           }
         })
         .catch(error => {
           console.log(error);
 
-          if (error.response.data && Object.values(error.response.data).length) {
-            Object.values(error.response.data).forEach(function (v, k) {
-              message_from_toast('error', acmcfs.message_title_error, v);
-            });
-          }
+          // if (error.response.data && Object.values(error.response.data).length) {
+          //   Object.values(error.response.data).forEach(function (v, k) {
+          //     message_from_toast('error', acmcfs.message_title_error, v);
+          //   });
+          // }
         })
         .then(res => {
           sys_running = 0;
