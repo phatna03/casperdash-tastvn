@@ -3,14 +3,16 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-
 use Illuminate\Support\Facades\Storage;
+
+use App\Api\SysCore;
+use App\Models\RestaurantFoodScan;
 
 class SyncImagesToS3 extends Command
 {
   protected $signature = 'sync:images-to-s3';
 
-  protected $description = 'Sync photo to S3 bucket';
+  protected $description = 'Sync photos to S3 bucket';
 
   protected $directories = [
     'cargo' => [
@@ -46,6 +48,9 @@ class SyncImagesToS3 extends Command
 
   public function handle()
   {
+    $api_core = new SysCore();
+    $s3_region = $api_core->get_setting('s3_region');
+
     foreach ($this->directories as $restaurant => $directory) {
 
       $count = 0;
@@ -60,9 +65,28 @@ class SyncImagesToS3 extends Command
       $files = $localDisk->allFiles($directory['folder']);
 
       foreach ($files as $file) {
-        $status = $s3Disk->put($file, $localDisk->get($file));
 
-        $count++;
+        $status = $s3Disk->put($file, $localDisk->get($file));
+        if ($status) {
+
+          $count++;
+
+          $row = RestaurantFoodScan::where('photo_name', $file)
+            ->first();
+          if ($row) {
+
+            $restaurant = $row->get_restaurant();
+            $URL = "https://s3.{$s3_region}.amazonaws.com/{$restaurant->s3_bucket_name}/{$file}";
+
+            if (@getimagesize($URL)) {
+              $row->update([
+                'local_storage' => 0,
+                'photo_url' => $URL,
+              ]);
+            }
+          }
+        }
+
         Storage::append($file_log, 'FILE_SYNC_STATUS= ' . $status);
         Storage::append($file_log, 'FILE_SYNC_DATA= ' . $file);
       }

@@ -77,7 +77,7 @@ return [
       'key' => env('AWS_ACCESS_KEY_ID'),
       'secret' => env('AWS_SECRET_ACCESS_KEY'),
       'region' => env('AWS_DEFAULT_REGION'),
-      'bucket' => 'cargo.tastevietnam.asia',
+      'bucket' => env('AWS_BUCKET_CARGO'),
     ],
 
     's3_bucket_deli' => [
@@ -85,7 +85,7 @@ return [
       'key' => env('AWS_ACCESS_KEY_ID'),
       'secret' => env('AWS_SECRET_ACCESS_KEY'),
       'region' => env('AWS_DEFAULT_REGION'),
-      'bucket' => 'assets.tastevietnam.asia',
+      'bucket' => env('AWS_BUCKET_DELI'),
     ],
 
     's3_bucket_market' => [
@@ -93,7 +93,7 @@ return [
       'key' => env('AWS_ACCESS_KEY_ID'),
       'secret' => env('AWS_SECRET_ACCESS_KEY'),
       'region' => env('AWS_DEFAULT_REGION'),
-      'bucket' => 'market.tastevietnam.asisa',
+      'bucket' => env('AWS_BUCKET_MARKET'),
     ],
 
     's3_bucket_poison' => [
@@ -101,7 +101,7 @@ return [
       'key' => env('AWS_ACCESS_KEY_ID'),
       'secret' => env('AWS_SECRET_ACCESS_KEY'),
       'region' => env('AWS_DEFAULT_REGION'),
-      'bucket' => 'poison.tastevietnam.asia',
+      'bucket' => env('AWS_BUCKET_POISON'),
     ],
   ],
 
