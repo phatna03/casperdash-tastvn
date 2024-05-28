@@ -32,7 +32,10 @@ package-lock.log
 
 /public/roboflow
 /public/uploaded
-/public/sensor
+/public/sensors
+
+/composer.lock
+composer.lock
 
 /node_modules
 /vendor

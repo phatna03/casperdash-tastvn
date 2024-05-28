@@ -40,18 +40,19 @@ class TesterController extends Controller
 {
   public function index(Request $request)
   {
-//    echo '<pre>';
+    echo '<pre>';
     $api_core = new SysCore();
     $user = Auth::user();
 
+
+
+    echo '<br />';
+    die('test ok...');
 
     $pageConfigs = [
       'myLayout' => 'horizontal',
       'hasCustomizer' => false,
     ];
-
-//    echo '<br />';
-//    die('test ok...');
 
     return view('tastevn.pages.tester', ['pageConfigs' => $pageConfigs]);
   }

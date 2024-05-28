@@ -39,9 +39,9 @@ return [
     ],
 
     //tester
-    'sensor' => [
+    'tester' => [
       'driver' => 'local',
-      'root' => public_path('sensor'),
+      'root' => public_path('tester'),
       'throw' => false,
       'visibility' => 'public',
     ],
@@ -60,18 +60,49 @@ return [
       'throw' => false,
     ],
 
-    's3' => [
+//    's3' => [
+//      'driver' => 's3',
+//      'key' => env('AWS_ACCESS_KEY_ID'),
+//      'secret' => env('AWS_SECRET_ACCESS_KEY'),
+//      'region' => env('AWS_DEFAULT_REGION'),
+//      'bucket' => env('AWS_BUCKET'),
+//      'url' => env('AWS_URL'),
+//      'endpoint' => env('AWS_ENDPOINT'),
+//      'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
+//      'throw' => false,
+//    ],
+
+    's3_bucket_cargo' => [
       'driver' => 's3',
       'key' => env('AWS_ACCESS_KEY_ID'),
       'secret' => env('AWS_SECRET_ACCESS_KEY'),
       'region' => env('AWS_DEFAULT_REGION'),
-      'bucket' => env('AWS_BUCKET'),
-      'url' => env('AWS_URL'),
-      'endpoint' => env('AWS_ENDPOINT'),
-      'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
-      'throw' => false,
+      'bucket' => 'cargo.tastevietnam.asia',
     ],
 
+    's3_bucket_deli' => [
+      'driver' => 's3',
+      'key' => env('AWS_ACCESS_KEY_ID'),
+      'secret' => env('AWS_SECRET_ACCESS_KEY'),
+      'region' => env('AWS_DEFAULT_REGION'),
+      'bucket' => 'assets.tastevietnam.asia',
+    ],
+
+    's3_bucket_market' => [
+      'driver' => 's3',
+      'key' => env('AWS_ACCESS_KEY_ID'),
+      'secret' => env('AWS_SECRET_ACCESS_KEY'),
+      'region' => env('AWS_DEFAULT_REGION'),
+      'bucket' => 'market.tastevietnam.asisa',
+    ],
+
+    's3_bucket_poison' => [
+      'driver' => 's3',
+      'key' => env('AWS_ACCESS_KEY_ID'),
+      'secret' => env('AWS_SECRET_ACCESS_KEY'),
+      'region' => env('AWS_DEFAULT_REGION'),
+      'bucket' => 'poison.tastevietnam.asia',
+    ],
   ],
 
   /*
