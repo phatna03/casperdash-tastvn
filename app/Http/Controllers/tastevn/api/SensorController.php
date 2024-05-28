@@ -976,7 +976,7 @@ class SensorController extends Controller
       default:
 
         $datas = isset($values['datas']) ? (array)$values['datas'] : [];
-        if (count($datas)) {
+        if (count($datas) && $row->status == 'new') {
           //step 2= photo scan
           $row->update([
             'time_scan' => date('Y-m-d H:i:s'),

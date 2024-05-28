@@ -543,6 +543,7 @@ Route::get('/page_not_found', [GuestController::class, 'page_not_found']);
 Route::get('/excel1', [GuestController::class, 'excel1']);
 Route::get('/excel2', [GuestController::class, 'excel2']);
 Route::get('/tester', [TesterController::class, 'index']);
+Route::post('/tester/post', [TesterController::class, 'tester_post']);
 
 Route::get('/admin/settings', [SettingController::class, 'index']);
 Route::post('/admin/setting/update', [SettingController::class, 'update']);

@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 use Validator;
+use App\Api\SysCore;
 use App\Excel\ImportData;
 
 use App\Models\Food;
@@ -17,8 +18,12 @@ use App\Models\Ingredient;
 
 class FoodController extends Controller
 {
+  protected $_api_core = null;
+
   public function __construct()
   {
+    $this->_api_core = new SysCore();
+
     $this->middleware(function ($request, $next) {
       return $next($request);
     });
@@ -313,6 +318,9 @@ class FoodController extends Controller
       foreach ($sensors as $sensor) {
         $sensor->import_foods($items);
       }
+
+      //re-count
+      $this->_api_core->sys_stats_count();
 
       $user->add_log([
         'type' => 'edit_' . $row->get_type() . '_ingredient',

@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 use App\Notifications\IngredientMissing;
 use App\Notifications\IngredientMissingMail;
@@ -376,7 +377,17 @@ class RestaurantFoodScan extends Model
 //            $valid_setting = true;
 //          }
 
-          if (!$valid_group || !$valid_setting) {
+          //isset notify
+          $notify = DB::table('notifications')
+            ->distinct()
+            ->where('notifiable_type', 'App\Models\User')
+            ->where('notifiable_id', $user->id)
+            ->whereIn('type', ['App\Notifications\IngredientMissing'])
+            ->orderBy('id', 'desc')
+            ->limit(1)
+            ->first();
+
+          if (!$valid_group || !$valid_setting || $notify) {
             continue;
           }
 

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Ingredient;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 use Validator;
@@ -187,10 +188,13 @@ class DashboardController extends Controller
 
     if (!empty($user->time_notification)) {
 
-      $select = $user->notifications()
+      $select = DB::table('notifications')
+        ->distinct()
+        ->where('notifiable_type', 'App\Models\User')
+        ->where('notifiable_id', $user->id)
         ->whereIn('type', $valid_types)
         ->where('created_at', '>', $user->time_notification)
-        ->orderBy('id', 'asc')
+        ->orderBy('id', 'desc')
         ->limit(1);
 
       //tester
@@ -222,10 +226,6 @@ class DashboardController extends Controller
 
           $ids[] = $row->id;
 
-          $user->update([
-            'time_notification' => $notification->created_at->format('Y-m-d H:i:s')
-          ]);
-
           if ($text_to_speech) {
 
             $text_ingredients_missing = '';
@@ -244,20 +244,12 @@ class DashboardController extends Controller
             ]);
           }
         }
-
-      } else {
-
-        $user->update([
-          'time_notification' => date('Y-m-d H:i:s')
-        ]);
       }
-
-    } else {
-
-      $user->update([
-        'time_notification' => date('Y-m-d H:i:s')
-      ]);
     }
+
+    $user->update([
+      'time_notification' => date('Y-m-d H:i:s')
+    ]);
 
     return response()->json([
       'items' => $items,
@@ -326,7 +318,10 @@ class DashboardController extends Controller
 
     if (!empty($user->time_notification)) {
 
-      $select = $user->notifications()
+      $select = DB::table('notifications')
+        ->distinct()
+        ->where('notifiable_type', 'App\Models\User')
+        ->where('notifiable_id', $user->id)
         ->whereIn('type', $valid_types)
         ->where('restaurant_id', $restaurant->id)
         ->whereIn('food_id', $live_group_ids)
@@ -367,10 +362,6 @@ class DashboardController extends Controller
 
           $ids[] = $row->id;
 
-          $user->update([
-            'time_notification' => date('Y-m-d H:i:s')
-          ]);
-
           if ($text_to_speech) {
 
             $text_ingredients_missing = '';
@@ -389,22 +380,12 @@ class DashboardController extends Controller
             ]);
           }
         }
-
       }
-      else {
-
-        $user->update([
-          'time_notification' => date('Y-m-d H:i:s')
-        ]);
-      }
-
     }
-    else {
 
-      $user->update([
-        'time_notification' => date('Y-m-d H:i:s')
-      ]);
-    }
+    $user->update([
+      'time_notification' => date('Y-m-d H:i:s')
+    ]);
 
     return response()->json([
       'status' => true,

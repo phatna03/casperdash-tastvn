@@ -4,6 +4,7 @@ namespace App\Http\Controllers\tastevn\api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 
@@ -14,6 +15,7 @@ use App\Notifications\IngredientMissingMail;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Excel\ExportFoodIngredient;
 use App\Excel\ExportFoodRecipe;
+use App\Excel\ImportData;
 
 use Validator;
 use Aws\S3\S3Client;
@@ -38,33 +40,52 @@ class TesterController extends Controller
 {
   public function index(Request $request)
   {
-    echo '<pre>';
+//    echo '<pre>';
     $api_core = new SysCore();
+    $user = Auth::user();
 
 
+    $pageConfigs = [
+      'myLayout' => 'horizontal',
+      'hasCustomizer' => false,
+    ];
 
-//    $URL1 = 'http://192.168.1.22:9001';
-//    $image = 'https://s3.ap-southeast-1.amazonaws.com/cargo.tastevietnam.asia/58-5b-69-19-ad-67/SENSOR/1/2024-05-26/19/SENSOR_2024-05-26-19-59-04-857_065.jpg';
-//
-//    $URL = $URL1 . '/missing-dish-ingredients/29?api_key=uYUCzsUbWxWRrO15iar5&image=' . $image;
-//
-//    $curl = curl_init();
-//
-//    curl_setopt_array($curl, Array(
-//      CURLOPT_URL            => $URL,
-//      CURLOPT_RETURNTRANSFER => TRUE,
-//      CURLOPT_ENCODING       => 'UTF-8'
-//    ));
-//
-//    $data = curl_exec($curl);
-//    curl_close($curl);
-//
-//    $data = (array)json_decode($data, true);
-//
-//    var_dump($data);
+//    echo '<br />';
+//    die('test ok...');
 
-    echo '<br />';
-    die('test ok...');
+    return view('tastevn.pages.tester', ['pageConfigs' => $pageConfigs]);
   }
 
+  public function tester_post(Request $request)
+  {
+    $values = $request->post();
+    $api_core = new SysCore();
+
+    $datas = (new ImportData())->toArray($request->file('excel'));
+    if (!count($datas) || !count($datas[0])) {
+      return response()->json([
+        'error' => 'Invalid data'
+      ], 404);
+    }
+
+    $file_log = 'public/logs/rbf_re_scan_data.log';
+
+    foreach ($datas[0] as $k => $data) {
+
+      $col1 = trim($data[0]);
+
+      $row = RestaurantFoodScan::find((int)$col1);
+      if (!$row) {
+        continue;
+      }
+
+      Storage::append($file_log, $row->id);
+
+      $api_core->v3_photo_scan($row);
+    }
+
+    return response()->json([
+      'status' => true,
+    ]);
+  }
 }
