@@ -448,6 +448,9 @@ class RestaurantController extends Controller
         'deleted' => $user->id,
       ]);
 
+    //re-count
+    $this->_api_core->sys_stats_count();
+
     return response()->json([
       'status' => true,
     ], 200);

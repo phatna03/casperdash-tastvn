@@ -329,6 +329,7 @@ class SysCore
           // URL for Http Request
           $url = "https://detect.roboflow.com/" . $rbf_dataset
             . "?api_key=" . $rbf_api_key
+            . "&confidence=30&overlap=60&max_objects=100"
             . "&image=" . urlencode($row->get_photo());
 
           // Setup + Send Http request
@@ -1048,6 +1049,7 @@ class SysCore
               // URL for Http Request
               $url = "https://detect.roboflow.com/" . $rbf_dataset
                 . "?api_key=" . $rbf_api_key
+                . "&confidence=30&overlap=60&max_objects=100"
                 . "&image=" . urlencode($URL);
 
               // Setup + Send Http request
@@ -1227,6 +1229,7 @@ class SysCore
     $rbf_dataset = $this->get_setting('rbf_dataset_scan');
     $rbf_api_key = $this->get_setting('rbf_api_key');
 
+    $rbf_url = '';
     $rfs_result = [];
 
     if ($rfs && !empty($rbf_dataset) && !empty($rbf_api_key)) {
@@ -1234,6 +1237,7 @@ class SysCore
       // URL for Http Request
       $rbf_url = "https://detect.roboflow.com/" . $rbf_dataset
         . "?api_key=" . $rbf_api_key
+        . "&confidence=30&overlap=60&max_objects=100"
         . "&image=" . urlencode($rfs->get_photo());
 
       // Setup + Send Http request
@@ -1263,6 +1267,11 @@ class SysCore
         'notification' => false,
       ]);
     }
+
+    return [
+      'api_url' => $rbf_url,
+      'data' => $rfs_result,
+    ];
   }
 
 }

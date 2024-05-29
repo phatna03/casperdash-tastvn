@@ -382,6 +382,7 @@ class RestaurantFoodScan extends Model
             ->distinct()
             ->where('notifiable_type', 'App\Models\User')
             ->where('notifiable_id', $user->id)
+            ->where('restaurant_food_scan_id', $this->id)
             ->whereIn('type', ['App\Notifications\IngredientMissing'])
             ->orderBy('id', 'desc')
             ->limit(1)

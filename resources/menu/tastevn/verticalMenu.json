@@ -25,6 +25,12 @@
       "url": "admin/roboflow",
       "slug": "admin-roboflow"
     },
+    {
+      "name": "Review Report",
+      "icon": "menu-icon tf-icons mdi mdi-message-draw no_user no_moderator",
+      "url": "admin/reports",
+      "slug": "admin-reports"
+    },
 
     {
       "name": "Restaurants",

@@ -188,6 +188,7 @@ use App\Http\Controllers\tastevn\api\CommentController;
 use App\Http\Controllers\tastevn\api\SensorController;
 use App\Http\Controllers\tastevn\view\GuestController;
 use App\Http\Controllers\tastevn\view\DashboardController;
+use App\Http\Controllers\tastevn\view\ExportController;
 
 use App\Api\SysCore;
 
@@ -198,6 +199,8 @@ Route::post('/auth/login', [AuthController::class, 'login']);
 Route::post('/auth/send-code', [AuthController::class, 'send_code']);
 Route::post('/auth/update-pwd', [AuthController::class, 'update_pwd']);
 Route::post('/auth/logout', [AuthController::class, 'logout']);
+//apix
+Route::get('/export/food/ingredients', [ExportController::class, 'food_ingredient']);
 //optimize
 Route::get('/', [SensorController::class, 'index']);
 Route::get('/admin', [SensorController::class, 'index']);

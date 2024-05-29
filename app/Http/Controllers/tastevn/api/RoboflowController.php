@@ -107,6 +107,9 @@ class RoboflowController extends Controller
     $img = 'roboflow_detect';
     $imgFILE = $request->file('image');
 
+    $api_url = '';
+    $result = [];
+
     if (!empty($imgFILE)) {
 
       foreach ($imgFILE as $file) {
@@ -138,8 +141,9 @@ class RoboflowController extends Controller
         }
 
         // URL for Http Request
-        $url =  "https://detect.roboflow.com/" . $rbf_dataset
+        $api_url =  "https://detect.roboflow.com/" . $rbf_dataset
           . "?api_key=" . $rbf_api_key
+          . "&confidence=30&overlap=60&max_objects=100"
           . "&image=" . urlencode($img_url);
 
         // Setup + Send Http request
@@ -152,7 +156,7 @@ class RoboflowController extends Controller
         try {
 
           $context = stream_context_create($options);
-          $result = file_get_contents($url, false, $context);
+          $result = file_get_contents($api_url, false, $context);
 
         } catch (\Exception $e) {
 
@@ -231,6 +235,11 @@ class RoboflowController extends Controller
 
         'ingredients_missing' => $sys_ingredients_missing,
       ],
+
+      'api' => [
+        'url' => $api_url,
+        'result' => $result,
+      ]
     ];
 
     return response()->json([

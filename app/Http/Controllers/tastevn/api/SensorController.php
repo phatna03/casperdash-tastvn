@@ -928,6 +928,10 @@ class SensorController extends Controller
       }
     }
 
+    if (!$row) {
+
+    }
+
     return response()->json([
       'status' => $row ? $row->status : 'no_photo',
 

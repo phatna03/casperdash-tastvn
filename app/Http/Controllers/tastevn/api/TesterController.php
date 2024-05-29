@@ -44,7 +44,10 @@ class TesterController extends Controller
     $api_core = new SysCore();
     $user = Auth::user();
 
+    $row = RestaurantFoodScan::find(35995);
+    $aaa = $api_core->v3_photo_scan($row);
 
+    var_dump($aaa);
 
     echo '<br />';
     die('test ok...');

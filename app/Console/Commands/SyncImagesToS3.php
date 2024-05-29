@@ -79,10 +79,14 @@ class SyncImagesToS3 extends Command
             $URL = "https://s3.{$s3_region}.amazonaws.com/{$restaurant->s3_bucket_name}/{$file}";
 
             if (@getimagesize($URL)) {
+
               $row->update([
                 'local_storage' => 0,
                 'photo_url' => $URL,
               ]);
+
+              //remove local file
+
             }
           }
         }
