@@ -19,7 +19,8 @@ use App\Excel\ImportData;
 
 use Validator;
 use Aws\S3\S3Client;
-use App\Api\SysCore;
+use App\Api\SysApp;
+use App\Api\SysRobo;
 
 use App\Models\User;
 use App\Models\Restaurant;
@@ -40,14 +41,10 @@ class TesterController extends Controller
 {
   public function index(Request $request)
   {
-    echo '<pre>';
-    $api_core = new SysCore();
+//    echo '<pre>';
     $user = Auth::user();
 
-    $row = RestaurantFoodScan::find(35995);
-    $aaa = $api_core->v3_photo_scan($row);
 
-    var_dump($aaa);
 
     echo '<br />';
     die('test ok...');
@@ -63,7 +60,6 @@ class TesterController extends Controller
   public function tester_post(Request $request)
   {
     $values = $request->post();
-    $api_core = new SysCore();
 
     $datas = (new ImportData())->toArray($request->file('excel'));
     if (!count($datas) || !count($datas[0])) {
@@ -85,7 +81,25 @@ class TesterController extends Controller
 
       Storage::append($file_log, $row->id);
 
-      $api_core->v3_photo_scan($row);
+      $img_url = $row->get_photo();
+
+      //step 2= photo scan
+      $datas = SysRobo::photo_scan($img_url, [
+        'confidence' => SysRobo::_SCAN_CONFIDENCE,
+        'overlap' => SysRobo::_SCAN_OVERLAP,
+      ]);
+
+      $row->update([
+        'time_scan' => date('Y-m-d H:i:s'),
+        'status' => $datas['status'] ? 'scanned' : 'failed',
+        'rbf_api' => $datas['status'] ? json_encode($datas['result']) : NULL,
+      ]);
+
+      //step 3= photo predict
+      $row->predict_food([
+        'notification' => false,
+      ]);
+
     }
 
     return response()->json([

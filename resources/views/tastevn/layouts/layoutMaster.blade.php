@@ -35,6 +35,7 @@
   var acmcfs = {
     link_base_url: '{{url('')}}',
     var_csrf: '{{csrf_token()}}',
+    dev_mode: '{{$devMode}}',
 
     message_title_info: '{{config('tastevn.message_title_info')}}',
     message_title_success: '{{config('tastevn.message_title_success')}}',

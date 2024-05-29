@@ -215,44 +215,48 @@
     });
 
     var sys_running = 0;
-    var sys_ready = 0;
+    var sys_ready = !parseInt(acmcfs.rbf_js);
 
-    //roboflow init
-    roboflow.auth({
-      publishable_key: "rf_3DtUFXV7oiSXMh2VkXK8d0EHcRD2"
-    });
-    async function rbf_load_model() {
-      var model = await roboflow.load({
-        model: "missing-dish-ingredients",
-        version: 29
+    if (parseInt(acmcfs.rbf_js)) {
+      //roboflow init
+      roboflow.auth({
+        publishable_key: "rf_3DtUFXV7oiSXMh2VkXK8d0EHcRD2"
       });
 
-      model.configure({
-        threshold: 0.3,
-        overlap: 0.6,
-        max_objects: 100
+      async function rbf_load_model() {
+        var model = await roboflow.load({
+          model: "missing-dish-ingredients",
+          version: 29
+        });
+
+        model.configure({
+          threshold: 0.3,
+          overlap: 0.6,
+          max_objects: 100
+        });
+
+        acmcfs.rbf_model = model;
+
+        return model;
+      }
+
+      //roboflow check ready
+      rbf_load_model().then(model => {
+        console.log("==============================================");
+        console.log("RBF load success......");
+
+        // Do something with the model
+        console.log(model.getMetadata());
+        console.log(model.getConfiguration());
+        console.log('ok...');
+
+        sys_ready = 1;
+
+      }).catch(error => {
+        console.log("==============================================");
+        console.error('Error loading model:', error);
       });
-
-      acmcfs.rbf_model = model;
-
-      return model;
     }
-    //roboflow check ready
-    rbf_load_model().then(model => {
-      console.log("==============================================");
-      console.log("RBF load success......");
-
-      // Do something with the model
-      console.log(model.getMetadata());
-      console.log(model.getConfiguration());
-      console.log('ok...');
-
-      sys_ready = 1;
-
-    }).catch(error => {
-      console.log("==============================================");
-      console.error('Error loading model:', error);
-    });
 
     function food_predict_by_datas(item_id, datas) {
       var wrap = $('.wrap-selected-food');

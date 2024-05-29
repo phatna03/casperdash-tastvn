@@ -247,18 +247,6 @@ Route::post('/admin/sensor/food/scan/get/food', [SensorController::class, 'food_
 //roboflow
 Route::post('/admin/roboflow/retraining', [RoboflowController::class, 'retraining']);
 
-
-
-
-
-
-
-Route::post('/admin/sensor/selectize/parent', [SensorController::class, 'selectize_parent']);
-Route::post('/admin/sensor/food/import', [SensorController::class, 'food_import']);
-Route::post('/admin/sensor/food/add', [SensorController::class, 'food_add']);
-Route::post('/admin/sensor/food/delete', [SensorController::class, 'food_delete']);
-Route::post('/admin/sensor/food/scan', [SensorController::class, 'food_scan']);
-
 Route::get('/datatable/sensor-foods', function (Request $request) {
   $values = $request->all();
   $restaurant = isset($values['restaurant']) ? (int)$values['restaurant'] : 0;

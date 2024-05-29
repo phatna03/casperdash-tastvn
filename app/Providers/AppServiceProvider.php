@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -37,9 +38,10 @@ class AppServiceProvider extends ServiceProvider
       }
     });
 
+    View::share('api_core', $api_core);
+
     View::share('baseURL', url(''));
     View::share('isMobi', $api_mobi->isMobile());
-
-    View::share('api_core', $api_core);
+    View::share('devMode', App::environment());
   }
 }

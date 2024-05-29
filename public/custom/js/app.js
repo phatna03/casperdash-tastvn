@@ -423,7 +423,9 @@ function offcanvas_close() {
 
 function sound_play() {
   var audio = new Audio(acmcfs.link_base_url + '/sound_notification.mp3');
-  audio.play();
+  if (acmcfs.dev_mode != 'local') {
+    audio.play();
+  }
 }
 
 function speaker_allow() {

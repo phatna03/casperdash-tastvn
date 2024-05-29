@@ -1,17 +1,15 @@
 <?php
 
 namespace App\Http\Controllers\tastevn\api;
-
 use App\Http\Controllers\Controller;
-use App\Models\RestaurantFood;
-use App\Models\RestaurantParent;
 use Illuminate\Http\Request;
-
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-
 use Validator;
+use App\Api\SysCore;
+use App\Api\SysRobo;
+use App\Jobs\PhotoUpload;
 use App\Models\User;
 use App\Models\Restaurant;
 use App\Models\RestaurantAccess;
@@ -19,9 +17,8 @@ use App\Models\RestaurantFoodScan;
 use App\Models\Food;
 use App\Models\FoodIngredient;
 use App\Models\Ingredient;
-
-use App\Api\SysCore;
-use App\Jobs\PhotoUpload;
+use App\Models\RestaurantFood;
+use App\Models\RestaurantParent;
 
 class RoboflowController extends Controller
 {
@@ -107,7 +104,7 @@ class RoboflowController extends Controller
     $img = 'roboflow_detect';
     $imgFILE = $request->file('image');
 
-    $api_url = '';
+    $datas = [];
     $result = [];
 
     if (!empty($imgFILE)) {
@@ -135,46 +132,22 @@ class RoboflowController extends Controller
         $storagePath = public_path($photoPath);
 
         //roboflow
-        $img_url = "https://www.eatme.eu/media/dwpb21km/avocado-toast-met-roerei-en-avocado.jpg";
+        $img_url = "http://ai.block8910.com/sensors/58-5b-69-20-11-7b/SENSOR/1/2024-05-28/22/SENSOR_2024-05-28-22-14-02-628_248.jpg";
         if (App::environment() == 'production') {
           $img_url = url("roboflow/test") . '/' . $photoName;
         }
 
-        // URL for Http Request
-        $api_url =  "https://detect.roboflow.com/" . $rbf_dataset
-          . "?api_key=" . $rbf_api_key
-          . "&confidence=30&overlap=60&max_objects=100"
-          . "&image=" . urlencode($img_url);
-
-        // Setup + Send Http request
-        $options = array(
-          'http' => array (
-            'header' => "Content-type: application/x-www-form-urlencoded\r\n",
-            'method'  => 'POST'
-          ));
-
-        try {
-
-          $context = stream_context_create($options);
-          $result = file_get_contents($api_url, false, $context);
-
-        } catch (\Exception $e) {
-
-          return response()->json([
-            'status' => false,
-            'error' => $e->getMessage(),
-          ], 400);
-        }
-
-        if (!empty($result)) {
-          $result = (array)json_decode($result);
-        }
+        //step 2= photo scan
+        $datas = SysRobo::photo_scan($img_url, [
+          'confidence' => SysRobo::_SCAN_CONFIDENCE,
+          'overlap' => SysRobo::_SCAN_OVERLAP,
+        ]);
       }
 
-      if (count($result)) {
+      if ($datas['status']) {
 
         $status = true;
-        $predictions = $result['predictions'];
+        $predictions = $datas['result']['predictions'];
         if (count($predictions)) {
 
           //ingredients
@@ -237,14 +210,12 @@ class RoboflowController extends Controller
       ],
 
       'api' => [
-        'url' => $api_url,
-        'result' => $result,
+        'result' => $datas['result'],
       ]
     ];
 
     return response()->json([
       'status' => $status,
-      'env' => App::environment(),
 
       'data' => $data,
       'food' => $food ? $food->id : 0,
