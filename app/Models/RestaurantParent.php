@@ -60,9 +60,13 @@ class RestaurantParent extends Model
   public function get_foods($pars = [])
   {
     $select = FoodIngredient::distinct()
-      ->select('food_id')
-      ->where('restaurant_parent_id', $this->id)
-      ->where('deleted', 0);
+      ->select('food_ingredients.food_id', 'foods.name')
+      ->leftJoin('foods', 'foods.id', '=', 'food_ingredients.food_id')
+      ->where('food_ingredients.restaurant_parent_id', $this->id)
+      ->where('food_ingredients.deleted', 0)
+      ->where('foods.deleted', 0)
+      ->orderByRaw('TRIM(LOWER(foods.name))')
+    ;
 
     return $select->get();
   }

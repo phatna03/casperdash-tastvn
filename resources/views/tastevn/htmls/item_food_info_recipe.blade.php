@@ -5,8 +5,8 @@ if (!isset($ingredients) || !count($ingredients)) {
 
 foreach ($ingredients as $ingredient):
 @endphp
-<div class="acm-ml-px-5">
-  - <b class="fnumber">{{$ingredient->ingredient_quantity}}</b>
-  <span>{{$ingredient->name}}</span>
+<div class="acm-ml-px-5 text-dark">
+{{--  - <b class="fnumber">{{$ingredient->ingredient_quantity}}</b>--}}
+  - <span>{{$ingredient->name}}</span>
 </div>
 @endforeach

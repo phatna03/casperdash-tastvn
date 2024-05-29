@@ -38,11 +38,11 @@
 
         $count++;
       @endphp
-      <div class="acm-border-css border-dark @if($count%2) bg-primary-subtle @endif p-3 mb-2 data_food_item data_food_item_{{$food->id}}"
+      <div class="acm-border-css border-dark @if($count%2) bg-warning-subtle @endif p-3 mb-2 data_food_item data_food_item_{{$food->id}}"
            data-food_id="{{$food->id}}">
         <div class="row">
           <div class="col-lg-6 mb-1">
-            <div class="text-dark fw-bold fs-4">{{$count . '. ' . $food->name}}</div>
+            <div class="text-dark fw-bold fs-4">{{$food->name}}</div>
             <div
               class="text-dark acm-text-italic mt-1">{{$food_category ? '(' . $food_category->name . ')' : ''}}</div>
           </div>
@@ -77,7 +77,7 @@
           </div>
 
           <div class="col-lg-3 mb-1">
-            <div class="text-dark fw-bold">+ Recipe Ingredients</div>
+            <div class="text-primary fw-bold">+ Recipe Ingredients</div>
             @if(count($recipes))
               @foreach($recipes as $recipe)
                 <div class="text-dark">- {{$recipe->name}}</div>
@@ -88,11 +88,11 @@
           </div>
 
           <div class="col-lg-3 mb-1">
-            <div class="text-dark fw-bold">+ Roboflow Ingredients</div>
+            <div class="text-primary fw-bold">+ Roboflow Ingredients</div>
             @if(count($ingredients))
               @foreach($ingredients as $ingredient)
                 <div class="wrap_text_roboflow_ingredient @if($ingredient->ingredient_type == 'core') cored text-danger @else text-dark @endif"
-                     @if($viewer->id == 5) onclick="food_ingredient_core_quick(this, {{$ingredient->food_ingredient_id}})" @endif
+                     @if($viewer->id == 5 || $viewer->is_super_admin()) onclick="food_ingredient_core_quick(this, {{$ingredient->food_ingredient_id}})" @endif
                 >
                   - <b>{{$ingredient->ingredient_quantity}}</b> {{$ingredient->name}}
                 </div>
