@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\tastevn\api;
+use App\Api\SysApp;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -12,6 +13,7 @@ use App\Excel\ImportData;
 
 use App\Models\RestaurantParent;
 use App\Models\Food;
+use App\Models\FoodIngredient;
 use App\Models\FoodCategory;
 use App\Models\Restaurant;
 use App\Models\RestaurantFood;
@@ -292,9 +294,10 @@ class RestaurantController extends Controller
       ], 422);
     }
 
-    $foods = $row->get_food_datas();
+    $foods = $row->get_foods();
 
-    $html = view('tastevn.htmls.info.item_restaurant_parent')
+    $html = view('tastevn.htmls.item_restaurant_parent')
+      ->with('restaurant_parent', $row)
       ->with('foods', $foods)
       ->render();
 
@@ -490,4 +493,32 @@ class RestaurantController extends Controller
     ], 200);
   }
 
+  public function food_core(Request $request)
+  {
+    $values = $request->post();
+    $user = Auth::user();
+
+    //required
+    $validator = Validator::make($values, [
+      'item' => 'required',
+    ]);
+    if ($validator->fails()) {
+      return response()->json($validator->errors(), 422);
+    }
+
+    $item = SysApp::get_item((int)$values['item'], 'food_ingredients');
+    if (!$item) {
+      return response()->json([
+        'error' => 'Invalid data'
+      ], 404);
+    }
+
+    $item->update([
+      'ingredient_type' => $item->ingredient_type == 'core' ? 'additive' : 'core',
+    ]);
+
+    return response()->json([
+      'status' => true,
+    ], 200);
+  }
 }

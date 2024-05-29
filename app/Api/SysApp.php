@@ -2,8 +2,18 @@
 
 namespace App\Api;
 
-
+use App\Models\Comment;
+use App\Models\Food;
+use App\Models\FoodCategory;
+use App\Models\FoodIngredient;
+use App\Models\Ingredient;
+use App\Models\Log;
+use App\Models\Restaurant;
+use App\Models\RestaurantFoodScan;
+use App\Models\RestaurantParent;
 use App\Models\SysSetting;
+use App\Models\Text;
+use App\Models\User;
 
 class SysApp
 {
@@ -30,6 +40,47 @@ class SysApp
     return $text;
   }
 
+  public static function get_item($item_id, $item_type)
+  {
+    $item = null;
 
+    switch ($item_type) {
+      case 'food_category':
+        $item = FoodCategory::find((int)$item_id);
+        break;
+      case 'food':
+        $item = Food::find((int)$item_id);
+        break;
+      case 'food_ingredients':
+        $item = FoodIngredient::find((int)$item_id);
+        break;
+      case 'restaurant':
+        $item = Restaurant::find((int)$item_id);
+        break;
+      case 'restaurant_parent':
+        $item = RestaurantParent::find((int)$item_id);
+        break;
+      case 'restaurant_food_scan':
+        $item = RestaurantFoodScan::find((int)$item_id);
+        break;
+      case 'ingredient':
+        $item = Ingredient::find((int)$item_id);
+        break;
+      case 'log':
+        $item = Log::find((int)$item_id);
+        break;
+      case 'comment':
+        $item = Comment::find((int)$item_id);
+        break;
+      case 'user':
+        $item = User::find((int)$item_id);
+        break;
+      case 'text':
+        $item = Text::find((int)$item_id);
+        break;
+    }
+
+    return $item;
+  }
 
 }

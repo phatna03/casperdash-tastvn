@@ -509,7 +509,7 @@
         wrap.find('.wrap-ingredients').empty();
 
         $('.result_photo_status .data_result').empty()
-          .append('<div class="badge bg-danger fw-bold acm-ml-px-10 acm-fs-15">No dish found</div>');
+          .append('<div class="badge bg-danger fw-bold acm-ml-px-10 acm-fs-15">Not Trained Yet</div>');
       }
     }
 

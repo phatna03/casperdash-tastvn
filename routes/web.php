@@ -215,6 +215,7 @@ Route::post('/admin/restaurant/info', [RestaurantController::class, 'info']);
 Route::post('/admin/restaurant/food/import', [RestaurantController::class, 'food_import']);
 Route::post('/admin/restaurant/food/remove', [RestaurantController::class, 'food_remove']);
 Route::post('/admin/restaurant/food/group', [RestaurantController::class, 'food_group']);
+Route::post('/admin/restaurant/food/core', [RestaurantController::class, 'food_core']);
 //restaurant = sensor
 Route::get('/admin/sensor', [DashboardController::class, 'sensor']);
 Route::post('/admin/sensor/kitchen', [DashboardController::class, 'sensor_kitchen']);

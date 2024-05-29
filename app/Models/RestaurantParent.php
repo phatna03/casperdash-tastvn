@@ -57,23 +57,14 @@ class RestaurantParent extends Model
 
   }
 
-  public function re_count($pars = [])
+  public function get_foods($pars = [])
   {
-    $this->count_sensors();
-    $this->count_foods();
-  }
-
-  public function count_sensors()
-  {
-    $count = Restaurant::distinct()
-      ->select('id')
+    $select = FoodIngredient::distinct()
+      ->select('food_id')
       ->where('restaurant_parent_id', $this->id)
-      ->where('deleted', 0)
-      ->count();
+      ->where('deleted', 0);
 
-    $this->update([
-      'count_sensors' => $count,
-    ]);
+    return $select->get();
   }
 
   public function get_sensors($pars = [])
@@ -98,6 +89,28 @@ class RestaurantParent extends Model
 
     return $select->get();
   }
+  //opt
+
+  public function re_count($pars = [])
+  {
+    $this->count_sensors();
+    $this->count_foods();
+  }
+
+  public function count_sensors()
+  {
+    $count = Restaurant::distinct()
+      ->select('id')
+      ->where('restaurant_parent_id', $this->id)
+      ->where('deleted', 0)
+      ->count();
+
+    $this->update([
+      'count_sensors' => $count,
+    ]);
+  }
+
+
 
   public function count_foods()
   {

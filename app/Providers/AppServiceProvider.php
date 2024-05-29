@@ -9,6 +9,7 @@ use Illuminate\Support\ServiceProvider;
 
 use App\Api\SysCore;
 use App\Api\SysMobi;
+use App\Api\SysApp;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -25,8 +26,6 @@ class AppServiceProvider extends ServiceProvider
    */
   public function boot(): void
   {
-    //custome
-    $api_core = new SysCore();
     $api_mobi = new SysMobi();
 
     //viewer
@@ -38,7 +37,8 @@ class AppServiceProvider extends ServiceProvider
       }
     });
 
-    View::share('api_core', $api_core);
+    View::share('api_app', new SysApp());
+    View::share('api_core', new SysCore());
 
     View::share('baseURL', url(''));
     View::share('isMobi', $api_mobi->isMobile());
