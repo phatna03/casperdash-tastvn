@@ -50,7 +50,7 @@
 
     timeout_default: 2000,
     timeout_quick: 500,
-    timeout_notification: 2000,
+    timeout_notification: 5000,
 
     notify_running: 0,
 

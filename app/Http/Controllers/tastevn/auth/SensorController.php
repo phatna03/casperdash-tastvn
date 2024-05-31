@@ -284,7 +284,7 @@ class SensorController extends Controller
 
     $invalid_roles = ['user'];
     if (in_array($this->_viewer->role, $invalid_roles)) {
-      return redirect('page_not_found');
+      return redirect('error/404');
     }
 
     $row = Restaurant::find((int)$id);
@@ -292,12 +292,12 @@ class SensorController extends Controller
       if ($this->_viewer->id == 5) {
 
       } else {
-        return redirect('page_not_found');
+        return redirect('error/404');
       }
     }
 
     if (!$this->_viewer->can_access_restaurant($row)) {
-      return redirect('page_not_found');
+      return redirect('error/404');
     }
 
     //search
@@ -931,7 +931,7 @@ class SensorController extends Controller
       if ($this->_viewer->id == 5) {
 
       } else {
-        return redirect('page_not_found');
+        return redirect('error/404');
       }
     }
 

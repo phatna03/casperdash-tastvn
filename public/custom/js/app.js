@@ -552,6 +552,24 @@ function excel_check(sender) {
   return true;
 };
 
+function toggle_header() {
+  $('#layout-navbar').toggleClass('d-none');
+  $('#layout-menu').toggleClass('d-none');
+  $('.page_main_footer').toggleClass('d-none');
+
+  if ($('#layout-navbar').hasClass('d-none')) {
+    $('.layout-page').addClass('hidden_header');
+  } else {
+    $('.layout-page').removeClass('hidden_header');
+  }
+
+  if ($('#layout-menu').hasClass('d-none')) {
+    $('.page_main_content').addClass('hidden_header');
+  } else {
+    $('.page_main_content').removeClass('hidden_header');
+  }
+}
+
 // tastevn
 function auth_form_active(frm_id) {
   $('.wrap_form_panel').addClass('d-none');
@@ -2043,7 +2061,6 @@ function notification_read(ele) {
 
   return false;
 }
-
 function notification_read_all() {
   var wrap = $('#wrap-notifications');
   wrap.find('.acm-itm-notify').removeClass('bg-primary-subtle');
@@ -2058,7 +2075,6 @@ function notification_read_all() {
 
   return false;
 }
-
 function notification_navbar() {
   var wrap = $('#navbar-notifications');
 
@@ -2085,7 +2101,6 @@ function notification_navbar() {
 
   return false;
 }
-
 function notification_newest() {
   if (acmcfs.notify_running) {
     return false;
@@ -2121,12 +2136,11 @@ function notification_newest() {
         // }
       }
 
-      //temp off
-      // if (response.data.speaker) {
-      //   setTimeout(function () {
-      //     speaker_play();
-      //   }, acmcfs.timeout_quick);
-      // }
+      if (response.data.speaker) {
+        setTimeout(function () {
+          speaker_play();
+        }, acmcfs.timeout_quick);
+      }
 
       if (response.data.role) {
         bind_staff(response.data.role);
@@ -2140,48 +2154,10 @@ function notification_newest() {
 
   return false;
 }
-
+//roboflow
 function roboflow_retraining_confirm() {
   var popup = $('#modal_roboflow_retraining');
   popup.modal('show');
   return false;
 }
 
-
-
-
-
-
-
-function stats_total_by_date(start_date, end_date) {
-  // console.log(start_date, start_date);
-
-  var wrap = $('#wrap-stats-total');
-  wrap.find('input[name=search_time]').daterangepicker({
-    timePicker: true,
-    timePickerIncrement: 30,
-    locale: {
-      format: 'DD/MM/YYYY HH:mm',
-    },
-    startDate: start_date + ' 00:00',
-    endDate: end_date + ' 00:00',
-  });
-}
-
-function toggle_header() {
-  $('#layout-navbar').toggleClass('d-none');
-  $('#layout-menu').toggleClass('d-none');
-  $('.page_main_footer').toggleClass('d-none');
-
-  if ($('#layout-navbar').hasClass('d-none')) {
-    $('.layout-page').addClass('hidden_header');
-  } else {
-    $('.layout-page').removeClass('hidden_header');
-  }
-
-  if ($('#layout-menu').hasClass('d-none')) {
-    $('.page_main_content').addClass('hidden_header');
-  } else {
-    $('.page_main_content').removeClass('hidden_header');
-  }
-}

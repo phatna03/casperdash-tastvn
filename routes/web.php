@@ -177,7 +177,6 @@ use App\Http\Controllers\tastevn\api\TesterController;
 use App\Http\Controllers\tastevn\api\RoboflowController;
 use App\Http\Controllers\tastevn\api\SettingController;
 use App\Http\Controllers\tastevn\api\UserController;
-//use App\Http\Controllers\tastevn\api\RestaurantController;
 use App\Http\Controllers\tastevn\api\FoodController;
 use App\Http\Controllers\tastevn\api\IngredientController;
 use App\Http\Controllers\tastevn\api\FoodCategoryController;
@@ -185,21 +184,16 @@ use App\Http\Controllers\tastevn\api\TextController;
 use App\Http\Controllers\tastevn\api\LogController;
 use App\Http\Controllers\tastevn\api\PhotoController;
 use App\Http\Controllers\tastevn\api\CommentController;
-//use App\Http\Controllers\tastevn\api\SensorController;
-//use App\Http\Controllers\tastevn\view\GuestController;
-use App\Http\Controllers\tastevn\view\DashboardController;
-//use App\Http\Controllers\tastevn\view\ExportController;
 
+use App\Api\SysApp;
 use App\Http\Controllers\tastevn\ApiController;
 use App\Http\Controllers\tastevn\LoginController;
 use App\Http\Controllers\tastevn\GuideController;
 use App\Http\Controllers\tastevn\PrinterController;
 use App\Http\Controllers\tastevn\ErrorController;
-
 use App\Http\Controllers\tastevn\auth\RestaurantController;
 use App\Http\Controllers\tastevn\auth\SensorController;
-
-use App\Api\SysApp;
+use App\Http\Controllers\tastevn\auth\NotificationController;
 
 //apix
 Route::get('/export/food/ingredients', [ApiController::class, 'food_ingredient']);
@@ -251,6 +245,14 @@ Route::post('/admin/sensor/food/scan/get/food', [SensorController::class, 'food_
 Route::get('/admin/kitchen/{id}', [SensorController::class, 'kitchen']);
 Route::post('/admin/kitchen/checker', [SensorController::class, 'kitchen_checker']);
 Route::post('/admin/kitchen/predict', [SensorController::class, 'kitchen_predict']);
+//notify
+Route::get('/admin/notifications', [NotificationController::class, 'index']);
+Route::post('/admin/notification/read', [NotificationController::class, 'notification_read']);
+Route::post('/admin/notification/read/all', [NotificationController::class, 'notification_read_all']);
+Route::post('/admin/notification/latest', [NotificationController::class, 'notification_latest']);
+Route::post('/admin/notification/newest', [NotificationController::class, 'notification_newest']);
+
+
 //datatable
 Route::get('/datatable/restaurant', function (Request $request) {
   $values = $request->all();
@@ -479,70 +481,10 @@ Route::get('/datatable/sensor-food-scan-errors', function (Request $request) {
 });
 //opt
 //======================================================================================================================
-
-//restaurant = sensor
-Route::get('/admin/sensor', [DashboardController::class, 'sensor']);
-Route::post('/admin/sensor/kitchen', [DashboardController::class, 'sensor_kitchen']);
-
-
-
-//opt
-Route::get('/admin/sensor/tester', [DashboardController::class, 'sensor_tester']);
-Route::post('/admin/sensor/tester/checker', [DashboardController::class, 'sensor_tester_checker']);
-Route::post('/admin/sensor/tester/predict', [DashboardController::class, 'sensor_tester_predict']);
-
 //roboflow
 Route::post('/admin/roboflow/retraining', [RoboflowController::class, 'retraining']);
+//restaurant = sensor
 
-Route::get('/datatable/sensor-foods', function (Request $request) {
-  $values = $request->all();
-  $restaurant = isset($values['restaurant']) ? (int)$values['restaurant'] : 0;
-
-  $order_default = true;
-  if (isset($values['order']) && count($values['order']) && isset($values['order'][0])) {
-    if (isset($values['order'][0]['column']) && (int)$values['order'][0]['column']) {
-      $order_default = false;
-    }
-  }
-
-  $select = App\Models\RestaurantFood::query("restaurant_foods")
-    ->select("restaurant_foods.food_id", "food_categories.name as category_name",
-      "foods.name as food_name", "foods.photo as food_photo", "restaurant_foods.updated_at")
-    ->leftJoin("foods", "restaurant_foods.food_id", "=", "foods.id")
-    ->leftJoin("food_categories", "restaurant_foods.food_category_id", "=", "food_categories.id")
-    ->where('restaurant_foods.deleted', 0);
-
-  if ($order_default) {
-    $select->orderBy('restaurant_foods.updated_at', 'desc')
-      ->orderBy('restaurant_foods.id', 'desc');
-  }
-
-  if ($restaurant) {
-    $select->where("restaurant_foods.restaurant_id", $restaurant);
-  }
-
-  if (count($values)) {
-    if (isset($values['name']) && !empty($values['name'])) {
-      $select->where('foods.name', 'LIKE', '%' . $values['name'] . '%');
-    }
-  }
-
-  return DataTables::of($select)->addIndexColumn()->toJson();
-});
-
-
-
-//optimize
-
-Route::post('/admin/dashboard/restaurant/food/get', [DashboardController::class, 'restaurant_food_get']);
-Route::post('/admin/dashboard/food/get/info', [DashboardController::class, 'food_get_info']);
-
-Route::get('/admin/notifications', [DashboardController::class, 'notification']);
-Route::post('/admin/notification/read', [DashboardController::class, 'notification_read']);
-Route::post('/admin/notification/read/all', [DashboardController::class, 'notification_read_all']);
-Route::post('/admin/notification/latest', [DashboardController::class, 'notification_latest']);
-Route::post('/admin/notification/newest', [DashboardController::class, 'notification_newest']);
-Route::post('/admin/notification/dashboard', [DashboardController::class, 'notification_dashboard']);
 
 Route::get('/tester', [TesterController::class, 'index']);
 Route::post('/tester/post', [TesterController::class, 'tester_post']);
