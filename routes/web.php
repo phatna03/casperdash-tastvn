@@ -176,8 +176,8 @@ use App\Http\Controllers\tastevn\api\AuthController;
 use App\Http\Controllers\tastevn\api\TesterController;
 use App\Http\Controllers\tastevn\api\RoboflowController;
 use App\Http\Controllers\tastevn\api\FoodController;
-use App\Http\Controllers\tastevn\api\IngredientController;
-use App\Http\Controllers\tastevn\api\FoodCategoryController;
+//use App\Http\Controllers\tastevn\api\IngredientController;
+//use App\Http\Controllers\tastevn\api\FoodCategoryController;
 use App\Http\Controllers\tastevn\api\PhotoController;
 use App\Http\Controllers\tastevn\api\CommentController;
 
@@ -194,6 +194,8 @@ use App\Http\Controllers\tastevn\auth\LogController;
 use App\Http\Controllers\tastevn\auth\TextController;
 use App\Http\Controllers\tastevn\auth\SettingController;
 use App\Http\Controllers\tastevn\auth\UserController;
+use App\Http\Controllers\tastevn\auth\IngredientController;
+use App\Http\Controllers\tastevn\auth\FoodCategoryController;
 
 //apix
 Route::get('/export/food/ingredients', [ApiController::class, 'food_ingredient']);
@@ -276,6 +278,19 @@ Route::post('/admin/user/update', [UserController::class, 'update']);
 Route::post('/admin/user/delete', [UserController::class, 'delete']);
 Route::post('/admin/user/restore', [UserController::class, 'restore']);
 Route::post('/admin/user/selectize', [UserController::class, 'selectize']);
+//ingredient
+Route::get('/admin/ingredients', [IngredientController::class, 'index']);
+Route::post('/admin/ingredient/store', [IngredientController::class, 'store']);
+Route::post('/admin/ingredient/update', [IngredientController::class, 'update']);
+Route::post('/admin/ingredient/create', [IngredientController::class, 'create']);
+Route::post('/admin/ingredient/selectize', [IngredientController::class, 'selectize']);
+//category
+Route::get('/admin/food-categories', [FoodCategoryController::class, 'index']);
+Route::post('/admin/food-category/store', [FoodCategoryController::class, 'store']);
+Route::post('/admin/food-category/update', [FoodCategoryController::class, 'update']);
+Route::post('/admin/food-category/create', [FoodCategoryController::class, 'create']);
+Route::post('/admin/food-category/selectize', [FoodCategoryController::class, 'selectize']);
+
 
 
 
@@ -577,6 +592,60 @@ Route::get('/datatable/texts', function (Request $request) {
 
   return DataTables::of($select)->addIndexColumn()->toJson();
 });
+Route::get('/datatable/ingredients', function (Request $request) {
+  $values = $request->all();
+
+  $order_default = true;
+  if (isset($values['order']) && count($values['order']) && isset($values['order'][0])) {
+    if (isset($values['order'][0]['column']) && (int)$values['order'][0]['column']) {
+      $order_default = false;
+    }
+  }
+
+  $select = App\Models\Ingredient::query();
+
+  if ($order_default) {
+    $select->orderBy('updated_at', 'desc')
+      ->orderBy('id', 'desc');
+  }
+
+  if (count($values)) {
+    if (isset($values['name']) && !empty($values['name'])) {
+      $select->where(function ($q) use ($values) {
+        $q->where('name', 'LIKE', '%' . $values['name'] . '%')
+          ->orWhere('name_vi', 'LIKE', '%' . $values['name'] . '%');
+      });
+    }
+  }
+
+  return DataTables::of($select)->addIndexColumn()->toJson();
+});
+Route::get('/datatable/food-categories', function (Request $request) {
+  $values = $request->all();
+
+  $order_default = true;
+  if (isset($values['order']) && count($values['order']) && isset($values['order'][0])) {
+    if (isset($values['order'][0]['column']) && (int)$values['order'][0]['column']) {
+      $order_default = false;
+    }
+  }
+
+  $select = App\Models\FoodCategory::query();
+
+  if ($order_default) {
+    $select->orderBy('updated_at', 'desc')
+      ->orderBy('id', 'desc');
+  }
+
+  if (count($values)) {
+    if (isset($values['name']) && !empty($values['name'])) {
+      $select->where('name', 'LIKE', '%' . $values['name'] . '%');
+    }
+  }
+
+  return DataTables::of($select)->addIndexColumn()->toJson();
+});
+
 //opt
 //======================================================================================================================
 //roboflow
@@ -659,70 +728,7 @@ Route::get('/datatable/foods', function (Request $request) {
   return DataTables::of($select)->addIndexColumn()->toJson();
 });
 
-Route::get('/admin/ingredients', [IngredientController::class, 'index']);
-Route::post('/admin/ingredient/store', [IngredientController::class, 'store']);
-Route::post('/admin/ingredient/update', [IngredientController::class, 'update']);
-Route::post('/admin/ingredient/create', [IngredientController::class, 'create']);
-Route::post('/admin/ingredient/selectize', [IngredientController::class, 'selectize']);
-Route::get('/datatable/ingredients', function (Request $request) {
-  $values = $request->all();
 
-  $order_default = true;
-  if (isset($values['order']) && count($values['order']) && isset($values['order'][0])) {
-    if (isset($values['order'][0]['column']) && (int)$values['order'][0]['column']) {
-      $order_default = false;
-    }
-  }
-
-  $select = App\Models\Ingredient::query();
-
-  if ($order_default) {
-    $select->orderBy('updated_at', 'desc')
-      ->orderBy('id', 'desc');
-  }
-
-  if (count($values)) {
-    if (isset($values['name']) && !empty($values['name'])) {
-      $select->where(function ($q) use ($values) {
-        $q->where('name', 'LIKE', '%' . $values['name'] . '%')
-          ->orWhere('name_vi', 'LIKE', '%' . $values['name'] . '%');
-      });
-    }
-  }
-
-  return DataTables::of($select)->addIndexColumn()->toJson();
-});
-
-Route::get('/admin/food-categories', [FoodCategoryController::class, 'index']);
-Route::post('/admin/food-category/store', [FoodCategoryController::class, 'store']);
-Route::post('/admin/food-category/update', [FoodCategoryController::class, 'update']);
-Route::post('/admin/food-category/create', [FoodCategoryController::class, 'create']);
-Route::post('/admin/food-category/selectize', [FoodCategoryController::class, 'selectize']);
-Route::get('/datatable/food-categories', function (Request $request) {
-  $values = $request->all();
-
-  $order_default = true;
-  if (isset($values['order']) && count($values['order']) && isset($values['order'][0])) {
-    if (isset($values['order'][0]['column']) && (int)$values['order'][0]['column']) {
-      $order_default = false;
-    }
-  }
-
-  $select = App\Models\FoodCategory::query();
-
-  if ($order_default) {
-    $select->orderBy('updated_at', 'desc')
-      ->orderBy('id', 'desc');
-  }
-
-  if (count($values)) {
-    if (isset($values['name']) && !empty($values['name'])) {
-      $select->where('name', 'LIKE', '%' . $values['name'] . '%');
-    }
-  }
-
-  return DataTables::of($select)->addIndexColumn()->toJson();
-});
 
 
 
