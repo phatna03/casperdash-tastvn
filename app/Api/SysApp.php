@@ -22,6 +22,14 @@ use App\Models\User;
 
 class SysApp
 {
+  public const _DEBUG = true;
+  public const _DEBUG_LOG_FOLDER = 'public/logs/';
+  public const _DEBUG_LOG_FILE_S3_CALLBACK = 'public/logs/s3_callback.log';
+
+  protected const _DEBUG_LOG_FILE_CRON = 'public/logs/cron_tastevn.log';
+  protected const _DEBUG_LOG_FILE_S3_POLLY = 'public/logs/s3_polly.log';
+  protected const _DEBUG_LOG_FILE_ROBOFLOW = 'public/logs/cron_tastevn_rbf_retrain.log';
+
   public function parse_to_query($query)
   {
     return vsprintf(str_replace('?', '%s', $query->toSql()), collect($query->getBindings())->map(function ($binding) {
@@ -84,6 +92,19 @@ class SysApp
       $randomString .= $characters[rand(0, $charactersLength - 1)];
     }
     return $randomString;
+  }
+
+  public function remote_file_exists($url)
+  {
+    $ch = curl_init($url);
+    curl_setopt($ch, CURLOPT_NOBODY, true);
+    curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+    if ($httpCode == 200) {
+      return true;
+    }
+    return false;
   }
 
   //aws

@@ -29,7 +29,7 @@
           <th>Name</th>
           <th>Email / Phone</th>
           <th>Role / Status</th>
-          <th>Restaurants</th>
+          <th>Sensors</th>
           <th>Note</th>
           <th>Latest updated</th>
           <th></th>
@@ -125,8 +125,12 @@
           <label for="add-item-manage-select">Select Restaurants Can Access</label>
         </div>
 
-        <button class="btn btn-primary me-sm-3 me-1 data-submit" type="submit">Submit</button>
-        <button type="reset" class="btn btn-outline-secondary" data-bs-dismiss="offcanvas">Cancel</button>
+        <div class="wrap-btns">
+          @include('tastevn.htmls.form_button_loading')
+          <button type="submit" class="btn btn-primary btn-ok btn-submit acm-float-right" >Submit</button>
+          <button type="button" class="btn btn-outline-secondary btn-ok btn-cancel" data-bs-dismiss="offcanvas">Cancel</button>
+        </div>
+
       </form>
     </div>
   </div>
@@ -213,8 +217,12 @@
           <label for="edit-item-manage-select">Select Restaurants Can Access</label>
         </div>
 
-        <button class="btn btn-primary me-sm-3 me-1 data-submit" type="submit">Submit</button>
-        <button type="reset" class="btn btn-outline-secondary" data-bs-dismiss="offcanvas">Cancel</button>
+        <div class="wrap-btns">
+          @include('tastevn.htmls.form_button_loading')
+          <button type="submit" class="btn btn-primary btn-ok btn-submit acm-float-right" >Submit</button>
+          <button type="button" class="btn btn-outline-secondary btn-ok btn-cancel" data-bs-dismiss="offcanvas">Cancel</button>
+        </div>
+
         <input type="hidden" name="item" />
       </form>
     </div>
@@ -235,8 +243,12 @@
           </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
-          <button type="button" onclick="user_delete(this)" class="btn btn-primary" data-bs-dismiss="modal">Confirm</button>
+          <div class="wrap-btns">
+            @include('tastevn.htmls.form_button_loading')
+            <button type="button" class="btn btn-primary btn-ok btn-submit acm-float-right" onclick="user_delete(this)">Submit</button>
+            <button type="button" class="btn btn-outline-secondary btn-ok btn-cancel" data-bs-dismiss="modal">Cancel</button>
+          </div>
+
           <input type="hidden" name="item" />
         </div>
       </div>
@@ -258,8 +270,12 @@
           </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
-          <button type="button" onclick="user_restore(this)" class="btn btn-primary" data-bs-dismiss="modal">Confirm</button>
+          <div class="wrap-btns">
+            @include('tastevn.htmls.form_button_loading')
+            <button type="button" class="btn btn-primary btn-ok btn-submit acm-float-right" onclick="user_restore(this)">Submit</button>
+            <button type="button" class="btn btn-outline-secondary btn-ok btn-cancel" data-bs-dismiss="modal">Cancel</button>
+          </div>
+
           <input type="hidden" name="item" />
         </div>
       </div>

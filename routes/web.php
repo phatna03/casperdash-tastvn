@@ -175,7 +175,6 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\tastevn\api\AuthController;
 use App\Http\Controllers\tastevn\api\TesterController;
 use App\Http\Controllers\tastevn\api\RoboflowController;
-use App\Http\Controllers\tastevn\api\UserController;
 use App\Http\Controllers\tastevn\api\FoodController;
 use App\Http\Controllers\tastevn\api\IngredientController;
 use App\Http\Controllers\tastevn\api\FoodCategoryController;
@@ -194,7 +193,7 @@ use App\Http\Controllers\tastevn\auth\NotificationController;
 use App\Http\Controllers\tastevn\auth\LogController;
 use App\Http\Controllers\tastevn\auth\TextController;
 use App\Http\Controllers\tastevn\auth\SettingController;
-
+use App\Http\Controllers\tastevn\auth\UserController;
 
 //apix
 Route::get('/export/food/ingredients', [ApiController::class, 'food_ingredient']);
@@ -260,6 +259,24 @@ Route::post('/admin/text/store', [TextController::class, 'store']);
 Route::post('/admin/text/update', [TextController::class, 'update']);
 Route::post('/admin/text/create', [TextController::class, 'create']);
 Route::post('/admin/text/selectize', [TextController::class, 'selectize']);
+//setting
+Route::get('/admin/settings', [SettingController::class, 'index']);
+Route::post('/admin/setting/update', [SettingController::class, 'update']);
+//user
+Route::get('/admin/profile', [UserController::class, 'profile']);
+Route::post('/admin/profile/update', [UserController::class, 'profile_update']);
+Route::post('/admin/profile/pwd/code', [UserController::class, 'profile_pwd_code']);
+Route::post('/admin/profile/pwd/update', [UserController::class, 'profile_pwd_update']);
+Route::get('/admin/profile/setting', [UserController::class, 'profile_setting']);
+Route::post('/admin/profile/setting/update', [UserController::class, 'profile_setting_update']);
+Route::post('/admin/profile/setting/notify', [UserController::class, 'profile_setting_notify']);
+Route::get('/admin/users', [UserController::class, 'index']);
+Route::post('/admin/user/store', [UserController::class, 'store']);
+Route::post('/admin/user/update', [UserController::class, 'update']);
+Route::post('/admin/user/delete', [UserController::class, 'delete']);
+Route::post('/admin/user/restore', [UserController::class, 'restore']);
+Route::post('/admin/user/selectize', [UserController::class, 'selectize']);
+
 
 
 //datatable
@@ -570,24 +587,7 @@ Route::post('/admin/roboflow/retraining', [RoboflowController::class, 'retrainin
 Route::get('/tester', [TesterController::class, 'index']);
 Route::post('/tester/post', [TesterController::class, 'tester_post']);
 
-Route::get('/admin/settings', [SettingController::class, 'index']);
-Route::post('/admin/setting/update', [SettingController::class, 'update']);
 
-Route::get('/admin/profile', [UserController::class, 'profile']);
-Route::post('/admin/profile/update', [UserController::class, 'profile_update']);
-Route::post('/admin/profile/pwd/code', [UserController::class, 'profile_pwd_code']);
-Route::post('/admin/profile/pwd/update', [UserController::class, 'profile_pwd_update']);
-
-Route::get('/admin/profile/setting', [UserController::class, 'profile_setting']);
-Route::post('/admin/profile/setting/update', [UserController::class, 'profile_setting_update']);
-Route::post('/admin/profile/setting/notify', [UserController::class, 'profile_setting_notify']);
-
-Route::get('/admin/users', [UserController::class, 'index']);
-Route::post('/admin/user/store', [UserController::class, 'store']);
-Route::post('/admin/user/update', [UserController::class, 'update']);
-Route::post('/admin/user/delete', [UserController::class, 'delete']);
-Route::post('/admin/user/restore', [UserController::class, 'restore']);
-Route::post('/admin/user/selectize', [UserController::class, 'selectize']);
 Route::get('/datatable/user', function (Request $request) {
   $values = $request->all();
 

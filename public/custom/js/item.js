@@ -1084,6 +1084,7 @@ function food_ingredient_core_quick(ele, itd) {
 function text_add(evt, frm) {
   evt.preventDefault();
   var form = $(frm);
+  form_loading(form);
 
   axios.post('/admin/text/store', {
     name: form.find('input[name=name]').val(),
@@ -1093,9 +1094,7 @@ function text_add(evt, frm) {
       message_from_toast('success', acmcfs.message_title_success, acmcfs.message_description_success_add, true);
 
       datatable_refresh();
-      setTimeout(function () {
-        form.find('input[name=name]').focus();
-      }, acmcfs.timeout_quick);
+
     })
     .catch(error => {
       var restoreModal = false;
@@ -1120,6 +1119,14 @@ function text_add(evt, frm) {
       setTimeout(function () {
         form.find('input[name=name]').focus();
       }, acmcfs.timeout_quick);
+    })
+    .then(() => {
+
+      form_loading(form, false);
+
+      setTimeout(function () {
+        form.find('input[name=name]').focus();
+      }, acmcfs.timeout_quick);
     });
 
   return false;
@@ -1138,6 +1145,7 @@ function text_edit_prepare(ele) {
 function text_edit(evt, frm) {
   evt.preventDefault();
   var form = $(frm);
+  form_loading(form);
 
   axios.post('/admin/text/update', {
     item: form.find('input[name=item]').val(),
@@ -1170,9 +1178,11 @@ function text_edit(evt, frm) {
         $('#modal_restore_item').modal('show');
       }
 
-      setTimeout(function () {
-        form.find('input[name=name]').focus();
-      }, acmcfs.timeout_quick);
+    })
+    .then(() => {
+
+      form_loading(form, false);
+      form_close(form);
     });
 
   return false;
@@ -1185,7 +1195,9 @@ function sys_setting_confirm(evt, frm) {
   return false;
 }
 function sys_setting() {
+  var popup = $('#modal_confirm_item');
   var form = $('#frm-settings');
+  form_loading(popup);
 
   axios.post('/admin/setting/update', {
     s3_region: form.find('input[name=s3_region]').val(),
@@ -1217,7 +1229,470 @@ function sys_setting() {
         });
       }
 
+    })
+    .then(() => {
+
+      form_loading(popup, false);
     });
 
   return false;
 }
+//user
+function user_clear(frm) {
+  var form = $(frm);
+
+  form.find('input[name=name]').val('');
+  form.find('input[name=email]').val('');
+  form.find('input[name=phone]').val('');
+  form.find('input[name=status][value=active]').prop('checked', true);
+  form.find('input[name=role][value=user]').prop('checked', true);
+  form.find('textarea[name=note]').val('');
+}
+function user_add(evt, frm) {
+  evt.preventDefault();
+  var form = $(frm);
+  form_loading(form);
+
+  axios.post('/admin/user/store', {
+    name: form.find('input[name=name]').val(),
+    email: form.find('input[name=email]').val(),
+    phone: form.find('input[name=phone]').val(),
+    status: form.find('input[name=status]:checked').val(),
+    role: form.find('input[name=role]:checked').val(),
+    note: form.find('textarea[name=note]').val(),
+    access_full: form.find('input[name=access_full]').is(':checked') ? 1 : 0,
+    access_restaurants: form.find('select[name=access_restaurants]').val(),
+  })
+    .then(response => {
+
+      message_from_toast('success', acmcfs.message_title_success, acmcfs.message_description_success_add, true);
+
+      datatable_refresh();
+
+    })
+    .catch(error => {
+      var restoreModal = false;
+
+      if (error.response.data && Object.values(error.response.data).length) {
+        Object.values(error.response.data).forEach(function (v, k) {
+          if (v == 'can_restored') {
+            restoreModal = true;
+          } else {
+            message_from_toast('error', acmcfs.message_title_error, v);
+          }
+        });
+      }
+
+      if (restoreModal && $('#modal_restore_item').length) {
+        $('#modal_restore_item input[name=item]').val(form.find('input[name=email]').val());
+        $('#modal_restore_item .alert').empty()
+          .append("Are you sure you want to restore item has email: <b class='text-dark'>" + form.find('input[name=email]').val() + "</b>");
+        $('#modal_restore_item').modal('show');
+      }
+
+    })
+    .then(() => {
+
+      form_loading(form, false);
+
+      setTimeout(function () {
+        form.find('input[name=name]').focus();
+      }, acmcfs.timeout_quick);
+    });
+
+  return false;
+}
+function user_full_restaurants(ele) {
+  var bind = $(ele);
+  var form = bind.closest('form');
+  var role = form.find('input[name=role]:checked').val();
+
+  if (role == 'admin') {
+    form.find('input[name=access_full]').prop('checked', true);
+    form.find('.access-restaurants').addClass('d-none');
+    return false;
+  }
+
+  if (bind.is(':checked')) {
+    form.find('.access-restaurants').addClass('d-none');
+  } else {
+    form.find('.access-restaurants').removeClass('d-none');
+  }
+}
+function user_edit_prepare(ele) {
+  var tr = $(ele).closest('tr');
+  var form = $('#offcanvas_edit_item form');
+
+  form.find('input[name=item]').val(tr.attr('data-id'));
+  form.find('input[name=name]').val(tr.attr('data-name'));
+  form.find('input[name=email]').val(tr.attr('data-email'));
+  form.find('input[name=phone]').val(tr.attr('data-phone'));
+  form.find('input[name=status][value=' + tr.attr('data-status') + ']').prop('checked', true);
+  form.find('input[name=role][value=' + tr.attr('data-role') + ']').prop('checked', true);
+  form.find('textarea[name=note]').val(tr.attr('data-note'));
+
+  var access_full = parseInt(tr.attr('data-access-full'));
+  if (access_full) {
+    form.find('input[name=access_full]').prop('checked', true);
+    form.find('.access-restaurants').addClass('d-none');
+  } else {
+    form.find('input[name=access_full]').prop('checked', false);
+    form.find('.access-restaurants').removeClass('d-none');
+
+    var datad = tr.attr('data-access-ids');
+    if (datad && datad !== '') {
+      datad = JSON.parse(datad);
+      form.find('.access-restaurants select').selectize()[0].selectize.setValue(datad);
+    }
+  }
+
+  setTimeout(function () {
+    form.find('input[name=name]').focus();
+  }, acmcfs.timeout_quick);
+}
+function user_edit(evt, frm) {
+  evt.preventDefault();
+  var form = $(frm);
+  form_loading(form);
+
+  axios.post('/admin/user/update', {
+    item: form.find('input[name=item]').val(),
+    name: form.find('input[name=name]').val(),
+    email: form.find('input[name=email]').val(),
+    phone: form.find('input[name=phone]').val(),
+    status: form.find('input[name=status]:checked').val(),
+    role: form.find('input[name=role]:checked').val(),
+    note: form.find('textarea[name=note]').val(),
+    access_full: form.find('input[name=access_full]').is(':checked') ? 1 : 0,
+    access_restaurants: form.find('select[name=access_restaurants]').val(),
+  })
+    .then(response => {
+
+      message_from_toast('success', acmcfs.message_title_success, acmcfs.message_description_success_update, true);
+
+      datatable_refresh();
+
+    })
+    .catch(error => {
+      var restoreModal = false;
+
+      if (error.response.data && Object.values(error.response.data).length) {
+        Object.values(error.response.data).forEach(function (v, k) {
+          if (v == 'can_restored') {
+            restoreModal = true;
+          } else {
+            message_from_toast('error', acmcfs.message_title_error, v);
+          }
+        });
+      }
+
+      if (restoreModal && $('#modal_restore_item').length) {
+        $('#modal_restore_item input[name=item]').val(form.find('input[name=email]').val());
+        $('#modal_restore_item .alert').empty()
+          .append("Are you sure you want to restore item has email: <b class='text-dark'>" + form.find('input[name=email]').val() + "</b>");
+        $('#modal_restore_item').modal('show');
+      }
+
+    })
+    .then(() => {
+
+      form_loading(form, false);
+      form_close(form);
+    });
+
+  return false;
+}
+function user_delete_confirm(ele) {
+  var tr = $(ele).closest('tr');
+  var popup = $('#modal_delete_item');
+
+  popup.find('input[name=item]').val(tr.attr('data-id'));
+}
+function user_delete(ele) {
+  var popup = $(ele).closest('.modal');
+  form_loading(popup);
+
+  axios.post('/admin/user/delete', {
+    item: popup.find('input[name=item]').val(),
+  })
+    .then(response => {
+
+      message_from_toast('success', acmcfs.message_title_success, acmcfs.message_description_success_update, true);
+
+      datatable_refresh();
+
+    })
+    .catch(error => {
+
+      if (error.response.data && Object.values(error.response.data).length) {
+        Object.values(error.response.data).forEach(function (v, k) {
+          message_from_toast('error', acmcfs.message_title_error, v);
+        });
+      }
+
+    })
+    .then(() => {
+
+      form_loading(popup, false);
+      form_close(popup);
+    });
+
+  return false;
+}
+function user_restore(ele) {
+  var popup = $(ele).closest('.modal');
+
+  axios.post('/admin/user/restore', {
+    item: popup.find('input[name=item]').val(),
+  })
+    .then(response => {
+
+      message_from_toast('success', acmcfs.message_title_success, acmcfs.message_description_success_update, true);
+
+      datatable_refresh();
+
+    })
+    .catch(error => {
+
+      if (error.response.data && Object.values(error.response.data).length) {
+        Object.values(error.response.data).forEach(function (v, k) {
+          message_from_toast('error', acmcfs.message_title_error, v);
+        });
+      }
+
+    });
+
+  return false;
+}
+function user_role(ele) {
+  var form = $(ele).closest('form');
+  var role = form.find('input[name=role]:checked').val();
+  if (role == 'admin') {
+    if (!form.find('input[name=access_full]').is(':checked')) {
+      form.find('input[name=access_full]').prop('checked', true);
+      form.find('.access-restaurants').addClass('d-none');
+    }
+  }
+}
+function user_profile_confirm(evt, frm) {
+  evt.preventDefault();
+  var popup = $('#modal_confirm_profile');
+  popup.modal('show');
+  return false;
+}
+function user_profile() {
+  var form = $('#frm-profile');
+  var popup = $('#modal_confirm_profile');
+  form_loading(popup);
+
+  axios.post('/admin/profile/update', {
+    name: form.find('input[name=info_name]').val(),
+    email: form.find('input[name=info_email]').val(),
+    phone: form.find('input[name=info_phone]').val(),
+  })
+    .then(response => {
+
+      message_from_toast('success', acmcfs.message_title_success, acmcfs.message_description_success_update, true);
+
+    })
+    .catch(error => {
+
+      if (error.response.data && Object.values(error.response.data).length) {
+        Object.values(error.response.data).forEach(function (v, k) {
+          message_from_toast('error', acmcfs.message_title_error, v);
+        });
+      }
+
+    })
+    .then(() => {
+
+      form_loading(popup, false);
+      form_close(popup);
+    });
+
+  return false;
+}
+function user_code_confirm() {
+  var popup = $('#modal_confirm_code');
+  popup.modal('show');
+  return false;
+}
+function user_code() {
+  var popup = $('#modal_confirm_code');
+  form_loading(popup);
+
+  axios.post('/admin/profile/pwd/code', {})
+    .then(response => {
+
+      message_from_toast('success', acmcfs.message_title_success, 'Your verify code has been sent successfully!', true);
+
+    })
+    .catch(error => {
+
+      if (error.response.data && Object.values(error.response.data).length) {
+        Object.values(error.response.data).forEach(function (v, k) {
+          message_from_toast('error', acmcfs.message_title_error, v);
+        });
+      }
+
+    })
+    .then(() => {
+
+      form_loading(popup, false);
+      form_close(popup);
+    });
+
+  return false;
+}
+function user_pwd_confirm(evt, frm) {
+  evt.preventDefault();
+  var popup = $('#modal_confirm_pwd');
+  popup.modal('show');
+  return false;
+}
+function user_pwd() {
+  var form = $('#frm-pwd');
+  var popup = $('#modal_confirm_pwd');
+  form_loading(popup);
+
+  axios.post('/admin/profile/pwd/update', {
+    code: form.find('input[name=pwd_code]').val(),
+    password: form.find('input[name=pwd_pwd1]').val(),
+    password_confirmation: form.find('input[name=pwd_pwd2]').val(),
+  })
+    .then(response => {
+
+      message_from_toast('success', acmcfs.message_title_success, acmcfs.message_description_success_update, true);
+      page_reload();
+
+    })
+    .catch(error => {
+
+      if (error.response.data && Object.values(error.response.data).length) {
+        Object.values(error.response.data).forEach(function (v, k) {
+          message_from_toast('error', acmcfs.message_title_error, v);
+        });
+      }
+
+    })
+    .then(() => {
+
+      form_loading(popup, false);
+      form_close(popup);
+    });
+
+  return false;
+}
+function user_setting_confirm(evt, frm) {
+  evt.preventDefault();
+  var popup = $('#modal_confirm_setting');
+  popup.modal('show');
+  return false;
+}
+function user_setting() {
+  var form = $('#frm-setting');
+
+  axios.post('/admin/profile/setting/update', {
+    settings: {}
+  })
+    .then(response => {
+
+      message_from_toast('success', acmcfs.message_title_success, acmcfs.message_description_success_update, true);
+
+    })
+    .catch(error => {
+
+      if (error.response.data && Object.values(error.response.data).length) {
+        Object.values(error.response.data).forEach(function (v, k) {
+          message_from_toast('error', acmcfs.message_title_error, v);
+        });
+      }
+
+    });
+
+  return false;
+}
+function user_test_sound() {
+  sound_play();
+}
+function user_test_speaker() {
+  speaker_tester();
+}
+function user_test_printer() {
+  page_open(acmcfs.link_base_url + '/printer/test');
+}
+function user_setting_notify_confirm(evt, frm) {
+  evt.preventDefault();
+  var popup = $('#modal_confirm_setting_notify');
+  popup.modal('show');
+  return false;
+}
+function user_setting_notify() {
+  var form = $('#frm-setting-notify');
+  var popup = $('#modal_confirm_setting_notify');
+  form_loading(popup);
+
+  var notifications = [];
+
+  form.find('.notify_item').each(function (k, v) {
+    var bind = $(v);
+    var notify = bind.attr('data-notify');
+    var key = '';
+    var val = '';
+
+    key = notify + '_receive';
+    val = bind.find('input[name=' + key + ']').is(':checked') ? 1 : 0;
+    notifications.push({
+      key: key,
+      val: val,
+    });
+
+    key = notify + '_alert_printer';
+    val = bind.find('input[name=' + key + ']').is(':checked') ? 1 : 0;
+    notifications.push({
+      key: key,
+      val: val,
+    });
+
+    key = notify + '_alert_email';
+    val = bind.find('input[name=' + key + ']').is(':checked') ? 1 : 0;
+    notifications.push({
+      key: key,
+      val: val,
+    });
+
+    key = notify + '_alert_speaker';
+    val = bind.find('input[name=' + key + ']').is(':checked') ? 1 : 0;
+    notifications.push({
+      key: key,
+      val: val,
+    });
+  });
+
+  axios.post('/admin/profile/setting/notify', {
+    notifications: notifications
+  })
+    .then(response => {
+
+      message_from_toast('success', acmcfs.message_title_success, acmcfs.message_description_success_update, true);
+
+    })
+    .catch(error => {
+
+      if (error.response.data && Object.values(error.response.data).length) {
+        Object.values(error.response.data).forEach(function (v, k) {
+          message_from_toast('error', acmcfs.message_title_error, v);
+        });
+      }
+
+    })
+    .then(() => {
+
+      form_loading(popup, false);
+      form_close(popup);
+    });
+
+  return false;
+}
+
+

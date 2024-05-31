@@ -175,8 +175,12 @@
           </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
-          <button type="button" onclick="sys_setting()" class="btn btn-primary" data-bs-dismiss="modal">Confirm</button>
+          <div class="wrap-btns">
+            @include('tastevn.htmls.form_button_loading')
+            <button type="button" class="btn btn-primary btn-ok btn-submit acm-float-right" onclick="sys_setting()">Submit</button>
+            <button type="button" class="btn btn-outline-secondary btn-ok btn-cancel" data-bs-dismiss="modal">Cancel</button>
+          </div>
+
           <input type="hidden" name="item" />
         </div>
       </div>
