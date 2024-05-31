@@ -59,16 +59,31 @@ class RestaurantParent extends Model
 
   public function get_foods($pars = [])
   {
-    $select = FoodIngredient::distinct()
-      ->select('food_ingredients.food_id', 'foods.name')
-      ->leftJoin('foods', 'foods.id', '=', 'food_ingredients.food_id')
-      ->where('food_ingredients.restaurant_parent_id', $this->id)
-      ->where('food_ingredients.deleted', 0)
-      ->where('foods.deleted', 0)
-      ->orderByRaw('TRIM(LOWER(foods.name))')
-    ;
+    $items = [];
 
-    return $select->get();
+    $sensor = $this->get_sensors([
+      'one_sensor' => 1,
+    ]);
+
+    if ($sensor) {
+
+      $select = RestaurantFood::query('restaurant_foods')
+        ->where('restaurant_foods.restaurant_id', $sensor->id)
+        ->distinct()
+        ->select(
+          'restaurant_foods.food_id', 'foods.name as food_name',
+          'restaurant_foods.photo as food_photo', 'restaurant_foods.live_group as food_live_group',
+          'restaurant_foods.food_category_id', 'food_categories.name as food_category_name'
+        )
+        ->where('restaurant_foods.deleted', 0)
+        ->leftJoin('foods', 'foods.id', '=', 'restaurant_foods.food_id')
+        ->leftJoin('food_categories', 'food_categories.id', '=', 'restaurant_foods.food_category_id')
+        ->orderByRaw('TRIM(LOWER(foods.name))');
+
+      $items = $select->get();
+    }
+
+    return $items;
   }
 
   public function get_sensors($pars = [])

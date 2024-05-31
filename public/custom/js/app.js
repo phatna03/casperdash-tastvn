@@ -1132,7 +1132,7 @@ function user_test_speaker() {
 }
 
 function user_test_printer() {
-  page_open(acmcfs.link_base_url + '/printer-test');
+  page_open(acmcfs.link_base_url + '/printer/test');
 }
 
 function user_setting_notify_confirm(evt, frm) {

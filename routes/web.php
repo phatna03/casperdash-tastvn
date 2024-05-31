@@ -177,7 +177,7 @@ use App\Http\Controllers\tastevn\api\TesterController;
 use App\Http\Controllers\tastevn\api\RoboflowController;
 use App\Http\Controllers\tastevn\api\SettingController;
 use App\Http\Controllers\tastevn\api\UserController;
-use App\Http\Controllers\tastevn\api\RestaurantController;
+//use App\Http\Controllers\tastevn\api\RestaurantController;
 use App\Http\Controllers\tastevn\api\FoodController;
 use App\Http\Controllers\tastevn\api\IngredientController;
 use App\Http\Controllers\tastevn\api\FoodCategoryController;
@@ -185,26 +185,39 @@ use App\Http\Controllers\tastevn\api\TextController;
 use App\Http\Controllers\tastevn\api\LogController;
 use App\Http\Controllers\tastevn\api\PhotoController;
 use App\Http\Controllers\tastevn\api\CommentController;
-use App\Http\Controllers\tastevn\api\SensorController;
-use App\Http\Controllers\tastevn\view\GuestController;
+//use App\Http\Controllers\tastevn\api\SensorController;
+//use App\Http\Controllers\tastevn\view\GuestController;
 use App\Http\Controllers\tastevn\view\DashboardController;
-use App\Http\Controllers\tastevn\view\ExportController;
+//use App\Http\Controllers\tastevn\view\ExportController;
+
+use App\Http\Controllers\tastevn\ApiController;
+use App\Http\Controllers\tastevn\LoginController;
+use App\Http\Controllers\tastevn\GuideController;
+use App\Http\Controllers\tastevn\PrinterController;
+use App\Http\Controllers\tastevn\ErrorController;
+
+use App\Http\Controllers\tastevn\auth\RestaurantController;
+use App\Http\Controllers\tastevn\auth\SensorController;
 
 use App\Api\SysCore;
 
-//auth
-Route::get('/login', [GuestController::class, 'login'])->name('logout');
-Route::get('/login', [GuestController::class, 'login'])->name('login');
-Route::post('/auth/login', [AuthController::class, 'login']);
-Route::post('/auth/send-code', [AuthController::class, 'send_code']);
-Route::post('/auth/update-pwd', [AuthController::class, 'update_pwd']);
-Route::post('/auth/logout', [AuthController::class, 'logout']);
 //apix
-Route::get('/export/food/ingredients', [ExportController::class, 'food_ingredient']);
-//optimize
-Route::get('/', [SensorController::class, 'index']);
-Route::get('/admin', [SensorController::class, 'index']);
-//restaurant (restaurant_parent) //add later
+Route::get('/export/food/ingredients', [ApiController::class, 'food_ingredient']);
+//auth
+Route::get('/login', [LoginController::class, 'login'])->name('login');
+Route::post('/auth/login', [LoginController::class, 'login_auth']);
+Route::post('/auth/send-code', [LoginController::class, 'send_code']);
+Route::post('/auth/update-pwd', [LoginController::class, 'update_pwd']);
+Route::post('/auth/logout', [LoginController::class, 'logout'])->name('logout');
+//guide
+Route::get('/guide/printer', [GuideController::class, 'printer']);
+Route::get('/guide/speaker', [GuideController::class, 'speaker']);
+//printer
+Route::get('/printer', [PrinterController::class, 'index']);
+Route::get('/printer/test', [PrinterController::class, 'test']);
+//error
+Route::get('/error/404', [ErrorController::class, 'index']);
+//restaurant
 Route::get('/admin/restaurants', [RestaurantController::class, 'index']);
 Route::post('/admin/restaurant/store', [RestaurantController::class, 'store']);
 Route::post('/admin/restaurant/update', [RestaurantController::class, 'update']);
@@ -216,6 +229,16 @@ Route::post('/admin/restaurant/food/import', [RestaurantController::class, 'food
 Route::post('/admin/restaurant/food/remove', [RestaurantController::class, 'food_remove']);
 Route::post('/admin/restaurant/food/group', [RestaurantController::class, 'food_group']);
 Route::post('/admin/restaurant/food/core', [RestaurantController::class, 'food_core']);
+
+
+//opt
+//======================================================================================================================
+
+//optimize
+Route::get('/', [SensorController::class, 'index']);
+Route::get('/admin', [SensorController::class, 'index']);
+//restaurant (restaurant_parent) //add later
+
 //restaurant = sensor
 Route::get('/admin/sensor', [DashboardController::class, 'sensor']);
 Route::post('/admin/sensor/kitchen', [DashboardController::class, 'sensor_kitchen']);
@@ -524,16 +547,7 @@ Route::post('/admin/notification/latest', [DashboardController::class, 'notifica
 Route::post('/admin/notification/newest', [DashboardController::class, 'notification_newest']);
 Route::post('/admin/notification/dashboard', [DashboardController::class, 'notification_dashboard']);
 
-Route::get('/guide', [GuestController::class, 'guide']);
-Route::get('/guide/printer', [GuestController::class, 'guide_printer']);
-Route::get('/guide/speaker', [GuestController::class, 'guide_speaker']);
 
-Route::get('/s3/bucket/get', [GuestController::class, 's3_bucket_get']);
-Route::get('/printer', [GuestController::class, 'printer']);
-Route::get('/printer-test', [GuestController::class, 'printer_test']);
-Route::get('/page_not_found', [GuestController::class, 'page_not_found']);
-Route::get('/excel1', [GuestController::class, 'excel1']);
-Route::get('/excel2', [GuestController::class, 'excel2']);
 Route::get('/tester', [TesterController::class, 'index']);
 Route::post('/tester/post', [TesterController::class, 'tester_post']);
 
@@ -584,18 +598,7 @@ Route::get('/datatable/user', function (Request $request) {
 
   return DataTables::of($select)->addIndexColumn()->toJson();
 });
-Route::post('/admin/restaurant/stats', [RestaurantController::class, 'stats']);
 
-
-Route::post('/admin/restaurant/food/add', [RestaurantController::class, 'food_add']);
-Route::post('/admin/restaurant/food/delete', [RestaurantController::class, 'food_delete']);
-Route::post('/admin/restaurant/food/scan', [RestaurantController::class, 'food_scan']);
-Route::post('/admin/restaurant/food/scan/delete', [RestaurantController::class, 'food_scan_delete']);
-Route::post('/admin/restaurant/food/scan/info', [RestaurantController::class, 'food_scan_info']);
-Route::post('/admin/restaurant/food/scan/get', [RestaurantController::class, 'food_scan_get']);
-Route::post('/admin/restaurant/food/scan/update', [RestaurantController::class, 'food_scan_update']);
-Route::post('/admin/restaurant/food/scan/error', [RestaurantController::class, 'food_scan_error']);
-Route::post('/admin/restaurant/food/scan/api', [RestaurantController::class, 'food_scan_api']);
 
 Route::get('/datatable/restaurant-foods', function (Request $request) {
   $values = $request->all();

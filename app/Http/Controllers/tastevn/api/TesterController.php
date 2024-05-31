@@ -44,6 +44,8 @@ class TesterController extends Controller
 //    echo '<pre>';
     $user = Auth::user();
 
+    $restaurant = Restaurant::find(5);
+
 
 
     echo '<br />';

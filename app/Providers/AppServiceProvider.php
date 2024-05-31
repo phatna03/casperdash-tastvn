@@ -28,6 +28,9 @@ class AppServiceProvider extends ServiceProvider
   {
     $api_mobi = new SysMobi();
 
+    //https
+    $this->app['request']->server->set('HTTPS', $this->app->environment() != 'local');
+
     //viewer
     view()->composer('*', function($view) {
       if (Auth::check()) {

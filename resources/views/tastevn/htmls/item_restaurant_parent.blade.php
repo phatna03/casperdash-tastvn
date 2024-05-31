@@ -16,18 +16,6 @@
 
         $food = $api_app->get_item($obj->food_id, 'food');
 
-        $food_photo = $food->get_photo([
-          'restaurant_parent_id' => $restaurant_parent->id
-        ]);
-
-        $food_category = $food->get_category([
-          'restaurant_parent_id' => $restaurant_parent->id
-        ]);
-
-        $food_live_group = $food->get_live_group([
-          'restaurant_parent_id' => $restaurant_parent->id
-        ]);
-
         $recipes = $food->get_recipes([
           'restaurant_parent_id' => $restaurant_parent->id
         ]);
@@ -44,13 +32,13 @@
           <div class="col-lg-6 mb-1">
             <div class="text-dark fw-bold fs-4">{{$food->name}}</div>
             <div
-              class="text-dark acm-text-italic mt-1">{{$food_category ? '(' . $food_category->name . ')' : ''}}</div>
+              class="text-dark acm-text-italic mt-1">{{$obj->food_category_id ? '(' . $obj->food_category_name . ')' : ''}}</div>
           </div>
 
           <div class="col-lg-3 mb-1">
             <select class="opt_selectize w-100" onchange="restaurant_food_live_group(this)">
               @for($i=1;$i<=3;$i++)
-                <option @if($food_live_group == $i) selected="selected" @endif value="{{$i}}">
+                <option @if($obj->food_live_group == $i) selected="selected" @endif value="{{$i}}">
                   @if($i==1)
                     {{$i}}. Super Confidence
                   @elseif($i==2)
@@ -72,7 +60,7 @@
 
           <div class="col-lg-6 mb-1">
             <div class="text-center w-100">
-              <img class="w-100" loading="lazy" src="{{$food_photo}}"/>
+              <img class="w-100" loading="lazy" src="{{$obj->food_photo}}"/>
             </div>
           </div>
 

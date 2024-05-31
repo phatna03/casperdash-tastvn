@@ -540,11 +540,15 @@ class Restaurant extends Model
 
     if ($rfs && $this->rbf_scan && !empty($rbf_dataset) && !empty($rbf_api_key)) {
 
+      //later check
+      $img_url = $rfs->get_photo();
+      $img_url = str_replace('https', 'http', $img_url);
+
       // URL for Http Request
       $rbf_url = "https://detect.roboflow.com/" . $rbf_dataset
         . "?api_key=" . $rbf_api_key
         . "&confidence=30&overlap=60&max_objects=100"
-        . "&image=" . urlencode($rfs->get_photo());
+        . "&image=" . urlencode($img_url);
 
       // Setup + Send Http request
       $rbf_options = array(

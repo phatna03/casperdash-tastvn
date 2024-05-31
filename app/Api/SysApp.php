@@ -18,14 +18,6 @@ use App\Models\User;
 class SysApp
 {
 
-  public static function get_setting($key)
-  {
-    $row = SysSetting::where('key', $key)
-      ->first();
-
-    return $row ? $row->value : NULL;
-  }
-
   public static function parse_s3_bucket_address($text)
   {
 //    '58-5b-69-19-ad-67/SENSOR/1';
@@ -40,6 +32,18 @@ class SysApp
     return $text;
   }
 
+  public static function str_rand($length = 8)
+  {
+    $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    $charactersLength = strlen($characters);
+    $randomString = '';
+    for ($i = 0; $i < $length; $i++) {
+      $randomString .= $characters[rand(0, $charactersLength - 1)];
+    }
+    return $randomString;
+  }
+
+  //db
   public static function get_item($item_id, $item_type)
   {
     $item = null;
@@ -82,5 +86,26 @@ class SysApp
 
     return $item;
   }
+
+  public static function get_setting($key)
+  {
+    $row = SysSetting::where('key', $key)
+      ->first();
+
+    return $row ? $row->value : NULL;
+  }
+
+  public static function sys_stats_count()
+  {
+    //RestaurantParent
+    //count_sensors, count_foods
+    $rows = RestaurantParent::all();
+    if (count($rows)) {
+      foreach ($rows as $row) {
+        $row->re_count();
+      }
+    }
+  }
+
 
 }
