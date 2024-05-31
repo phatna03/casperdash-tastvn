@@ -847,6 +847,83 @@ class SensorController extends Controller
     ]);
   }
 
+  public function food_scan_get(Request $request)
+  {
+    $values = $request->post();
+
+    $validator = Validator::make($values, [
+      'item' => 'required',
+    ]);
+    if ($validator->fails()) {
+      return response()->json($validator->errors(), 422);
+    }
+    //invalid
+    $row = RestaurantFoodScan::findOrFail((int)$values['item']);
+    if (!$row) {
+      return response()->json([
+        'error' => 'Invalid item'
+      ], 422);
+    }
+
+    $ingredients_missing = [];
+    if ($row->get_food()) {
+      $ingredients_missing = $row->get_ingredients_missing();
+    }
+
+    $texts = Text::where('deleted', 0)
+      ->orderByRaw('TRIM(LOWER(name)) + 0')
+      ->get();
+
+    $text_ids = [];
+    $arr = $row->get_texts(['text_id_only' => 1]);
+    if (count($arr)) {
+      $text_ids = $arr->toArray();
+      $text_ids = array_map('current', $text_ids);
+    }
+
+    //info
+    $html_info = view('tastevn.htmls.item_food_scan_get')
+      ->with('item', $row)
+      ->with('ingredients', $ingredients_missing)
+      ->with('texts', $texts)
+      ->with('text_ids', $text_ids)
+      ->render();
+
+    return response()->json([
+      'html_info' => $html_info,
+
+      'status' => true,
+    ], 200);
+  }
+
+  public function stats(Request $request)
+  {
+    $values = $request->post();
+
+    $validator = Validator::make($values, [
+      'item' => 'required',
+    ]);
+    if ($validator->fails()) {
+      return response()->json($validator->errors(), 422);
+    }
+    //invalid
+    $row = Restaurant::findOrFail((int)$values['item']);
+    if (!$row) {
+      return response()->json([
+        'error' => 'Invalid item'
+      ], 422);
+    }
+
+    $type = isset($values['type']) ? $values['type'] : 'total';
+    $times = isset($values['times']) ? $values['times'] : NULL;
+
+    return response()->json([
+      'stats' => $row->get_stats($type, $times),
+
+      'status' => true,
+    ], 200);
+  }
+
   public function kitchen(string $id)
   {
     $row = Restaurant::find((int)$id);
@@ -1213,82 +1290,4 @@ class SensorController extends Controller
       'ingredients_found' => $ingredients_found,
     ];
   }
-
-  public function food_scan_get(Request $request)
-  {
-    $values = $request->post();
-
-    $validator = Validator::make($values, [
-      'item' => 'required',
-    ]);
-    if ($validator->fails()) {
-      return response()->json($validator->errors(), 422);
-    }
-    //invalid
-    $row = RestaurantFoodScan::findOrFail((int)$values['item']);
-    if (!$row) {
-      return response()->json([
-        'error' => 'Invalid item'
-      ], 422);
-    }
-
-    $ingredients_missing = [];
-    if ($row->get_food()) {
-      $ingredients_missing = $row->get_ingredients_missing();
-    }
-
-    $texts = Text::where('deleted', 0)
-      ->orderByRaw('TRIM(LOWER(name)) + 0')
-      ->get();
-
-    $text_ids = [];
-    $arr = $row->get_texts(['text_id_only' => 1]);
-    if (count($arr)) {
-      $text_ids = $arr->toArray();
-      $text_ids = array_map('current', $text_ids);
-    }
-
-    //info
-    $html_info = view('tastevn.htmls.item_food_scan_get')
-      ->with('item', $row)
-      ->with('ingredients', $ingredients_missing)
-      ->with('texts', $texts)
-      ->with('text_ids', $text_ids)
-      ->render();
-
-    return response()->json([
-      'html_info' => $html_info,
-
-      'status' => true,
-    ], 200);
-  }
-
-  public function stats(Request $request)
-  {
-    $values = $request->post();
-
-    $validator = Validator::make($values, [
-      'item' => 'required',
-    ]);
-    if ($validator->fails()) {
-      return response()->json($validator->errors(), 422);
-    }
-    //invalid
-    $row = Restaurant::findOrFail((int)$values['item']);
-    if (!$row) {
-      return response()->json([
-        'error' => 'Invalid item'
-      ], 422);
-    }
-
-    $type = isset($values['type']) ? $values['type'] : 'total';
-    $times = isset($values['times']) ? $values['times'] : NULL;
-
-    return response()->json([
-      'stats' => $row->get_stats($type, $times),
-
-      'status' => true,
-    ], 200);
-  }
-
 }

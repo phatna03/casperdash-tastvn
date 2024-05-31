@@ -22,6 +22,13 @@ use App\Models\User;
 
 class SysApp
 {
+  public function parse_to_query($query)
+  {
+    return vsprintf(str_replace('?', '%s', $query->toSql()), collect($query->getBindings())->map(function ($binding) {
+      $binding = addslashes($binding);
+      return is_numeric($binding) ? $binding : "'{$binding}'";
+    })->toArray());
+  }
 
   public function parse_date_range($times = NULL)
   {

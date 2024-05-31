@@ -200,10 +200,10 @@
                   <input type="text" class="form-control text-center date_time_picker" name="time_upload"
                          id="scan-search-time-upload" autocomplete="off" data-value="last_and_current_day"
                          onchange="sensor_search_food_scan(this)"/>
-                  <label for="scan-search-time-upload">Time upload</label>
+                  <label for="scan-search-time-upload">Time Upload</label>
                 </div>
               </div>
-              <div class="col-md-6 mb-2">
+              <div class="col-md-6 mb-2 d-none">
                 <div class="form-floating form-floating-outline">
                   <input type="text" class="form-control text-center date_time_picker" name="time_scan"
                          id="scan-search-time-scan" autocomplete="off" data-value="last_and_current_day"
@@ -236,7 +236,7 @@
                   <label for="scan-search-missing">Type</label>
                 </div>
               </div>
-              <div class="col-md-12 mb-2">
+              <div class="col-md-6 mb-2">
                 <div class="form-floating form-floating-outline wrap-select-users">
                   <div class="form-control acm-wrap-selectize" id="scan-search-users">
                     <select name="users" multiple onchange="sensor_search_food_scan(this)"
@@ -262,7 +262,7 @@
               <th>Confidence</th>
               <th>Ingredients missing</th>
               <th>Time upload</th>
-              <th>Time scanned</th>
+{{--              <th>Time scanned</th>--}}
               <th>Note</th>
               <th class="d-none"></th>
               <th class="d-none"></th>
@@ -303,10 +303,10 @@
                   <input type="text" class="form-control text-center date_time_picker" name="time_upload"
                          id="error-search-time-upload" autocomplete="off" data-value="last_and_current_day"
                          onchange="sensor_search_food_scan_error(this)"/>
-                  <label for="error-search-time-upload">Time upload</label>
+                  <label for="error-search-time-upload">Time Upload</label>
                 </div>
               </div>
-              <div class="col-md-6 mb-2">
+              <div class="col-md-6 mb-2 d-none">
                 <div class="form-floating form-floating-outline">
                   <input type="text" class="form-control text-center date_time_picker" name="time_scan"
                          id="error-search-time-scan" autocomplete="off" data-value="last_and_current_day"
@@ -547,7 +547,7 @@
         {data: 'confidence', name: 'confidence'},
         {data: 'missing_texts', name: 'missing_texts'},
         {data: 'time_photo', name: 'time_photo'},
-        {data: 'time_scan', name: 'time_scan'},
+        // {data: 'time_scan', name: 'time_scan'},
         {data: 'note', name: 'note'},
         {data: 'id', name: 'id'},
         {data: 'text_texts', name: 'text_texts'},
@@ -626,7 +626,7 @@
               '<div class="acm-float-left acm-mr-px-5">' +
               '<img class="acm-border-css" loading="lazy" width="100" height="70px" src="' + photo_url + '" />' +
               '</div>' +
-              '<div class="overflow-hidden acm-max-line-3">' +
+              '<div class="overflow-hidden acm-max-line-3 acm-width-150-min">' +
               '<div>ID: ' + full['id'] + '</div>' +
               '<div>' + food_name + '</div>' +
               '<div class="acm-text-italic">' + food_category + '</div>' +
@@ -701,22 +701,22 @@
             return ('<div class="cursor-pointer" onclick="sensor_food_scan_info(' + full['id'] + ')">' + html + '</div>');
           }
         },
+        // {
+        //   targets: 6,
+        //   render: function (data, type, full, meta) {
+        //     var html = '';
+        //     var arr = full['time_scan'].split(' ');
+        //     if (arr.length) {
+        //       html = '<div>' + arr[0] + '</div>' +
+        //         '<div>' + arr[1] + '</div>';
+        //     } else {
+        //       html = full['time_scan'];
+        //     }
+        //     return ('<div class="cursor-pointer" onclick="sensor_food_scan_info(' + full['id'] + ')">' + html + '</div>');
+        //   }
+        // },
         {
           targets: 6,
-          render: function (data, type, full, meta) {
-            var html = '';
-            var arr = full['time_scan'].split(' ');
-            if (arr.length) {
-              html = '<div>' + arr[0] + '</div>' +
-                '<div>' + arr[1] + '</div>';
-            } else {
-              html = full['time_scan'];
-            }
-            return ('<div class="cursor-pointer" onclick="sensor_food_scan_info(' + full['id'] + ')">' + html + '</div>');
-          }
-        },
-        {
-          targets: 7,
           sType: "priority",
           render: function (data, type, full, meta) {
             if (type == 'order' || type == 'sort') {
@@ -752,11 +752,11 @@
           }
         },
         {
-          targets: 8,
+          targets: 7,
           className: 'd-none',
         },
         {
-          targets: 9,
+          targets: 8,
           className: 'd-none',
         },
       ],
