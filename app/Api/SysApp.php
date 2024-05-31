@@ -1,7 +1,12 @@
 <?php
 
 namespace App\Api;
-
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
+//aws
+use Aws\Polly\PollyClient;
+use Aws\S3\S3Client;
+//model
 use App\Models\Comment;
 use App\Models\Food;
 use App\Models\FoodCategory;
@@ -18,7 +23,38 @@ use App\Models\User;
 class SysApp
 {
 
-  public static function parse_s3_bucket_address($text)
+  public function parse_date_range($times = NULL)
+  {
+    $time_from = NULL;
+    $time_to = NULL;
+
+    $times = array_filter(explode('-', $times));
+
+    if (count($times) && !empty($times[0])) {
+      $date_from = trim(substr(trim($times[0]), 0, 10));
+      $time_from = trim(substr(trim($times[0]), 10));
+      $hour_from = trim(substr(trim($time_from), 0, 2));
+      $minute_from = trim(substr(trim($time_from), 3, 2));
+
+      $time_from = date('Y-m-d', strtotime(str_replace('/', '-', $date_from))) . ' ' . $hour_from . ':' . $minute_from . ':00';
+    }
+
+    if (count($times) && !empty($times[1])) {
+      $date_to = trim(substr(trim($times[1]), 0, 10));
+      $time_to = trim(substr(trim($times[1]), 10));
+      $hour_to = trim(substr(trim($time_to), 0, 2));
+      $minute_to = trim(substr(trim($time_to), 3, 2));
+
+      $time_to = date('Y-m-d', strtotime(str_replace('/', '-', $date_to))) . ' ' . $hour_to . ':' . $minute_to . ':00';
+    }
+
+    return [
+      'time_from' => $time_from,
+      'time_to' => $time_to,
+    ];
+  }
+
+  public function parse_s3_bucket_address($text)
   {
 //    '58-5b-69-19-ad-67/SENSOR/1';
 
@@ -32,7 +68,7 @@ class SysApp
     return $text;
   }
 
-  public static function str_rand($length = 8)
+  public function str_rand($length = 8)
   {
     $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
     $charactersLength = strlen($characters);
@@ -43,8 +79,145 @@ class SysApp
     return $randomString;
   }
 
+  //aws
+  public function aws_s3_polly($pars = [])
+  {
+    $user = Auth::user();
+
+    //pars
+    $tester = isset($pars['tester']) ? (int)$pars['tester'] : 0;
+    $text_rate = isset($pars['text_rate']) && !empty($pars['text_rate']) ? $pars['text_rate'] : 'medium';
+    $text_to_speak = isset($pars['text_to_speak']) && !empty($pars['text_to_speak']) ? $pars['text_to_speak'] : NULL;
+    //configs
+    $s3_polly_configs = [
+      'version' => 'latest',
+      'region' => $this::get_setting('s3_region'),
+      'credentials' => [
+        'key' => $this->get_setting('s3_api_key'),
+        'secret' => $this->get_setting('s3_api_secret'),
+      ]
+    ];
+    $s3_bucket = 'cargo.tastevietnam.asia';
+    $s3_file_path = 'casperdash/user_' . $user->id . '/speaker_notify.mp3';
+
+    $this::_DEBUG ? Storage::append($this::_DEBUG_LOG_FILE_S3_POLLY, 'TODO_AT_' . date('d_M_Y_H_i_s')) : $this->log_failed();
+
+    if ($tester) {
+
+      $s3_file_path = 'casperdash/user_' . $user->id . '/speaker_tester.mp3';
+      $s3_file_test = 'https://s3.' . $s3_polly_configs['region'] . '.amazonaws.com/' . $s3_bucket . '/' . $s3_file_path;
+
+      if ($this->remote_file_exists($s3_file_test)) {
+        return false;
+      }
+
+      $this::_DEBUG ? Storage::append($this::_DEBUG_LOG_FILE_S3_POLLY, 'TESTER - ' . $user->id . ' - ' . $user->name) : $this->log_failed();
+
+      try {
+
+        $s3_polly_client = new PollyClient($s3_polly_configs);
+
+        //text_rate = x-slow, slow, medium, fast, and x-fast
+        $text_to_speak = "<speak>" .
+          "<prosody rate='{$text_rate}'>" .
+          "[Test Audio System] Cargo Restaurant," .
+          "Ingredients Missing, 1 Sour Bread, 2 Grilled Tomatoes, 3 Avocado Sliced" .
+          "</prosody>" .
+          "</speak>";
+        $s3_polly_args = [
+          'OutputFormat' => 'mp3',
+          'Text' => $text_to_speak,
+          'TextType' => 'ssml',
+          'VoiceId' => 'Joey', //pass preferred voice id here
+        ];
+
+        $result = $s3_polly_client->synthesizeSpeech($s3_polly_args);
+        $polly_result = $result->get('AudioStream')->getContents();
+
+        #Save MP3 to S3
+        $credentials = new \Aws\Credentials\Credentials($s3_polly_configs['credentials']['key'], $s3_polly_configs['credentials']['secret']);
+        $client_s3 = new S3Client([
+          'version' => 'latest',
+          'credentials' => $credentials,
+          'region' => $s3_polly_configs['region']
+        ]);
+
+        $result_s3 = $client_s3->putObject([
+          'Key' => $s3_file_path,
+//        'ACL'         => 'public-read',
+          'Body' => $polly_result,
+          'Bucket' => $s3_bucket,
+          'ContentType' => 'audio/mpeg',
+          'SampleRate' => '8000'
+        ]);
+
+      } catch (Exception $e) {
+        $this->bug_add([
+          'type' => 's3_polly_tester',
+          'line' => $e->getLine(),
+          'file' => $e->getFile(),
+          'message' => $e->getMessage(),
+          'params' => json_encode($e),
+        ]);
+      }
+    } else {
+      //live
+      if (!empty($text_to_speak)) {
+        $text_to_speak = "<speak>" .
+          "<prosody rate='{$text_rate}'>" .
+          $text_to_speak .
+          "</prosody>" .
+          "</speak>";
+      }
+
+      $this::_DEBUG ? Storage::append($this::_DEBUG_LOG_FILE_S3_POLLY, 'NOTIFY - ' . $user->id . ' - ' . $user->name) : $this->log_failed();
+
+      try {
+
+        $s3_polly_client = new PollyClient($s3_polly_configs);
+
+        $s3_polly_args = [
+          'OutputFormat' => 'mp3',
+          'Text' => $text_to_speak,
+          'TextType' => 'ssml',
+          'VoiceId' => 'Joey', //pass preferred voice id here
+        ];
+
+        $result = $s3_polly_client->synthesizeSpeech($s3_polly_args);
+        $polly_result = $result->get('AudioStream')->getContents();
+
+        #Save MP3 to S3
+        $credentials = new \Aws\Credentials\Credentials($s3_polly_configs['credentials']['key'], $s3_polly_configs['credentials']['secret']);
+        $client_s3 = new S3Client([
+          'version' => 'latest',
+          'credentials' => $credentials,
+          'region' => $s3_polly_configs['region']
+        ]);
+
+        $result_s3 = $client_s3->putObject([
+          'Key' => $s3_file_path,
+//        'ACL'         => 'public-read',
+          'Body' => $polly_result,
+          'Bucket' => $s3_bucket,
+          'ContentType' => 'audio/mpeg',
+          'SampleRate' => '8000'
+        ]);
+
+      } catch (Exception $e) {
+        $this->bug_add([
+          'type' => 's3_polly_notify',
+          'line' => $e->getLine(),
+          'file' => $e->getFile(),
+          'message' => $e->getMessage(),
+          'params' => json_encode($e),
+        ]);
+      }
+    }
+
+  }
+
   //db
-  public static function get_item($item_id, $item_type)
+  public function get_item($item_id, $item_type)
   {
     $item = null;
 
@@ -87,7 +260,7 @@ class SysApp
     return $item;
   }
 
-  public static function get_setting($key)
+  public function get_setting($key)
   {
     $row = SysSetting::where('key', $key)
       ->first();
@@ -95,7 +268,7 @@ class SysApp
     return $row ? $row->value : NULL;
   }
 
-  public static function sys_stats_count()
+  public function sys_stats_count()
   {
     //RestaurantParent
     //count_sensors, count_foods
@@ -105,6 +278,40 @@ class SysApp
         $row->re_count();
       }
     }
+  }
+
+  public function sys_ingredients_compact($pars = [])
+  {
+    $arr = [];
+    $existed = [];
+
+    if (count($pars)) {
+      foreach ($pars as $prediction) {
+        $prediction = (array)$prediction;
+
+        $ingredient = Ingredient::whereRaw('LOWER(name) LIKE ?', strtolower(trim($prediction['class'])))
+          ->first();
+        if ($ingredient) {
+
+          if (in_array($ingredient->id, $existed)) {
+            foreach ($arr as $k => $v) {
+              if ($v['id'] == $ingredient->id) {
+                $arr[$k]['quantity'] += 1;
+              }
+            }
+          } else {
+            $arr[] = [
+              'id' => $ingredient->id,
+              'quantity' => 1,
+            ];
+          }
+
+          $existed[] = $ingredient->id;
+        }
+      }
+    }
+
+    return $arr;
   }
 
 

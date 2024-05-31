@@ -20,9 +20,12 @@ use App\Models\RestaurantFood;
 class RestaurantController extends Controller
 {
   protected $_viewer = null;
+  protected $_sys_app = null;
 
   public function __construct()
   {
+    $this->_sys_app = new SysApp();
+
     $this->middleware(function ($request, $next) {
 
       $this->_viewer = Auth::user();
@@ -143,7 +146,7 @@ class RestaurantController extends Controller
     $row->on_update_after();
 
     //re-count
-    SysApp::sys_stats_count();
+    $this->_sys_app->sys_stats_count();
 
     $row = RestaurantParent::find($row->id);
     $diffs['after'] = $row->get_log();
@@ -385,7 +388,7 @@ class RestaurantController extends Controller
         }
 
         //re-count
-        SysApp::sys_stats_count();
+        $this->_sys_app->sys_stats_count();
 
 //      $this->_viewer->add_log([
 //        'type' => 'import_food_to_' . $restaurant_parent->get_type(),
@@ -442,7 +445,7 @@ class RestaurantController extends Controller
       ]);
 
     //re-count
-    SysApp::sys_stats_count();
+    $this->_sys_app->sys_stats_count();
 
     return response()->json([
       'status' => true,
@@ -494,7 +497,7 @@ class RestaurantController extends Controller
       return response()->json($validator->errors(), 422);
     }
 
-    $item = SysApp::get_item((int)$values['item'], 'food_ingredients');
+    $item = FoodIngredient::find((int)$values['item']);
     if (!$item) {
       return response()->json([
         'error' => 'Invalid data'

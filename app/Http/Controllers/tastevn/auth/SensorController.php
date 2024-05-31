@@ -1,22 +1,18 @@
 <?php
 
-namespace App\Http\Controllers\tastevn\api;
+namespace App\Http\Controllers\tastevn\auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
-
+//lib
 use Validator;
-use App\Api\SysCore;
 use App\Api\SysApp;
 use App\Api\SysRobo;
 use App\Excel\ImportData;
-
-use Illuminate\Support\Facades\Notification;
-use App\Notifications\IngredientMissing;
-
+//model
 use App\Models\Restaurant;
 use App\Models\RestaurantParent;
 use App\Models\RestaurantFood;
@@ -30,13 +26,17 @@ use App\Models\RestaurantFoodScanMissing;
 
 class SensorController extends Controller
 {
-  protected $_api_core = null;
+  protected $_viewer = null;
+  protected $_sys_app = null;
 
   public function __construct()
   {
-    $this->_api_core = new SysCore();
+    $this->_sys_app = new SysApp();
 
     $this->middleware(function ($request, $next) {
+
+      $this->_viewer = Auth::user();
+
       return $next($request);
     });
 
@@ -45,9 +45,8 @@ class SensorController extends Controller
 
   public function index(Request $request)
   {
-    $user = Auth::user();
     $invalid_roles = ['user'];
-    if (in_array($user->role, $invalid_roles)) {
+    if (in_array($this->_viewer->role, $invalid_roles)) {
       return redirect('admin/photos');
     }
 
@@ -56,7 +55,7 @@ class SensorController extends Controller
       'hasCustomizer' => false,
     ];
 
-    $user->add_log([
+    $this->_viewer->add_log([
       'type' => 'view_listing_sensor',
     ]);
 
@@ -66,7 +65,6 @@ class SensorController extends Controller
   public function store(Request $request)
   {
     $values = $request->post();
-    $user = Auth::user();
     //required
     $validator = Validator::make($values, [
       'name' => 'required|string',
@@ -97,12 +95,12 @@ class SensorController extends Controller
       's3_bucket_name' => isset($values['s3_bucket_name']) ? trim($values['s3_bucket_name']) : '',
       's3_bucket_address' => isset($values['s3_bucket_address']) ? trim($values['s3_bucket_address']) : '',
       'rbf_scan' => isset($values['rbf_scan']) && (int)$values['rbf_scan'] ? 1 : 0,
-      'creator_id' => $user->id,
+      'creator_id' => $this->_viewer->id,
     ]);
 
     $row->on_create_after();
 
-    $user->add_log([
+    $this->_viewer->add_log([
       'type' => 'add_' . $row->get_type(),
       'restaurant_id' => (int)$row->id,
       'item_id' => (int)$row->id,
@@ -118,7 +116,6 @@ class SensorController extends Controller
   public function update(Request $request)
   {
     $values = $request->post();
-    $user = Auth::user();
     //required
     $validator = Validator::make($values, [
       'item' => 'required',
@@ -168,7 +165,7 @@ class SensorController extends Controller
     $row = Restaurant::find($row->id);
     $diffs['after'] = $row->get_log();
     if (json_encode($diffs['before']) !== json_encode($diffs['after'])) {
-      $user->add_log([
+      $this->_viewer->add_log([
         'type' => 'edit_' . $row->get_type(),
         'restaurant_id' => (int)$row->id,
         'item_id' => (int)$row->id,
@@ -186,7 +183,6 @@ class SensorController extends Controller
   public function delete(Request $request)
   {
     $values = $request->post();
-    $user = Auth::user();
     //required
     $validator = Validator::make($values, [
       'item' => 'required',
@@ -203,12 +199,12 @@ class SensorController extends Controller
     }
 
     $row->update([
-      'deleted' => $user->id,
+      'deleted' => $this->_viewer->id,
     ]);
 
     $row->on_delete_after();
 
-    $user->add_log([
+    $this->_viewer->add_log([
       'type' => 'delete_' . $row->get_type(),
       'restaurant_id' => (int)$row->id,
       'item_id' => (int)$row->id,
@@ -224,7 +220,6 @@ class SensorController extends Controller
   public function restore(Request $request)
   {
     $values = $request->post();
-    $user = Auth::user();
     //required
     $validator = Validator::make($values, [
       'item' => 'required',
@@ -247,7 +242,7 @@ class SensorController extends Controller
 
     $row->on_restore_after();
 
-    $user->add_log([
+    $this->_viewer->add_log([
       'type' => 'restore_' . $row->get_type(),
       'restaurant_id' => (int)$row->id,
       'item_id' => (int)$row->id,
@@ -262,14 +257,13 @@ class SensorController extends Controller
 
   public function selectize(Request $request)
   {
-    $user = Auth::user();
     $values = $request->post();
     $keyword = isset($values['keyword']) && !empty($values['keyword']) ? $values['keyword'] : NULL;
 
     $select = Restaurant::select('id', 'name');
 
     //tester
-    if ($user && $user->id == 5) {
+    if ($this->_viewer->id == 5) {
 
     } else {
       $select->where('deleted', 0);
@@ -287,22 +281,22 @@ class SensorController extends Controller
   public function show(string $id, Request $request)
   {
     $values = $request->all();
-    $user = Auth::user();
+
     $invalid_roles = ['user'];
-    if (in_array($user->role, $invalid_roles)) {
+    if (in_array($this->_viewer->role, $invalid_roles)) {
       return redirect('page_not_found');
     }
 
     $row = Restaurant::find((int)$id);
     if (!$row || $row->deleted) {
-      if ($user->id == 5) {
+      if ($this->_viewer->id == 5) {
 
       } else {
         return redirect('page_not_found');
       }
     }
 
-    if (!$user->can_access_restaurant($row)) {
+    if (!$this->_viewer->can_access_restaurant($row)) {
       return redirect('page_not_found');
     }
 
@@ -319,7 +313,7 @@ class SensorController extends Controller
       'debug' => $debug,
     ];
 
-    $user->add_log([
+    $this->_viewer->add_log([
       'type' => 'view_item_' . $row->get_type(),
       'restaurant_id' => (int)$row->id,
       'item_id' => (int)$row->id,
@@ -332,7 +326,6 @@ class SensorController extends Controller
   public function food_scan_delete(Request $request)
   {
     $values = $request->post();
-    $user = Auth::user();
 
     //required
     $validator = Validator::make($values, [
@@ -350,7 +343,7 @@ class SensorController extends Controller
     }
 
     $row->update([
-      'deleted' => $user->id,
+      'deleted' => $this->_viewer->id,
     ]);
 
     return response()->json([
@@ -362,7 +355,6 @@ class SensorController extends Controller
   public function food_scan_api(Request $request)
   {
     $values = $request->post();
-    $api_core = new SysCore();
 
     $validator = Validator::make($values, [
       'item' => 'required',
@@ -420,8 +412,6 @@ class SensorController extends Controller
   public function food_scan_info(Request $request)
   {
     $values = $request->post();
-    $user = Auth::user();
-    $api_core = new SysCore();
 
     $validator = Validator::make($values, [
       'item' => 'required',
@@ -464,18 +454,19 @@ class SensorController extends Controller
     $apid = (array)json_decode($row->rbf_api, true);
     if (count($apid)) {
 
-      $founds = $api_core->sys_ingredients_found($apid['predictions']);
-      $sys_food_predicts = $api_core->sys_predict_foods_by_ingredients($founds);
-      $sys_food_predict = $api_core->sys_predict_foods_by_ingredients($founds, true);
-      if (count($sys_food_predict)) {
-        $food_predict = Food::find($sys_food_predict['food']);
-        if ($food_predict) {
-          $sys_ingredients_missing = $food_predict->missing_ingredients([
-            'restaurant_parent_id' => $restaurant->restaurant_parent_id,
-            'ingredients' => $founds,
-          ]);
+      $founds = $this->_sys_app->sys_ingredients_compact($apid['predictions']);
+      if (count($founds)) {
+        foreach ($founds as $temp) {
+          $ing = Ingredient::find((int)$temp['id']);
+          if ($ing) {
+            $rbf_ingredients_found[] = [
+              'quantity' => $temp['quantity'],
+              'title' => !empty($ing['name_vi']) ? $ing['name'] . ' - ' . $ing['name_vi'] : $ing['name'],
+            ];
+          }
         }
       }
+
       if ($row->get_food()) {
 
         $food_name = $row->get_food()->name;
@@ -524,17 +515,6 @@ class SensorController extends Controller
           $usr_food_id = $usr_food->id;
 
           $usr_ingredients_missing = $row->get_ingredients_missing();
-        }
-      }
-      if (count($founds)) {
-        foreach ($founds as $temp) {
-          $ing = Ingredient::find((int)$temp['id']);
-          if ($ing) {
-            $rbf_ingredients_found[] = [
-              'quantity' => $temp['quantity'],
-              'title' => !empty($ing['name_vi']) ? $ing['name'] . ' - ' . $ing['name_vi'] : $ing['name'],
-            ];
-          }
         }
       }
     }
@@ -613,7 +593,7 @@ class SensorController extends Controller
       ->with('texts', $row->get_texts(['text_name_only' => 1]))
       ->render();
 
-    $user->add_log([
+    $this->_viewer->add_log([
       'type' => 'view_item_' . $row->get_type(),
       'restaurant_id' => (int)$row->restaurant_id,
       'item_id' => (int)$row->id,
@@ -633,7 +613,6 @@ class SensorController extends Controller
   public function food_scan_error(Request $request)
   {
     $values = $request->post();
-    $api_core = new SysCore();
 
     $validator = Validator::make($values, [
       'item' => 'required',
@@ -668,7 +647,7 @@ class SensorController extends Controller
       ->where('missing_ids', '=', $values['missing_ids']);
 
     if (!empty($time_scan)) {
-      $times = $api_core->parse_date_range($time_scan);
+      $times = $this->_sys_app->parse_date_range($time_scan);
       if (!empty($times['time_from'])) {
         $select->where('time_scan', '>=', $times['time_from']);
       }
@@ -677,7 +656,7 @@ class SensorController extends Controller
       }
     }
     if (!empty($time_upload)) {
-      $times = $api_core->parse_date_range($time_upload);
+      $times = $this->_sys_app->parse_date_range($time_upload);
       if (!empty($times['time_from'])) {
         $select->where('time_photo', '>=', $times['time_from']);
       }
@@ -704,7 +683,6 @@ class SensorController extends Controller
   public function food_scan_update(Request $request)
   {
     $values = $request->post();
-    $user = Auth::user();
 
     $validator = Validator::make($values, [
       'item' => 'required',
@@ -821,7 +799,7 @@ class SensorController extends Controller
     $row = RestaurantFoodScan::find($row->id);
     $diffs['after'] = $row->get_log();
     if (json_encode($diffs['before']) !== json_encode($diffs['after'])) {
-      $user->add_log([
+      $this->_viewer->add_log([
         'type' => 'edit_result',
         'restaurant_id' => (int)$row->restaurant_id,
         'item_id' => (int)$row->id,
@@ -840,7 +818,6 @@ class SensorController extends Controller
   public function food_scan_get_food(Request $request)
   {
     $values = $request->all();
-    $user = Auth::user();
 
     $validator = Validator::make($values, [
       'rfs' => 'required',
@@ -872,11 +849,9 @@ class SensorController extends Controller
 
   public function kitchen(string $id)
   {
-    $user = Auth::user();
-
     $row = Restaurant::find((int)$id);
     if (!$row || $row->deleted) {
-      if ($user->id == 5) {
+      if ($this->_viewer->id == 5) {
 
       } else {
         return redirect('page_not_found');
@@ -916,7 +891,7 @@ class SensorController extends Controller
 
     $row = NULL;
 
-    $folder_setting = SysApp::parse_s3_bucket_address($restaurant->s3_bucket_address);
+    $folder_setting = $this->_sys_app->parse_s3_bucket_address($restaurant->s3_bucket_address);
     $directory = $folder_setting . '/' . $cur_date . '/' . $cur_hour . '/';
 
     $files = Storage::disk('sensors')->files($directory);
@@ -972,10 +947,7 @@ class SensorController extends Controller
 
   public function kitchen_predict(Request $request)
   {
-    $api_core = new SysCore();
     $values = $request->post();
-
-    $user = Auth::user();
 
     $validator = Validator::make($values, [
       'item' => 'required',
@@ -1054,13 +1026,13 @@ class SensorController extends Controller
     //speaker
     $text_to_speak = '';
     $text_to_speech = false;
-    if ((int)$user->get_setting('missing_ingredient_alert_speaker')) {
+    if ((int)$this->_viewer->get_setting('missing_ingredient_alert_speaker')) {
       $text_to_speech = true;
     }
 
     //printer
     $printer = false;
-    if ((int)$user->get_setting('missing_ingredient_alert_printer')) {
+    if ((int)$this->_viewer->get_setting('missing_ingredient_alert_printer')) {
       $printer = true;
     }
 
@@ -1094,7 +1066,7 @@ class SensorController extends Controller
             . ', [Need to re-check]'
           ;
 
-          $api_core->s3_polly([
+          $this->_sys_app->aws_s3_polly([
             'text_to_speak' => $text_to_speak,
             'text_rate' => 'slow',
           ]);
@@ -1245,7 +1217,6 @@ class SensorController extends Controller
   public function food_scan_get(Request $request)
   {
     $values = $request->post();
-    $api_core = new SysCore();
 
     $validator = Validator::make($values, [
       'item' => 'required',

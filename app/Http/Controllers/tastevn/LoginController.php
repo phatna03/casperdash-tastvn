@@ -18,6 +18,12 @@ use App\Models\PasswordResetToken;
 
 class LoginController extends Controller
 {
+  protected $_sys_app = null;
+
+  public function __construct()
+  {
+    $this->_sys_app = new SysApp();
+  }
 
   public function login(Request $request)
   {
@@ -119,7 +125,7 @@ class LoginController extends Controller
 
     if ($credentials['step'] == 'email') {
       //token
-      $token = strtoupper(SysApp::str_rand(8));
+      $token = strtoupper($this->_sys_app->str_rand(8));
 
       $row = PasswordResetToken::where('email', $credentials['email'])
         ->first();

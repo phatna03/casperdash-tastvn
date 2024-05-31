@@ -2,6 +2,7 @@
 
 namespace App\Api;
 
+use App\Api\SysApp;
 
 class SysRobo
 {
@@ -10,9 +11,11 @@ class SysRobo
 
   public static function photo_scan($img_url, $pars = [])
   {
+    $sys_app = new SysApp();
+
     //setting web
-    $dataset = SysApp::get_setting('rbf_dataset_scan');
-    $api_key = SysApp::get_setting('rbf_api_key');
+    $dataset = $sys_app->get_setting('rbf_dataset_scan');
+    $api_key = $sys_app->get_setting('rbf_api_key');
 
     //pars
     $confidence = isset($pars['confidence']) ? (int)$pars['confidence'] : 50;
