@@ -175,7 +175,6 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\tastevn\api\AuthController;
 use App\Http\Controllers\tastevn\api\TesterController;
 use App\Http\Controllers\tastevn\api\RoboflowController;
-use App\Http\Controllers\tastevn\api\SettingController;
 use App\Http\Controllers\tastevn\api\UserController;
 use App\Http\Controllers\tastevn\api\FoodController;
 use App\Http\Controllers\tastevn\api\IngredientController;
@@ -194,6 +193,8 @@ use App\Http\Controllers\tastevn\auth\SensorController;
 use App\Http\Controllers\tastevn\auth\NotificationController;
 use App\Http\Controllers\tastevn\auth\LogController;
 use App\Http\Controllers\tastevn\auth\TextController;
+use App\Http\Controllers\tastevn\auth\SettingController;
+
 
 //apix
 Route::get('/export/food/ingredients', [ApiController::class, 'food_ingredient']);

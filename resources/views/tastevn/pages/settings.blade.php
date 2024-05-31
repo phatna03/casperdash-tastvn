@@ -28,24 +28,27 @@
       <div class="row g-4">
         <div class="col-md-3">
           <div class="form-floating form-floating-outline">
-            <input type="text" name="s3_region" id="s3-region" class="form-control"
+            <input type="text" name="s3_region" id="s3-region" class="form-control text-center"
                 value="{{isset($pageConfigs['settings']['s3_region']) ? $pageConfigs['settings']['s3_region'] : ''}}"
+                   disabled
             />
             <label for="s3-region">Region</label>
           </div>
         </div>
         <div class="col-md-3">
           <div class="form-floating form-floating-outline">
-            <input type="text" name="s3_api_key" id="s3-api-key" class="form-control"
+            <input type="text" name="s3_api_key" id="s3-api-key" class="form-control text-center"
                    value="{{isset($pageConfigs['settings']['s3_api_key']) ? $pageConfigs['settings']['s3_api_key'] : ''}}"
+                   disabled
             />
             <label for="s3-api-key">API Key</label>
           </div>
         </div>
         <div class="col-md-3">
           <div class="form-floating form-floating-outline">
-            <input type="text" name="s3_api_secret" id="s3-secret-key" class="form-control"
+            <input type="text" name="s3_api_secret" id="s3-secret-key" class="form-control text-center"
                    value="{{isset($pageConfigs['settings']['s3_api_secret']) ? $pageConfigs['settings']['s3_api_secret'] : ''}}"
+                   disabled
             />
             <label for="s3-secret-key">API Secret Key</label>
           </div>
@@ -56,26 +59,28 @@
       <div class="row g-4">
         <div class="col-md-3">
           <div class="form-floating form-floating-outline">
-            <input type="text" name="rbf_api_key" id="rbf-api-key" class="form-control"
+            <input type="text" name="rbf_api_key" id="rbf-api-key" class="form-control text-center"
                    value="{{isset($pageConfigs['settings']['rbf_api_key']) ? $pageConfigs['settings']['rbf_api_key'] : ''}}"
+                   disabled
             />
             <label for="rbf-api-key">API Key</label>
           </div>
         </div>
         <div class="col-md-3">
           <div class="form-floating form-floating-outline">
-            <input type="text" name="rbf_dataset_scan" id="rbf-dataset-scan" class="form-control"
+            <input type="text" name="rbf_dataset_scan" id="rbf-dataset-scan" class="form-control text-center"
                    value="{{isset($pageConfigs['settings']['rbf_dataset_scan']) ? $pageConfigs['settings']['rbf_dataset_scan'] : ''}}"
+                   disabled
             />
-            <label for="rbf-dataset-scan">Dataset Scan</label>
+            <label for="rbf-dataset-scan">Dataset</label>
           </div>
         </div>
         <div class="col-md-3">
           <div class="form-floating form-floating-outline">
-            <input type="text" name="rbf_dataset_upload" id="rbf-dataset-upload" class="form-control"
-                   value="{{isset($pageConfigs['settings']['rbf_dataset_upload']) ? $pageConfigs['settings']['rbf_dataset_upload'] : ''}}"
+            <input type="text" name="rbf_dataset_ver" id="rbf-dataset-upload" class="form-control text-center fnumber"
+                   value="{{isset($pageConfigs['settings']['rbf_dataset_ver']) ? (int)$pageConfigs['settings']['rbf_dataset_ver'] : ''}}"
             />
-            <label for="rbf-dataset-upload">Dataset Upload</label>
+            <label for="rbf-dataset-upload">Version</label>
           </div>
         </div>
       </div>
@@ -84,7 +89,7 @@
       <div class="row g-4">
         <div class="col-md-3">
           <div class="form-floating form-floating-outline">
-            <input type="text" name="mail_mailer" id="mail-mailer" class="form-control"
+            <input type="text" name="mail_mailer" id="mail-mailer" class="form-control text-center"
                    value="{{isset($pageConfigs['settings']['mail_mailer']) ? $pageConfigs['settings']['mail_mailer'] : ''}}"
             />
             <label for="mail-mailer">Mailer</label>
@@ -92,7 +97,7 @@
         </div>
         <div class="col-md-3">
           <div class="form-floating form-floating-outline">
-            <input type="text" name="mail_host" id="mail-host" class="form-control"
+            <input type="text" name="mail_host" id="mail-host" class="form-control text-center"
                    value="{{isset($pageConfigs['settings']['mail_host']) ? $pageConfigs['settings']['mail_host'] : ''}}"
             />
             <label for="mail-host">Host</label>
@@ -100,7 +105,7 @@
         </div>
         <div class="col-md-3">
           <div class="form-floating form-floating-outline">
-            <input type="text" name="mail_username" id="mail-username" class="form-control"
+            <input type="text" name="mail_username" id="mail-username" class="form-control text-center"
                    value="{{isset($pageConfigs['settings']['mail_username']) ? $pageConfigs['settings']['mail_username'] : ''}}"
             />
             <label for="mail-username">Username</label>
@@ -108,7 +113,7 @@
         </div>
         <div class="col-md-3">
           <div class="form-floating form-floating-outline">
-            <input type="text" name="mail_password" id="mail-password" class="form-control"
+            <input type="text" name="mail_password" id="mail-password" class="form-control text-center"
                    value="{{isset($pageConfigs['settings']['mail_password']) ? $pageConfigs['settings']['mail_password'] : ''}}"
             />
             <label for="mail-password">Password</label>
@@ -116,7 +121,7 @@
         </div>
         <div class="col-md-3">
           <div class="form-floating form-floating-outline">
-            <input type="text" name="mail_port" id="mail-port" class="form-control"
+            <input type="text" name="mail_port" id="mail-port" class="form-control text-center"
                    value="{{isset($pageConfigs['settings']['mail_port']) ? $pageConfigs['settings']['mail_port'] : ''}}"
             />
             <label for="mail-port">Port</label>
@@ -124,7 +129,7 @@
         </div>
         <div class="col-md-3">
           <div class="form-floating form-floating-outline">
-            <input type="text" name="mail_encryption" id="mail-encryption" class="form-control"
+            <input type="text" name="mail_encryption" id="mail-encryption" class="form-control text-center"
                    value="{{isset($pageConfigs['settings']['mail_encryption']) ? $pageConfigs['settings']['mail_encryption'] : ''}}"
             />
             <label for="mail-encryption">Encryption</label>
@@ -132,7 +137,7 @@
         </div>
         <div class="col-md-3">
           <div class="form-floating form-floating-outline">
-            <input type="text" name="mail_from_address" id="mail-from-address" class="form-control"
+            <input type="text" name="mail_from_address" id="mail-from-address" class="form-control text-center"
                    value="{{isset($pageConfigs['settings']['mail_from_address']) ? $pageConfigs['settings']['mail_from_address'] : ''}}"
             />
             <label for="mail-from-address">From Address</label>
@@ -140,7 +145,7 @@
         </div>
         <div class="col-md-3">
           <div class="form-floating form-floating-outline">
-            <input type="text" name="mail_from_name" id="mail-from-name" class="form-control"
+            <input type="text" name="mail_from_name" id="mail-from-name" class="form-control text-center"
                    value="{{isset($pageConfigs['settings']['mail_from_name']) ? $pageConfigs['settings']['mail_from_name'] : ''}}"
             />
             <label for="mail-from-name">From Name</label>

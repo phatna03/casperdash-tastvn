@@ -297,6 +297,32 @@ class SysApp
     ];
   }
 
+  public function get_log_settings()
+  {
+    return [
+      'aws_s3' => [
+        's3_region' => $this->get_setting('s3_region'),
+        's3_api_key' => $this->get_setting('s3_api_key'),
+        's3_api_secret' => $this->get_setting('s3_api_secret'),
+      ],
+      'roboflow' => [
+        'rbf_api_key' => $this->get_setting('rbf_api_key'),
+        'rbf_dataset_scan' => $this->get_setting('rbf_dataset_scan'),
+        'rbf_dataset_ver' => $this->get_setting('rbf_dataset_ver'),
+      ],
+      'mail_server' => [
+        'mail_mailer' => $this->get_setting('mail_mailer'),
+        'mail_host' => $this->get_setting('mail_host'),
+        'mail_username' => $this->get_setting('mail_username'),
+        'mail_password' => $this->get_setting('mail_password'),
+        'mail_port' => $this->get_setting('mail_port'),
+        'mail_encryption' => $this->get_setting('mail_encryption'),
+        'mail_from_address' => $this->get_setting('mail_from_address'),
+        'mail_from_name' => $this->get_setting('mail_from_name'),
+      ],
+    ];
+  }
+
   public function sys_stats_count()
   {
     //RestaurantParent

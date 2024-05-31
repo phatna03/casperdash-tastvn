@@ -3,7 +3,6 @@ function bind_datad(wrap) {
   bind_number(wrap);
   bind_selectize(wrap);
 }
-
 function bind_selectize(wrap) {
   var wrapper = $(wrap);
   if (!wrapper.length) {
@@ -246,7 +245,6 @@ function bind_selectize(wrap) {
     });
   }
 }
-
 function bind_number(wrap) {
   var wrapper = $(wrap);
   //0= 48 //9= 57 //, = 44 //- = 45 //. = 46
@@ -297,13 +295,11 @@ function bind_number(wrap) {
     }, acmcfs.timeout_quick);
   });
 }
-
 function bind_nl2br(str, is_xhtml) {
   var breakTag = (is_xhtml || typeof is_xhtml === 'undefined') ? '<br ' + '/>' : '<br>'; // Adjust comment to avoid issue on phpjs.org display
 
   return (str + '').replace(/([^>\r\n]?)(\r\n|\n\r|\r|\n)/g, '$1' + breakTag + '$2');
 }
-
 function bind_picker() {
   //date range
   if ($('.date_picker').length) {
@@ -380,7 +376,6 @@ function bind_picker() {
     });
   }
 }
-
 function bind_staff(role) {
   $('.no_' + role).closest('.menu-item').remove();
   $('.no_' + role).remove();
@@ -405,7 +400,6 @@ function input_number_only(value) {
 
   return !value || value === '' ? 0 : value;
 }
-
 function input_number_min_one(ele) {
   var bind = $(ele);
   var val = bind.val().trim();
@@ -415,29 +409,20 @@ function input_number_min_one(ele) {
   }
 }
 
-function offcanvas_close() {
-  $('.offcanvas').removeClass('show');
-  $('.offcanvas-backdrop').remove();
-  $('body').attr('style', '');
-}
-
 function sound_play() {
   var audio = new Audio(acmcfs.link_base_url + '/sound_notification.mp3');
   if (acmcfs.dev_mode != 'local') {
     audio.play();
   }
 }
-
 function speaker_allow() {
   var audio = new Audio(acmcfs.link_speaker);
   audio.play();
 }
-
 function speaker_play() {
   var audio = new Audio(acmcfs.link_speaker_notify);
   audio.play();
 }
-
 function speaker_tester() {
   var audio = new Audio(acmcfs.link_speaker_tester);
   audio.play();
@@ -476,7 +461,6 @@ function page_url(href, time_out = 0) {
     parent.window.location.href = href;
   }
 }
-
 function page_loading(status = true) {
   if (status) {
     $("#preloader").removeClass('d-none');
@@ -484,7 +468,6 @@ function page_loading(status = true) {
     $("#preloader").addClass('d-none');
   }
 }
-
 function page_reload(time_out = 0) {
   if (time_out && parseInt(time_out) > 0) {
     setTimeout(function () {
@@ -494,7 +477,6 @@ function page_reload(time_out = 0) {
     window.location.reload(true);
   }
 }
-
 function page_open(href, time_out = 0) {
   if (time_out && parseInt(time_out) > 0) {
     setTimeout(function () {
@@ -529,7 +511,6 @@ function form_loading(frm, loading = true) {
     form.find('.wrap-btns .btn-ok').removeClass('d-none');
   }
 }
-
 function form_close(frm) {
   var form = $(frm);
 
@@ -575,7 +556,6 @@ function auth_form_active(frm_id) {
   $('.wrap_form_panel').addClass('d-none');
   $('#' + frm_id).removeClass('d-none');
 }
-
 function auth_form_login(evt, frm) {
   evt.preventDefault();
   var form = $(frm);
@@ -617,7 +597,6 @@ function auth_form_login(evt, frm) {
 
   return false;
 }
-
 function auth_form_forgot(evt, frm) {
   evt.preventDefault();
   var form = $(frm);
@@ -666,7 +645,6 @@ function auth_form_forgot(evt, frm) {
 
   return false;
 }
-
 function auth_form_reset(evt, frm) {
   evt.preventDefault();
   var form = $(frm);
@@ -708,7 +686,6 @@ function auth_form_reset(evt, frm) {
 
   return false;
 }
-
 function auth_logout() {
 
   axios.post('/auth/logout', {})
@@ -738,50 +715,6 @@ function auth_logout() {
   return false;
 }
 
-function sys_setting_confirm(evt, frm) {
-  evt.preventDefault();
-  var popup = $('#modal_confirm_item');
-  popup.modal('show');
-  return false;
-}
-
-function sys_setting() {
-  var form = $('#frm-settings');
-
-  axios.post('/admin/setting/update', {
-    s3_region: form.find('input[name=s3_region]').val(),
-    s3_api_key: form.find('input[name=s3_api_key]').val(),
-    s3_api_secret: form.find('input[name=s3_api_secret]').val(),
-    rbf_api_key: form.find('input[name=rbf_api_key]').val(),
-    rbf_dataset_scan: form.find('input[name=rbf_dataset_scan]').val(),
-    rbf_dataset_upload: form.find('input[name=rbf_dataset_upload]').val(),
-    mail_mailer: form.find('input[name=mail_mailer]').val(),
-    mail_host: form.find('input[name=mail_host]').val(),
-    mail_username: form.find('input[name=mail_username]').val(),
-    mail_password: form.find('input[name=mail_password]').val(),
-    mail_port: form.find('input[name=mail_port]').val(),
-    mail_encryption: form.find('input[name=mail_encryption]').val(),
-    mail_from_address: form.find('input[name=mail_from_address]').val(),
-    mail_from_name: form.find('input[name=mail_from_name]').val(),
-  })
-    .then(response => {
-
-      message_from_toast('success', acmcfs.message_title_success, acmcfs.message_description_success_update, true);
-      page_reload(acmcfs.timeout_quick);
-
-    })
-    .catch(error => {
-
-      if (error.response.data && Object.values(error.response.data).length) {
-        Object.values(error.response.data).forEach(function (v, k) {
-          message_from_toast('error', acmcfs.message_title_error, v);
-        });
-      }
-
-    });
-
-  return false;
-}
 
 //user
 function user_clear(frm) {
@@ -1220,105 +1153,7 @@ function user_setting_notify() {
   return false;
 }
 
-//text
-function text_add(evt, frm) {
-  evt.preventDefault();
-  var form = $(frm);
 
-  axios.post('/admin/text/store', {
-    name: form.find('input[name=name]').val(),
-  })
-    .then(response => {
-
-      message_from_toast('success', acmcfs.message_title_success, acmcfs.message_description_success_add, true);
-
-      datatable_refresh();
-      setTimeout(function () {
-        form.find('input[name=name]').focus();
-      }, acmcfs.timeout_quick);
-    })
-    .catch(error => {
-      var restoreModal = false;
-
-      if (error.response.data && Object.values(error.response.data).length) {
-        Object.values(error.response.data).forEach(function (v, k) {
-          // if (v == 'can_restored') {
-          //   restoreModal = true;
-          // } else {
-          message_from_toast('error', acmcfs.message_title_error, v);
-          // }
-        });
-      }
-
-      if (restoreModal && $('#modal_restore_item').length) {
-        $('#modal_restore_item input[name=item]').val(form.find('input[name=name]').val());
-        $('#modal_restore_item .alert').empty()
-          .append("Are you sure you want to restore item has text: <b class='text-dark'>" + form.find('input[name=name]').val() + "</b>");
-        $('#modal_restore_item').modal('show');
-      }
-
-      setTimeout(function () {
-        form.find('input[name=name]').focus();
-      }, acmcfs.timeout_quick);
-    });
-
-  return false;
-}
-
-function text_edit_prepare(ele) {
-  var tr = $(ele).closest('tr');
-  var form = $('#offcanvas_edit_item form');
-
-  form.find('input[name=item]').val(tr.attr('data-id'));
-  form.find('input[name=name]').val(tr.attr('data-name'));
-
-  setTimeout(function () {
-    form.find('input[name=name]').focus();
-  }, acmcfs.timeout_quick);
-}
-
-function text_edit(evt, frm) {
-  evt.preventDefault();
-  var form = $(frm);
-
-  axios.post('/admin/text/update', {
-    item: form.find('input[name=item]').val(),
-    name: form.find('input[name=name]').val(),
-  })
-    .then(response => {
-
-      message_from_toast('success', acmcfs.message_title_success, acmcfs.message_description_success_update, true);
-
-      datatable_refresh();
-
-    })
-    .catch(error => {
-      var restoreModal = false;
-
-      if (error.response.data && Object.values(error.response.data).length) {
-        Object.values(error.response.data).forEach(function (v, k) {
-          // if (v == 'can_restored') {
-          //   restoreModal = true;
-          // } else {
-          message_from_toast('error', acmcfs.message_title_error, v);
-          // }
-        });
-      }
-
-      if (restoreModal && $('#modal_restore_item').length) {
-        $('#modal_restore_item input[name=item]').val(form.find('input[name=name]').val());
-        $('#modal_restore_item .alert').empty()
-          .append("Are you sure you want to restore item has name: <b class='text-dark'>" + form.find('input[name=name]').val() + "</b>");
-        $('#modal_restore_item').modal('show');
-      }
-
-      setTimeout(function () {
-        form.find('input[name=name]').focus();
-      }, acmcfs.timeout_quick);
-    });
-
-  return false;
-}
 
 //restaurant
 function restaurant_food_scan_view(id) {
@@ -1736,7 +1571,6 @@ function food_edit(evt, frm) {
       message_from_toast('success', acmcfs.message_title_success, acmcfs.message_description_success_update, true);
 
       datatable_refresh();
-      // offcanvas_close();
 
     })
     .catch(error => {
@@ -1947,7 +1781,6 @@ function food_edit_ingredient(evt, frm) {
       message_from_toast('success', acmcfs.message_title_success, acmcfs.message_description_success_update, true);
 
       datatable_refresh();
-      // offcanvas_close();
 
     })
     .catch(error => {
@@ -2027,7 +1860,6 @@ function food_edit_recipe(evt, frm) {
       message_from_toast('success', acmcfs.message_title_success, acmcfs.message_description_success_update, true);
 
       datatable_refresh();
-      // offcanvas_close();
 
     })
     .catch(error => {

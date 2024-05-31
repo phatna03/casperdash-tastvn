@@ -1080,3 +1080,144 @@ function food_ingredient_core_quick(ele, itd) {
 
   return false;
 }
+//text
+function text_add(evt, frm) {
+  evt.preventDefault();
+  var form = $(frm);
+
+  axios.post('/admin/text/store', {
+    name: form.find('input[name=name]').val(),
+  })
+    .then(response => {
+
+      message_from_toast('success', acmcfs.message_title_success, acmcfs.message_description_success_add, true);
+
+      datatable_refresh();
+      setTimeout(function () {
+        form.find('input[name=name]').focus();
+      }, acmcfs.timeout_quick);
+    })
+    .catch(error => {
+      var restoreModal = false;
+
+      if (error.response.data && Object.values(error.response.data).length) {
+        Object.values(error.response.data).forEach(function (v, k) {
+          // if (v == 'can_restored') {
+          //   restoreModal = true;
+          // } else {
+          message_from_toast('error', acmcfs.message_title_error, v);
+          // }
+        });
+      }
+
+      if (restoreModal && $('#modal_restore_item').length) {
+        $('#modal_restore_item input[name=item]').val(form.find('input[name=name]').val());
+        $('#modal_restore_item .alert').empty()
+          .append("Are you sure you want to restore item has text: <b class='text-dark'>" + form.find('input[name=name]').val() + "</b>");
+        $('#modal_restore_item').modal('show');
+      }
+
+      setTimeout(function () {
+        form.find('input[name=name]').focus();
+      }, acmcfs.timeout_quick);
+    });
+
+  return false;
+}
+function text_edit_prepare(ele) {
+  var tr = $(ele).closest('tr');
+  var form = $('#offcanvas_edit_item form');
+
+  form.find('input[name=item]').val(tr.attr('data-id'));
+  form.find('input[name=name]').val(tr.attr('data-name'));
+
+  setTimeout(function () {
+    form.find('input[name=name]').focus();
+  }, acmcfs.timeout_quick);
+}
+function text_edit(evt, frm) {
+  evt.preventDefault();
+  var form = $(frm);
+
+  axios.post('/admin/text/update', {
+    item: form.find('input[name=item]').val(),
+    name: form.find('input[name=name]').val(),
+  })
+    .then(response => {
+
+      message_from_toast('success', acmcfs.message_title_success, acmcfs.message_description_success_update, true);
+
+      datatable_refresh();
+
+    })
+    .catch(error => {
+      var restoreModal = false;
+
+      if (error.response.data && Object.values(error.response.data).length) {
+        Object.values(error.response.data).forEach(function (v, k) {
+          // if (v == 'can_restored') {
+          //   restoreModal = true;
+          // } else {
+          message_from_toast('error', acmcfs.message_title_error, v);
+          // }
+        });
+      }
+
+      if (restoreModal && $('#modal_restore_item').length) {
+        $('#modal_restore_item input[name=item]').val(form.find('input[name=name]').val());
+        $('#modal_restore_item .alert').empty()
+          .append("Are you sure you want to restore item has name: <b class='text-dark'>" + form.find('input[name=name]').val() + "</b>");
+        $('#modal_restore_item').modal('show');
+      }
+
+      setTimeout(function () {
+        form.find('input[name=name]').focus();
+      }, acmcfs.timeout_quick);
+    });
+
+  return false;
+}
+//setting
+function sys_setting_confirm(evt, frm) {
+  evt.preventDefault();
+  var popup = $('#modal_confirm_item');
+  popup.modal('show');
+  return false;
+}
+function sys_setting() {
+  var form = $('#frm-settings');
+
+  axios.post('/admin/setting/update', {
+    s3_region: form.find('input[name=s3_region]').val(),
+    s3_api_key: form.find('input[name=s3_api_key]').val(),
+    s3_api_secret: form.find('input[name=s3_api_secret]').val(),
+    rbf_api_key: form.find('input[name=rbf_api_key]').val(),
+    rbf_dataset_scan: form.find('input[name=rbf_dataset_scan]').val(),
+    rbf_dataset_ver: form.find('input[name=rbf_dataset_ver]').val(),
+    mail_mailer: form.find('input[name=mail_mailer]').val(),
+    mail_host: form.find('input[name=mail_host]').val(),
+    mail_username: form.find('input[name=mail_username]').val(),
+    mail_password: form.find('input[name=mail_password]').val(),
+    mail_port: form.find('input[name=mail_port]').val(),
+    mail_encryption: form.find('input[name=mail_encryption]').val(),
+    mail_from_address: form.find('input[name=mail_from_address]').val(),
+    mail_from_name: form.find('input[name=mail_from_name]').val(),
+  })
+    .then(response => {
+
+      message_from_toast('success', acmcfs.message_title_success, acmcfs.message_description_success_update, true);
+      page_reload(acmcfs.timeout_quick);
+
+    })
+    .catch(error => {
+
+      if (error.response.data && Object.values(error.response.data).length) {
+        Object.values(error.response.data).forEach(function (v, k) {
+          message_from_toast('error', acmcfs.message_title_error, v);
+        });
+      }
+
+    });
+
+  return false;
+}
