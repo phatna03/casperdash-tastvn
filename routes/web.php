@@ -172,12 +172,8 @@ Route::get('/cc', function () {
 //======================================================================================================================
 //tastevn
 use Illuminate\Http\Request;
-use App\Http\Controllers\tastevn\api\AuthController;
-use App\Http\Controllers\tastevn\api\TesterController;
-use App\Http\Controllers\tastevn\api\RoboflowController;
+//use App\Http\Controllers\tastevn\api\RoboflowController;
 //use App\Http\Controllers\tastevn\api\FoodController;
-//use App\Http\Controllers\tastevn\api\PhotoController;
-//use App\Http\Controllers\tastevn\api\CommentController;
 
 use App\Api\SysApp;
 use App\Http\Controllers\tastevn\ApiController;
@@ -206,6 +202,9 @@ Route::post('/auth/login', [LoginController::class, 'login_auth']);
 Route::post('/auth/send-code', [LoginController::class, 'send_code']);
 Route::post('/auth/update-pwd', [LoginController::class, 'update_pwd']);
 Route::post('/auth/logout', [LoginController::class, 'logout'])->name('logout');
+//tester
+Route::get('/tester', [TesterController::class, 'index']);
+Route::post('/tester/post', [TesterController::class, 'tester_post']);
 //guide
 Route::get('/guide/printer', [GuideController::class, 'printer']);
 Route::get('/guide/speaker', [GuideController::class, 'speaker']);
@@ -312,8 +311,12 @@ Route::post('/admin/food/update/recipe', [FoodController::class, 'update_recipe'
 Route::post('/admin/food/import', [FoodController::class, 'import']);
 Route::post('/admin/food/import/recipe', [FoodController::class, 'import_recipe']);
 Route::post('/admin/food/selectize', [FoodController::class, 'selectize']);
-
-
+//roboflow
+Route::post('/admin/roboflow/retraining', [RoboflowController::class, 'retraining']);
+Route::get('/admin/roboflow', [RoboflowController::class, 'index']);
+Route::post('/admin/roboflow/detect', [RoboflowController::class, 'detect']);
+Route::post('/admin/roboflow/restaurant/food/get', [RoboflowController::class, 'restaurant_food_get']);
+Route::post('/admin/roboflow/food/get/info', [RoboflowController::class, 'food_get_info']);
 //datatable
 Route::get('/datatable/restaurant', function (Request $request) {
   $values = $request->all();
@@ -720,25 +723,8 @@ Route::get('/datatable/foods', function (Request $request) {
 
   return DataTables::of($select)->addIndexColumn()->toJson();
 });
-//opt
+
 //======================================================================================================================
-//roboflow
-Route::post('/admin/roboflow/retraining', [RoboflowController::class, 'retraining']);
-//restaurant = sensor
-
-
-Route::get('/tester', [TesterController::class, 'index']);
-Route::post('/tester/post', [TesterController::class, 'tester_post']);
-
-
-
-
-Route::get('/admin/roboflow', [RoboflowController::class, 'index']);
-Route::post('/admin/roboflow/detect', [RoboflowController::class, 'detect']);
-
-Route::post('/admin/roboflow/restaurant/food/get', [RoboflowController::class, 'restaurant_food_get']);
-Route::post('/admin/roboflow/food/get/info', [RoboflowController::class, 'food_get_info']);
-
 //======================================================================================================================
 //theme material ui
 // Main Page Route

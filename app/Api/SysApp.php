@@ -19,6 +19,7 @@ use App\Models\RestaurantParent;
 use App\Models\SysSetting;
 use App\Models\Text;
 use App\Models\User;
+use App\Models\SysBug;
 
 class SysApp
 {
@@ -389,6 +390,19 @@ class SysApp
 
     return $arr;
   }
+
+  public function bug_add($pars = [])
+  {
+    if (count($pars)) {
+      SysBug::create($pars);
+    }
+  }
+
+  public function log_failed()
+  {
+
+  }
+
 
 
 }

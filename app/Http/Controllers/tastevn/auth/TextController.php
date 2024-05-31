@@ -35,7 +35,7 @@ class TextController extends Controller
   {
     $invalid_roles = ['user'];
     if (in_array($this->_viewer->role, $invalid_roles)) {
-      return redirect('page_not_found');
+      return redirect('error/404');
     }
 
     $pageConfigs = [

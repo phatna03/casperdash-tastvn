@@ -1,30 +1,34 @@
 <?php
 
-namespace App\Http\Controllers\tastevn\api;
+namespace App\Http\Controllers\tastevn\auth;
 use App\Http\Controllers\Controller;
-use App\Models\Restaurant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-
+//lib
 use Validator;
-use App\Api\SysCore;
+use App\Api\SysApp;
 use App\Excel\ImportData;
-
+//model
 use App\Models\Food;
 use App\Models\RestaurantFood;
 use App\Models\RestaurantParent;
 use App\Models\Ingredient;
+use App\Models\Restaurant;
 
 class FoodController extends Controller
 {
-  protected $_api_core = null;
+  protected $_viewer = null;
+  protected $_sys_app = null;
 
   public function __construct()
   {
-    $this->_api_core = new SysCore();
+    $this->_sys_app = new SysApp();
 
     $this->middleware(function ($request, $next) {
+
+      $this->_viewer = Auth::user();
+
       return $next($request);
     });
 
@@ -36,10 +40,9 @@ class FoodController extends Controller
    */
   public function index(Request $request)
   {
-    $user = Auth::user();
     $invalid_roles = ['user'];
-    if (in_array($user->role, $invalid_roles)) {
-      return redirect('page_not_found');
+    if (in_array($this->_viewer->role, $invalid_roles)) {
+      return redirect('error/404');
     }
 
     $pageConfigs = [
@@ -47,7 +50,7 @@ class FoodController extends Controller
       'hasCustomizer' => false,
     ];
 
-    $user->add_log([
+    $this->_viewer->add_log([
       'type' => 'view_listing_food',
     ]);
 
@@ -65,7 +68,7 @@ class FoodController extends Controller
   public function store(Request $request)
   {
     $values = $request->all();
-    $user = Auth::user();
+
     //required
     $validator = Validator::make($values, [
       'name' => 'required|string',
@@ -95,14 +98,14 @@ class FoodController extends Controller
 
     $row = Food::create([
       'name' => ucwords(strtolower(trim($values['name']))),
-      'creator_id' => $user->id,
+      'creator_id' => $this->_viewer->id,
 
       'live_group' => isset($values['live_group']) && (int)$values['live_group'] < 4 ? (int)$values['live_group'] : 3,
     ]);
 
 //    $row->add_ingredients($ingredients);
 
-    $user->add_log([
+    $this->_viewer->add_log([
       'type' => 'add_' . $row->get_type(),
       'item_id' => (int)$row->id,
       'item_type' => $row->get_type(),
@@ -159,7 +162,7 @@ class FoodController extends Controller
   public function update(Request $request)
   {
     $values = $request->all();
-    $user = Auth::user();
+
     //required
     $validator = Validator::make($values, [
       'item' => 'required',
@@ -239,7 +242,7 @@ class FoodController extends Controller
     $row = Food::find($row->id);
     $diffs['after'] = $row->get_log();
     if (json_encode($diffs['before']) !== json_encode($diffs['after'])) {
-      $user->add_log([
+      $this->_viewer->add_log([
         'type' => 'edit_' . $row->get_type(),
         'item_id' => (int)$row->id,
         'item_type' => $row->get_type(),
@@ -256,7 +259,7 @@ class FoodController extends Controller
   public function update_ingredient(Request $request)
   {
     $values = $request->post();
-    $user = Auth::user();
+
     //required
     $validator = Validator::make($values, [
       'item' => 'required',
@@ -320,9 +323,9 @@ class FoodController extends Controller
       }
 
       //re-count
-      $this->_api_core->sys_stats_count();
+      $this->_sys_app->sys_stats_count();
 
-      $user->add_log([
+      $this->_viewer->add_log([
         'type' => 'edit_' . $row->get_type() . '_ingredient',
         'item_id' => (int)$row->id,
         'item_type' => $row->get_type(),
@@ -339,7 +342,7 @@ class FoodController extends Controller
   public function update_recipe(Request $request)
   {
     $values = $request->post();
-    $user = Auth::user();
+
     //required
     $validator = Validator::make($values, [
       'item' => 'required',
@@ -388,7 +391,7 @@ class FoodController extends Controller
       'restaurant_parent_id' => $restaurant_parent_id,
     ]);
     if (json_encode($diffs['before']) !== json_encode($diffs['after'])) {
-      $user->add_log([
+      $this->_viewer->add_log([
         'type' => 'edit_' . $row->get_type() . '_recipe',
         'item_id' => (int)$row->id,
         'item_type' => $row->get_type(),
@@ -469,7 +472,6 @@ class FoodController extends Controller
   public function get(Request $request)
   {
     $values = $request->all();
-    $user = Auth::user();
 
     $validator = Validator::make($values, [
       'item' => 'required',
@@ -508,7 +510,7 @@ class FoodController extends Controller
       ->with('ingredients', $row->get_ingredients())
       ->render();
 
-    $user->add_log([
+    $this->_viewer->add_log([
       'type' => 'view_item_' . $row->get_type(),
       'item_id' => (int)$row->id,
       'item_type' => $row->get_type(),
@@ -528,7 +530,6 @@ class FoodController extends Controller
   public function get_info(Request $request)
   {
     $values = $request->all();
-    $user = Auth::user();
 
     $validator = Validator::make($values, [
       'item' => 'required',
@@ -584,7 +585,6 @@ class FoodController extends Controller
   public function get_ingredient(Request $request)
   {
     $values = $request->post();
-    $user = Auth::user();
 
     $validator = Validator::make($values, [
       'item' => 'required',
@@ -618,7 +618,6 @@ class FoodController extends Controller
   public function get_recipe(Request $request)
   {
     $values = $request->post();
-    $user = Auth::user();
 
     $validator = Validator::make($values, [
       'item' => 'required',
@@ -661,7 +660,6 @@ class FoodController extends Controller
       ], 404);
     }
 
-    $user = Auth::user();
     $faileds = [];
     $temp_count = 0;
     $temps = [];
@@ -714,7 +712,7 @@ class FoodController extends Controller
           if (!$row) {
             $row = Food::create([
               'name' => ucwords(strtolower($temp['food'])),
-              'creator_id' => $user->id,
+              'creator_id' => $this->_viewer->id,
             ]);
           }
 
@@ -741,7 +739,7 @@ class FoodController extends Controller
             'ingredients' => $ingredients,
           ]);
 
-          $user->add_log([
+          $this->_viewer->add_log([
             'type' => 'import_' . $row->get_type(),
             'item_id' => (int)$row->id,
             'item_type' => $row->get_type(),
@@ -783,7 +781,6 @@ class FoodController extends Controller
       ], 404);
     }
 
-    $user = Auth::user();
     $faileds = [];
     $temp_count = 0;
     $temps = [];
@@ -836,7 +833,7 @@ class FoodController extends Controller
           if (!$row) {
             $row = Food::create([
               'name' => ucwords(strtolower($temp['food'])),
-              'creator_id' => $user->id,
+              'creator_id' => $this->_viewer->id,
             ]);
           }
 
@@ -862,7 +859,7 @@ class FoodController extends Controller
             'ingredients' => $ingredients,
           ]);
 
-          $user->add_log([
+          $this->_viewer->add_log([
             'type' => 'import_recipe_' . $row->get_type(),
             'item_id' => (int)$row->id,
             'item_type' => $row->get_type(),

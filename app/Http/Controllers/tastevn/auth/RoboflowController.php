@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\tastevn\api;
+namespace App\Http\Controllers\tastevn\auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
