@@ -558,7 +558,7 @@
           render: function (data, type, full, meta) {
             var html = '';
 
-            @if($viewer->id == 5) //dev
+            @if($viewer->is_dev()) //dev
               html += '<div class="d-inline-block dropdown acm-mr-px-5">' +
               '<button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown"><i class="mdi mdi-dots-vertical"></i></button>' +
               '<div class="dropdown-menu">' +
@@ -761,7 +761,7 @@
         },
       ],
       buttons: [
-        @if($viewer->is_super_admin() || $viewer->id == 5)
+        @if($viewer->is_super_admin() || $viewer->is_dev())
         {
           text: '<i class="mdi mdi-robot-confused me-0 me-sm-1"></i><span class="d-none d-sm-inline-block">Re-train Roboflow</span>',
           className: 'add-new btn btn-danger waves-effect waves-light acm-mr-px-10',

@@ -275,6 +275,28 @@ class SysApp
     return $row ? $row->value : NULL;
   }
 
+  public function get_log_types()
+  {
+    return [
+      'login' => 'Login',
+      'logout' => 'Logout',
+    ];
+  }
+
+  public function get_log_items()
+  {
+    return [
+      'food_category' => 'Categories',
+      'food' => 'Dishes',
+      'ingredient' => 'Ingredients',
+      'text' => 'Text notes',
+      'user' => 'Users',
+      'restaurant' => 'Sensors',
+      'restaurant_parent' => 'Restaurants',
+      'restaurant_food_scan' => 'Photos',
+    ];
+  }
+
   public function sys_stats_count()
   {
     //RestaurantParent

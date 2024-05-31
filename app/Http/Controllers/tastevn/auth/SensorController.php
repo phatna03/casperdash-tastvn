@@ -263,7 +263,7 @@ class SensorController extends Controller
     $select = Restaurant::select('id', 'name');
 
     //tester
-    if ($this->_viewer->id == 5) {
+    if ($this->_viewer->is_dev()) {
 
     } else {
       $select->where('deleted', 0);
@@ -289,7 +289,7 @@ class SensorController extends Controller
 
     $row = Restaurant::find((int)$id);
     if (!$row || $row->deleted) {
-      if ($this->_viewer->id == 5) {
+      if ($this->_viewer->is_dev()) {
 
       } else {
         return redirect('error/404');
@@ -928,7 +928,7 @@ class SensorController extends Controller
   {
     $row = Restaurant::find((int)$id);
     if (!$row || $row->deleted) {
-      if ($this->_viewer->id == 5) {
+      if ($this->_viewer->is_dev()) {
 
       } else {
         return redirect('error/404');

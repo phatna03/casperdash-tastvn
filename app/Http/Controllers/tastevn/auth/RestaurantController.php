@@ -256,7 +256,7 @@ class RestaurantController extends Controller
     $select = RestaurantParent::select('id', 'name');
 
     //tester
-    if ($this->_viewer->id == 5) {
+    if ($this->_viewer->is_dev()) {
 
     } else {
       $select->where('deleted', 0);

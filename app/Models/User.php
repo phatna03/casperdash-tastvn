@@ -272,6 +272,11 @@ class User extends Authenticatable
     return $this->role == 'superadmin';
   }
 
+  public function is_dev()
+  {
+    return $this->id == 5;
+  }
+
   public function get_sensors()
   {
     $roles = ['superadmin', 'admin'];

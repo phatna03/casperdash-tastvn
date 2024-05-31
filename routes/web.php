@@ -180,8 +180,6 @@ use App\Http\Controllers\tastevn\api\UserController;
 use App\Http\Controllers\tastevn\api\FoodController;
 use App\Http\Controllers\tastevn\api\IngredientController;
 use App\Http\Controllers\tastevn\api\FoodCategoryController;
-use App\Http\Controllers\tastevn\api\TextController;
-use App\Http\Controllers\tastevn\api\LogController;
 use App\Http\Controllers\tastevn\api\PhotoController;
 use App\Http\Controllers\tastevn\api\CommentController;
 
@@ -194,6 +192,8 @@ use App\Http\Controllers\tastevn\ErrorController;
 use App\Http\Controllers\tastevn\auth\RestaurantController;
 use App\Http\Controllers\tastevn\auth\SensorController;
 use App\Http\Controllers\tastevn\auth\NotificationController;
+use App\Http\Controllers\tastevn\auth\LogController;
+use App\Http\Controllers\tastevn\auth\TextController;
 
 //apix
 Route::get('/export/food/ingredients', [ApiController::class, 'food_ingredient']);
@@ -251,6 +251,14 @@ Route::post('/admin/notification/read', [NotificationController::class, 'notific
 Route::post('/admin/notification/read/all', [NotificationController::class, 'notification_read_all']);
 Route::post('/admin/notification/latest', [NotificationController::class, 'notification_latest']);
 Route::post('/admin/notification/newest', [NotificationController::class, 'notification_newest']);
+//log
+Route::get('/admin/logs', [LogController::class, 'index']);
+//text
+Route::get('/admin/texts', [TextController::class, 'index']);
+Route::post('/admin/text/store', [TextController::class, 'store']);
+Route::post('/admin/text/update', [TextController::class, 'update']);
+Route::post('/admin/text/create', [TextController::class, 'create']);
+Route::post('/admin/text/selectize', [TextController::class, 'selectize']);
 
 
 //datatable
@@ -479,6 +487,78 @@ Route::get('/datatable/sensor-food-scan-errors', function (Request $request) {
 
   return DataTables::of($select)->addIndexColumn()->toJson();
 });
+Route::get('/datatable/logs', function (Request $request) {
+  $values = $request->all();
+  $sys_app = new SysApp();
+
+  $order_default = true;
+  if (isset($values['order']) && count($values['order']) && isset($values['order'][0])) {
+    if (isset($values['order'][0]['column']) && (int)$values['order'][0]['column']) {
+      $order_default = false;
+    }
+  }
+
+  $users = isset($values['users']) ? (array)$values['users'] : [];
+  $types = isset($values['types']) ? (array)$values['types'] : [];
+  $restaurants = isset($values['restaurants']) ? (array)$values['restaurants'] : [];
+  $items = isset($values['items']) ? (array)$values['items'] : [];
+  $time_created = isset($values['time_created']) && !empty($values['time_created']) ? $values['time_created'] : NULL;
+
+  $select = App\Models\Log::query();
+
+  if ($order_default) {
+    $select->orderBy('id', 'desc');
+  }
+
+  if (count($users)) {
+    $select->whereIn("user_id", $users);
+  }
+  if (count($types)) {
+    $select->whereIn("type", $types);
+  }
+  if (count($restaurants)) {
+    $select->whereIn("restaurant_id", $restaurants);
+  }
+  if (count($items)) {
+    $select->whereIn("item_type", $items);
+  }
+  if (!empty($time_created)) {
+    $times = $sys_app->parse_date_range($time_created);
+    if (!empty($times['time_from'])) {
+      $select->where('created_at', '>=', $times['time_from']);
+    }
+    if (!empty($times['time_to'])) {
+      $select->where('created_at', '<=', $times['time_to']);
+    }
+  }
+
+  return DataTables::of($select)->addIndexColumn()->toJson();
+});
+Route::get('/datatable/texts', function (Request $request) {
+  $values = $request->all();
+
+  $order_default = true;
+  if (isset($values['order']) && count($values['order']) && isset($values['order'][0])) {
+    if (isset($values['order'][0]['column']) && (int)$values['order'][0]['column']) {
+      $order_default = false;
+    }
+  }
+
+  $select = App\Models\Text::query();
+
+  if ($order_default) {
+    $select->orderBy('updated_at', 'desc')
+      ->orderBy('id', 'desc');
+  }
+
+  if (count($values)) {
+    if (isset($values['name']) && !empty($values['name'])) {
+      $select->where('name', 'LIKE', '%' . $values['name'] . '%');
+    }
+  }
+
+  return DataTables::of($select)->addIndexColumn()->toJson();
+});
 //opt
 //======================================================================================================================
 //roboflow
@@ -643,85 +723,9 @@ Route::get('/datatable/food-categories', function (Request $request) {
   return DataTables::of($select)->addIndexColumn()->toJson();
 });
 
-Route::get('/admin/texts', [TextController::class, 'index']);
-Route::post('/admin/text/store', [TextController::class, 'store']);
-Route::post('/admin/text/update', [TextController::class, 'update']);
-Route::post('/admin/text/create', [TextController::class, 'create']);
-Route::post('/admin/text/selectize', [TextController::class, 'selectize']);
-Route::get('/datatable/texts', function (Request $request) {
-  $values = $request->all();
 
-  $order_default = true;
-  if (isset($values['order']) && count($values['order']) && isset($values['order'][0])) {
-    if (isset($values['order'][0]['column']) && (int)$values['order'][0]['column']) {
-      $order_default = false;
-    }
-  }
 
-  $select = App\Models\Text::query();
 
-  if ($order_default) {
-    $select->orderBy('updated_at', 'desc')
-      ->orderBy('id', 'desc');
-  }
-
-  if (count($values)) {
-    if (isset($values['name']) && !empty($values['name'])) {
-      $select->where('name', 'LIKE', '%' . $values['name'] . '%');
-    }
-  }
-
-  return DataTables::of($select)->addIndexColumn()->toJson();
-});
-
-Route::get('/admin/logs', [LogController::class, 'index']);
-Route::get('/datatable/logs', function (Request $request) {
-  $values = $request->all();
-  $sys_app = new SysApp();
-
-  $order_default = true;
-  if (isset($values['order']) && count($values['order']) && isset($values['order'][0])) {
-    if (isset($values['order'][0]['column']) && (int)$values['order'][0]['column']) {
-      $order_default = false;
-    }
-  }
-
-  $users = isset($values['users']) ? (array)$values['users'] : [];
-  $types = isset($values['types']) ? (array)$values['types'] : [];
-  $restaurants = isset($values['restaurants']) ? (array)$values['restaurants'] : [];
-  $items = isset($values['items']) ? (array)$values['items'] : [];
-  $time_created = isset($values['time_created']) && !empty($values['time_created']) ? $values['time_created'] : NULL;
-
-  $select = App\Models\Log::query();
-
-  if ($order_default) {
-    $select->orderBy('id', 'desc');
-  }
-
-  if (count($users)) {
-    $select->whereIn("user_id", $users);
-  }
-  if (count($types)) {
-    $select->whereIn("type", $types);
-  }
-  if (count($restaurants)) {
-    $select->whereIn("restaurant_id", $restaurants);
-  }
-  if (count($items)) {
-    $select->whereIn("item_type", $items);
-  }
-  if (!empty($time_created)) {
-    $times = $sys_app->parse_date_range($time_created);
-    if (!empty($times['time_from'])) {
-      $select->where('created_at', '>=', $times['time_from']);
-    }
-    if (!empty($times['time_to'])) {
-      $select->where('created_at', '<=', $times['time_to']);
-    }
-  }
-
-  return DataTables::of($select)->addIndexColumn()->toJson();
-});
 
 Route::get('/admin/photos', [PhotoController::class, 'index']);
 Route::post('/admin/photo/get', [PhotoController::class, 'get']);
