@@ -7,7 +7,6 @@ use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 //lib
-use Validator;
 use App\Api\SysApp;
 use App\Models\RestaurantFoodScan;
 
@@ -49,7 +48,6 @@ class PhotoController extends Controller
   {
     $values = $request->all();
 //    echo '<pre>';var_dump($values);die;
-
     $existed = isset($values['existed']) ? (array)$values['existed'] : [];
     $restaurants = isset($values['restaurants']) ? (array)$values['restaurants'] : [];
     $time_upload = isset($values['time_upload']) && !empty($values['time_upload']) ? $values['time_upload'] : NULL;
@@ -59,7 +57,6 @@ class PhotoController extends Controller
         'restaurant_food_scans.photo_url', 'restaurant_food_scans.photo_name', 'restaurant_food_scans.local_storage',
         'restaurant_food_scans.time_photo', 'restaurants.name as restaurant_name')
       ->leftJoin('restaurants', 'restaurant_food_scans.restaurant_id', '=', 'restaurants.id')
-//      ->where('restaurant_food_scans.deleted', 0)
       ->orderBy('restaurant_food_scans.time_photo', 'desc')
       ->orderBy('restaurant_food_scans.id', 'desc')
       ->limit(24)

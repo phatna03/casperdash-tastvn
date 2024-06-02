@@ -172,9 +172,6 @@ Route::get('/cc', function () {
 //======================================================================================================================
 //tastevn
 use Illuminate\Http\Request;
-//use App\Http\Controllers\tastevn\api\RoboflowController;
-//use App\Http\Controllers\tastevn\api\FoodController;
-
 use App\Api\SysApp;
 use App\Http\Controllers\tastevn\ApiController;
 use App\Http\Controllers\tastevn\LoginController;

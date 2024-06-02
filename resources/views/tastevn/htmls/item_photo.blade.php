@@ -14,7 +14,7 @@ foreach ($items as $item):
        data-lcl-author="{{$item->id}}"
        data-lcl-thumb="{{$item->get_photo()}}?dpr=1&auto=format&fit=crop&w=150&q=80&cs=tinysrgb"
     >
-      <img class="card-img-top" src="{{$item->get_photo()}}" alt="{{$item->get_photo()}}" />
+      <img class="card-img-top" loading="lazy" src="{{$item->get_photo()}}" alt="{{$item->get_photo()}}" />
     </a>
     <div class="card-body p-1 clearfix position-relative">
       <div class="clearfix mb-2 mt-1">

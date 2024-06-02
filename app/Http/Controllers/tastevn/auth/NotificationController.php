@@ -1,19 +1,13 @@
 <?php
 
 namespace App\Http\Controllers\tastevn\auth;
-
 use App\Http\Controllers\Controller;
-
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 //lib
-use Validator;
 use App\Api\SysApp;
-use App\Excel\ImportData;
 //model
-use App\Models\Food;
-use App\Models\Restaurant;
 use App\Models\RestaurantFoodScan;
 
 class NotificationController extends Controller
@@ -42,7 +36,7 @@ class NotificationController extends Controller
     $page = isset($values['page']) && (int)$values['page'] > 1 ? (int)$values['page'] : 1;
 
     $select = $this->_viewer->notifications()
-      ->orderBy('id', 'desc');
+      ->orderBy('created_at', 'desc');
 
     //tester
     if ($this->_viewer->id != 5) {
@@ -99,7 +93,7 @@ class NotificationController extends Controller
     $html = '';
 
     $select = $this->_viewer->notifications()
-      ->orderBy('id', 'desc');
+      ->orderBy('created_at', 'desc');
 
     //tester
     if ($this->_viewer->id != 5) {
@@ -154,8 +148,7 @@ class NotificationController extends Controller
         ->where('notifiable_type', 'App\Models\User')
         ->where('notifiable_id', $this->_viewer->id)
         ->whereIn('type', $valid_types)
-        ->where('created_at', '>', $this->_viewer->time_notification)
-        ->orderBy('id', 'asc')
+        ->orderBy('created_at', 'desc')
         ->limit(1);
 
       //tester
@@ -173,6 +166,11 @@ class NotificationController extends Controller
 
           $ingredients = array_filter(explode('&nbsp', $row->missing_texts));
           if (!count($ingredients)) {
+            continue;
+          }
+
+          //time
+          if (strtotime($this->_viewer->time_notification) < strtotime($row->created_at)) {
             continue;
           }
 

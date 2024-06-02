@@ -7,7 +7,6 @@ use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 //lib
-use Validator;
 use App\Api\SysApp;
 //model
 use App\Models\Comment;

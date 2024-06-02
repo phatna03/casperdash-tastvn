@@ -5,7 +5,7 @@
 <div class="row">
   <div class="col-lg-6 mb-2 text-center">
     <div class="w-auto">
-      <img class="w-100" src="{{$img_src}}" />
+      <img class="w-100" src="{{$img_src}}" loading="lazy" />
     </div>
   </div>
   <div class="col-lg-6 mb-2">

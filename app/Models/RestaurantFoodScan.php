@@ -409,7 +409,7 @@ class RestaurantFoodScan extends Model
                 $notify->update([
                   'restaurant_food_scan_id' => $this->id,
                   'restaurant_id' => $this->get_restaurant()->id,
-                  'food_id' => $this->get_food()->id,
+                  'food_id' => $this->get_food() ? $this->get_food()->id : 0,
                   'object_type' => 'restaurant_food_scan',
                   'object_id' => $this->id,
                   'data' => json_encode([

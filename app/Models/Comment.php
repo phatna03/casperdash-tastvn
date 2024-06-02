@@ -96,7 +96,7 @@ class Comment extends Model
                   $notify->update([
                     'restaurant_food_scan_id' => $rfs->id,
                     'restaurant_id' => $rfs->get_restaurant()->id,
-                    'food_id' => $rfs->get_food()->id,
+                    'food_id' => $rfs->get_food() ? $rfs->get_food()->id : 0,
                     'object_type' => 'comment',
                     'object_id' => $this->id,
                     'data' => json_encode([
@@ -161,7 +161,7 @@ class Comment extends Model
                   $notify->update([
                     'restaurant_food_scan_id' => $rfs->id,
                     'restaurant_id' => $rfs->get_restaurant()->id,
-                    'food_id' => $rfs->get_food()->id,
+                    'food_id' => $rfs->get_food() ? $rfs->get_food()->id : 0,
                     'object_type' => 'comment',
                     'object_id' => $this->id,
                     'data' => json_encode([

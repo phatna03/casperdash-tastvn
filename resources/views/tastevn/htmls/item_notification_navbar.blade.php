@@ -20,7 +20,7 @@
   <div class="d-flex gap-2">
     <div class="flex-shrink-0">
       <div class="text-center w-px-50 h-px-50 me-1">
-        <img class="w-100 h-100" style="border-radius: 50%;" src="{{$rfs->get_photo()}}"/>
+        <img class="w-100 h-100" style="border-radius: 50%;" loading="lazy" src="{{$rfs->get_photo()}}"/>
       </div>
     </div>
     <div class="d-flex flex-column flex-grow-1 overflow-hidden w-px-200">
