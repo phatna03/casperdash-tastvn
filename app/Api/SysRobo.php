@@ -69,8 +69,4 @@ class SysRobo
     ];
   }
 
-  public static function photo_predict()
-  {
-
-  }
 }

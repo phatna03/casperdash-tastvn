@@ -13,8 +13,6 @@ use App\Notifications\IngredientMissing;
 use App\Notifications\IngredientMissingMail;
 
 use Maatwebsite\Excel\Facades\Excel;
-use App\Excel\ExportFoodIngredient;
-use App\Excel\ExportFoodRecipe;
 use App\Excel\ImportData;
 
 use Validator;

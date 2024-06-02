@@ -5,7 +5,6 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 //excel
 use Maatwebsite\Excel\Facades\Excel;
-use App\Excel\ExportFoodIngredient;
 //model
 use App\Models\Food;
 use App\Models\RestaurantParent;
