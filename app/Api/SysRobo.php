@@ -14,7 +14,8 @@ class SysRobo
     $sys_app = new SysApp();
 
     //setting web
-    $dataset = $sys_app->get_setting('rbf_dataset_scan');
+    $dataset = $sys_app->parse_s3_bucket_address($sys_app->get_setting('rbf_dataset_scan'));
+    $version = $sys_app->get_setting('rbf_dataset_ver');
     $api_key = $sys_app->get_setting('rbf_api_key');
 
     //pars
@@ -26,7 +27,7 @@ class SysRobo
     $error = [];
 
     // URL for Http Request
-    $api_url =  "https://detect.roboflow.com/" . $dataset
+    $api_url =  "https://detect.roboflow.com/" . $dataset . "/" . $version
       . "?api_key=" . $api_key
       . "&confidence=" . $confidence
       . "&overlap=" . $overlap

@@ -178,6 +178,7 @@ use App\Http\Controllers\tastevn\LoginController;
 use App\Http\Controllers\tastevn\GuideController;
 use App\Http\Controllers\tastevn\PrinterController;
 use App\Http\Controllers\tastevn\ErrorController;
+use App\Http\Controllers\tastevn\TesterController;
 use App\Http\Controllers\tastevn\auth\RestaurantController;
 use App\Http\Controllers\tastevn\auth\SensorController;
 use App\Http\Controllers\tastevn\auth\NotificationController;

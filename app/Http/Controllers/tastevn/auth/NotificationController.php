@@ -170,7 +170,7 @@ class NotificationController extends Controller
           }
 
           //time
-          if (strtotime($this->_viewer->time_notification) < strtotime($row->created_at)) {
+          if (strtotime(date('Y-m-d H:i:s', strtotime($this->_viewer->time_notification))) > strtotime(date('Y-m-d H:i:s', strtotime($row->created_at)))) {
             continue;
           }
 
@@ -181,6 +181,12 @@ class NotificationController extends Controller
             'food_name' => $row->get_food()->name,
             'food_confidence' => $row->confidence,
             'ingredients' => $ingredients,
+
+            'time_notification' => date('Y-m-d H:i:s', strtotime($this->_viewer->time_notification)),
+            'created_at' => date('Y-m-d H:i:s', strtotime($row->created_at)),
+
+            'time1' => strtotime(date('Y-m-d H:i:s', strtotime($this->_viewer->time_notification))),
+            'time2' => strtotime(date('Y-m-d H:i:s', strtotime($row->created_at)))
           ];
 
           $ids[] = $row->id;
