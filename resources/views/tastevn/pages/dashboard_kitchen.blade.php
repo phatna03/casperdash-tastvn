@@ -15,9 +15,9 @@
 @endsection
 
 @section('content')
-  <div class="row p-1">
+  <div class="row m-0">
     <div class="col-12 mb-1">
-      <h4 class="position-relative w-100">
+      <h4 class="position-relative w-100 mb-0">
         <div class="acm-float-right">
           <button type="button" class="btn btn-sm btn-primary p-1" onclick="speaker_allow()">
             <i class="mdi mdi-speaker"></i> Test Speaker
@@ -39,14 +39,14 @@
         <div class="card-body p-0">
           <div class="row">
             <div class="col-lg-6">
-              <div class="acm-border-css p-2 border-dark acm-height-450-min">
-                <div class="text-center text-uppercase overflow-hidden mb-2">
+              <div class="p-1">
+                <div class="text-center text-uppercase overflow-hidden mb-1">
                   <div class="badge bg-secondary">Food Recipe</div>
                 </div>
                 <div class="wrap-selected-food">
-                  <div class="row">
+                  <div class="row m-0">
                     <div class="col-lg-6 mb-1 d-none">
-                      <div class="form-floating form-floating-outline mb-2">
+                      <div class="form-floating form-floating-outline mb-1">
                         <div class="form-control acm-wrap-selectize" id="select-item-restaurant">
                           <select name="restaurant_parent_id" class="ajx_selectize" required
                                   data-value="restaurant_parent" onchange="restaurant_selected(this)"
@@ -58,7 +58,7 @@
                     </div>
 
                     <div class="col-lg-6 mb-1 d-none">
-                      <div class="form-floating form-floating-outline mb-2">
+                      <div class="form-floating form-floating-outline mb-1">
                         <div class="form-control acm-wrap-selectize" id="select-item-food">
                           <select name="food" class="opt_selectize" onchange="food_selected(this)"
                                   data-placeholder="Please choose dish..."
@@ -71,13 +71,13 @@
                       </div>
                     </div>
 
-                    <div class="col-lg-12 mb-1 position-relative">
+                    <div class="col-lg-12 p-0 mb-1 position-relative">
                       <div class="text-center w-auto d-none">
                         <h3 class="food-name"></h3>
                       </div>
 
                       <div class="text-center w-auto">
-                        <img class="w-100 mt-2 food-photo" src="{{url('custom/img/no_photo.png')}}" />
+                        <img class="w-100 food-photo" loading="lazy" src="{{url('custom/img/no_photo.png')}}" />
                       </div>
                     </div>
 
@@ -90,14 +90,14 @@
             </div>
 
             <div class="col-lg-6 wrap_food_tester">
-              <div class="acm-border-css p-2 border-dark acm-height-450-min">
-                <div class="text-center text-uppercase overflow-hidden mb-2">
+              <div class="p-1">
+                <div class="text-center text-uppercase overflow-hidden mb-1">
                   <div class="badge bg-secondary">Latest Sensor Photo</div>
                 </div>
                 <div>
                   <div class="row">
-                    <div class="col-lg-12 mb-2 d-none">
-                      <div class="form-floating form-floating-outline mb-2">
+                    <div class="col-lg-12 mb-1 d-none">
+                      <div class="form-floating form-floating-outline mb-1">
                         <div class="form-control acm-wrap-selectize" id="restaurant-sensor-select">
                           <select name="sensor" class="opt_selectize d-none" onchange="sensor_selected(this)"
                                   data-placeholder="Please choose restaurant sensor..."
@@ -116,37 +116,33 @@
 
                     <input type="hidden" name="current_itd" />
 
-                    <div class="col-lg-6 mb-2 wrap_notify_result d-none result_photo_standard">
+                    <div class="col-lg-6 mb-1 wrap_notify_result d-none result_photo_standard">
                       <div class="text-center w-100">
-                        <img class="w-100" src="" />
+                        <img class="w-100" loading="lazy" src="" />
                       </div>
                     </div>
 
-                    <div class="col-lg-12 mb-2 wrap_notify_result d-none result_photo_sensor">
+                    <div class="col-lg-12 mb-1 wrap_notify_result d-none result_photo_sensor">
                       <div class="d-inline-block">
                         <img class="w-100" loading="lazy" src="" />
                       </div>
                     </div>
 
-                    <div class="col-lg-12 mb-1 wrap_notify_result d-none result_photo_itd w-100">
+                    <div class="col-lg-12 mb-1 wrap_notify_result d-none result_photo_itd">
+                      <div class="acm-float-right acm-ml-px-5 wrap_notify_result d-none result_photo_status">
+                        <div class="data_result"></div>
+                      </div>
+
                       <div class="d-inline-block">
-                        <div class="text-dark">+ Photo ID: <b class="fw-bold"></b></div>
+                        <div class="text-dark fw-bold">+ Photo ID: <b class="fw-bold"></b></div>
                       </div>
 
                       <div class="data_result d-inline-block"></div>
                     </div>
 
-                    <div class="col-lg-12 mb-1 wrap_notify_result d-none result_photo_status">
+                    <div class="col-lg-12 mb-1 wrap_notify_result d-none result_predicted_dish">
                       <div class="d-inline-block">
-                        <div class="text-dark">+ Status: <b class="fw-bold"></b></div>
-                      </div>
-
-                      <div class="data_result d-inline-block"></div>
-                    </div>
-
-                    <div class="col-lg-12 mb-2 wrap_notify_result d-none result_predicted_dish">
-                      <div class="d-inline-block">
-                        <div class="text-dark">+ Predicted Dish:</div>
+                        <div class="text-dark fw-bold">+ Dish:</div>
                       </div>
 
                       <div class="data_result d-inline-block"></div>
@@ -154,7 +150,7 @@
 
                     <div class="col-lg-6 mb-1 wrap_notify_result d-none result_ingredients_found">
                       <div class="w-100">
-                        <div class="text-dark">+ Ingredients Found:</div>
+                        <div class="text-dark fw-bold">+ Ingredients Found:</div>
                       </div>
 
                       <div class="data_result"></div>
@@ -162,18 +158,10 @@
 
                     <div class="col-lg-6 mb-1 wrap_notify_result d-none result_ingredients_missing">
                       <div class="w-100">
-                        <div class="text-dark">+ Ingredients Missing:</div>
+                        <div class="text-dark fw-bold">+ Ingredients Missing:</div>
                       </div>
 
                       <div class="data_result"></div>
-                    </div>
-
-                    <div class="col-lg-12 mb-1 wrap_notify_result d-none result_unknown_data">
-                      <div class="d-inline-block">
-                        <div class="text-dark">+ Status: <b class="fw-bold text-danger">Unknown photo information</b></div>
-                      </div>
-
-                      <div class="data_result d-inline-block"></div>
                     </div>
 
                     <input type="hidden" name="current_file_id" />
@@ -204,11 +192,11 @@
 
       toggle_header();
 
-      // sensor_checker();
+      sensor_checker();
 
       setInterval(function () {
         if (sys_ready) {
-          sensor_checker();
+          // sensor_checker();
         }
       }, 2000);
 
@@ -262,7 +250,7 @@
       var wrap = $('.wrap-selected-food');
 
       $('.result_photo_status .data_result').empty()
-        .append('<div class="badge bg-success fw-bold acm-ml-px-10 acm-fs-15">predicting...</div>');
+        .append('<div class="badge bg-success fw-bold acm-ml-px-10 acm-fs-13">predicting...</div>');
 
       axios.post('/admin/kitchen/predict', {
         item: item_id,
@@ -280,7 +268,7 @@
             response.data.notifys.forEach(function (v, k) {
 
               var html_toast = '<div class="cursor-pointer" onclick="sensor_food_scan_info(' + v.itd + ')">';
-              html_toast += '<div class="acm-fs-13">+ Predicted Dish: <b><span class="acm-mr-px-5 text-danger">' + v.food_confidence + '%</span><span>' + v.food_name + '</span></b></div>';
+              html_toast += '<div class="acm-fs-13">+ Dish: <b><span class="acm-mr-px-5 text-danger">' + v.food_confidence + '%</span><span>' + v.food_name + '</span></b></div>';
 
               html_toast += '<div class="acm-fs-13">+ Ingredients Missing:</div>';
               v.ingredients.forEach(function (v1, k1) {
@@ -320,7 +308,7 @@
       var wrap = $('.wrap-selected-food');
 
       $('.result_photo_status .data_result').empty()
-        .append('<div class="badge bg-success fw-bold acm-ml-px-10 acm-fs-15">predicting...</div>');
+        .append('<div class="badge bg-success fw-bold acm-ml-px-10 acm-fs-13">predicting...</div>');
 
       axios.post('/admin/kitchen/predict', {
         item: item_id,
@@ -338,7 +326,7 @@
             response.data.notifys.forEach(function (v, k) {
 
               var html_toast = '<div class="cursor-pointer" onclick="sensor_food_scan_info(' + v.itd + ')">';
-              html_toast += '<div class="acm-fs-13">+ Predicted Dish: <b><span class="acm-mr-px-5 text-danger">' + v.food_confidence + '%</span><span>' + v.food_name + '</span></b></div>';
+              html_toast += '<div class="acm-fs-13">+ Dish: <b><span class="acm-mr-px-5 text-danger">' + v.food_confidence + '%</span><span>' + v.food_name + '</span></b></div>';
 
               html_toast += '<div class="acm-fs-13">+ Ingredients Missing:</div>';
               v.ingredients.forEach(function (v1, k1) {
@@ -405,7 +393,7 @@
             $('.result_photo_itd').removeClass('d-none');
 
             $('.result_photo_status .data_result').empty()
-              .append('<div class="badge bg-info fw-bold acm-ml-px-10 acm-fs-15">checking...</div>');
+              .append('<div class="badge bg-info fw-bold acm-ml-px-10 acm-fs-13">checking...</div>');
             $('.result_photo_status').removeClass('d-none');
 
             //show data
@@ -469,7 +457,7 @@
 
         //sensor
         $('.result_photo_status .data_result').empty()
-          .append('<div class="badge bg-primary fw-bold acm-ml-px-10 acm-fs-15">checked</div>');
+          .append('<div class="badge bg-primary fw-bold acm-ml-px-10 acm-fs-13 d-none">checked</div>');
 
         //predicted_dish
         if (datas.food_name != '') {
@@ -494,9 +482,11 @@
         //ingredients_found
         html = '';
         if (datas.ingredients_found.length) {
+          // html += '<div class="row m-0">';
           datas.ingredients_found.forEach(function (v, k) {
             html += '<div class="text-dark acm-ml-px-10">- <b class="text-danger acm-mr-px-5">' + v.quantity + '</b> ' + v.name + '</div>';
           });
+          // html += '</div>';
         }
         if (html && html != '') {
           $('.result_ingredients_found .data_result').empty().append(html);
@@ -509,7 +499,7 @@
         wrap.find('.wrap-ingredients').empty();
 
         $('.result_photo_status .data_result').empty()
-          .append('<div class="badge bg-danger fw-bold acm-ml-px-10 acm-fs-15">Not Trained Yet</div>');
+          .append('<div class="badge bg-danger fw-bold acm-ml-px-10 acm-fs-13">Not Trained Yet</div>');
       }
     }
 

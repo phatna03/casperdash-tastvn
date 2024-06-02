@@ -1191,7 +1191,7 @@ class SensorController extends Controller
     if ($food) {
 
       $food_id = $food->id;
-      $food_name = '[' . $restaurant->get_parent()->name . '] ' . $food->name;
+      $food_name = $food->name;
 
       //photo standard
       $restaurant_ids = Restaurant::where('deleted', 0)
