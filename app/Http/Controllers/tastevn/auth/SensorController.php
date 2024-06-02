@@ -262,7 +262,7 @@ class SensorController extends Controller
 
     $select = Restaurant::select('id', 'name');
 
-    //tester
+    //dev
     if ($this->_viewer->is_dev()) {
 
     } else {

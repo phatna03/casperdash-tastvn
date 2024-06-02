@@ -62,7 +62,7 @@ class PhotoController extends Controller
       ->limit(24)
     ;
 
-    //tester
+    //dev
     if ($this->_viewer->is_dev()) {
 
     } else {

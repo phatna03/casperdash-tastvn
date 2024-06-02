@@ -435,8 +435,14 @@ class FoodController extends Controller
   protected function selectize_items($pars = [])
   {
     $select = Food::query("foods")
-      ->select('foods.id', 'foods.name')
-      ->where('foods.deleted', 0);
+      ->select('foods.id', 'foods.name');
+
+    //dev
+    if ($this->_viewer->is_dev()) {
+
+    } else {
+      $select->where('foods.deleted', 0);
+    }
 
     $keyword = isset($pars['keyword']) && !empty($pars['keyword']) ? $pars['keyword'] : NULL;
     if (!empty($keyword)) {

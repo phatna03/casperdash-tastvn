@@ -238,6 +238,13 @@ class IngredientController extends Controller
   {
     $select = Ingredient::select('id', 'name', 'name_vi');
 
+    //dev
+    if ($this->_viewer->is_dev()) {
+
+    } else {
+      $select->where('deleted', 0);
+    }
+
     $keyword = isset($pars['keyword']) && !empty($pars['keyword']) ? $pars['keyword'] : NULL;
     if (!empty($keyword)) {
       $select->where('name', 'LIKE', "%{$keyword}%");

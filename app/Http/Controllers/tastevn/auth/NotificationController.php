@@ -38,8 +38,8 @@ class NotificationController extends Controller
     $select = $this->_viewer->notifications()
       ->orderBy('created_at', 'desc');
 
-    //tester
-    if ($this->_viewer->id != 5) {
+    //dev
+    if (!$this->_viewer->is_dev()) {
       $select->where('restaurant_id', '<>', 7);
     }
 
@@ -95,8 +95,8 @@ class NotificationController extends Controller
     $select = $this->_viewer->notifications()
       ->orderBy('created_at', 'desc');
 
-    //tester
-    if ($this->_viewer->id != 5) {
+    //dev
+    if (!$this->_viewer->is_dev()) {
       $select->where('restaurant_id', '<>', 7);
     }
 
@@ -151,8 +151,8 @@ class NotificationController extends Controller
         ->orderBy('created_at', 'desc')
         ->limit(1);
 
-      //tester
-      if ($this->_viewer->id != 5) {
+      //dev
+      if (!$this->_viewer->is_dev()) {
         $select->where('restaurant_id', '<>', 7);
       }
 

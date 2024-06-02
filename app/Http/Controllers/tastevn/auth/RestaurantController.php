@@ -255,7 +255,7 @@ class RestaurantController extends Controller
 
     $select = RestaurantParent::select('id', 'name');
 
-    //tester
+    //dev
     if ($this->_viewer->is_dev()) {
 
     } else {
