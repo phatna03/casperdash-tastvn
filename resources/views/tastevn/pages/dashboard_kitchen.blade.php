@@ -192,11 +192,10 @@
 
       toggle_header();
 
-      sensor_checker();
-
+      // sensor_checker();
       setInterval(function () {
         if (sys_ready) {
-          // sensor_checker();
+          sensor_checker();
         }
       }, 2000);
 

@@ -104,6 +104,7 @@
 
     @auth
     //notify
+    notification_newest();
     notify_realtime = setInterval(function () {
       notification_newest();
     }, acmcfs.timeout_notification);
@@ -118,38 +119,6 @@
       $('.modal-backdrop').not('.stacked').css('z-index', 1039 + (10 * idx));
       $('.modal-backdrop').not('.stacked').addClass('stacked');
     });
-
-    //roboflow
-//     roboflow.auth({
-//       publishable_key: "rf_3DtUFXV7oiSXMh2VkXK8d0EHcRD2"
-//     });
-//     async function rbf_load_model() {
-//       var model = await roboflow.load({
-//         model: "missing-dish-ingredients",
-//         version: 17
-//       });
-//
-//       model.configure({
-//         threshold: 0.5,
-//         overlap: 0.6,
-//         max_objects: 50
-//       });
-//
-//       acmcfs.rbf_model = model;
-//
-//       return model;
-//     }
-//
-// // Call the async function
-//     rbf_load_model().then(model => {
-//       // Do something with the model
-//       console.log(model.getMetadata());
-//       console.log(model.getConfiguration());
-//       console.log('ok...');
-//
-//     }).catch(error => {
-//       console.error('Error loading model:', error);
-//     });
 
     @endauth
   });

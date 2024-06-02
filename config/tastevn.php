@@ -3,7 +3,7 @@
 return [
 
   //tastevn
-  "creatorName" => "CasperDash",
+  "creatorName" => "Block8910",
   "creatorUrl" => "https://casperdash.io/",
   "templateName" => "TasteVN",
   "templateSuffix" => "TasteVN System",
