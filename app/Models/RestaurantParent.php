@@ -9,7 +9,6 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 use Aws\S3\S3Client;
-use App\Api\SysCore;
 
 class RestaurantParent extends Model
 {
@@ -57,6 +56,59 @@ class RestaurantParent extends Model
 
   }
 
+  public function get_foods($pars = [])
+  {
+    $items = [];
+
+    $sensor = $this->get_sensors([
+      'one_sensor' => 1,
+    ]);
+
+    if ($sensor) {
+
+      $select = RestaurantFood::query('restaurant_foods')
+        ->where('restaurant_foods.restaurant_id', $sensor->id)
+        ->distinct()
+        ->select(
+          'restaurant_foods.food_id', 'foods.name as food_name',
+          'restaurant_foods.photo as food_photo', 'restaurant_foods.live_group as food_live_group',
+          'restaurant_foods.food_category_id', 'food_categories.name as food_category_name'
+        )
+        ->where('restaurant_foods.deleted', 0)
+        ->leftJoin('foods', 'foods.id', '=', 'restaurant_foods.food_id')
+        ->leftJoin('food_categories', 'food_categories.id', '=', 'restaurant_foods.food_category_id')
+        ->orderByRaw('TRIM(LOWER(foods.name))');
+
+      $items = $select->get();
+    }
+
+    return $items;
+  }
+
+  public function get_sensors($pars = [])
+  {
+    $deleted = isset($pars['deleted']) && (int)$pars['deleted'] ? (int)$pars['deleted'] : 0;
+    $one_sensor = isset($pars['one_sensor']) && (int)$pars['one_sensor'] ? (int)$pars['one_sensor'] : 0;
+
+    $select = Restaurant::where('restaurant_parent_id', $this->id);
+
+    if ($deleted) {
+      $select->where('deleted', '>', 0);
+    } else {
+      $select->where('deleted', 0);
+    }
+
+    if ($one_sensor) {
+      $select->orderBy('id', 'asc')
+        ->limit(1);
+
+      return $select->first();
+    }
+
+    return $select->get();
+  }
+  //opt
+
   public function re_count($pars = [])
   {
     $this->count_sensors();
@@ -76,20 +128,7 @@ class RestaurantParent extends Model
     ]);
   }
 
-  public function get_sensors($pars = [])
-  {
-    $deleted = isset($pars['deleted']) && (int)$pars['deleted'] ? (int)$pars['deleted'] : 0;
 
-    $select = Restaurant::where('restaurant_parent_id', $this->id);
-
-    if ($deleted) {
-      $select->where('deleted', '>', 0);
-    } else {
-      $select->where('deleted', 0);
-    }
-
-    return $select->get();
-  }
 
   public function count_foods()
   {
@@ -119,12 +158,14 @@ class RestaurantParent extends Model
         'restaurant_foods.photo as food_photo', 'restaurant_foods.live_group as food_live_group',
         'restaurant_foods.food_category_id', 'food_categories.name as food_category_name'
       )
+      ->where('restaurant_foods.deleted', 0)
       ->leftJoin('foods', 'foods.id', '=', 'restaurant_foods.food_id')
       ->leftJoin('food_categories', 'food_categories.id', '=', 'restaurant_foods.food_category_id')
       ->whereIn('restaurant_foods.restaurant_id', function ($q) {
         $q->select('id')
           ->from('restaurants')
-          ->where('restaurant_parent_id', $this->id);
+          ->where('restaurant_parent_id', $this->id)
+        ;
       })
       ->orderByRaw('TRIM(LOWER(foods.name))');
 

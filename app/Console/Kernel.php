@@ -9,7 +9,7 @@ class Kernel extends ConsoleKernel
 {
   protected $commands = [
     //custome
-    'App\Console\Commands\TodoAPI',
+    'App\Console\Commands\SyncImagesToS3',
   ];
 
   /**
@@ -17,39 +17,11 @@ class Kernel extends ConsoleKernel
    */
   protected function schedule(Schedule $schedule): void
   {
-    //custome
-    //cargo
-    $schedule->command('tastevn:s3todo', [1, 1])
+    //sync photos
+    $schedule->command('sync:images-to-s3')
+      ->daily()
       ->withoutOverlapping()
-      ->everyTwoSeconds()
       ->runInBackground();
-
-    $schedule->command('tastevn:s3todo', [1, 2])
-      ->withoutOverlapping()
-      ->everyTwoSeconds()
-      ->runInBackground();
-    //deli
-    $schedule->command('tastevn:s3todo', [1, 3])
-      ->withoutOverlapping()
-      ->everyFiveSeconds()
-      ->runInBackground();
-
-    $schedule->command('tastevn:s3todo', [1, 4])
-      ->withoutOverlapping()
-      ->everyFiveSeconds()
-      ->runInBackground();
-    //market
-    $schedule->command('tastevn:s3todo', [1, 5])
-      ->withoutOverlapping()
-      ->everyFiveSeconds()
-      ->runInBackground();
-    //poison
-    $schedule->command('tastevn:s3todo', [1, 6])
-      ->withoutOverlapping()
-      ->everyFiveSeconds()
-      ->runInBackground();
-
-
   }
 
   /**

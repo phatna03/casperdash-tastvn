@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Notification;
 use App\Notifications\PhotoComment;
 use App\Notifications\PhotoCommentMail;
 
-use App\Api\SysCore;
+use App\Api\SysApp;
 
 class Comment extends Model
 {
@@ -45,9 +45,9 @@ class Comment extends Model
 
   public function get_object()
   {
-    $api_core = new SysCore();
+    $sys_app = new SysApp();
 
-    return !empty($this->object_type) ? $api_core->get_item($this->object_id, $this->object_type) : null;
+    return !empty($this->object_type) ? $sys_app->get_item($this->object_id, $this->object_type) : null;
   }
 
   public function on_create_after()
@@ -96,7 +96,7 @@ class Comment extends Model
                   $notify->update([
                     'restaurant_food_scan_id' => $rfs->id,
                     'restaurant_id' => $rfs->get_restaurant()->id,
-                    'food_id' => $rfs->get_food()->id,
+                    'food_id' => $rfs->get_food() ? $rfs->get_food()->id : 0,
                     'object_type' => 'comment',
                     'object_id' => $this->id,
                     'data' => json_encode([
@@ -161,7 +161,7 @@ class Comment extends Model
                   $notify->update([
                     'restaurant_food_scan_id' => $rfs->id,
                     'restaurant_id' => $rfs->get_restaurant()->id,
-                    'food_id' => $rfs->get_food()->id,
+                    'food_id' => $rfs->get_food() ? $rfs->get_food()->id : 0,
                     'object_type' => 'comment',
                     'object_id' => $this->id,
                     'data' => json_encode([

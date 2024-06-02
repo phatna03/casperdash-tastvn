@@ -502,6 +502,9 @@ function sensor_restore(ele) {
 function sensor_info(itd) {
   page_url(acmcfs.link_base_url + '/admin/sensor/info/' + itd);
 }
+function sensor_kitchen(itd) {
+  page_url(acmcfs.link_base_url + '/admin/kitchen/' + itd);
+}
 function sensor_stats() {
   var wrap = $('#wrap-stats-total');
 
@@ -1043,5 +1046,1361 @@ function sensor_search_food_scan_error(ele) {
       }
     }, acmcfs.timeout_default);
   }
+}
+//ingredient
+function ingredient_add(evt, frm) {
+  evt.preventDefault();
+  var form = $(frm);
+  form_loading(form);
+
+  axios.post('/admin/ingredient/store', {
+    name: form.find('input[name=name]').val(),
+    name_vi: form.find('input[name=name_vi]').val(),
+  })
+    .then(response => {
+
+      message_from_toast('success', acmcfs.message_title_success, acmcfs.message_description_success_add, true);
+
+      datatable_refresh();
+      setTimeout(function () {
+        form.find('input[name=name]').focus();
+      }, acmcfs.timeout_quick);
+    })
+    .catch(error => {
+      var restoreModal = false;
+
+      if (error.response.data && Object.values(error.response.data).length) {
+        Object.values(error.response.data).forEach(function (v, k) {
+          // if (v == 'can_restored') {
+          //   restoreModal = true;
+          // } else {
+          message_from_toast('error', acmcfs.message_title_error, v);
+          // }
+        });
+      }
+
+      if (restoreModal && $('#modal_restore_item').length) {
+        $('#modal_restore_item input[name=item]').val(form.find('input[name=name]').val());
+        $('#modal_restore_item .alert').empty()
+          .append("Are you sure you want to restore item has name: <b class='text-dark'>" + form.find('input[name=name]').val() + "</b>");
+        $('#modal_restore_item').modal('show');
+      }
+
+    })
+    .then(() => {
+
+      form_loading(form, false);
+
+      setTimeout(function () {
+        form.find('input[name=name]').focus();
+      }, acmcfs.timeout_quick);
+    });
+
+  return false;
+}
+function ingredient_edit_prepare(ele) {
+  var tr = $(ele).closest('tr');
+  var form = $('#offcanvas_edit_item form');
+
+  form.find('input[name=item]').val(tr.attr('data-id'));
+  form.find('input[name=name]').val(tr.attr('data-name'));
+  form.find('input[name=name_vi]').val(tr.attr('data-name_vi'));
+
+  setTimeout(function () {
+    form.find('input[name=name]').focus();
+  }, acmcfs.timeout_quick);
+}
+function ingredient_edit(evt, frm) {
+  evt.preventDefault();
+  var form = $(frm);
+  form_loading(form);
+
+  axios.post('/admin/ingredient/update', {
+    item: form.find('input[name=item]').val(),
+    name: form.find('input[name=name]').val(),
+    name_vi: form.find('input[name=name_vi]').val(),
+  })
+    .then(response => {
+
+      message_from_toast('success', acmcfs.message_title_success, acmcfs.message_description_success_update, true);
+
+      datatable_refresh();
+
+    })
+    .catch(error => {
+      var restoreModal = false;
+
+      if (error.response.data && Object.values(error.response.data).length) {
+        Object.values(error.response.data).forEach(function (v, k) {
+          // if (v == 'can_restored') {
+          //   restoreModal = true;
+          // } else {
+          message_from_toast('error', acmcfs.message_title_error, v);
+          // }
+        });
+      }
+
+      if (restoreModal && $('#modal_restore_item').length) {
+        $('#modal_restore_item input[name=item]').val(form.find('input[name=name]').val());
+        $('#modal_restore_item .alert').empty()
+          .append("Are you sure you want to restore item has name: <b class='text-dark'>" + form.find('input[name=name]').val() + "</b>");
+        $('#modal_restore_item').modal('show');
+      }
+
+    })
+    .then(() => {
+
+      form_loading(form, false);
+      form_close(form);
+    });
+
+  return false;
+}
+//food category
+function food_category_add(evt, frm) {
+  evt.preventDefault();
+  var form = $(frm);
+  form_loading(form);
+
+  axios.post('/admin/food-category/store', {
+    name: form.find('input[name=name]').val(),
+  })
+    .then(response => {
+
+      message_from_toast('success', acmcfs.message_title_success, acmcfs.message_description_success_add, true);
+
+      datatable_refresh();
+
+    })
+    .catch(error => {
+      var restoreModal = false;
+
+      if (error.response.data && Object.values(error.response.data).length) {
+        Object.values(error.response.data).forEach(function (v, k) {
+          // if (v == 'can_restored') {
+          //   restoreModal = true;
+          // } else {
+          message_from_toast('error', acmcfs.message_title_error, v);
+          // }
+        });
+      }
+
+      if (restoreModal && $('#modal_restore_item').length) {
+        $('#modal_restore_item input[name=item]').val(form.find('input[name=name]').val());
+        $('#modal_restore_item .alert').empty()
+          .append("Are you sure you want to restore item has name: <b class='text-dark'>" + form.find('input[name=name]').val() + "</b>");
+        $('#modal_restore_item').modal('show');
+      }
+
+    })
+    .then(() => {
+
+      form_loading(form, false);
+
+      setTimeout(function () {
+        form.find('input[name=name]').focus();
+      }, acmcfs.timeout_quick);
+    });
+
+  return false;
+}
+function food_category_edit_prepare(ele) {
+  var tr = $(ele).closest('tr');
+  var form = $('#offcanvas_edit_item form');
+
+  form.find('input[name=item]').val(tr.attr('data-id'));
+  form.find('input[name=name]').val(tr.attr('data-name'));
+
+  setTimeout(function () {
+    form.find('input[name=name]').focus();
+  }, acmcfs.timeout_quick);
+}
+function food_category_edit(evt, frm) {
+  evt.preventDefault();
+  var form = $(frm);
+  form_loading(form);
+
+  axios.post('/admin/food-category/update', {
+    item: form.find('input[name=item]').val(),
+    name: form.find('input[name=name]').val(),
+  })
+    .then(response => {
+
+      message_from_toast('success', acmcfs.message_title_success, acmcfs.message_description_success_update, true);
+
+      datatable_refresh();
+
+    })
+    .catch(error => {
+      var restoreModal = false;
+
+      if (error.response.data && Object.values(error.response.data).length) {
+        Object.values(error.response.data).forEach(function (v, k) {
+          // if (v == 'can_restored') {
+          //   restoreModal = true;
+          // } else {
+          message_from_toast('error', acmcfs.message_title_error, v);
+          // }
+        });
+      }
+
+      if (restoreModal && $('#modal_restore_item').length) {
+        $('#modal_restore_item input[name=item]').val(form.find('input[name=name]').val());
+        $('#modal_restore_item .alert').empty()
+          .append("Are you sure you want to restore item has name: <b class='text-dark'>" + form.find('input[name=name]').val() + "</b>");
+        $('#modal_restore_item').modal('show');
+      }
+
+    })
+    .then(() => {
+
+      form_loading(form, false);
+      form_close(form);
+    });
+
+  return false;
+}
+//text
+function text_add(evt, frm) {
+  evt.preventDefault();
+  var form = $(frm);
+  form_loading(form);
+
+  axios.post('/admin/text/store', {
+    name: form.find('input[name=name]').val(),
+  })
+    .then(response => {
+
+      message_from_toast('success', acmcfs.message_title_success, acmcfs.message_description_success_add, true);
+
+      datatable_refresh();
+
+    })
+    .catch(error => {
+      var restoreModal = false;
+
+      if (error.response.data && Object.values(error.response.data).length) {
+        Object.values(error.response.data).forEach(function (v, k) {
+          // if (v == 'can_restored') {
+          //   restoreModal = true;
+          // } else {
+          message_from_toast('error', acmcfs.message_title_error, v);
+          // }
+        });
+      }
+
+      if (restoreModal && $('#modal_restore_item').length) {
+        $('#modal_restore_item input[name=item]').val(form.find('input[name=name]').val());
+        $('#modal_restore_item .alert').empty()
+          .append("Are you sure you want to restore item has text: <b class='text-dark'>" + form.find('input[name=name]').val() + "</b>");
+        $('#modal_restore_item').modal('show');
+      }
+
+      setTimeout(function () {
+        form.find('input[name=name]').focus();
+      }, acmcfs.timeout_quick);
+    })
+    .then(() => {
+
+      form_loading(form, false);
+
+      setTimeout(function () {
+        form.find('input[name=name]').focus();
+      }, acmcfs.timeout_quick);
+    });
+
+  return false;
+}
+function text_edit_prepare(ele) {
+  var tr = $(ele).closest('tr');
+  var form = $('#offcanvas_edit_item form');
+
+  form.find('input[name=item]').val(tr.attr('data-id'));
+  form.find('input[name=name]').val(tr.attr('data-name'));
+
+  setTimeout(function () {
+    form.find('input[name=name]').focus();
+  }, acmcfs.timeout_quick);
+}
+function text_edit(evt, frm) {
+  evt.preventDefault();
+  var form = $(frm);
+  form_loading(form);
+
+  axios.post('/admin/text/update', {
+    item: form.find('input[name=item]').val(),
+    name: form.find('input[name=name]').val(),
+  })
+    .then(response => {
+
+      message_from_toast('success', acmcfs.message_title_success, acmcfs.message_description_success_update, true);
+
+      datatable_refresh();
+
+    })
+    .catch(error => {
+      var restoreModal = false;
+
+      if (error.response.data && Object.values(error.response.data).length) {
+        Object.values(error.response.data).forEach(function (v, k) {
+          // if (v == 'can_restored') {
+          //   restoreModal = true;
+          // } else {
+          message_from_toast('error', acmcfs.message_title_error, v);
+          // }
+        });
+      }
+
+      if (restoreModal && $('#modal_restore_item').length) {
+        $('#modal_restore_item input[name=item]').val(form.find('input[name=name]').val());
+        $('#modal_restore_item .alert').empty()
+          .append("Are you sure you want to restore item has name: <b class='text-dark'>" + form.find('input[name=name]').val() + "</b>");
+        $('#modal_restore_item').modal('show');
+      }
+
+    })
+    .then(() => {
+
+      form_loading(form, false);
+      form_close(form);
+    });
+
+  return false;
+}
+//setting
+function sys_setting_confirm(evt, frm) {
+  evt.preventDefault();
+  var popup = $('#modal_confirm_item');
+  popup.modal('show');
+  return false;
+}
+function sys_setting() {
+  var popup = $('#modal_confirm_item');
+  var form = $('#frm-settings');
+  form_loading(popup);
+
+  axios.post('/admin/setting/update', {
+    s3_region: form.find('input[name=s3_region]').val(),
+    s3_api_key: form.find('input[name=s3_api_key]').val(),
+    s3_api_secret: form.find('input[name=s3_api_secret]').val(),
+    rbf_api_key: form.find('input[name=rbf_api_key]').val(),
+    rbf_dataset_scan: form.find('input[name=rbf_dataset_scan]').val(),
+    rbf_dataset_ver: form.find('input[name=rbf_dataset_ver]').val(),
+    mail_mailer: form.find('input[name=mail_mailer]').val(),
+    mail_host: form.find('input[name=mail_host]').val(),
+    mail_username: form.find('input[name=mail_username]').val(),
+    mail_password: form.find('input[name=mail_password]').val(),
+    mail_port: form.find('input[name=mail_port]').val(),
+    mail_encryption: form.find('input[name=mail_encryption]').val(),
+    mail_from_address: form.find('input[name=mail_from_address]').val(),
+    mail_from_name: form.find('input[name=mail_from_name]').val(),
+  })
+    .then(response => {
+
+      message_from_toast('success', acmcfs.message_title_success, acmcfs.message_description_success_update, true);
+      page_reload(acmcfs.timeout_quick);
+
+    })
+    .catch(error => {
+
+      if (error.response.data && Object.values(error.response.data).length) {
+        Object.values(error.response.data).forEach(function (v, k) {
+          message_from_toast('error', acmcfs.message_title_error, v);
+        });
+      }
+
+    })
+    .then(() => {
+
+      form_loading(popup, false);
+    });
+
+  return false;
+}
+//user
+function user_clear(frm) {
+  var form = $(frm);
+
+  form.find('input[name=name]').val('');
+  form.find('input[name=email]').val('');
+  form.find('input[name=phone]').val('');
+  form.find('input[name=status][value=active]').prop('checked', true);
+  form.find('input[name=role][value=user]').prop('checked', true);
+  form.find('textarea[name=note]').val('');
+}
+function user_add(evt, frm) {
+  evt.preventDefault();
+  var form = $(frm);
+  form_loading(form);
+
+  axios.post('/admin/user/store', {
+    name: form.find('input[name=name]').val(),
+    email: form.find('input[name=email]').val(),
+    phone: form.find('input[name=phone]').val(),
+    status: form.find('input[name=status]:checked').val(),
+    role: form.find('input[name=role]:checked').val(),
+    note: form.find('textarea[name=note]').val(),
+    access_full: form.find('input[name=access_full]').is(':checked') ? 1 : 0,
+    access_restaurants: form.find('select[name=access_restaurants]').val(),
+  })
+    .then(response => {
+
+      message_from_toast('success', acmcfs.message_title_success, acmcfs.message_description_success_add, true);
+
+      datatable_refresh();
+
+    })
+    .catch(error => {
+      var restoreModal = false;
+
+      if (error.response.data && Object.values(error.response.data).length) {
+        Object.values(error.response.data).forEach(function (v, k) {
+          if (v == 'can_restored') {
+            restoreModal = true;
+          } else {
+            message_from_toast('error', acmcfs.message_title_error, v);
+          }
+        });
+      }
+
+      if (restoreModal && $('#modal_restore_item').length) {
+        $('#modal_restore_item input[name=item]').val(form.find('input[name=email]').val());
+        $('#modal_restore_item .alert').empty()
+          .append("Are you sure you want to restore item has email: <b class='text-dark'>" + form.find('input[name=email]').val() + "</b>");
+        $('#modal_restore_item').modal('show');
+      }
+
+    })
+    .then(() => {
+
+      form_loading(form, false);
+
+      setTimeout(function () {
+        form.find('input[name=name]').focus();
+      }, acmcfs.timeout_quick);
+    });
+
+  return false;
+}
+function user_full_restaurants(ele) {
+  var bind = $(ele);
+  var form = bind.closest('form');
+  var role = form.find('input[name=role]:checked').val();
+
+  if (role == 'admin') {
+    form.find('input[name=access_full]').prop('checked', true);
+    form.find('.access-restaurants').addClass('d-none');
+    return false;
+  }
+
+  if (bind.is(':checked')) {
+    form.find('.access-restaurants').addClass('d-none');
+  } else {
+    form.find('.access-restaurants').removeClass('d-none');
+  }
+}
+function user_edit_prepare(ele) {
+  var tr = $(ele).closest('tr');
+  var form = $('#offcanvas_edit_item form');
+
+  form.find('input[name=item]').val(tr.attr('data-id'));
+  form.find('input[name=name]').val(tr.attr('data-name'));
+  form.find('input[name=email]').val(tr.attr('data-email'));
+  form.find('input[name=phone]').val(tr.attr('data-phone'));
+  form.find('input[name=status][value=' + tr.attr('data-status') + ']').prop('checked', true);
+  form.find('input[name=role][value=' + tr.attr('data-role') + ']').prop('checked', true);
+  form.find('textarea[name=note]').val(tr.attr('data-note'));
+
+  var access_full = parseInt(tr.attr('data-access-full'));
+  if (access_full) {
+    form.find('input[name=access_full]').prop('checked', true);
+    form.find('.access-restaurants').addClass('d-none');
+  } else {
+    form.find('input[name=access_full]').prop('checked', false);
+    form.find('.access-restaurants').removeClass('d-none');
+
+    var datad = tr.attr('data-access-ids');
+    if (datad && datad !== '') {
+      datad = JSON.parse(datad);
+      form.find('.access-restaurants select').selectize()[0].selectize.setValue(datad);
+    }
+  }
+
+  setTimeout(function () {
+    form.find('input[name=name]').focus();
+  }, acmcfs.timeout_quick);
+}
+function user_edit(evt, frm) {
+  evt.preventDefault();
+  var form = $(frm);
+  form_loading(form);
+
+  axios.post('/admin/user/update', {
+    item: form.find('input[name=item]').val(),
+    name: form.find('input[name=name]').val(),
+    email: form.find('input[name=email]').val(),
+    phone: form.find('input[name=phone]').val(),
+    status: form.find('input[name=status]:checked').val(),
+    role: form.find('input[name=role]:checked').val(),
+    note: form.find('textarea[name=note]').val(),
+    access_full: form.find('input[name=access_full]').is(':checked') ? 1 : 0,
+    access_restaurants: form.find('select[name=access_restaurants]').val(),
+  })
+    .then(response => {
+
+      message_from_toast('success', acmcfs.message_title_success, acmcfs.message_description_success_update, true);
+
+      datatable_refresh();
+
+    })
+    .catch(error => {
+      var restoreModal = false;
+
+      if (error.response.data && Object.values(error.response.data).length) {
+        Object.values(error.response.data).forEach(function (v, k) {
+          if (v == 'can_restored') {
+            restoreModal = true;
+          } else {
+            message_from_toast('error', acmcfs.message_title_error, v);
+          }
+        });
+      }
+
+      if (restoreModal && $('#modal_restore_item').length) {
+        $('#modal_restore_item input[name=item]').val(form.find('input[name=email]').val());
+        $('#modal_restore_item .alert').empty()
+          .append("Are you sure you want to restore item has email: <b class='text-dark'>" + form.find('input[name=email]').val() + "</b>");
+        $('#modal_restore_item').modal('show');
+      }
+
+    })
+    .then(() => {
+
+      form_loading(form, false);
+      form_close(form);
+    });
+
+  return false;
+}
+function user_delete_confirm(ele) {
+  var tr = $(ele).closest('tr');
+  var popup = $('#modal_delete_item');
+
+  popup.find('input[name=item]').val(tr.attr('data-id'));
+}
+function user_delete(ele) {
+  var popup = $(ele).closest('.modal');
+  form_loading(popup);
+
+  axios.post('/admin/user/delete', {
+    item: popup.find('input[name=item]').val(),
+  })
+    .then(response => {
+
+      message_from_toast('success', acmcfs.message_title_success, acmcfs.message_description_success_update, true);
+
+      datatable_refresh();
+
+    })
+    .catch(error => {
+
+      if (error.response.data && Object.values(error.response.data).length) {
+        Object.values(error.response.data).forEach(function (v, k) {
+          message_from_toast('error', acmcfs.message_title_error, v);
+        });
+      }
+
+    })
+    .then(() => {
+
+      form_loading(popup, false);
+      form_close(popup);
+    });
+
+  return false;
+}
+function user_restore(ele) {
+  var popup = $(ele).closest('.modal');
+
+  axios.post('/admin/user/restore', {
+    item: popup.find('input[name=item]').val(),
+  })
+    .then(response => {
+
+      message_from_toast('success', acmcfs.message_title_success, acmcfs.message_description_success_update, true);
+
+      datatable_refresh();
+
+    })
+    .catch(error => {
+
+      if (error.response.data && Object.values(error.response.data).length) {
+        Object.values(error.response.data).forEach(function (v, k) {
+          message_from_toast('error', acmcfs.message_title_error, v);
+        });
+      }
+
+    });
+
+  return false;
+}
+function user_role(ele) {
+  var form = $(ele).closest('form');
+  var role = form.find('input[name=role]:checked').val();
+  if (role == 'admin') {
+    if (!form.find('input[name=access_full]').is(':checked')) {
+      form.find('input[name=access_full]').prop('checked', true);
+      form.find('.access-restaurants').addClass('d-none');
+    }
+  }
+}
+function user_profile_confirm(evt, frm) {
+  evt.preventDefault();
+  var popup = $('#modal_confirm_profile');
+  popup.modal('show');
+  return false;
+}
+function user_profile() {
+  var form = $('#frm-profile');
+  var popup = $('#modal_confirm_profile');
+  form_loading(popup);
+
+  axios.post('/admin/profile/update', {
+    name: form.find('input[name=info_name]').val(),
+    email: form.find('input[name=info_email]').val(),
+    phone: form.find('input[name=info_phone]').val(),
+  })
+    .then(response => {
+
+      message_from_toast('success', acmcfs.message_title_success, acmcfs.message_description_success_update, true);
+
+    })
+    .catch(error => {
+
+      if (error.response.data && Object.values(error.response.data).length) {
+        Object.values(error.response.data).forEach(function (v, k) {
+          message_from_toast('error', acmcfs.message_title_error, v);
+        });
+      }
+
+    })
+    .then(() => {
+
+      form_loading(popup, false);
+      form_close(popup);
+    });
+
+  return false;
+}
+function user_code_confirm() {
+  var popup = $('#modal_confirm_code');
+  popup.modal('show');
+  return false;
+}
+function user_code() {
+  var popup = $('#modal_confirm_code');
+  form_loading(popup);
+
+  axios.post('/admin/profile/pwd/code', {})
+    .then(response => {
+
+      message_from_toast('success', acmcfs.message_title_success, 'Your verify code has been sent successfully!', true);
+
+    })
+    .catch(error => {
+
+      if (error.response.data && Object.values(error.response.data).length) {
+        Object.values(error.response.data).forEach(function (v, k) {
+          message_from_toast('error', acmcfs.message_title_error, v);
+        });
+      }
+
+    })
+    .then(() => {
+
+      form_loading(popup, false);
+      form_close(popup);
+    });
+
+  return false;
+}
+function user_pwd_confirm(evt, frm) {
+  evt.preventDefault();
+  var popup = $('#modal_confirm_pwd');
+  popup.modal('show');
+  return false;
+}
+function user_pwd() {
+  var form = $('#frm-pwd');
+  var popup = $('#modal_confirm_pwd');
+  form_loading(popup);
+
+  axios.post('/admin/profile/pwd/update', {
+    code: form.find('input[name=pwd_code]').val(),
+    password: form.find('input[name=pwd_pwd1]').val(),
+    password_confirmation: form.find('input[name=pwd_pwd2]').val(),
+  })
+    .then(response => {
+
+      message_from_toast('success', acmcfs.message_title_success, acmcfs.message_description_success_update, true);
+      page_reload();
+
+    })
+    .catch(error => {
+
+      if (error.response.data && Object.values(error.response.data).length) {
+        Object.values(error.response.data).forEach(function (v, k) {
+          message_from_toast('error', acmcfs.message_title_error, v);
+        });
+      }
+
+    })
+    .then(() => {
+
+      form_loading(popup, false);
+      form_close(popup);
+    });
+
+  return false;
+}
+function user_setting_confirm(evt, frm) {
+  evt.preventDefault();
+  var popup = $('#modal_confirm_setting');
+  popup.modal('show');
+  return false;
+}
+function user_setting() {
+  var form = $('#frm-setting');
+
+  axios.post('/admin/profile/setting/update', {
+    settings: {}
+  })
+    .then(response => {
+
+      message_from_toast('success', acmcfs.message_title_success, acmcfs.message_description_success_update, true);
+
+    })
+    .catch(error => {
+
+      if (error.response.data && Object.values(error.response.data).length) {
+        Object.values(error.response.data).forEach(function (v, k) {
+          message_from_toast('error', acmcfs.message_title_error, v);
+        });
+      }
+
+    });
+
+  return false;
+}
+function user_test_sound() {
+  sound_play();
+}
+function user_test_speaker() {
+  speaker_tester();
+}
+function user_test_printer() {
+  page_open(acmcfs.link_base_url + '/printer/test');
+}
+function user_setting_notify_confirm(evt, frm) {
+  evt.preventDefault();
+  var popup = $('#modal_confirm_setting_notify');
+  popup.modal('show');
+  return false;
+}
+function user_setting_notify() {
+  var form = $('#frm-setting-notify');
+  var popup = $('#modal_confirm_setting_notify');
+  form_loading(popup);
+
+  var notifications = [];
+
+  form.find('.notify_item').each(function (k, v) {
+    var bind = $(v);
+    var notify = bind.attr('data-notify');
+    var key = '';
+    var val = '';
+
+    key = notify + '_receive';
+    val = bind.find('input[name=' + key + ']').is(':checked') ? 1 : 0;
+    notifications.push({
+      key: key,
+      val: val,
+    });
+
+    key = notify + '_alert_printer';
+    val = bind.find('input[name=' + key + ']').is(':checked') ? 1 : 0;
+    notifications.push({
+      key: key,
+      val: val,
+    });
+
+    key = notify + '_alert_email';
+    val = bind.find('input[name=' + key + ']').is(':checked') ? 1 : 0;
+    notifications.push({
+      key: key,
+      val: val,
+    });
+
+    key = notify + '_alert_speaker';
+    val = bind.find('input[name=' + key + ']').is(':checked') ? 1 : 0;
+    notifications.push({
+      key: key,
+      val: val,
+    });
+  });
+
+  axios.post('/admin/profile/setting/notify', {
+    notifications: notifications
+  })
+    .then(response => {
+
+      message_from_toast('success', acmcfs.message_title_success, acmcfs.message_description_success_update, true);
+
+    })
+    .catch(error => {
+
+      if (error.response.data && Object.values(error.response.data).length) {
+        Object.values(error.response.data).forEach(function (v, k) {
+          message_from_toast('error', acmcfs.message_title_error, v);
+        });
+      }
+
+    })
+    .then(() => {
+
+      form_loading(popup, false);
+      form_close(popup);
+    });
+
+  return false;
+}
+//rfs
+function restaurant_food_scan_view(id) {
+  axios.post('/admin/photo/view', {
+    item: id,
+  })
+    .then(response => {
+      //
+    })
+    .catch(error => {
+      //
+    });
+
+  return false;
+}
+function restaurant_food_scan_cmt(ele) {
+  var parent = $(ele).closest('#lcl_wrap');
+  var content = parent.find('textarea[name=note]').val();
+  var object_id = parent.find('input[name=object_id]').val();
+
+  axios.post('/admin/comment/note', {
+    object_id: object_id,
+    object_type: 'restaurant_food_scan',
+    content: content,
+  })
+    .then(response => {
+
+      message_from_toast('success', acmcfs.message_title_success, acmcfs.message_description_success_add, true);
+
+      if ($('body .restaurant_food_scan_' + object_id).length) {
+        $('body .restaurant_food_scan_' + object_id).attr('data-lcl-txt', content);
+      }
+
+    })
+    .catch(error => {
+      if (error.response.data && Object.values(error.response.data).length) {
+        Object.values(error.response.data).forEach(function (v, k) {
+          message_from_toast('error', acmcfs.message_title_error, v);
+        });
+      }
+    });
+
+  return false;
+}
+//food
+function food_clear(frm) {
+  var form = $(frm);
+
+  form.find('input[name=name]').val('');
+  form.find('select[name=live_group]').selectize()[0].selectize.setValue(3);
+}
+function food_item(frm) {
+  var form = $(frm);
+  var ingredients = [];
+
+  if (form.find('.wrap-add-item-ingredients .wrap-fetch .food-ingredient-item').length) {
+    form.find('.wrap-add-item-ingredients .wrap-fetch .food-ingredient-item').each(function (k, v) {
+      var tr = $(v);
+      var ing_name = parseInt(tr.find('select[name=ing_name]').val());
+      if (ing_name && ing_name > 0) {
+        ingredients.push({
+          id: ing_name,
+          quantity: input_number_only(tr.find('input[name=ing_quantity]').val())
+            ? input_number_only(tr.find('input[name=ing_quantity]').val()) : 1,
+
+          color: tr.find('input[name=ing_color]').length ? tr.find('input[name=ing_color]').val() : '',
+          core: tr.find('input[name=ing_core]').length && tr.find('input[name=ing_core]').is(':checked') ? 1 : 0,
+
+          old: tr.find('input[name=old]').length ? tr.find('input[name=old]').val() : 0,
+        });
+      }
+    });
+  }
+
+  return ingredients;
+}
+function food_add_clear() {
+  var form = $('#offcanvas_add_item form');
+
+  form.find('input[name=name]').val('');
+  form.find('select[name=live_group]').selectize()[0].selectize.setValue(3);
+
+  setTimeout(function () {
+    form.find('input[name=name]').focus();
+  }, acmcfs.timeout_quick);
+}
+function food_add(evt, frm) {
+  evt.preventDefault();
+  var form = $(frm);
+  form_loading(form);
+
+  // var ingredients = food_item(frm);
+  // if (!ingredients.length) {
+  //   message_from_toast('error', acmcfs.message_title_error, "Ingredients required", true);
+  //   return false;
+  // }
+
+  const formData = new FormData();
+  formData.append("name", form.find('input[name=name]').val());
+  formData.append("live_group", form.find('select[name=live_group]').val());
+  // formData.append("ingredients", JSON.stringify(ingredients));
+
+  // Read selected files
+  // if (form.find('input[type=file]')[0].files.length) {
+  //   formData.append('photo[]', form.find('input[type=file]')[0].files[0]);
+  // }
+
+  axios.post('/admin/food/store', formData)
+    .then(response => {
+
+      message_from_toast('success', acmcfs.message_title_success, acmcfs.message_description_success_add, true);
+
+      datatable_refresh();
+
+    })
+    .catch(error => {
+      if (error.response.data && Object.values(error.response.data).length) {
+        Object.values(error.response.data).forEach(function (v, k) {
+          message_from_toast('error', acmcfs.message_title_error, v);
+        });
+      }
+    })
+    .then(() => {
+
+      form_loading(form, false);
+
+      setTimeout(function () {
+        form.find('input[name=name]').focus();
+      }, acmcfs.timeout_quick);
+    });
+
+  return false;
+}
+function ingredient_item_focus(ele, focus = 0) {
+  var parent = $(ele).closest('.food-ingredient-item');
+  parent.removeClass('acm-border-focus');
+  if (parseInt(focus)) {
+    parent.addClass('acm-border-focus');
+  }
+}
+function ingredient_item_add(ele) {
+  var form = $(ele).closest('form');
+
+  axios.post('/admin/food/ingredient/html', {})
+    .then(response => {
+
+      form.find('.wrap-add-item-ingredients .wrap-fetch').append(response.data.html);
+      bind_datad(form);
+
+    })
+    .catch(error => {
+
+    });
+
+  return false;
+}
+function ingredient_item_remove(ele) {
+  var parent = $(ele).closest('.food-ingredient-item');
+  parent.remove();
+}
+function recipe_item_add(ele) {
+  var form = $(ele).closest('form');
+
+  axios.post('/admin/food/recipe/html', {})
+    .then(response => {
+
+      form.find('.wrap-add-item-ingredients .wrap-fetch').append(response.data.html);
+      bind_datad(form);
+
+    })
+    .catch(error => {
+
+    });
+
+  return false;
+}
+function food_edit_prepare(ele) {
+  var tr = $(ele).closest('tr');
+  var form = $('#offcanvas_edit_item form');
+
+  form.find('input[name=name]').val('');
+
+  form.find('input[name=item]').val(tr.attr('data-id'));
+  form.find('input[name=name]').val(tr.attr('data-name'));
+  form.find('select[name=live_group]').selectize()[0].selectize.setValue(tr.attr('data-live_group'));
+
+  setTimeout(function () {
+    form.find('input[name=name]').focus();
+  }, acmcfs.timeout_quick);
+}
+function food_edit(evt, frm) {
+  evt.preventDefault();
+  var form = $(frm);
+  form_loading(form);
+
+  const formData = new FormData();
+  formData.append("item", form.find('input[name=item]').val());
+  formData.append("name", form.find('input[name=name]').val());
+  formData.append("live_group", form.find('select[name=live_group]').val());
+
+  axios.post('/admin/food/update', formData)
+    .then(response => {
+
+      message_from_toast('success', acmcfs.message_title_success, acmcfs.message_description_success_update, true);
+
+      datatable_refresh();
+
+    })
+    .catch(error => {
+      if (error.response.data && Object.values(error.response.data).length) {
+        Object.values(error.response.data).forEach(function (v, k) {
+          message_from_toast('error', acmcfs.message_title_error, v);
+        });
+      }
+    })
+    .then(() => {
+
+      form_loading(form, false);
+      form_close(form);
+    });
+
+  return false;
+}
+function food_info(id) {
+  var popup = $('#modal_food_info');
+
+  popup.find('.modal-header h4').text('Loading...');
+
+  popup.find('.modal-body .food_info_select select[name=restaurant_parent_id]').selectize()[0].selectize.setValue('');
+  popup.find('.modal-body .food_info_img img').removeAttr('src').attr('src', acmcfs.link_food_no_photo);
+  popup.find('.modal-body .food_info_ingredients').empty();
+  popup.find('.modal-body input[name=item]').val(id);
+
+  axios.post('/admin/food/get', {
+    item: id,
+  })
+    .then(response => {
+
+      popup.find('.modal-header h4').text(response.data.item.name);
+
+      bind_datad(popup);
+      popup.modal('show');
+
+    })
+    .catch(error => {
+      if (error.response.data && Object.values(error.response.data).length) {
+        Object.values(error.response.data).forEach(function (v, k) {
+          message_from_toast('error', acmcfs.message_title_error, v);
+        });
+      }
+    });
+
+  return false;
+}
+function food_info_select(ele) {
+  var bind = $(ele);
+  var popup = bind.closest('.modal');
+
+  var selected = bind.val();
+  if (!selected || selected == '') {
+    return false;
+  }
+
+  popup.find('.modal-body .food_info_img img').removeAttr('src').attr('src', acmcfs.link_food_no_photo);
+  popup.find('.modal-body .food_info_ingredients').empty();
+
+  axios.post('/admin/food/get/info', {
+    item: popup.find('.modal-body input[name=item]').val(),
+    restaurant_parent_id: selected,
+  })
+    .then(response => {
+
+      if (response.data.food_photo && response.data.food_photo != '') {
+        popup.find('.modal-body .food_info_img img').removeAttr('src').attr('src', response.data.food_photo);
+      }
+
+      if (response.data.html_ingredient && response.data.html_ingredient != '') {
+        popup.find('.modal-body .food_roboflow').append(response.data.html_ingredient);
+      }
+      if (response.data.html_recipe && response.data.html_recipe != '') {
+        popup.find('.modal-body .food_recipe').append(response.data.html_recipe);
+      }
+
+    })
+    .catch(error => {
+      if (error.response.data && Object.values(error.response.data).length) {
+        Object.values(error.response.data).forEach(function (v, k) {
+          message_from_toast('error', acmcfs.message_title_error, v);
+        });
+      }
+    });
+
+  return false;
+}
+function food_import(evt, frm) {
+  evt.preventDefault();
+  var form = $(frm);
+
+  const formData = new FormData();
+  formData.append('excel', form.find('input[type=file]')[0].files[0]);
+  formData.append('restaurant_parent_id', form.find('select[name=restaurant_parent_id]').val());
+
+  axios.post('/admin/food/import', formData)
+    .then(response => {
+
+      message_from_toast('success', acmcfs.message_title_success, acmcfs.message_description_success_add, true);
+
+      datatable_refresh();
+
+    })
+    .catch(error => {
+      if (error.response.data && Object.values(error.response.data).length) {
+        Object.values(error.response.data).forEach(function (v, k) {
+          message_from_toast('error', acmcfs.message_title_error, v);
+        });
+      }
+    });
+
+  return false;
+}
+function food_import_recipe(evt, frm) {
+  evt.preventDefault();
+  var form = $(frm);
+
+  const formData = new FormData();
+  formData.append('excel', form.find('input[type=file]')[0].files[0]);
+  formData.append('restaurant_parent_id', form.find('select[name=restaurant_parent_id]').val());
+
+  axios.post('/admin/food/import/recipe', formData)
+    .then(response => {
+
+      message_from_toast('success', acmcfs.message_title_success, acmcfs.message_description_success_add, true);
+
+      datatable_refresh();
+
+    })
+    .catch(error => {
+      if (error.response.data && Object.values(error.response.data).length) {
+        Object.values(error.response.data).forEach(function (v, k) {
+          message_from_toast('error', acmcfs.message_title_error, v);
+        });
+      }
+    });
+
+  return false;
+}
+function food_edit_prepare_ingredient(ele) {
+  var tr = $(ele).closest('tr');
+  var form = $('#offcanvas_edit_ingredient form');
+
+  form.find('.wrap-edit-ingredients').addClass('d-none');
+  form.find('.wrap-add-item-ingredients .wrap-fetch').empty();
+  form.find('select[name=restaurant_parent_id]').selectize()[0].selectize.setValue('');
+
+  form.find('input[name=item]').val(tr.attr('data-id'));
+}
+function food_edit_select_ingredient(ele) {
+  var bind = $(ele);
+  var form = bind.closest('form');
+
+  form.find('.wrap-edit-ingredients').addClass('d-none');
+  form.find('.wrap-add-item-ingredients .wrap-fetch').empty();
+
+  var selected = bind.val();
+  if (!selected || selected == '') {
+    return false;
+  }
+
+  axios.post('/admin/food/get/ingredient', {
+    item: form.find('input[name=item]').val(),
+    restaurant_parent_id: selected,
+  })
+    .then(response => {
+
+      if (response.data.html && response.data.html != '') {
+        form.find('.wrap-edit-ingredients').removeClass('d-none');
+        form.find('.wrap-add-item-ingredients .wrap-fetch').append(response.data.html);
+        bind_datad(form);
+      }
+
+    })
+    .catch(error => {
+      if (error.response.data && Object.values(error.response.data).length) {
+        Object.values(error.response.data).forEach(function (v, k) {
+          message_from_toast('error', acmcfs.message_title_error, v);
+        });
+      }
+    });
+}
+function food_edit_ingredient(evt, frm) {
+  evt.preventDefault();
+  var form = $(frm);
+
+  var ingredients = food_item(frm);
+  if (!ingredients.length) {
+    message_from_toast('error', acmcfs.message_title_error, "Ingredients required", true);
+    return false;
+  }
+
+  const formData = new FormData();
+  formData.append("item", form.find('input[name=item]').val());
+  formData.append("restaurant_parent_id", form.find('select[name=restaurant_parent_id]').val());
+  formData.append("ingredients", JSON.stringify(ingredients));
+
+  axios.post('/admin/food/update/ingredient', formData)
+    .then(response => {
+
+      message_from_toast('success', acmcfs.message_title_success, acmcfs.message_description_success_update, true);
+
+      datatable_refresh();
+
+    })
+    .catch(error => {
+      if (error.response.data && Object.values(error.response.data).length) {
+        Object.values(error.response.data).forEach(function (v, k) {
+          message_from_toast('error', acmcfs.message_title_error, v);
+        });
+      }
+    });
+
+  return false;
+}
+function food_edit_prepare_recipe(ele) {
+  var tr = $(ele).closest('tr');
+  var form = $('#offcanvas_edit_recipe form');
+
+  form.find('.wrap-edit-ingredients').addClass('d-none');
+  form.find('.wrap-add-item-ingredients .wrap-fetch').empty();
+  form.find('select[name=restaurant_parent_id]').selectize()[0].selectize.setValue('');
+
+  form.find('input[name=item]').val(tr.attr('data-id'));
+}
+function food_edit_select_recipe(ele) {
+  var bind = $(ele);
+  var form = bind.closest('form');
+
+  form.find('.wrap-edit-ingredients').addClass('d-none');
+  form.find('.wrap-add-item-ingredients .wrap-fetch').empty();
+
+  var selected = bind.val();
+  if (!selected || selected == '') {
+    return false;
+  }
+
+  axios.post('/admin/food/get/recipe', {
+    item: form.find('input[name=item]').val(),
+    restaurant_parent_id: selected,
+  })
+    .then(response => {
+
+      if (response.data.html && response.data.html != '') {
+        form.find('.wrap-edit-ingredients').removeClass('d-none');
+        form.find('.wrap-add-item-ingredients .wrap-fetch').append(response.data.html);
+        bind_datad(form);
+      }
+
+    })
+    .catch(error => {
+      if (error.response.data && Object.values(error.response.data).length) {
+        Object.values(error.response.data).forEach(function (v, k) {
+          message_from_toast('error', acmcfs.message_title_error, v);
+        });
+      }
+    });
+}
+function food_edit_recipe(evt, frm) {
+  evt.preventDefault();
+  var form = $(frm);
+
+  var ingredients = food_item(frm);
+  if (!ingredients.length) {
+    message_from_toast('error', acmcfs.message_title_error, "Ingredients required", true);
+    return false;
+  }
+
+  const formData = new FormData();
+  formData.append("item", form.find('input[name=item]').val());
+  formData.append("restaurant_parent_id", form.find('select[name=restaurant_parent_id]').val());
+  formData.append("ingredients", JSON.stringify(ingredients));
+
+  axios.post('/admin/food/update/recipe', formData)
+    .then(response => {
+
+      message_from_toast('success', acmcfs.message_title_success, acmcfs.message_description_success_update, true);
+
+      datatable_refresh();
+
+    })
+    .catch(error => {
+      if (error.response.data && Object.values(error.response.data).length) {
+        Object.values(error.response.data).forEach(function (v, k) {
+          message_from_toast('error', acmcfs.message_title_error, v);
+        });
+      }
+    });
+
+  return false;
+}
+function food_ingredient_core_quick(ele, itd) {
+  var bind = $(ele);
+  var wrap = bind.closest('.wrap_text_roboflow_ingredient');
+
+  if (wrap.hasClass('cored')) {
+    wrap.removeClass('cored').removeClass('text-danger')
+      .addClass('text-dark');
+  } else {
+    wrap.addClass('cored').addClass('text-danger')
+      .removeClass('text-dark');
+  }
+
+  axios.post('/admin/restaurant/food/core', {
+    item: itd,
+  })
+    .then(response => {
+      message_from_toast('success', acmcfs.message_title_success, acmcfs.message_description_success_update);
+    })
+    .catch(error => {
+      console.log(error);
+      if (error.response.data && Object.values(error.response.data).length) {
+        Object.values(error.response.data).forEach(function (v, k) {
+          message_from_toast('error', acmcfs.message_title_error, v);
+        });
+      }
+    })
+    .then(() => {
+
+    });
+
+  return false;
 }
 

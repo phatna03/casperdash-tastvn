@@ -599,7 +599,7 @@
 }
 
 .page_main_content.hidden_header {
-  padding-top: 1.5rem !important;
+  padding: 5px 5px 10px 5px !important;
 }
 
 .wrap-btns {
@@ -618,6 +618,6 @@
 
 @media only screen and (min-width: 1200px) {
   .layout-menu-fixed .layout-horizontal .layout-page .page_main_content.hidden_header {
-    padding-top: 1.5rem !important;
+    padding: 5px 5px 10px 5px !important;
   }
 }

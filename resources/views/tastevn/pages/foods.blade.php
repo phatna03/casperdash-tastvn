@@ -59,8 +59,12 @@
           </div>
           <label for="add-item-live-group">Confidence</label>
         </div>
-        <button class="btn btn-primary me-sm-3 me-1 data-submit" type="submit">Submit</button>
-        <button type="reset" class="btn btn-outline-secondary" data-bs-dismiss="offcanvas">Cancel</button>
+
+        <div class="wrap-btns">
+          @include('tastevn.htmls.form_button_loading')
+          <button type="submit" class="btn btn-primary btn-ok btn-submit acm-float-right" >Submit</button>
+          <button type="button" class="btn btn-outline-secondary btn-ok btn-cancel" data-bs-dismiss="offcanvas">Cancel</button>
+        </div>
       </form>
     </div>
   </div>
@@ -87,8 +91,13 @@
           </div>
           <label for="edit-item-live-group">Confidence</label>
         </div>
-        <button class="btn btn-primary me-sm-3 me-1 data-submit" type="submit">Submit</button>
-        <button type="reset" class="btn btn-outline-secondary" data-bs-dismiss="offcanvas">Cancel</button>
+
+        <div class="wrap-btns">
+          @include('tastevn.htmls.form_button_loading')
+          <button type="submit" class="btn btn-primary btn-ok btn-submit acm-float-right" >Submit</button>
+          <button type="button" class="btn btn-outline-secondary btn-ok btn-cancel" data-bs-dismiss="offcanvas">Cancel</button>
+        </div>
+
         <input type="hidden" name="item" />
       </form>
     </div>
@@ -127,8 +136,13 @@
           </div>
           <label for="edit-item-food-recipe-custom" class="text-danger">Recipe Ingredients</label>
         </div>
-        <button class="btn btn-primary me-sm-3 me-1 data-submit" type="submit">Submit</button>
-        <button type="reset" class="btn btn-outline-secondary" data-bs-dismiss="offcanvas">Cancel</button>
+
+        <div class="wrap-btns">
+          @include('tastevn.htmls.form_button_loading')
+          <button type="submit" class="btn btn-primary btn-ok btn-submit acm-float-right" >Submit</button>
+          <button type="button" class="btn btn-outline-secondary btn-ok btn-cancel" data-bs-dismiss="offcanvas">Cancel</button>
+        </div>
+
         <input type="hidden" name="item" />
       </form>
     </div>
@@ -167,8 +181,13 @@
           </div>
           <label for="edit-item-food-ingredient-custom" class="text-danger">Roboflow Ingredients</label>
         </div>
-        <button class="btn btn-primary me-sm-3 me-1 data-submit" type="submit">Submit</button>
-        <button type="reset" class="btn btn-outline-secondary" data-bs-dismiss="offcanvas">Cancel</button>
+
+        <div class="wrap-btns">
+          @include('tastevn.htmls.form_button_loading')
+          <button type="submit" class="btn btn-primary btn-ok btn-submit acm-float-right" >Submit</button>
+          <button type="button" class="btn btn-outline-secondary btn-ok btn-cancel" data-bs-dismiss="offcanvas">Cancel</button>
+        </div>
+
         <input type="hidden" name="item" />
       </form>
     </div>
@@ -202,8 +221,11 @@
             </div>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
-            <button type="submit" class="btn btn-primary">Confirm</button>
+            <div class="wrap-btns">
+              @include('tastevn.htmls.form_button_loading')
+              <button type="submit" class="btn btn-primary btn-ok btn-submit acm-float-right">Submit</button>
+              <button type="button" class="btn btn-outline-secondary btn-ok btn-cancel" data-bs-dismiss="modal">Cancel</button>
+            </div>
           </div>
         </form>
       </div>
@@ -237,8 +259,11 @@
             </div>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
-            <button type="submit" class="btn btn-primary">Confirm</button>
+            <div class="wrap-btns">
+              @include('tastevn.htmls.form_button_loading')
+              <button type="submit" class="btn btn-primary btn-ok btn-submit acm-float-right">Submit</button>
+              <button type="button" class="btn btn-outline-secondary btn-ok btn-cancel" data-bs-dismiss="modal">Cancel</button>
+            </div>
           </div>
         </form>
       </div>

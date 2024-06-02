@@ -10,13 +10,12 @@
         <div class="col-6 mb-1">
           <div class="text-center w-auto p-1">
             <div class="text-uppercase fw-bold text-dark">photo standard</div>
-            <img class="w-100 acm-height-300-max" src="{{$food->get_photo_standard($restaurant)}}" />
+            <img class="w-100 acm-height-300-max" loading="lazy" src="{{$food->get_photo_standard($restaurant)}}" />
           </div>
         </div>
         <div class="col-6 mb-1">
           <div class="text-center w-auto p-1">
             <div class="text-uppercase fw-bold text-dark">photo sensor error</div>
-{{--            <img class="w-100 acm-height-300-max" src="{{$item['photo_url']}}" />--}}
 
             <div id="custCarousel" class="carousel slide" data-ride="carousel" align="center">
               <!-- slides -->
@@ -27,7 +26,7 @@
                   $count++;
                 @endphp
                 <div class="carousel-item item-{{$row->id}} @if($count == 1) active @endif">
-                  <img src="{{$row->photo_url}}" alt="{{$row->photo_url}}">
+                  <img loading="lazy" src="{{$row->get_photo()}}" alt="{{$row->get_photo()}}">
                 </div>
                 @endforeach
               </div>
@@ -49,7 +48,7 @@
 {{--                @endphp--}}
 {{--                <li class="list-inline-item cursor-pointer @if($count == 1) active @endif">--}}
 {{--                  <a id="carousel-selector-{{$count - 1}}" class="@if($count == 1) selected @endif" data-slide-to="{{$count - 1}}" data-target="#custCarousel">--}}
-{{--                    <img src="{{$row->photo_url}}" class="img-fluid">--}}
+{{--                    <img src="{{$row->get_photo()}}" class="img-fluid">--}}
 {{--                  </a>--}}
 {{--                </li>--}}
 {{--                @endforeach--}}

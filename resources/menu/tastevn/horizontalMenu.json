@@ -12,12 +12,6 @@
       "url": "admin/users",
       "slug": "admin-users"
     },
-    {
-      "name": "Sensor Kitchen",
-      "icon": "menu-icon tf-icons mdi mdi-chef-hat",
-      "url": "admin/sensor",
-      "slug": "admin-sensor"
-    },
 
     {
       "name": "Album Photos",
@@ -30,6 +24,12 @@
       "icon": "menu-icon tf-icons mdi mdi-robot no_user no_moderator",
       "url": "admin/roboflow",
       "slug": "admin-roboflow"
+    },
+    {
+      "name": "Review Report",
+      "icon": "menu-icon tf-icons mdi mdi-message-draw no_admin no_superadmin no_user no_moderator",
+      "url": "admin/reports",
+      "slug": "admin-reports"
     },
 
     {

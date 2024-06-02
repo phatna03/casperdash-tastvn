@@ -30,6 +30,7 @@
 
   <h4 class="mb-2"><span class="text-muted fw-light">Admin /</span> Sensor: {{$pageConfigs['item']->name}}</h4>
   <input type="hidden" name="current_restaurant" value="{{$pageConfigs['item']->id}}"/>
+  <input type="hidden" name="debug" value="{{$pageConfigs['debug']}}"/>
 
   <div class="row g-4 mb-4">
     <div class="col-lg-12 wrap-stats" id="wrap-stats-total">
@@ -199,10 +200,10 @@
                   <input type="text" class="form-control text-center date_time_picker" name="time_upload"
                          id="scan-search-time-upload" autocomplete="off" data-value="last_and_current_day"
                          onchange="sensor_search_food_scan(this)"/>
-                  <label for="scan-search-time-upload">Time upload</label>
+                  <label for="scan-search-time-upload">Time Upload</label>
                 </div>
               </div>
-              <div class="col-md-6 mb-2">
+              <div class="col-md-6 mb-2 d-none">
                 <div class="form-floating form-floating-outline">
                   <input type="text" class="form-control text-center date_time_picker" name="time_scan"
                          id="scan-search-time-scan" autocomplete="off" data-value="last_and_current_day"
@@ -235,7 +236,7 @@
                   <label for="scan-search-missing">Type</label>
                 </div>
               </div>
-              <div class="col-md-12 mb-2">
+              <div class="col-md-6 mb-2">
                 <div class="form-floating form-floating-outline wrap-select-users">
                   <div class="form-control acm-wrap-selectize" id="scan-search-users">
                     <select name="users" multiple onchange="sensor_search_food_scan(this)"
@@ -261,7 +262,7 @@
               <th>Confidence</th>
               <th>Ingredients missing</th>
               <th>Time upload</th>
-              <th>Time scanned</th>
+{{--              <th>Time scanned</th>--}}
               <th>Note</th>
               <th class="d-none"></th>
               <th class="d-none"></th>
@@ -302,10 +303,10 @@
                   <input type="text" class="form-control text-center date_time_picker" name="time_upload"
                          id="error-search-time-upload" autocomplete="off" data-value="last_and_current_day"
                          onchange="sensor_search_food_scan_error(this)"/>
-                  <label for="error-search-time-upload">Time upload</label>
+                  <label for="error-search-time-upload">Time Upload</label>
                 </div>
               </div>
-              <div class="col-md-6 mb-2">
+              <div class="col-md-6 mb-2 d-none">
                 <div class="form-floating form-floating-outline">
                   <input type="text" class="form-control text-center date_time_picker" name="time_scan"
                          id="error-search-time-scan" autocomplete="off" data-value="last_and_current_day"
@@ -546,7 +547,7 @@
         {data: 'confidence', name: 'confidence'},
         {data: 'missing_texts', name: 'missing_texts'},
         {data: 'time_photo', name: 'time_photo'},
-        {data: 'time_scan', name: 'time_scan'},
+        // {data: 'time_scan', name: 'time_scan'},
         {data: 'note', name: 'note'},
         {data: 'id', name: 'id'},
         {data: 'text_texts', name: 'text_texts'},
@@ -557,7 +558,7 @@
           render: function (data, type, full, meta) {
             var html = '';
 
-            @if($viewer->id == 5) //dev
+            @if($viewer->is_dev()) //dev
               html += '<div class="d-inline-block dropdown acm-mr-px-5">' +
               '<button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown"><i class="mdi mdi-dots-vertical"></i></button>' +
               '<div class="dropdown-menu">' +
@@ -590,8 +591,9 @@
               html = '<div><span class="badge bg-info">' + full['status'] + '</span></div>';
             }
 
+            var debug = $('input[name=debug]').val();
             var html_admin = '<div></div>';
-            if (parseInt(acmcfs.rbf_auth)) {
+            if (parseInt(debug)) {
               html_admin = '<div class="mt-1">' +
                 '<button type="button" class="btn btn-sm btn-primary p-1 acm-mr-px-10" onclick="sensor_food_scan_api(this, 1)"><i class="mdi mdi-food ic_current"></i> re-predict</button>' +
                 '</div>' +
@@ -614,13 +616,17 @@
               ? 'Unknown...' : full['food_name'];
             var food_category = !full['category_name'] || full['category_name'] === 'null'
               ? '' : '(' + full['category_name'] + ')';
+            var photo_url = full['photo_url'];
+            if (parseInt(full['local_storage'])) {
+              photo_url = acmcfs.link_base_url + '/sensors/' + full['photo_name'];
+            }
 
             return (
               '<div class="clearfix cursor-pointer" onclick="sensor_food_scan_info(' + full['id'] + ')">' +
               '<div class="acm-float-left acm-mr-px-5">' +
-              '<img class="acm-border-css" loading="lazy" width="100" height="70px" src="' + full['photo_url'] + '" />' +
+              '<img class="acm-border-css" loading="lazy" width="100" height="70px" src="' + photo_url + '" />' +
               '</div>' +
-              '<div class="overflow-hidden acm-max-line-3">' +
+              '<div class="overflow-hidden acm-max-line-3 acm-width-150-min">' +
               '<div>ID: ' + full['id'] + '</div>' +
               '<div>' + food_name + '</div>' +
               '<div class="acm-text-italic">' + food_category + '</div>' +
@@ -695,22 +701,22 @@
             return ('<div class="cursor-pointer" onclick="sensor_food_scan_info(' + full['id'] + ')">' + html + '</div>');
           }
         },
+        // {
+        //   targets: 6,
+        //   render: function (data, type, full, meta) {
+        //     var html = '';
+        //     var arr = full['time_scan'].split(' ');
+        //     if (arr.length) {
+        //       html = '<div>' + arr[0] + '</div>' +
+        //         '<div>' + arr[1] + '</div>';
+        //     } else {
+        //       html = full['time_scan'];
+        //     }
+        //     return ('<div class="cursor-pointer" onclick="sensor_food_scan_info(' + full['id'] + ')">' + html + '</div>');
+        //   }
+        // },
         {
           targets: 6,
-          render: function (data, type, full, meta) {
-            var html = '';
-            var arr = full['time_scan'].split(' ');
-            if (arr.length) {
-              html = '<div>' + arr[0] + '</div>' +
-                '<div>' + arr[1] + '</div>';
-            } else {
-              html = full['time_scan'];
-            }
-            return ('<div class="cursor-pointer" onclick="sensor_food_scan_info(' + full['id'] + ')">' + html + '</div>');
-          }
-        },
-        {
-          targets: 7,
           sType: "priority",
           render: function (data, type, full, meta) {
             if (type == 'order' || type == 'sort') {
@@ -746,16 +752,16 @@
           }
         },
         {
-          targets: 8,
+          targets: 7,
           className: 'd-none',
         },
         {
-          targets: 9,
+          targets: 8,
           className: 'd-none',
         },
       ],
       buttons: [
-        @if($viewer->is_super_admin() || $viewer->id == 5)
+        @if($viewer->is_super_admin() || $viewer->is_dev())
         {
           text: '<i class="mdi mdi-robot-confused me-0 me-sm-1"></i><span class="d-none d-sm-inline-block">Re-train Roboflow</span>',
           className: 'add-new btn btn-danger waves-effect waves-light acm-mr-px-10',

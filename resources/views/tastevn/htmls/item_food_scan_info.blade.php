@@ -5,7 +5,7 @@
         <div class="text-uppercase">
           <span class="badge bg-secondary">photo standard</span>
         </div>
-        <img class="acm-width-max-100 h-auto acm-border-css" src="{{$data['food']['photo']}}"/>
+        <img class="acm-width-max-100 h-auto acm-border-css" loading="lazy" src="{{$data['food']['photo']}}"/>
       </div>
     </div>
   </div>
@@ -20,7 +20,7 @@
             <span class="badge bg-danger cmt-count">{{count($comments) . ' notes'}}</span>
           @endif
         </div>
-        <img class="acm-width-max-100 h-auto acm-border-css" src="{{$item['photo_url']}}"/>
+        <img class="acm-width-max-100 h-auto acm-border-css" loading="lazy" src="{{$item->get_photo()}}"/>
       </div>
 
       @if(count($comments))

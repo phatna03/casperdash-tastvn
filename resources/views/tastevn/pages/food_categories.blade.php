@@ -48,8 +48,12 @@
           <input type="text" class="form-control" id="add-item-name" name="name" />
           <label for="add-item-name">Name <b class="text-danger">*</b></label>
         </div>
-        <button class="btn btn-primary me-sm-3 me-1 data-submit" type="submit">Submit</button>
-        <button type="reset" class="btn btn-outline-secondary" data-bs-dismiss="offcanvas">Cancel</button>
+
+        <div class="wrap-btns">
+          @include('tastevn.htmls.form_button_loading')
+          <button type="submit" class="btn btn-primary btn-ok btn-submit acm-float-right" >Submit</button>
+          <button type="button" class="btn btn-outline-secondary btn-ok btn-cancel" data-bs-dismiss="offcanvas">Cancel</button>
+        </div>
       </form>
     </div>
   </div>
@@ -65,8 +69,13 @@
           <input type="text" class="form-control" id="edit-item-name" name="name" />
           <label for="edit-item-name">Name <b class="text-danger">*</b></label>
         </div>
-        <button class="btn btn-primary me-sm-3 me-1 data-submit" type="submit">Submit</button>
-        <button type="reset" class="btn btn-outline-secondary" data-bs-dismiss="offcanvas">Cancel</button>
+
+        <div class="wrap-btns">
+          @include('tastevn.htmls.form_button_loading')
+          <button type="submit" class="btn btn-primary btn-ok btn-submit acm-float-right" >Submit</button>
+          <button type="button" class="btn btn-outline-secondary btn-ok btn-cancel" data-bs-dismiss="offcanvas">Cancel</button>
+        </div>
+
         <input type="hidden" name="item" />
       </form>
     </div>

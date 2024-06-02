@@ -570,12 +570,96 @@ class Food extends Model
     return $arr;
   }
 
-  public function get_photo()
+  public function get_photo($pars = [])
   {
     $text = url('custom/img/no_photo.png');
+
     if (!empty($this->photo)) {
       $text = url('') . $this->photo;
     }
+
+    if (count($pars)) {
+      if (isset($pars['restaurant_parent_id']) && !empty($pars['restaurant_parent_id'])) {
+        $restaurant_parent = RestaurantParent::find((int)$pars['restaurant_parent_id']);
+        if ($restaurant_parent) {
+          $sensor = $restaurant_parent->get_sensors([
+            'one_sensor' => 1,
+          ]);
+          if ($sensor) {
+            $row = RestaurantFood::where('deleted', 0)
+              ->where('restaurant_id', $sensor->id)
+              ->where('food_id', $this->id)
+              ->where('photo', '<>', NULL)
+              ->orderBy('id', 'desc')
+              ->limit(1)
+              ->first();
+            if ($row) {
+              $text = $row->photo;
+            }
+          }
+        }
+      }
+    }
+
     return $text;
+  }
+
+  public function get_category($pars = [])
+  {
+    $category = NULL;
+
+    if (count($pars)) {
+      if (isset($pars['restaurant_parent_id']) && !empty($pars['restaurant_parent_id'])) {
+        $restaurant_parent = RestaurantParent::find((int)$pars['restaurant_parent_id']);
+        if ($restaurant_parent) {
+          $sensor = $restaurant_parent->get_sensors([
+            'one_sensor' => 1,
+          ]);
+          if ($sensor) {
+            $row = RestaurantFood::where('deleted', 0)
+              ->where('restaurant_id', $sensor->id)
+              ->where('food_id', $this->id)
+              ->where('food_category_id', '>', 0)
+              ->orderBy('id', 'desc')
+              ->limit(1)
+              ->first();
+            if ($row) {
+              $category = FoodCategory::find($row->food_category_id);
+            }
+          }
+        }
+      }
+    }
+
+    return $category;
+  }
+
+  public function get_live_group($pars = [])
+  {
+    $live_group = 0;
+
+    if (count($pars)) {
+      if (isset($pars['restaurant_parent_id']) && !empty($pars['restaurant_parent_id'])) {
+        $restaurant_parent = RestaurantParent::find((int)$pars['restaurant_parent_id']);
+        if ($restaurant_parent) {
+          $sensor = $restaurant_parent->get_sensors([
+            'one_sensor' => 1,
+          ]);
+          if ($sensor) {
+            $row = RestaurantFood::where('deleted', 0)
+              ->where('restaurant_id', $sensor->id)
+              ->where('food_id', $this->id)
+              ->orderBy('id', 'desc')
+              ->limit(1)
+              ->first();
+            if ($row) {
+              $live_group = $row->live_group;
+            }
+          }
+        }
+      }
+    }
+
+    return $live_group;
   }
 }

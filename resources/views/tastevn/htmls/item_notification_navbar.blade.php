@@ -7,8 +7,8 @@
   $type2s = ['App\Notifications\IngredientMissing'];
 
     foreach($notifications as $notification):
-    $rfs = $api_core->get_item($notification->restaurant_food_scan_id, 'restaurant_food_scan');
-    if (!$rfs || empty($rfs->photo_url)) {
+    $rfs = $sys_app->get_item($notification->restaurant_food_scan_id, 'restaurant_food_scan');
+    if (!$rfs) {
         continue;
     }
 @endphp
@@ -20,7 +20,7 @@
   <div class="d-flex gap-2">
     <div class="flex-shrink-0">
       <div class="text-center w-px-50 h-px-50 me-1">
-        <img class="w-100 h-100" style="border-radius: 50%;" src="{{$rfs->photo_url}}"/>
+        <img class="w-100 h-100" style="border-radius: 50%;" loading="lazy" src="{{$rfs->get_photo()}}"/>
       </div>
     </div>
     <div class="d-flex flex-column flex-grow-1 overflow-hidden w-px-200">
@@ -30,8 +30,8 @@
         @php
           $type = $notification->data['typed'];
 
-          $owner = $api_core->get_item($notification->data['owner_id'], 'user');
-          $comment = $api_core->get_item($notification->object_id, $notification->object_type);
+          $owner = $sys_app->get_item($notification->data['owner_id'], 'user');
+          $comment = $sys_app->get_item($notification->object_id, $notification->object_type);
 
           $text1 = 'added new note for the photo with ID:';
           if ($type == 'photo_comment_edit') {

@@ -2,12 +2,13 @@
 
 namespace App\Providers;
 
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
-use App\Api\SysCore;
 use App\Api\SysMobi;
+use App\Api\SysApp;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -24,9 +25,10 @@ class AppServiceProvider extends ServiceProvider
    */
   public function boot(): void
   {
-    //custome
-    $api_core = new SysCore();
     $api_mobi = new SysMobi();
+
+    //https
+    $this->app['request']->server->set('HTTPS', $this->app->environment() != 'local');
 
     //viewer
     view()->composer('*', function($view) {
@@ -37,9 +39,10 @@ class AppServiceProvider extends ServiceProvider
       }
     });
 
+    View::share('sys_app', new SysApp());
+
     View::share('baseURL', url(''));
     View::share('isMobi', $api_mobi->isMobile());
-
-    View::share('api_core', $api_core);
+    View::share('devMode', App::environment());
   }
 }

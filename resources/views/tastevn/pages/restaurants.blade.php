@@ -241,13 +241,18 @@
           targets: 1,
           render: function (data, type, full, meta) {
             return (
-              '<div class="cursor-pointer" onclick="sensor_info(' + full['id'] + ')">' +
+              '<div>' +
               '<span>' +
-              '<button type="button" class="btn btn-sm btn-icon btn-primary acm-mr-px-10">' +
+              '<button type="button" onclick="sensor_kitchen(' + full['id'] + ')" class="btn btn-sm btn-icon btn-success acm-mr-px-5">' +
+              '<span class="mdi mdi-chef-hat"></span>' +
+              '</button>' +
+              '</span>' +
+              '<span>' +
+              '<button type="button" onclick="sensor_info(' + full['id'] + ')" class="btn btn-sm btn-icon btn-primary acm-mr-px-5">' +
               '<span class="mdi mdi-eye"></span>' +
               '</button>' +
               '</span>' +
-              '<span>' + full['name'] + '</span>' +
+              '<span class="cursor-pointer" onclick="sensor_info(' + full['id'] + ')">' + full['name'] + '</span>' +
               '</div>'
             );
           }

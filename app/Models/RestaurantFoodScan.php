@@ -1,15 +1,14 @@
 <?php
 
 namespace App\Models;
-
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 use App\Notifications\IngredientMissing;
 use App\Notifications\IngredientMissingMail;
-
-use App\Api\SysCore;
+//lib
+use App\Api\SysApp;
 
 class RestaurantFoodScan extends Model
 {
@@ -21,9 +20,12 @@ class RestaurantFoodScan extends Model
     'restaurant_id',
     'food_category_id',
     'food_id',
+
+    'local_storage',
     'photo_url',
     'photo_name',
     'photo_ext',
+
     'confidence',
     'found_by',
     'status',
@@ -90,9 +92,24 @@ class RestaurantFoodScan extends Model
     ];
   }
 
+  public function get_photo()
+  {
+    $photo = $this->photo_url;
+    if ($this->local_storage || empty($photo)) {
+      $photo = url('sensors') . '/' . $this->photo_name;
+    }
+
+    return $photo;
+  }
+
   public function get_food()
   {
     return Food::find($this->food_id);
+  }
+
+  public function get_food_rbf()
+  {
+    return Food::find($this->rbf_predict);
   }
 
   public function get_food_category()
@@ -124,6 +141,7 @@ class RestaurantFoodScan extends Model
     return $select->get();
   }
 
+  //photooo
   public function predict_reset()
   {
     $this->update([
@@ -148,64 +166,73 @@ class RestaurantFoodScan extends Model
 
   public function predict_food($pars = [])
   {
-    $api_core = new SysCore();
+    $sys_app = new SysApp();
 
-    $result = (array)json_decode($this->rbf_api, true);
     $notification = isset($pars['notification']) ? (bool)$pars['notification'] : true;
     $restaurant = $this->get_restaurant();
 
-    if (count($result)) {
+    $result1s = (array)json_decode($this->rbf_api, true);
+    $result2s = (array)json_decode($this->rbf_api_js, true);
+
+    $rbf_time = 0;
+    if (count($result1s)) {
+      $rbf_time = $result1s['time'];
+    }
+
+    $predictions = count($result1s) ? (array)$result1s['predictions'] : [];
+    if (!count($predictions) && count($result2s)) {
+      $predictions = $result2s;
+    }
+
+    if (count($predictions)) {
 
       $food = NULL;
       $foods = [];
-      $ingredients_found = $api_core->sys_ingredients_found($result['predictions']);
+      $ingredients_found = $sys_app->sys_ingredients_compact($predictions);
 
       //find food
-      $predictions = $result['predictions'];
-      if (count($predictions)) {
-        foreach ($predictions as $prediction) {
-          $prediction = (array)$prediction;
+      foreach ($predictions as $prediction) {
+        $prediction = (array)$prediction;
 
-          $confidence = (int)($prediction['confidence'] * 100);
+        $confidence = (int)($prediction['confidence'] * 100);
 
-          $found = Food::whereRaw('LOWER(name) LIKE ?', strtolower(trim($prediction['class'])))
-            ->first();
-          if ($found && $confidence >= 50 && count($ingredients_found) && $restaurant->serve_food($found)) {
+        $found = Food::whereRaw('LOWER(name) LIKE ?', strtolower(trim($prediction['class'])))
+          ->first();
+        if ($found && $confidence >= 50 && count($ingredients_found) && $restaurant->serve_food($found)) {
 
-            //check valid ingredient
-            $valid_food = true;
-            $food_ingredients = $found->get_ingredients([
-              'restaurant_parent_id' => $restaurant->restaurant_parent_id,
-            ]);
-            if (!count($food_ingredients)) {
-              $valid_food = false;
-            }
+          //check valid ingredient
+          $valid_food = true;
+          $food_ingredients = $found->get_ingredients([
+            'restaurant_parent_id' => $restaurant->restaurant_parent_id,
+          ]);
+          if (!count($food_ingredients)) {
+            $valid_food = false;
+          }
 
-            //check core ingredient
-            $valid_core = true;
-            $core_ids = $found->get_ingredients_core([
-              'restaurant_parent_id' => $restaurant->restaurant_parent_id,
-              'ingredient_id_only' => 1,
-            ]);
-            if (count($core_ids)) {
-              $found_ids = array_column($ingredients_found, 'id');
-              $found_count = 0;
-              foreach ($found_ids as $found_id) {
-                if (in_array($found_id, $core_ids)) {
-                  $found_count++;
-                }
-              }
-              if ($found_count != count($core_ids)) {
-                $valid_core = false;
+          //check core ingredient
+          $valid_core = true;
+          $core_ids = $found->get_ingredients_core([
+            'restaurant_parent_id' => $restaurant->restaurant_parent_id,
+            'ingredient_id_only' => 1,
+          ]);
+          if (count($core_ids)) {
+            $found_ids = array_column($ingredients_found, 'id');
+            $found_count = 0;
+            foreach ($found_ids as $found_id) {
+              if (in_array($found_id, $core_ids)) {
+                $found_count++;
               }
             }
-
-            if ($valid_core && $valid_food) {
-              $foods[] = [
-                'food' => $found->id,
-                'confidence' => $confidence,
-              ];
+            if ($found_count != count($core_ids)) {
+              $valid_core = false;
             }
+          }
+
+          if ($valid_core && $valid_food) {
+            $foods[] = [
+              'food' => $found->id,
+              'confidence' => $confidence,
+            ];
           }
         }
       }
@@ -239,18 +266,6 @@ class RestaurantFoodScan extends Model
           'sys_predict' => 0,
           'sys_confidence' => 0,
         ]);
-      } else {
-        //system predict
-        $predict = $api_core->sys_predict_foods_by_ingredients($ingredients_found, true);
-        if (count($predict)) {
-          $this->update([
-            'food_id' => $predict['food'],
-            'confidence' => (int)$predict['confidence'],
-            'sys_confidence' => (int)$predict['confidence'],
-            'found_by' => 'sys',
-            'sys_predict' => $predict['food'],
-          ]);
-        }
       }
 
       //refresh
@@ -259,7 +274,7 @@ class RestaurantFoodScan extends Model
       //other params
       $this->update([
         'food_category_id' => (int)$this->find_food_category($food),
-        'total_seconds' => $result['time'],
+        'total_seconds' => $rbf_time,
         'status' => 'checked',
 
         'time_end' => date('Y-m-d H:i:s'),
@@ -284,6 +299,11 @@ class RestaurantFoodScan extends Model
         ]);
         $this->add_ingredients_missing($food, $ingredients_missing, $notification);
       }
+    }
+    else {
+      $this->update([
+        'status' => 'failed',
+      ]);
     }
   }
 
@@ -344,7 +364,18 @@ class RestaurantFoodScan extends Model
 //            $valid_setting = true;
 //          }
 
-          if (!$valid_group || !$valid_setting) {
+          //isset notify
+          $notify = DB::table('notifications')
+            ->distinct()
+            ->where('notifiable_type', 'App\Models\User')
+            ->where('notifiable_id', $user->id)
+            ->where('restaurant_food_scan_id', $this->id)
+            ->whereIn('type', ['App\Notifications\IngredientMissing'])
+            ->orderBy('id', 'desc')
+            ->limit(1)
+            ->first();
+
+          if (!$valid_group || !$valid_setting || $notify) {
             continue;
           }
 
@@ -378,7 +409,7 @@ class RestaurantFoodScan extends Model
                 $notify->update([
                   'restaurant_food_scan_id' => $this->id,
                   'restaurant_id' => $this->get_restaurant()->id,
-                  'food_id' => $this->get_food()->id,
+                  'food_id' => $this->get_food() ? $this->get_food()->id : 0,
                   'object_type' => 'restaurant_food_scan',
                   'object_id' => $this->id,
                   'data' => json_encode([
@@ -420,6 +451,7 @@ class RestaurantFoodScan extends Model
     ]);
   }
 
+  //cmt
   public function get_comment($user = null)
   {
     $text = '';
