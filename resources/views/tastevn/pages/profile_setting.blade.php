@@ -98,7 +98,7 @@
 
       <div class="acm-clearfix">
         <div class="row g-4">
-          @foreach($api_core->get_notifications() as $notify)
+          @foreach($sys_app->get_notifications() as $notify)
           <div class="col-md-12 notify_item" data-notify="{{$notify}}">
             <div class="form-floating form-floating-outline">
               <div class="form-control" id="setting-notify-{{$notify}}">

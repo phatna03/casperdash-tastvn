@@ -297,6 +297,13 @@ class SysApp
     return $row ? $row->value : NULL;
   }
 
+  public function get_notifications()
+  {
+    return [
+      'missing_ingredient', 'photo_comment',
+    ];
+  }
+
   public function get_log_types()
   {
     return [
@@ -403,6 +410,78 @@ class SysApp
 
   }
 
+  public function rbf_retrain()
+  {
+//settings
+    $rbf_dataset = $this->get_setting('rbf_dataset_upload');
+    $rbf_api_key = $this->get_setting('rbf_api_key');
 
+    //retrain rows
+    $select = RestaurantFoodScan::where('deleted', 0)
+      ->where('rbf_retrain', 1)
+      ->orderBy('id', 'asc');
+
+    $this::_DEBUG ? Storage::append($this::_DEBUG_LOG_FILE_ROBOFLOW, 'TODO_AT_' . date('d_M_Y_H_i_s')) : $this->log_failed();
+
+    try {
+
+      $rows = $select->get();
+
+      if (count($rows)) {
+
+        $count = 0;
+
+        foreach ($rows as $row) {
+
+          $this::_DEBUG ? Storage::append($this::_DEBUG_LOG_FILE_ROBOFLOW, 'ROW_' . $row->id . '_START_') : $this->log_failed();
+
+          $count++;
+
+          // URL for Http Request
+          $url = "https://api.roboflow.com/dataset/"
+            . $rbf_dataset . "/upload"
+            . "?api_key=" . $rbf_api_key
+            . "&name=re_training_" . date('Y_m_d_H_i_s') . "_" . $count . "." . $row->photo_ext
+            . "&split=train"
+            . "&image=" . urlencode($row->get_photo());
+
+          // Setup + Send Http request
+          $options = array(
+            'http' => array(
+              'header' => "Content-type: application/x-www-form-urlencoded\r\n",
+              'method' => 'POST'
+            ));
+
+          $context = stream_context_create($options);
+          $result = file_get_contents($url, false, $context);
+
+          $this::_DEBUG ? Storage::append($this::_DEBUG_LOG_FILE_ROBOFLOW, 'ROW_' . $row->id . '_END_' . json_encode($result)) : $this->log_failed();
+
+          if (!empty($result)) {
+            $result = (array)json_decode($result);
+          }
+
+          $status = 3;
+          if (count($result) && isset($result['id']) && !empty($result['id'])) {
+            $status = 2;
+          }
+
+          $row->update([
+            'rbf_retrain' => $status,
+          ]);
+        }
+      }
+
+    } catch (\Exception $e) {
+      $this->bug_add([
+        'type' => 'rbf_photo_retrain',
+        'line' => $e->getLine(),
+        'file' => $e->getFile(),
+        'message' => $e->getMessage(),
+        'params' => json_encode($e),
+      ]);
+    }
+
+  }
 
 }

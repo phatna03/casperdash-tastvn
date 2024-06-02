@@ -7,7 +7,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
-use App\Api\SysCore;
 use App\Api\SysMobi;
 use App\Api\SysApp;
 
@@ -40,8 +39,7 @@ class AppServiceProvider extends ServiceProvider
       }
     });
 
-    View::share('api_app', new SysApp());
-    View::share('api_core', new SysCore());
+    View::share('sys_app', new SysApp());
 
     View::share('baseURL', url(''));
     View::share('isMobi', $api_mobi->isMobile());

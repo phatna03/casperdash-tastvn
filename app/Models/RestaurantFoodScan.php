@@ -1,16 +1,14 @@
 <?php
 
 namespace App\Models;
-
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 use App\Notifications\IngredientMissing;
 use App\Notifications\IngredientMissingMail;
-
-use App\Api\SysCore;
+//lib
+use App\Api\SysApp;
 
 class RestaurantFoodScan extends Model
 {
@@ -143,6 +141,7 @@ class RestaurantFoodScan extends Model
     return $select->get();
   }
 
+  //photooo
   public function predict_reset()
   {
     $this->update([
@@ -167,7 +166,7 @@ class RestaurantFoodScan extends Model
 
   public function predict_food($pars = [])
   {
-    $api_core = new SysCore();
+    $sys_app = new SysApp();
 
     $notification = isset($pars['notification']) ? (bool)$pars['notification'] : true;
     $restaurant = $this->get_restaurant();
@@ -189,7 +188,7 @@ class RestaurantFoodScan extends Model
 
       $food = NULL;
       $foods = [];
-      $ingredients_found = $api_core->sys_ingredients_found($predictions);
+      $ingredients_found = $sys_app->sys_ingredients_compact($predictions);
 
       //find food
       foreach ($predictions as $prediction) {
@@ -267,18 +266,6 @@ class RestaurantFoodScan extends Model
           'sys_predict' => 0,
           'sys_confidence' => 0,
         ]);
-      } else {
-        //system predict
-        $predict = $api_core->sys_predict_foods_by_ingredients($ingredients_found, true);
-        if (count($predict)) {
-          $this->update([
-            'food_id' => $predict['food'],
-            'confidence' => (int)$predict['confidence'],
-            'sys_confidence' => (int)$predict['confidence'],
-            'found_by' => 'sys',
-            'sys_predict' => $predict['food'],
-          ]);
-        }
       }
 
       //refresh
@@ -464,6 +451,7 @@ class RestaurantFoodScan extends Model
     ]);
   }
 
+  //cmt
   public function get_comment($user = null)
   {
     $text = '';

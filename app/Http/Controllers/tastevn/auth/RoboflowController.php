@@ -6,10 +6,12 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+//lib
 use Validator;
-use App\Api\SysCore;
+use App\Api\SysApp;
 use App\Api\SysRobo;
 use App\Jobs\PhotoUpload;
+//model
 use App\Models\User;
 use App\Models\Restaurant;
 use App\Models\RestaurantAccess;
@@ -22,9 +24,17 @@ use App\Models\RestaurantParent;
 
 class RoboflowController extends Controller
 {
+  protected $_viewer = null;
+  protected $_sys_app = null;
+
   public function __construct()
   {
+    $this->_sys_app = new SysApp();
+
     $this->middleware(function ($request, $next) {
+
+      $this->_viewer = Auth::user();
+
       return $next($request);
     });
 
@@ -35,9 +45,8 @@ class RoboflowController extends Controller
   {
     $values = $request->all();
 
-    $user = Auth::user();
     $invalid_roles = ['user'];
-    if (in_array($user->role, $invalid_roles)) {
+    if (in_array($this->_viewer->role, $invalid_roles)) {
       return redirect('page_not_found');
     }
 
@@ -55,7 +64,7 @@ class RoboflowController extends Controller
       'debug' => $debug
     ];
 
-    $user->add_log([
+    $this->_viewer->add_log([
       'type' => 'view_modal_testing',
     ]);
 
@@ -67,9 +76,8 @@ class RoboflowController extends Controller
     $status = false;
     $values = $request->all();
 
-    $api_core = new SysCore();
-    $rbf_dataset = $api_core->get_setting('rbf_dataset_scan');
-    $rbf_api_key = $api_core->get_setting('rbf_api_key');
+    $rbf_dataset = $this->_sys_app->get_setting('rbf_dataset_scan');
+    $rbf_api_key = $this->_sys_app->get_setting('rbf_api_key');
 
     if (empty($rbf_dataset) || empty($rbf_dataset)) {
       return response()->json([
@@ -151,7 +159,7 @@ class RoboflowController extends Controller
         if (count($predictions)) {
 
           //ingredients
-          $ingredients_found = $api_core->sys_ingredients_found($predictions);
+          $ingredients_found = $this->_sys_app->sys_ingredients_compact($predictions);
           if (count($ingredients_found)) {
             foreach ($ingredients_found as $temp) {
               $ing = Ingredient::find((int)$temp['id']);
@@ -220,43 +228,6 @@ class RoboflowController extends Controller
       'data' => $data,
       'food' => $food ? $food->id : 0,
     ], 200);
-  }
-
-  protected function predict_foods($predictions)
-  {
-    $arr = [];
-    $ingredientsIds = [];
-
-    if (count($predictions)) {
-      foreach ($predictions as $prediction) {
-
-        $prediction = (array)$prediction;
-
-        $ingredient = Ingredient::whereRaw('LOWER(name) LIKE ?', strtolower(trim($prediction['class'])))
-          ->first();
-        if ($ingredient) {
-          $ingredientsIds[] = $ingredient->id;
-        }
-      }
-    }
-
-    //foods
-    $foods = Food::where('deleted', 0)
-      ->get();
-
-    if (count($foods) && count($ingredientsIds)) {
-      foreach ($foods as $food) {
-        $confidence = $food->check_food_confidence_by_ingredients($ingredientsIds);
-        if ($confidence) {
-          $arr[] = [
-            'food' => $food->name,
-            'confidence' => $confidence,
-          ];
-        }
-      }
-    }
-
-    return $arr;
   }
 
   public function retraining(Request $request)
@@ -335,7 +306,6 @@ class RoboflowController extends Controller
   public function food_get_info(Request $request)
   {
     $values = $request->post();
-    $user = Auth::user();
 
     $validator = Validator::make($values, [
       'item' => 'required',

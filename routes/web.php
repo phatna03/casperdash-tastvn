@@ -193,6 +193,7 @@ use App\Http\Controllers\tastevn\auth\FoodCategoryController;
 use App\Http\Controllers\tastevn\auth\PhotoController;
 use App\Http\Controllers\tastevn\auth\CommentController;
 use App\Http\Controllers\tastevn\auth\FoodController;
+use App\Http\Controllers\tastevn\auth\RoboflowController;
 
 //apix
 Route::get('/export/food/ingredients', [ApiController::class, 'food_ingredient']);

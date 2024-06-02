@@ -7,7 +7,7 @@
   $type2s = ['App\Notifications\IngredientMissing'];
 
     foreach($notifications as $notification):
-    $rfs = $api_core->get_item($notification->restaurant_food_scan_id, 'restaurant_food_scan');
+    $rfs = $sys_app->get_item($notification->restaurant_food_scan_id, 'restaurant_food_scan');
     if (!$rfs) {
         continue;
     }
@@ -32,8 +32,8 @@
         @php
           $type = $notification->data['typed'];
 
-          $owner = $api_core->get_item($notification->data['owner_id'], 'user');
-          $comment = $api_core->get_item($notification->object_id, $notification->object_type);
+          $owner = $sys_app->get_item($notification->data['owner_id'], 'user');
+          $comment = $sys_app->get_item($notification->object_id, $notification->object_type);
 
           $text1 = 'added new note for the photo with ID: ';
           if ($type == 'photo_comment_edit') {

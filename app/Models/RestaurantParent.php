@@ -9,7 +9,6 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 use Aws\S3\S3Client;
-use App\Api\SysCore;
 
 class RestaurantParent extends Model
 {

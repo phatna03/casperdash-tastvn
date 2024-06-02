@@ -5,7 +5,7 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Storage;
 
-use App\Api\SysCore;
+use App\Api\SysApp;
 use App\Models\RestaurantFoodScan;
 
 class SyncImagesToS3 extends Command
@@ -48,8 +48,8 @@ class SyncImagesToS3 extends Command
 
   public function handle()
   {
-    $api_core = new SysCore();
-    $s3_region = $api_core->get_setting('s3_region');
+    $sys_app = new SysApp();
+    $s3_region = $sys_app->get_setting('s3_region');
 
     foreach ($this->directories as $restaurant => $directory) {
 
@@ -81,7 +81,7 @@ class SyncImagesToS3 extends Command
             if (@getimagesize($URL)) {
 
               $row->update([
-                'local_storage' => 0,
+                'local_storage' => 2,
                 'photo_url' => $URL,
               ]);
 

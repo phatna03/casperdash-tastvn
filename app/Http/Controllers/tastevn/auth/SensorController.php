@@ -723,8 +723,6 @@ class SensorController extends Controller
           'found_by' => 'usr',
           'status' => 'edited',
           'confidence' => 100,
-          'food_category_id' => $row->get_restaurant()->get_food_category($food)
-            ? $row->get_restaurant()->get_food_category($food)->id : 0,
         ]);
 
         $ingredients_missing = [];

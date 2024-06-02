@@ -9,7 +9,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
-use App\Api\SysCore;
+use App\Api\SysApp;
 
 class PhotoUpload implements ShouldQueue
 {
@@ -28,7 +28,7 @@ class PhotoUpload implements ShouldQueue
      */
     public function handle(): void
     {
-      $api_core = new SysCore();
-      $api_core->rbf_retrain();
+      $sys_app = new SysApp();
+      $sys_app->rbf_retrain();
     }
 }

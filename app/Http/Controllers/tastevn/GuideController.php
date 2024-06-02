@@ -4,9 +4,6 @@ namespace App\Http\Controllers\tastevn;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-
-//lib
-use App\Api\SysCore;
 //model
 use App\Models\RestaurantFoodScan;
 

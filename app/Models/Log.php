@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 
-use App\Api\SysCore;
+use App\Api\SysApp;
 
 class Log extends Model
 {
@@ -40,9 +40,9 @@ class Log extends Model
 
   public function item()
   {
-    $api_core = new SysCore();
+    $sys_app = new SysApp();
 
-    return $api_core->get_item($this->item_id, $this->item_type);
+    return $sys_app->get_item($this->item_id, $this->item_type);
   }
 
   public function set_text()

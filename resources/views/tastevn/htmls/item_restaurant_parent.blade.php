@@ -14,7 +14,7 @@
             continue;
         }
 
-        $food = $api_app->get_item($obj->food_id, 'food');
+        $food = $sys_app->get_item($obj->food_id, 'food');
 
         $recipes = $food->get_recipes([
           'restaurant_parent_id' => $restaurant_parent->id
