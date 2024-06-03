@@ -15,27 +15,33 @@ class SysRobo
   public static function s3_bucket_folder()
   {
     return [
-      'cargo' => [
+      'cargo1' => [
+        'restaurant' => 'cargo',
         'bucket' => 's3_bucket_cargo',
         'folder' => '/58-5b-69-19-ad-83/',
       ],
-      'cargo' => [
+      'cargo2' => [
+        'restaurant' => 'cargo',
         'bucket' => 's3_bucket_cargo',
         'folder' => '/58-5b-69-19-ad-67/',
       ],
-      'deli' => [
+      'deli1' => [
+        'restaurant' => 'deli',
         'bucket' => 's3_bucket_deli',
         'folder' => '/58-5b-69-19-ad-b6/',
       ],
-      'deli' => [
+      'deli2' => [
+        'restaurant' => 'deli',
         'bucket' => 's3_bucket_deli',
         'folder' => '/58-5b-69-20-11-7b/',
       ],
       'market' => [
+        'restaurant' => 'market',
         'bucket' => 's3_bucket_market',
         'folder' => '/58-5b-69-20-a8-f6/',
       ],
       'poison' => [
+        'restaurant' => 'poison',
         'bucket' => 's3_bucket_poison',
         'folder' => '/58-5b-69-15-cd-2b/',
       ],
@@ -126,9 +132,12 @@ class SysRobo
 
     $cur_date = date('Y-m-d');
     $cur_hour = (int)date('H');
+
     //old
+    $notify = true;
     if (isset($pars['hour']) && !empty($pars['hour'])) {
       $cur_hour = (int)$pars['hour'];
+      $notify = false;
     }
 
     $row = NULL;
@@ -182,7 +191,7 @@ class SysRobo
 
           //step 3= photo predict
           $row->predict_food([
-            'notification' => false,
+            'notification' => $notify,
           ]);
         }
       }

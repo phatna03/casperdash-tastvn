@@ -45,6 +45,10 @@ class TesterController extends Controller
     $sys_app = new SysApp();
     $restaurant = Restaurant::find(5);
 
+
+
+
+
 //    $count = $this->clear_photos();
 //    var_dump($count);
 
@@ -123,13 +127,17 @@ class TesterController extends Controller
   {
     $count = 0;
 
-    $date = date('Y-m-d', strtotime("-3 days"));
+    $date = date('Y-m-d', strtotime("-7 days"));
 
     var_dump('***************************************************************************************');
     var_dump($date);
 
     $directories = SysRobo::s3_bucket_folder();
     foreach ($directories as $restaurant => $directory) {
+
+      var_dump('***************************************************************************************');
+      var_dump($restaurant);
+      var_dump($directory);
 
       $localDisk = Storage::disk('sensors');
       $s3Disk = Storage::disk($directory['bucket']);
@@ -147,9 +155,7 @@ class TesterController extends Controller
           var_dump($storagePath);
 
           if (is_file($storagePath)) {
-            var_dump('fileeeeeee...');
             unlink($storagePath);
-
             $count++;
           }
         }
