@@ -2403,4 +2403,43 @@ function food_ingredient_core_quick(ele, itd) {
 
   return false;
 }
+//report
+function report_add(evt, frm) {
+  evt.preventDefault();
+  var form = $(frm);
+  form_loading(form);
+
+  axios.post('/admin/report/store', {
+    name: form.find('input[name=name]').val(),
+    dates: form.find('input[name=dates]').val(),
+    restaurant_parent_id: form.find('select[name=restaurant_parent_id]').val(),
+    foods: form.find('select[name=foods]').val(),
+  })
+    .then(response => {
+
+      message_from_toast('success', acmcfs.message_title_success, acmcfs.message_description_success_add, true);
+
+      datatable_refresh();
+
+    })
+    .catch(error => {
+      if (error.response.data && Object.values(error.response.data).length) {
+        Object.values(error.response.data).forEach(function (v, k) {
+          message_from_toast('error', acmcfs.message_title_error, v);
+        });
+      }
+
+    })
+    .then(() => {
+
+      form_loading(form, false);
+
+      setTimeout(function () {
+        form.find('input[name=name]').focus();
+      }, acmcfs.timeout_quick);
+    });
+
+  return false;
+}
+
 

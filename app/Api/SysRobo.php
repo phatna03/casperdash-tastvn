@@ -152,9 +152,9 @@ class SysRobo
     $folder_setting = $sys_app->parse_s3_bucket_address($restaurant->s3_bucket_address);
     $directory = $folder_setting . '/' . $cur_date . '/' . $cur_hour . '/';
 
-    if ($old) {
-      $cur_hour += 11;
-    }
+//    if ($old) {
+//      $cur_hour += 11;
+//    }
 
     $files = Storage::disk('sensors')->files($directory);
     if (count($files)) {

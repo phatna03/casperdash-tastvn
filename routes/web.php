@@ -192,9 +192,11 @@ use App\Http\Controllers\tastevn\auth\PhotoController;
 use App\Http\Controllers\tastevn\auth\CommentController;
 use App\Http\Controllers\tastevn\auth\FoodController;
 use App\Http\Controllers\tastevn\auth\RoboflowController;
+use App\Http\Controllers\tastevn\auth\ReportController;
 
 //apix
 Route::get('/export/food/ingredients', [ApiController::class, 'food_ingredient']);
+Route::get('/food/datas', [ApiController::class, 'food_datas']);
 //auth
 Route::get('/login', [LoginController::class, 'login'])->name('login');
 Route::post('/auth/login', [LoginController::class, 'login_auth']);
@@ -316,7 +318,42 @@ Route::get('/admin/roboflow', [RoboflowController::class, 'index']);
 Route::post('/admin/roboflow/detect', [RoboflowController::class, 'detect']);
 Route::post('/admin/roboflow/restaurant/food/get', [RoboflowController::class, 'restaurant_food_get']);
 Route::post('/admin/roboflow/food/get/info', [RoboflowController::class, 'food_get_info']);
+//report
+Route::get('/admin/reports', [ReportController::class, 'index']);
 //datatable
+Route::get('/datatable/report', function (Request $request) {
+  $values = $request->all();
+
+  $order_default = true;
+  if (isset($values['order']) && count($values['order']) && isset($values['order'][0])) {
+    if (isset($values['order'][0]['column']) && (int)$values['order'][0]['column']) {
+      $order_default = false;
+    }
+  }
+
+  $user = \Illuminate\Support\Facades\Auth::user();
+
+  $select = App\Models\Report::query("reports")
+    ->select("reports.id", "reports.name", "reports.status",
+      "reports.date_from", "reports.date_to", "reports.total_photos",
+      "reports.restaurant_parent_id", "restaurant_parents.name as restaurant_name",
+    )
+    ->leftJoin('restaurant_parents', 'restaurant_parents.id', '=', 'reports.restaurant_parent_id')
+    ->where('reports.deleted', 0);
+
+  if ($order_default) {
+    $select->orderBy('reports.updated_at', 'desc')
+      ->orderBy('reports.id', 'desc');
+  }
+
+  if (count($values)) {
+    if (isset($values['name']) && !empty($values['name'])) {
+      $select->where('reports.name', 'LIKE', '%' . $values['name'] . '%');
+    }
+  }
+
+  return DataTables::of($select)->addIndexColumn()->toJson();
+});
 Route::get('/datatable/restaurant', function (Request $request) {
   $values = $request->all();
 

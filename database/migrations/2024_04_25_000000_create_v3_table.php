@@ -39,6 +39,8 @@ return new class extends Migration {
         $table->dateTime('date_from');
         $table->dateTime('date_to');
         $table->bigInteger('total_photos')->default(0);
+        $table->bigInteger('total_points')->default(0);
+        $table->decimal('point')->default(0);
         $table->enum('status', ['new', 'running', 'done'])->default('new');
         $table->bigInteger('deleted')->default(0);
         $table->timestamps();
@@ -50,6 +52,9 @@ return new class extends Migration {
         $table->id();
         $table->bigInteger('report_id');
         $table->bigInteger('food_id');
+        $table->bigInteger('total_photos')->default(0);
+        $table->bigInteger('total_points')->default(0);
+        $table->decimal('point')->default(0);
         $table->timestamps();
       });
     }
@@ -60,22 +65,14 @@ return new class extends Migration {
         $table->bigInteger('report_id');
         $table->bigInteger('restaurant_food_scan_id');
         $table->bigInteger('food_id')->default(0);
-        $table->enum('status', ['passed', 'accepted', 'error', 'failed'])->default('passed');
+        $table->enum('status', ['passed', 'failed'])->default('passed');
         $table->bigInteger('reporting')->default(1);
+        $table->decimal('point')->default(1);
         $table->text('note')->nullable();
         $table->timestamps();
       });
     }
 
-    if (!Schema::hasTable('report_photo_missings')) {
-      Schema::create('report_photo_missings', function (Blueprint $table) {
-        $table->id();
-        $table->bigInteger('report_photo_id');
-        $table->bigInteger('ingredient_id');
-        $table->bigInteger('quantity');
-        $table->timestamps();
-      });
-    }
   }
 
   /**
@@ -89,6 +86,5 @@ return new class extends Migration {
     Schema::dropIfExists('reports');
     Schema::dropIfExists('report_foods');
     Schema::dropIfExists('report_photos');
-    Schema::dropIfExists('report_photo_missings');
   }
 };

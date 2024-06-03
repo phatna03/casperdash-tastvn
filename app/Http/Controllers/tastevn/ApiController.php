@@ -5,8 +5,11 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 //excel
 use Maatwebsite\Excel\Facades\Excel;
+//lib
+use App\Api\SysApp;
 //model
 use App\Models\Food;
+use App\Models\Restaurant;
 use App\Models\RestaurantParent;
 use App\Models\KasWebhook;
 
@@ -71,6 +74,186 @@ class ApiController extends Controller
     }
 
     return response()->json($items);
+  }
+
+  public function food_datas()
+  {
+    $ch = curl_init();
+    $headers = [
+      'Accept: application/json',
+    ];
+
+    $URL = url('api/food/predict');
+    $postData = [
+      'predictions' => [
+        [
+          "class" => "air dried striploin steak - canadian lobster",
+          "confidence" => 0.78
+        ],
+        [
+          "class" => "grilled striploin steak",
+          "confidence" => 0.78
+        ],
+        [
+          "class" => "canadian lobster",
+          "confidence" => 0.78
+        ],
+        [
+          "class" => "baked potato",
+          "confidence" => 0.78
+        ],
+        [
+          "class" => "steak sauce",
+          "confidence" => 0.78
+        ],
+      ]
+    ];
+
+    curl_setopt($ch, CURLOPT_URL, $URL);
+    curl_setopt($ch, CURLOPT_POST, 1);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($postData));
+    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+    $result = curl_exec($ch);
+    $statusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+    curl_close($ch);
+
+    $data = (array)json_decode($result);
+
+    echo '<pre>';var_dump($data);die;
+  }
+
+  public function food_predict(Request $request)
+  {
+    $values = $request->post();
+
+    $valid_data = true;
+    $predictions = isset($values['predictions']) && !empty($values['predictions']) ? (array)$values['predictions'] : [];
+    if (count($predictions)) {
+      foreach ($predictions as $prediction) {
+        if (isset($prediction['class']) && isset($prediction['confidence'])) {
+          continue;
+        }
+
+        $valid_data = false;
+      }
+    }
+    if (!$valid_data) {
+      return response()->json([
+        'status' => false,
+        'error' => 'invalid data',
+
+        'datas' => json_encode($predictions),
+      ]);
+    }
+
+    $sys_app = new SysApp();
+    $restaurant = Restaurant::find(5);
+
+    $food_id = 0;
+    $food_confidence = 0;
+    $food_name = '';
+    $ing_found = [];
+    $ing_missing = [];
+
+    if (count($predictions)) {
+
+      $food = NULL;
+      $foods = [];
+      $ingredients_found = $sys_app->sys_ingredients_compact($predictions);
+
+      //find food
+      foreach ($predictions as $prediction) {
+        $prediction = (array)$prediction;
+
+        $confidence = (int)($prediction['confidence'] * 100);
+
+        $found = Food::whereRaw('LOWER(name) LIKE ?', strtolower(trim($prediction['class'])))
+          ->first();
+        if ($found && $confidence >= 50 && count($ingredients_found) && $restaurant->serve_food($found)) {
+
+          //check valid ingredient
+          $valid_food = true;
+          $food_ingredients = $found->get_ingredients([
+            'restaurant_parent_id' => $restaurant->restaurant_parent_id,
+          ]);
+          if (!count($food_ingredients)) {
+            $valid_food = false;
+          }
+
+          //check core ingredient
+          $valid_core = true;
+          $core_ids = $found->get_ingredients_core([
+            'restaurant_parent_id' => $restaurant->restaurant_parent_id,
+            'ingredient_id_only' => 1,
+          ]);
+          if (count($core_ids)) {
+            $found_ids = array_column($ingredients_found, 'id');
+            $found_count = 0;
+            foreach ($found_ids as $found_id) {
+              if (in_array($found_id, $core_ids)) {
+                $found_count++;
+              }
+            }
+            if ($found_count != count($core_ids)) {
+              $valid_core = false;
+            }
+          }
+
+          if ($valid_core && $valid_food) {
+            $foods[] = [
+              'food' => $found->id,
+              'confidence' => $confidence,
+            ];
+          }
+        }
+      }
+
+      if (count($foods)) {
+        if (count($foods) > 1) {
+          $a1 = [];
+          $a2 = [];
+          foreach ($foods as $key => $val) {
+            $a1[$key] = $val['confidence'];
+            $a2[$key] = $val['food'];
+          }
+          array_multisort($a1, SORT_DESC, $a2, SORT_DESC, $foods);
+        }
+
+        $foods = $foods[0];
+        $food = Food::find($foods['food']);
+        $food_confidence = $foods['confidence'];
+      }
+
+      if ($food) {
+
+        $food_id = $food->id;
+        $food_name = $food->name;
+
+        $ing_found = $food->get_ingredients_info([
+          'restaurant_parent_id' => $restaurant->restaurant_parent_id,
+          'ingredients' => $ingredients_found,
+        ]);
+        $ing_missing = $food->missing_ingredients([
+          'restaurant_parent_id' => $restaurant->restaurant_parent_id,
+          'ingredients' => $ingredients_found,
+        ]);
+      }
+    }
+
+    return response()->json([
+      'status' => true,
+      'food' => [
+        'id' => $food_id,
+        'confidence' => $food_confidence,
+        'name' => $food_name,
+      ],
+      'ingredient' => [
+        'found' => $ing_found,
+        'missing' => $ing_missing,
+      ]
+    ]);
   }
 
   public function kas_cart_info(Request $request)
