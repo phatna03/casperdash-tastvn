@@ -45,32 +45,18 @@ class TesterController extends Controller
     $sys_app = new SysApp();
     $restaurant = Restaurant::find(5);
 
-//    $localDisk = Storage::disk('sensors');
-//    $s3Disk = Storage::disk('s3_bucket_market');
+//    $count = $this->clear_photos();
+//    var_dump($count);
+
+
+    //check old photos
+//    SysRobo::photo_get([
+//      'limit' => 1,
+//      'page' => 5,
 //
-//    $date = date('Y-m-d', strtotime("-3 days"));
-//    $directory = "/58-5b-69-20-a8-f6/SENSOR/1/{$date}/";
-//
-//    $files = $localDisk->allFiles($directory);
-//
-//    var_dump($date);
-//
-//    if (count($files)) {
-//      foreach ($files as $file) {
-//
-//        var_dump('--------------------------------------------------------');
-//        var_dump($file);
-//
-//
-//        $storagePath = public_path('sensors') . '/' . $file;
-//        var_dump($storagePath);
-//
-//        if (is_file($storagePath)) {
-//          var_dump('fileeeeeee...');
-//          unlink($storagePath);
-//        }
-//      }
-//    }
+//      'hour' => 10,
+//    ]);
+
 
     echo '<br />';
     die('test ok...');
@@ -131,5 +117,45 @@ class TesterController extends Controller
     return response()->json([
       'status' => true,
     ]);
+  }
+
+  protected function clear_photos()
+  {
+    $count = 0;
+
+    $date = date('Y-m-d', strtotime("-3 days"));
+
+    var_dump('***************************************************************************************');
+    var_dump($date);
+
+    $directories = SysRobo::s3_bucket_folder();
+    foreach ($directories as $restaurant => $directory) {
+
+      $localDisk = Storage::disk('sensors');
+      $s3Disk = Storage::disk($directory['bucket']);
+
+      $dir = "{$directory['folder']}SENSOR/1/{$date}/";
+      $files = $localDisk->allFiles($dir);
+      if (count($files)) {
+        foreach ($files as $file) {
+
+          var_dump('--------------------------------------------------------');
+          var_dump($file);
+
+
+          $storagePath = public_path('sensors') . '/' . $file;
+          var_dump($storagePath);
+
+          if (is_file($storagePath)) {
+            var_dump('fileeeeeee...');
+            unlink($storagePath);
+
+            $count++;
+          }
+        }
+      }
+    }
+
+    return $count;
   }
 }

@@ -6,40 +6,13 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Storage;
 
 use App\Api\SysApp;
+use App\Api\SysRobo;
 use App\Models\RestaurantFoodScan;
 
 class ClearLocalImages extends Command
 {
   protected $signature = 'local:clear-images';
-
   protected $description = 'Clear local photos';
-
-  protected $directories = [
-    'cargo' => [
-      'bucket' => 's3_bucket_cargo',
-      'folder' => '/58-5b-69-19-ad-83/',
-    ],
-    'cargo' => [
-      'bucket' => 's3_bucket_cargo',
-      'folder' => '/58-5b-69-19-ad-67/',
-    ],
-    'deli' => [
-      'bucket' => 's3_bucket_deli',
-      'folder' => '/58-5b-69-19-ad-b6/',
-    ],
-    'deli' => [
-      'bucket' => 's3_bucket_deli',
-      'folder' => '/58-5b-69-20-11-7b/',
-    ],
-    'market' => [
-      'bucket' => 's3_bucket_market',
-      'folder' => '/58-5b-69-20-a8-f6/',
-    ],
-    'poison' => [
-      'bucket' => 's3_bucket_poison',
-      'folder' => '/58-5b-69-15-cd-2b/',
-    ],
-  ];
 
   public function __construct()
   {
@@ -51,7 +24,8 @@ class ClearLocalImages extends Command
     $sys_app = new SysApp();
     $s3_region = $sys_app->get_setting('s3_region');
 
-    foreach ($this->directories as $restaurant => $directory) {
+    $directories = SysRobo::s3_bucket_folder();
+    foreach ($directories as $restaurant => $directory) {
 
       $count = 0;
 

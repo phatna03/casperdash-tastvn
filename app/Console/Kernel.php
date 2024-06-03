@@ -11,6 +11,7 @@ class Kernel extends ConsoleKernel
     //custome
     'App\Console\Commands\SyncImagesToS3',
     'App\Console\Commands\ClearLocalImages',
+    'App\Console\Commands\GetPhotos',
   ];
 
   /**
@@ -18,6 +19,38 @@ class Kernel extends ConsoleKernel
    */
   protected function schedule(Schedule $schedule): void
   {
+    //custome
+    //cargo
+    $schedule->command('local:check-images', [1, 1])
+      ->withoutOverlapping()
+      ->everyFiveSeconds()
+      ->runInBackground();
+
+    $schedule->command('local:check-images', [1, 2])
+      ->withoutOverlapping()
+      ->everyFiveSeconds()
+      ->runInBackground();
+    //deli
+    $schedule->command('local:check-images', [1, 3])
+      ->withoutOverlapping()
+      ->everyFiveSeconds()
+      ->runInBackground();
+
+    $schedule->command('local:check-images', [1, 4])
+      ->withoutOverlapping()
+      ->everyFiveSeconds()
+      ->runInBackground();
+    //market
+    $schedule->command('local:check-images', [1, 5])
+      ->withoutOverlapping()
+      ->everyFiveSeconds()
+      ->runInBackground();
+    //poison
+    $schedule->command('local:check-images', [1, 6])
+      ->withoutOverlapping()
+      ->everyFiveSeconds()
+      ->runInBackground();
+
     //sync photos
     $schedule->command('sync:images-to-s3')
       ->dailyAt('01:00')
