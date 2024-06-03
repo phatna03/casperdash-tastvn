@@ -135,9 +135,16 @@ class SysRobo
 
     //old
     $notify = true;
-    if (isset($pars['hour']) && !empty($pars['hour'])) {
-      $cur_hour = (int)$pars['hour'];
+    $old = false;
+
+    if (isset($pars['date']) && !empty($pars['date'])) {
+      $cur_date = $pars['date'];
+      $old = true;
+    }
+    if (isset($pars['hour'])) {
+      $cur_hour = (int)$pars['hour'] ? (int)$pars['hour'] : $pars['hour'];
       $notify = false;
+      $old = true;
     }
 
     $row = NULL;
@@ -145,10 +152,15 @@ class SysRobo
     $folder_setting = $sys_app->parse_s3_bucket_address($restaurant->s3_bucket_address);
     $directory = $folder_setting . '/' . $cur_date . '/' . $cur_hour . '/';
 
+    if ($old) {
+      $cur_hour += 11;
+    }
+
     $files = Storage::disk('sensors')->files($directory);
     if (count($files)) {
       //desc
 //      $files = array_reverse($files);
+      $count = 0;
 
       //step 1= photo check
       foreach ($files as $file) {
@@ -156,6 +168,7 @@ class SysRobo
         if (!count($ext) || $ext[count($ext) - 1] != 'jpg') {
           continue;
         }
+        $count++;
 
         //check exist
         $row = RestaurantFoodScan::where('restaurant_id', $restaurant->id)
@@ -171,6 +184,18 @@ class SysRobo
             'photo_ext' => 'jpg',
             'time_photo' => date('Y-m-d H:i:s'),
           ]);
+
+          if ($old) {
+
+            $time_photo = $cur_date . ' '
+              . $sys_app->parse_hour_format($cur_hour) . ':'
+              . $sys_app->parse_hour_format($count) . ':'
+              . $sys_app->parse_hour_format($count);
+
+            $row->update([
+              'time_photo' => $time_photo,
+            ]);
+          }
         }
 
         if ($row->status == 'new') {
@@ -191,7 +216,7 @@ class SysRobo
 
           //step 3= photo predict
           $row->predict_food([
-            'notification' => $notify,
+            'notification' => $old ? false : $notify,
           ]);
         }
       }

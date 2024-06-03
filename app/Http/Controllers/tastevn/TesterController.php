@@ -45,10 +45,6 @@ class TesterController extends Controller
     $sys_app = new SysApp();
     $restaurant = Restaurant::find(5);
 
-
-
-
-
 //    $count = $this->clear_photos();
 //    var_dump($count);
 
@@ -58,6 +54,7 @@ class TesterController extends Controller
 //      'limit' => 1,
 //      'page' => 5,
 //
+//      'date' => '2024-06-02',
 //      'hour' => 10,
 //    ]);
 

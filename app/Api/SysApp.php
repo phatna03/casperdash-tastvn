@@ -84,6 +84,15 @@ class SysApp
     return $text;
   }
 
+  public function parse_hour_format($hour)
+  {
+    if ((int)$hour < 10) {
+      $hour = '0' . $hour;
+    }
+
+    return $hour;
+  }
+
   public function str_rand($length = 8)
   {
     $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
