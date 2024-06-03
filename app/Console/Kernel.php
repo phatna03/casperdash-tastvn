@@ -10,6 +10,7 @@ class Kernel extends ConsoleKernel
   protected $commands = [
     //custome
     'App\Console\Commands\SyncImagesToS3',
+    'App\Console\Commands\ClearLocalImages',
   ];
 
   /**
@@ -19,8 +20,13 @@ class Kernel extends ConsoleKernel
   {
     //sync photos
     $schedule->command('sync:images-to-s3')
-//      ->hourly()
-      ->daily()
+      ->dailyAt('01:00')
+      ->withoutOverlapping()
+      ->runInBackground();
+
+    //clear photos
+    $schedule->command('local:clear-images')
+      ->dailyAt('02:00')
       ->withoutOverlapping()
       ->runInBackground();
   }

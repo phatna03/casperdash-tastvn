@@ -40,13 +40,37 @@ class TesterController extends Controller
 
   public function index(Request $request)
   {
-//    echo '<pre>';
+    echo '<pre>';
     $user = Auth::user();
     $sys_app = new SysApp();
     $restaurant = Restaurant::find(5);
 
-
-
+//    $localDisk = Storage::disk('sensors');
+//    $s3Disk = Storage::disk('s3_bucket_market');
+//
+//    $date = date('Y-m-d', strtotime("-3 days"));
+//    $directory = "/58-5b-69-20-a8-f6/SENSOR/1/{$date}/";
+//
+//    $files = $localDisk->allFiles($directory);
+//
+//    var_dump($date);
+//
+//    if (count($files)) {
+//      foreach ($files as $file) {
+//
+//        var_dump('--------------------------------------------------------');
+//        var_dump($file);
+//
+//
+//        $storagePath = public_path('sensors') . '/' . $file;
+//        var_dump($storagePath);
+//
+//        if (is_file($storagePath)) {
+//          var_dump('fileeeeeee...');
+//          unlink($storagePath);
+//        }
+//      }
+//    }
 
     echo '<br />';
     die('test ok...');

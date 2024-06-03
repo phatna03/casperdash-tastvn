@@ -8,11 +8,11 @@ use Illuminate\Support\Facades\Storage;
 use App\Api\SysApp;
 use App\Models\RestaurantFoodScan;
 
-class SyncImagesToS3 extends Command
+class ClearLocalImages extends Command
 {
-  protected $signature = 'sync:images-to-s3';
+  protected $signature = 'local:clear-images';
 
-  protected $description = 'Sync photos to S3 bucket';
+  protected $description = 'Clear local photos';
 
   protected $directories = [
     'cargo' => [
@@ -54,42 +54,26 @@ class SyncImagesToS3 extends Command
     foreach ($this->directories as $restaurant => $directory) {
 
       $count = 0;
-      $date = date('Y-m-d', strtotime("-1 days"));
 
-      $file_log = 'public/logs/cron_sync_s3_' . $restaurant . '.log';
+      $file_log = 'public/logs/cron_clear_photos_' . $restaurant . '.log';
       Storage::append($file_log, '===================================================================================');
 
       $localDisk = Storage::disk('sensors');
       $s3Disk = Storage::disk($directory['bucket']);
 
-      $files = $localDisk->allFiles($directory['folder']);
+      $date = date('Y-m-d', strtotime("-3 days"));
+      $dir = "{$directory['folder']}SENSOR/1/{$date}/";
+
+      $files = $localDisk->allFiles($dir);
 
       foreach ($files as $file) {
 
-        $status = $s3Disk->put($file, $localDisk->get($file));
-        if ($status) {
+        Storage::append($file_log, 'FILE_CLEAR= ' . $file);
 
-          $count++;
-
-          $row = RestaurantFoodScan::where('photo_name', $file)
-            ->first();
-          if ($row) {
-
-            $restaurant = $row->get_restaurant();
-            $URL = "https://s3.{$s3_region}.amazonaws.com/{$restaurant->s3_bucket_name}/{$file}";
-
-            if (@getimagesize($URL)) {
-
-              $row->update([
-                'local_storage' => 0,
-                'photo_url' => $URL,
-              ]);
-            }
-          }
+        $storagePath = public_path('sensors') . '/' . $file;
+        if (is_file($storagePath)) {
+          unlink($storagePath);
         }
-
-        Storage::append($file_log, 'FILE_SYNC_STATUS= ' . $status);
-        Storage::append($file_log, 'FILE_SYNC_DATA= ' . $file);
       }
 
       Storage::append($file_log, 'TOTAL= ' . $count);
