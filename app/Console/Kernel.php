@@ -20,7 +20,7 @@ class Kernel extends ConsoleKernel
     //sync photos
     $schedule->command('sync:images-to-s3')
 //      ->hourly()
-      ->everyTenMinutes()
+      ->daily()
       ->withoutOverlapping()
       ->runInBackground();
   }

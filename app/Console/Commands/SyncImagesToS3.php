@@ -81,7 +81,7 @@ class SyncImagesToS3 extends Command
             if (@getimagesize($URL)) {
 
               $row->update([
-                'local_storage' => 2,
+                'local_storage' => 0,
                 'photo_url' => $URL,
               ]);
 
