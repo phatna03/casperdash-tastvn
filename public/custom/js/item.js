@@ -2403,6 +2403,30 @@ function food_ingredient_core_quick(ele, itd) {
 
   return false;
 }
+function food_ingredient_confidence_quick(ele, itd) {
+  var bind = $(ele);
+
+  axios.post('/admin/restaurant/food/confidence', {
+    item: itd,
+    confidence: parseInt(bind.val())
+  })
+    .then(response => {
+      message_from_toast('success', acmcfs.message_title_success, acmcfs.message_description_success_update);
+    })
+    .catch(error => {
+      console.log(error);
+      if (error.response.data && Object.values(error.response.data).length) {
+        Object.values(error.response.data).forEach(function (v, k) {
+          message_from_toast('error', acmcfs.message_title_error, v);
+        });
+      }
+    })
+    .then(() => {
+
+    });
+
+  return false;
+}
 //report
 function report_add(evt, frm) {
   evt.preventDefault();

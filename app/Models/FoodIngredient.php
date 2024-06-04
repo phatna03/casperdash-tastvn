@@ -18,6 +18,7 @@ class FoodIngredient extends Model
     'ingredient_id',
     'ingredient_quantity',
     'ingredient_color',
+    'confidence',
     'deleted',
   ];
 

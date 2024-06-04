@@ -362,7 +362,8 @@ class Food extends Model
       ->distinct()
       ->select("{$tblFoodIngredient}.id as food_ingredient_id", "{$tblIngredient}.id",
         "{$tblIngredient}.name", "{$tblIngredient}.name_vi", "{$tblFoodIngredient}.ingredient_color",
-        "{$tblFoodIngredient}.ingredient_quantity", "{$tblFoodIngredient}.ingredient_type"
+        "{$tblFoodIngredient}.ingredient_quantity", "{$tblFoodIngredient}.ingredient_type",
+        "{$tblFoodIngredient}.confidence"
       )
       ->leftJoin($tblIngredient, "{$tblIngredient}.id", "=", "{$tblFoodIngredient}.ingredient_id")
       ->where("{$tblFoodIngredient}.deleted", 0)

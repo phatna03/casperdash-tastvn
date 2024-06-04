@@ -17,6 +17,8 @@ class Report extends Model
     'date_from',
     'date_to',
     'total_photos',
+    'total_points',
+    'point',
     'status',
     'deleted',
   ];

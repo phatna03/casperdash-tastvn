@@ -16,6 +16,7 @@ class ReportPhoto extends Model
     'restaurant_food_scan_id',
     'food_id',
     'status',
+    'point',
     'reporting',
     'note',
   ];

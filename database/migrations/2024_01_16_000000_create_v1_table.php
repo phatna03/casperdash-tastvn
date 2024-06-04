@@ -78,6 +78,7 @@ return new class extends Migration {
         $table->enum('ingredient_type', ['core', 'additive'])->default('additive');
         $table->bigInteger('ingredient_id');
         $table->bigInteger('ingredient_quantity')->default(1);
+        $table->integer('confidence')->default(50);
         $table->string('ingredient_color')->nullable();
         $table->bigInteger('deleted')->default(0);
         $table->timestamps();
@@ -90,6 +91,8 @@ return new class extends Migration {
         $table->bigInteger('restaurant_id');
         $table->bigInteger('food_category_id')->default(0);
         $table->bigInteger('food_id');
+        $table->text('photo')->nullable();
+        $table->integer('live_group')->default(3);
         $table->bigInteger('creator_id')->default(0);
         $table->bigInteger('deleted')->default(0);
         $table->timestamps();
@@ -102,6 +105,7 @@ return new class extends Migration {
         $table->bigInteger('restaurant_id');
         $table->bigInteger('food_category_id')->default(0);
         $table->bigInteger('food_id')->default(0);
+        $table->integer('local_storage')->default(0);
         $table->text('photo_url');
         $table->text('photo_name');
         $table->text('photo_ext');

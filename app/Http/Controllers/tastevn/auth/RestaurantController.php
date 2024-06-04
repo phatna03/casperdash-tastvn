@@ -513,5 +513,34 @@ class RestaurantController extends Controller
     ], 200);
   }
 
+  public function food_confidence(Request $request)
+  {
+    $values = $request->post();
+
+    //required
+    $validator = Validator::make($values, [
+      'item' => 'required',
+      'confidence' => 'required',
+    ]);
+    if ($validator->fails()) {
+      return response()->json($validator->errors(), 422);
+    }
+
+    $item = FoodIngredient::find((int)$values['item']);
+    if (!$item) {
+      return response()->json([
+        'error' => 'Invalid data'
+      ], 404);
+    }
+
+    $item->update([
+      'confidence' => (int)$values['confidence'],
+    ]);
+
+    return response()->json([
+      'status' => true,
+    ], 200);
+  }
+
 
 }

@@ -14,6 +14,9 @@ class ReportFood extends Model
   protected $fillable = [
     'report_id',
     'food_id',
+    'total_photos',
+    'total_points',
+    'point'
   ];
 
   public function get_type()
