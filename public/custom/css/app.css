@@ -333,6 +333,14 @@
   min-width: 400px;
 }
 
+.acm-width-500-min {
+  min-width: 500px;
+}
+
+.acm-width-600-min {
+  min-width: 600px;
+}
+
 .acm-overflow-y-auto {
   overflow-y: auto;
 }

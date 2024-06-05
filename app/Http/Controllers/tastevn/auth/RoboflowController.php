@@ -159,7 +159,7 @@ class RoboflowController extends Controller
         if (count($predictions)) {
 
           //ingredients
-          $ingredients_found = $this->_sys_app->sys_ingredients_compact($predictions);
+          $ingredients_found = SysRobo::ingredients_compact($predictions);
           if (count($ingredients_found)) {
             foreach ($ingredients_found as $temp) {
               $ing = Ingredient::find((int)$temp['id']);

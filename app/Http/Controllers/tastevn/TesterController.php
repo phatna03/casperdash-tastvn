@@ -45,6 +45,15 @@ class TesterController extends Controller
     $sys_app = new SysApp();
     $restaurant = Restaurant::find(5);
 
+    $row = RestaurantFoodScan::find(36807);
+
+    $row->predict_food([
+      'debug' => true,
+    ]);
+
+//    $sys_app->sys_stats_count();
+
+
 //    $count = $this->clear_photos();
 //    var_dump($count);
 

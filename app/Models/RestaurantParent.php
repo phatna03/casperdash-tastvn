@@ -107,7 +107,26 @@ class RestaurantParent extends Model
 
     return $select->get();
   }
-  //opt
+
+  public function food_serve(Food $food)
+  {
+    $sensor = $this->get_sensors([
+      'one_sensor' => 1,
+    ]);
+
+    if ($sensor) {
+
+      $items = RestaurantFood::where('deleted', 0)
+        ->where('restaurant_id', $sensor->id)
+        ->where('food_id', $food->id)
+        ->get();
+      if (count($items)) {
+        return true;
+      }
+    }
+
+    return false;
+  }
 
   public function re_count($pars = [])
   {
@@ -128,8 +147,6 @@ class RestaurantParent extends Model
     ]);
   }
 
-
-
   public function count_foods()
   {
     //all sensors use same food list
@@ -139,7 +156,10 @@ class RestaurantParent extends Model
       ->get();
     if (count($sensors)) {
       foreach ($sensors as $sensor) {
-        $count = $sensor->count_foods();
+        $count_foods = $sensor->count_foods();
+        if (!$count) {
+          $count = $count_foods;
+        }
       }
     }
 
@@ -148,27 +168,4 @@ class RestaurantParent extends Model
     ]);
   }
 
-  public function get_food_datas($pars = [])
-  {
-    //all sensors use same food list
-    $select = RestaurantFood::query('restaurant_foods')
-      ->distinct()
-      ->select(
-        'restaurant_foods.food_id', 'foods.name as food_name',
-        'restaurant_foods.photo as food_photo', 'restaurant_foods.live_group as food_live_group',
-        'restaurant_foods.food_category_id', 'food_categories.name as food_category_name'
-      )
-      ->where('restaurant_foods.deleted', 0)
-      ->leftJoin('foods', 'foods.id', '=', 'restaurant_foods.food_id')
-      ->leftJoin('food_categories', 'food_categories.id', '=', 'restaurant_foods.food_category_id')
-      ->whereIn('restaurant_foods.restaurant_id', function ($q) {
-        $q->select('id')
-          ->from('restaurants')
-          ->where('restaurant_parent_id', $this->id)
-        ;
-      })
-      ->orderByRaw('TRIM(LOWER(foods.name))');
-
-    return $select->get();
-  }
 }

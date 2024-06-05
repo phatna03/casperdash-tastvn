@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 //excel
 use Maatwebsite\Excel\Facades\Excel;
 //lib
-use App\Api\SysApp;
+use App\Api\SysRobo;
 //model
 use App\Models\Food;
 use App\Models\Restaurant;
@@ -87,24 +87,32 @@ class ApiController extends Controller
     $postData = [
       'predictions' => [
         [
-          "class" => "air dried striploin steak - canadian lobster",
+          "class" => "beef striploin salad",
           "confidence" => 0.78
         ],
         [
-          "class" => "grilled striploin steak",
+          "class" => "sliced grilled striploin steak",
           "confidence" => 0.78
         ],
         [
-          "class" => "canadian lobster",
+          "class" => "avocado cut",
           "confidence" => 0.78
         ],
         [
-          "class" => "baked potato",
+          "class" => "orange segments",
           "confidence" => 0.78
         ],
         [
-          "class" => "steak sauce",
-          "confidence" => 0.78
+          "class" => "garlic bread",
+          "confidence" => 0.91
+        ],
+        [
+          "class" => "garlic bread",
+          "confidence" => 0.70
+        ],
+        [
+          "class" => "garlic bread",
+          "confidence" => 0.44
         ],
       ]
     ];
@@ -148,7 +156,6 @@ class ApiController extends Controller
       ]);
     }
 
-    $sys_app = new SysApp();
     $restaurant = Restaurant::find(5);
 
     $food_id = 0;
@@ -159,73 +166,22 @@ class ApiController extends Controller
 
     if (count($predictions)) {
 
+      //find foods
+      $foods = SysRobo::foods_find([
+        'predictions' => $predictions,
+        'restaurant_parent_id' => $restaurant->restaurant_parent_id,
+      ]);
+
+      //food highest confidence
+      $foods = SysRobo::foods_valid($foods);
+
       $food = NULL;
-      $foods = [];
-      $ingredients_found = $sys_app->sys_ingredients_compact($predictions);
-
-      //find food
-      foreach ($predictions as $prediction) {
-        $prediction = (array)$prediction;
-
-        $confidence = (int)($prediction['confidence'] * 100);
-
-        $found = Food::whereRaw('LOWER(name) LIKE ?', strtolower(trim($prediction['class'])))
-          ->first();
-        if ($found && $confidence >= 50 && count($ingredients_found) && $restaurant->serve_food($found)) {
-
-          //check valid ingredient
-          $valid_food = true;
-          $food_ingredients = $found->get_ingredients([
-            'restaurant_parent_id' => $restaurant->restaurant_parent_id,
-          ]);
-          if (!count($food_ingredients)) {
-            $valid_food = false;
-          }
-
-          //check core ingredient
-          $valid_core = true;
-          $core_ids = $found->get_ingredients_core([
-            'restaurant_parent_id' => $restaurant->restaurant_parent_id,
-            'ingredient_id_only' => 1,
-          ]);
-          if (count($core_ids)) {
-            $found_ids = array_column($ingredients_found, 'id');
-            $found_count = 0;
-            foreach ($found_ids as $found_id) {
-              if (in_array($found_id, $core_ids)) {
-                $found_count++;
-              }
-            }
-            if ($found_count != count($core_ids)) {
-              $valid_core = false;
-            }
-          }
-
-          if ($valid_core && $valid_food) {
-            $foods[] = [
-              'food' => $found->id,
-              'confidence' => $confidence,
-            ];
-          }
-        }
-      }
-
-      if (count($foods)) {
-        if (count($foods) > 1) {
-          $a1 = [];
-          $a2 = [];
-          foreach ($foods as $key => $val) {
-            $a1[$key] = $val['confidence'];
-            $a2[$key] = $val['food'];
-          }
-          array_multisort($a1, SORT_DESC, $a2, SORT_DESC, $foods);
-        }
-
-        $foods = $foods[0];
+      if (count($foods) && $foods['food']) {
         $food = Food::find($foods['food']);
         $food_confidence = $foods['confidence'];
       }
 
+      //find missing ingredients
       if ($food) {
 
         $food_id = $food->id;
@@ -233,11 +189,12 @@ class ApiController extends Controller
 
         $ing_found = $food->get_ingredients_info([
           'restaurant_parent_id' => $restaurant->restaurant_parent_id,
-          'ingredients' => $ingredients_found,
+          'predictions' => $predictions,
         ]);
+
         $ing_missing = $food->missing_ingredients([
           'restaurant_parent_id' => $restaurant->restaurant_parent_id,
-          'ingredients' => $ingredients_found,
+          'ingredients' => $ing_found,
         ]);
       }
     }

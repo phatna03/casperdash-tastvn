@@ -5,7 +5,10 @@ use Illuminate\Support\Facades\Storage;
 //lib
 use App\Api\SysApp;
 use App\Models\Restaurant;
+use App\Models\RestaurantParent;
 use App\Models\RestaurantFoodScan;
+use App\Models\Food;
+use App\Models\Ingredient;
 
 class SysRobo
 {
@@ -222,5 +225,149 @@ class SysRobo
       }
     }
 
+  }
+
+  public static function ingredients_compact($pars = [])
+  {
+    $arr = [];
+    $existed = [];
+
+    if (count($pars)) {
+      foreach ($pars as $prediction) {
+        $prediction = (array)$prediction;
+
+        $ingredient = Ingredient::whereRaw('LOWER(name) LIKE ?', strtolower(trim($prediction['class'])))
+          ->first();
+        if ($ingredient) {
+
+          if (in_array($ingredient->id, $existed)) {
+            foreach ($arr as $k => $v) {
+              if ($v['id'] == $ingredient->id) {
+                $arr[$k]['quantity'] += 1;
+              }
+            }
+          } else {
+            $arr[] = [
+              'id' => $ingredient->id,
+              'quantity' => 1,
+            ];
+          }
+
+          $existed[] = $ingredient->id;
+        }
+      }
+    }
+
+    return $arr;
+  }
+
+  public static function foods_find($pars = [])
+  {
+    $sys_app = new SysApp();
+
+    $arr = [];
+
+    $debug = isset($pars['debug']) ? (bool)$pars['debug'] : false;
+    $restaurant_parent_id = isset($pars['restaurant_parent_id']) ? (int)$pars['restaurant_parent_id'] : 0;
+    $restaurant_parent = RestaurantParent::find($restaurant_parent_id);
+
+    $predictions = isset($pars['predictions']) ? (array)$pars['predictions'] : [];
+
+
+    if (count($predictions) && $restaurant_parent) {
+
+      $ingredients_found = SysRobo::ingredients_compact($predictions);
+
+      foreach ($predictions as $prediction) {
+
+        $confidence = (int)($prediction['confidence'] * 100);
+        $class = strtolower(trim($prediction['class']));
+
+        $food = Food::where('deleted', 0)
+          ->whereRaw('LOWER(name) LIKE ?', $class)
+          ->first();
+
+        if ($debug) {
+          var_dump('***** FOOD? = ' . ($food ? $food->id . ' - ' . $food->name : 0));
+        }
+
+        if ($debug && $food) {
+          var_dump('***** FOOD SERVE? = ' . $restaurant_parent->food_serve($food));
+        }
+
+        if ($food && $restaurant_parent->food_serve($food)) {
+
+          //check valid ingredient
+          $valid_food = true;
+          $food_ingredients = $food->get_ingredients([
+            'restaurant_parent_id' => $restaurant_parent_id,
+          ]);
+          if (!count($food_ingredients)) {
+            $valid_food = false;
+          }
+
+          //check core ingredient
+          $valid_core = true;
+          $core_ids = $food->get_ingredients_core([
+            'restaurant_parent_id' => $restaurant_parent_id,
+            'ingredient_id_only' => 1,
+          ]);
+          if (count($core_ids)) {
+            $found_ids = array_column($ingredients_found, 'id');
+            $found_count = 0;
+            foreach ($found_ids as $found_id) {
+              if (in_array($found_id, $core_ids)) {
+                $found_count++;
+              }
+            }
+            if ($found_count != count($core_ids)) {
+              $valid_core = false;
+            }
+          }
+
+          if ($debug) {
+            var_dump('***** FOODS VALID? = ' . $valid_core . ' && ' . $valid_food);
+          }
+
+          if ($valid_core && $valid_food) {
+            $arr[] = [
+              'food' => $food->id,
+              'confidence' => $confidence,
+            ];
+          }
+        }
+      }
+    }
+
+    return $arr;
+  }
+
+  public static function foods_valid($arr = [])
+  {
+    $food_id = 0;
+    $food_confidence = 0;
+
+    if (count($arr)) {
+
+      if (count($arr) > 1) {
+        $a1 = [];
+        $a2 = [];
+        foreach ($arr as $key => $val) {
+          $a1[$key] = $val['confidence'];
+          $a2[$key] = $val['food'];
+        }
+        array_multisort($a1, SORT_DESC, $a2, SORT_DESC, $arr);
+      }
+
+      $arr = $arr[0];
+
+      $food_id = $arr['food'];
+      $food_confidence = $arr['confidence'];
+    }
+
+    return [
+      'food' => $food_id,
+      'confidence' => $food_confidence,
+    ];
   }
 }

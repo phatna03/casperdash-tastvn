@@ -541,30 +541,70 @@ class Food extends Model
 
   public function get_ingredients_info($pars)
   {
-    $ingredients = isset($pars['ingredients']) ? (array)$pars['ingredients'] : [];
+    $debug = isset($pars['debug']) ? (bool)$pars['debug'] : false;
+
+    $predictions = isset($pars['predictions']) ? (array)$pars['predictions'] : [];
     $restaurant_parent_id = isset($pars['restaurant_parent_id']) ? (int)$pars['restaurant_parent_id'] : 0;
 
     $arr = [];
+    $ids = [];
 
-    if (count($ingredients) && $restaurant_parent_id) {
-      foreach ($ingredients as $ing) {
-        $ingredient = Ingredient::find($ing['id']);
+    if (count($predictions) && $restaurant_parent_id) {
 
-        $row = FoodIngredient::where('food_id', $this->id)
-          ->where('ingredient_id', $ingredient->id)
-          ->where('restaurant_parent_id', $restaurant_parent_id)
+      $temps = [];
+      foreach ($predictions as $prediction) {
+        $temps[] = [
+          'ingredient' => strtolower(trim($prediction['class'])),
+          'confidence' => round($prediction['confidence'] * 100),
+        ];
+      }
+
+      if ($debug) {
+        var_dump('+++++ ING COMPACT?');
+        var_dump($temps);
+      }
+
+      foreach ($temps as $temp) {
+
+        $ingredient = Ingredient::where('deleted', 0)
+          ->whereRaw('LOWER(name) LIKE ?', $temp['ingredient'])
           ->first();
-        if (!$row) {
-          continue;
+
+        if ($debug) {
+          var_dump('***** INGREDIENT? = ' . ($ingredient ? $ingredient->id . ' - ' . $ingredient->name : 0));
         }
 
-        $arr[] = [
-          'id' => $ing['id'],
-          'quantity' => $ing['quantity'],
-          'name' => $ingredient->name,
-          'name_vi' => $ingredient->name_vi,
-          'type' => $row ? $row->ingredient_type : 'additive',
-        ];
+        if ($ingredient) {
+          $row = FoodIngredient::where('deleted', 0)
+            ->where('food_id', $this->id)
+            ->where('ingredient_id', $ingredient->id)
+            ->where('restaurant_parent_id', $restaurant_parent_id)
+            ->where('confidence', '<=', $temp['confidence'])
+            ->first();
+
+          if ($debug) {
+            var_dump('***** INGREDIENT VALID? = ' . ($row ? $row->id . ' - ' . $temp['confidence'] . '%' : 0));
+          }
+
+          if ($row) {
+
+            if (count($ids) && in_array($ingredient->id, $ids)) {
+              $arr[$ingredient->id]['quantity'] = $arr[$ingredient->id]['quantity'] + 1;
+            } else {
+              $arr[$ingredient->id] = [
+                'id' => $ingredient->id,
+                'quantity' => 1,
+                'name' => $ingredient->name,
+                'name_vi' => $ingredient->name_vi,
+                'type' => $row ? $row->ingredient_type : 'additive',
+              ];
+            }
+
+            if (!in_array($ingredient->id, $ids)) {
+              $ids[] = $ingredient->id;
+            }
+          }
+        }
       }
     }
 

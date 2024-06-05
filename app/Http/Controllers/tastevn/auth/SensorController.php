@@ -454,7 +454,7 @@ class SensorController extends Controller
     $apid = (array)json_decode($row->rbf_api, true);
     if (count($apid)) {
 
-      $founds = $this->_sys_app->sys_ingredients_compact($apid['predictions']);
+      $founds = SysRobo::ingredients_compact($apid['predictions']);
       if (count($founds)) {
         foreach ($founds as $temp) {
           $ing = Ingredient::find((int)$temp['id']);
