@@ -1,8 +1,8 @@
-<table class="table-responsive table-bordered w-100">
+<table class="table-responsive acm-table table-bordered w-100">
   <tr>
     <th class="text-center align-middle" rowspan="4">Dishes</th>
     <th class="text-center align-middle" colspan="5">Robot found dishes</th>
-    <th class="text-center align-middle" rowspan="4">Robot not<br/> found dish</th>
+    <th class="text-center align-middle" rowspan="4">Robot not<br/> found dishes</th>
     <th class="text-center align-middle" rowspan="4">Total<br/> points</th>
     <th class="text-center align-middle" rowspan="4">Points<br/> achieved</th>
     <th class="text-center align-middle" rowspan="4">Rate<br/> (%)</th>
@@ -51,12 +51,12 @@
       @endif
     </td>
     <td class="text-center">
-      @if($item['ing_miss_wrong_point'])
+      @if($item['ing_miss_wrong_point'] > 0)
         <div class="fnumber text-dark">{{$item['ing_miss_wrong_point']}}</div>
       @endif
     </td>
     <td class="text-center">
-      @if($item['ing_miss_wrong_failed'])
+      @if($item['ing_miss_wrong_failed'] > 0)
         <div class="fnumber text-dark">{{$item['ing_miss_wrong_failed']}}</div>
       @endif
     </td>

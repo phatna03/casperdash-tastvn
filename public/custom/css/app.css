@@ -454,6 +454,10 @@
   font-style: italic;
 }
 
+.acm-table tr:hover td {
+  background-color: #e0e0fc;
+}
+
 #custCarousel .carousel-indicators {
   position: static;
   margin-top: 20px;

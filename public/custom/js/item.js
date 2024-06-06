@@ -2597,6 +2597,8 @@ function report_load(itd) {
 
       wrap.empty().append(response.data.html);
 
+      $('#not_found_dishes').text(response.data.not_found);
+
     })
     .catch(error => {
 

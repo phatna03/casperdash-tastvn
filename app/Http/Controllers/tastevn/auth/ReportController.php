@@ -204,6 +204,7 @@ class ReportController extends Controller
     return response()->json([
       'status' => true,
       'html' => $html,
+      'not_found' => $row->total_photos - $row->total_points,
     ], 200);
   }
 

@@ -12,8 +12,12 @@
   </h4>
 
   <div class="card">
-    <div class="card-header border-bottom">
-      <h5 class="card-title m-0 text-uppercase">Report Information</h5>
+    <div class="card-header border-bottom acm-clearfix">
+      <div class="acm-float-right acm-ml-px-5">
+        <div>Robot not found dishes: <b class="fw-bold text-dark" id="not_found_dishes"></b></div>
+      </div>
+
+      <h5 class="card-title m-0 text-uppercase overflow-hidden">Report Information</h5>
     </div>
     <div class="card-body" id="wrap-datas">
 
