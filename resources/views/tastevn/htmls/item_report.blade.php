@@ -37,12 +37,12 @@
     <td class="text-dark">{{$stt . '. ' . $item['food_name']}}</td>
     <td class="text-center">
       @if($item['ing_full'])
-        <div class="fnumber text-dark cursor-pointer">{{$item['ing_full']}}</div>
+        <div class="fnumber text-primary cursor-pointer">{{$item['ing_full']}}</div>
       @endif
     </td>
     <td class="text-center">
       @if($item['ing_miss_right'])
-        <div class="fnumber text-dark cursor-pointer">{{$item['ing_miss_right']}}</div>
+        <div class="fnumber text-primary cursor-pointer">{{$item['ing_miss_right']}}</div>
       @endif
     </td>
     <td class="text-center">
@@ -52,7 +52,7 @@
     </td>
     <td class="text-center">
       @if($item['ing_miss_wrong_point'] > 0)
-        <div class="fnumber text-dark cursor-pointer">{{$item['ing_miss_wrong_point']}}</div>
+        <div class="fnumber text-primary cursor-pointer">{{$item['ing_miss_wrong_point']}}</div>
       @endif
     </td>
     <td class="text-center">
@@ -72,7 +72,7 @@
     </td>
     <td class="text-center">
       @if($item['total_points'])
-        <div class="nfnumber text-dark">{{$item['point']}}</div>
+        <div class="nfnumber text-primary">{{$item['point']}}</div>
       @endif
     </td>
     <td class="text-center">

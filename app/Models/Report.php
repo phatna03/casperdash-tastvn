@@ -52,11 +52,14 @@ class Report extends Model
       ->select('report_foods.food_id as food_id', 'foods.name as food_name',
         'report_foods.total_photos', 'report_foods.total_points', 'report_foods.point',
       )
+      ->selectRaw('round(( report_foods.point/report_foods.total_points * 100 ),2) AS percentage')
       ->leftJoin('foods', 'foods.id', '=', 'report_foods.food_id')
       ->where('report_foods.report_id', $this->id)
+//      ->orderBy('report_foods.total_photos', 'desc')
+//      ->orderBy('report_foods.total_points', 'desc')
+//      ->orderBy('report_foods.point', 'desc')
+      ->orderBy('percentage', 'desc')
       ->orderBy('report_foods.total_photos', 'desc')
-      ->orderBy('report_foods.total_points', 'desc')
-      ->orderBy('report_foods.point', 'desc')
       ->orderByRaw('TRIM(LOWER(foods.name))')
       ->get();
     if (count($rows)) {
