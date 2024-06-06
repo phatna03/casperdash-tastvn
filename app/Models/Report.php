@@ -112,7 +112,7 @@ class Report extends Model
           ->where('restaurant_food_scans.status', 'failed')
           ->where('report_photos.status', 'failed')
           ->where('report_photos.reporting', 0)
-          ->count();
+          ->sum('report_photos.point');
 
         $items[] = [
           'food_id' => $row['food_id'],
