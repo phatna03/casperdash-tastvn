@@ -45,21 +45,7 @@ class TesterController extends Controller
     $sys_app = new SysApp();
     $restaurant = Restaurant::find(5);
 
-    $select = RestaurantFoodScan::where('deleted', 0)
-      ->whereIn('restaurant_id', [5, 6])
-      ->whereDate('time_photo', '>=', '2024-05-01')
-      ->where('sys_confidence', 0)
-      ->orderBy('id', 'asc')
-      ->limit(6);
-    $rows = $select->get();
 
-    foreach ($rows as $row) {
-      var_dump($row->id);
-
-      $img_url = $row->get_photo();
-
-      var_dump(!@getimagesize($img_url));
-    }
 
 //    $row = RestaurantFoodScan::find(20764);
 //

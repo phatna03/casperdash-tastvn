@@ -71,6 +71,7 @@ function restaurant_edit(evt, frm) {
 
       datatable_refresh();
 
+      form_close(form);
     })
     .catch(error => {
       var restoreModal = false;
@@ -93,9 +94,7 @@ function restaurant_edit(evt, frm) {
       // }
     })
     .then(() => {
-
       form_loading(form, false);
-      form_close(form);
     });
 
   return false;
@@ -224,6 +223,7 @@ function restaurant_food_import(evt, frm) {
 
       datatable_refresh();
 
+      form_close(form);
     })
     .catch(error => {
       if (error.response.data && Object.values(error.response.data).length) {
@@ -233,9 +233,7 @@ function restaurant_food_import(evt, frm) {
       }
     })
     .then(() => {
-
       form_loading(form, false);
-      form_close(form);
     });
 
   return false;
@@ -401,6 +399,7 @@ function sensor_edit(evt, frm) {
 
       datatable_refresh();
 
+      form_close(form);
     })
     .catch(error => {
       var restoreModal = false;
@@ -424,9 +423,7 @@ function sensor_edit(evt, frm) {
 
     })
     .then(() => {
-
       form_loading(form, false);
-      form_close(form);
     });
 
   return false;
@@ -723,7 +720,7 @@ function sensor_food_scan_update(evt, frm) {
 
       message_from_toast('success', acmcfs.message_title_success, acmcfs.message_description_success_add, true);
       sensor_food_scan_info_rebind(view_current);
-
+      form_close(form);
     })
     .catch(error => {
       if (error.response.data && Object.values(error.response.data).length) {
@@ -733,9 +730,7 @@ function sensor_food_scan_update(evt, frm) {
       }
     })
     .then(() => {
-
       form_loading(form, false);
-      form_close(form);
     });
 
   return false;
@@ -1126,6 +1121,7 @@ function ingredient_edit(evt, frm) {
 
       datatable_refresh();
 
+      form_close(form);
     })
     .catch(error => {
       var restoreModal = false;
@@ -1149,9 +1145,7 @@ function ingredient_edit(evt, frm) {
 
     })
     .then(() => {
-
       form_loading(form, false);
-      form_close(form);
     });
 
   return false;
@@ -1230,6 +1224,7 @@ function food_category_edit(evt, frm) {
 
       datatable_refresh();
 
+      form_close(form);
     })
     .catch(error => {
       var restoreModal = false;
@@ -1253,9 +1248,7 @@ function food_category_edit(evt, frm) {
 
     })
     .then(() => {
-
       form_loading(form, false);
-      form_close(form);
     });
 
   return false;
@@ -1337,6 +1330,7 @@ function text_edit(evt, frm) {
 
       datatable_refresh();
 
+      form_close(form);
     })
     .catch(error => {
       var restoreModal = false;
@@ -1360,9 +1354,7 @@ function text_edit(evt, frm) {
 
     })
     .then(() => {
-
       form_loading(form, false);
-      form_close(form);
     });
 
   return false;
@@ -1552,6 +1544,7 @@ function user_edit(evt, frm) {
 
       datatable_refresh();
 
+      form_close(form);
     })
     .catch(error => {
       var restoreModal = false;
@@ -1575,9 +1568,7 @@ function user_edit(evt, frm) {
 
     })
     .then(() => {
-
       form_loading(form, false);
-      form_close(form);
     });
 
   return false;
@@ -2080,6 +2071,7 @@ function food_edit(evt, frm) {
 
       datatable_refresh();
 
+      form_close(form);
     })
     .catch(error => {
       if (error.response.data && Object.values(error.response.data).length) {
@@ -2089,9 +2081,7 @@ function food_edit(evt, frm) {
       }
     })
     .then(() => {
-
       form_loading(form, false);
-      form_close(form);
     });
 
   return false;
@@ -2437,7 +2427,6 @@ function report_add(evt, frm) {
     name: form.find('input[name=name]').val(),
     dates: form.find('input[name=dates]').val(),
     restaurant_parent_id: form.find('select[name=restaurant_parent_id]').val(),
-    foods: form.find('select[name=foods]').val(),
   })
     .then(response => {
 
@@ -2465,5 +2454,136 @@ function report_add(evt, frm) {
 
   return false;
 }
+function report_edit_prepare(ele) {
+  var tr = $(ele).closest('tr');
+  var form = $('#offcanvas_edit_item form');
 
+  form.find('input[name=name]').val('');
 
+  form.find('input[name=item]').val(tr.attr('data-id'));
+  form.find('input[name=name]').val(tr.attr('data-name'));
+  form.find('select[name=restaurant_parent_id]').selectize()[0].selectize.setValue(tr.attr('data-restaurant_parent_id'));
+
+  form.find('input[name=dates]').daterangepicker({
+    timePicker: true,
+    timePickerIncrement: 30,
+    locale: {
+      format: 'DD/MM/YYYY HH:mm',
+    },
+    timePicker24Hour: true,
+    startDate: input_date_time(tr.attr('data-date_from')),
+    endDate: input_date_time(tr.attr('data-date_to')),
+  });
+
+  setTimeout(function () {
+    form.find('input[name=name]').focus();
+  }, acmcfs.timeout_quick);
+}
+function report_edit(evt, frm) {
+  evt.preventDefault();
+  var form = $(frm);
+  form_loading(form);
+
+  const formData = new FormData();
+  formData.append("item", form.find('input[name=item]').val());
+  formData.append("name", form.find('input[name=name]').val());
+  formData.append("dates", form.find('input[name=dates]').val());
+  formData.append("restaurant_parent_id", form.find('select[name=restaurant_parent_id]').val());
+
+  axios.post('/admin/report/update', formData)
+    .then(response => {
+
+      message_from_toast('success', acmcfs.message_title_success, acmcfs.message_description_success_update, true);
+
+      datatable_refresh();
+
+      form_close(form);
+    })
+    .catch(error => {
+      if (error.response.data && Object.values(error.response.data).length) {
+        Object.values(error.response.data).forEach(function (v, k) {
+          message_from_toast('error', acmcfs.message_title_error, v);
+        });
+      }
+    })
+    .then(() => {
+      form_loading(form, false);
+    });
+
+  return false;
+}
+function report_delete_confirm(ele) {
+  var tr = $(ele).closest('tr');
+  var popup = $('#modal_delete_item');
+
+  popup.find('input[name=item]').val(tr.attr('data-id'));
+}
+function report_delete(ele) {
+  var popup = $(ele).closest('.modal');
+  form_loading(popup);
+
+  axios.post('/admin/report/delete', {
+    item: popup.find('input[name=item]').val(),
+  })
+    .then(response => {
+
+      message_from_toast('success', acmcfs.message_title_success, acmcfs.message_description_success_update, true);
+
+      datatable_refresh();
+
+      form_close(popup);
+    })
+    .catch(error => {
+
+      if (error.response.data && Object.values(error.response.data).length) {
+        Object.values(error.response.data).forEach(function (v, k) {
+          message_from_toast('error', acmcfs.message_title_error, v);
+        });
+      }
+
+    })
+    .then(() => {
+      form_loading(popup, false);
+    });
+
+  return false;
+}
+function report_start_confirm(ele) {
+  var tr = $(ele).closest('tr');
+  var popup = $('#modal_start_item');
+
+  popup.find('input[name=item]').val(tr.attr('data-id'));
+}
+function report_start(ele) {
+  var popup = $(ele).closest('.modal');
+  form_loading(popup);
+
+  var itd = popup.find('input[name=item]').val();
+
+  axios.post('/admin/report/start', {
+    item: itd,
+  })
+    .then(response => {
+
+      message_from_toast('success', acmcfs.message_title_success, acmcfs.message_description_success_update, true);
+
+      report_info(itd);
+    })
+    .catch(error => {
+
+      if (error.response.data && Object.values(error.response.data).length) {
+        Object.values(error.response.data).forEach(function (v, k) {
+          message_from_toast('error', acmcfs.message_title_error, v);
+        });
+      }
+
+    })
+    .then(() => {
+      form_loading(popup, false);
+    });
+
+  return false;
+}
+function report_info(itd) {
+  page_url(acmcfs.link_base_url + '/admin/report/info/' + itd);
+}

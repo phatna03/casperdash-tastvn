@@ -38,6 +38,7 @@ return new class extends Migration {
         $table->bigInteger('restaurant_parent_id');
         $table->dateTime('date_from');
         $table->dateTime('date_to');
+        $table->bigInteger('total_foods')->default(0);
         $table->bigInteger('total_photos')->default(0);
         $table->bigInteger('total_points')->default(0);
         $table->decimal('point')->default(0);

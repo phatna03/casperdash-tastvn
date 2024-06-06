@@ -11,15 +11,7 @@ use Validator;
 use App\Api\SysApp;
 use App\Api\SysRobo;
 //model
-use App\Models\User;
-use App\Models\Restaurant;
-use App\Models\RestaurantAccess;
-use App\Models\RestaurantFoodScan;
-use App\Models\Food;
-use App\Models\FoodIngredient;
-use App\Models\Ingredient;
-use App\Models\RestaurantFood;
-use App\Models\RestaurantParent;
+use App\Models\Report;
 
 class ReportController extends Controller
 {
@@ -57,5 +49,128 @@ class ReportController extends Controller
 
     return view('tastevn.pages.reports', ['pageConfigs' => $pageConfigs]);
   }
+
+  public function store(Request $request)
+  {
+    $values = $request->post();
+
+    //required
+    $validator = Validator::make($values, [
+      'name' => 'required|string',
+      'restaurant_parent_id' => 'required',
+      'dates' => 'required',
+    ]);
+    if ($validator->fails()) {
+      return response()->json($validator->errors(), 422);
+    }
+
+    $dates = $this->_sys_app->parse_date_range($values['dates']);
+
+    $row = Report::create([
+      'name' => trim($values['name']),
+      'restaurant_parent_id' => (int)$values['restaurant_parent_id'],
+      'date_from' => $dates['time_from'],
+      'date_to' => $dates['time_to'],
+    ]);
+
+    return response()->json([
+      'status' => true,
+      'item' => $row->name,
+    ], 200);
+  }
+
+  public function update(Request $request)
+  {
+    $values = $request->post();
+
+    //required
+    $validator = Validator::make($values, [
+      'item' => 'required',
+      'name' => 'required|string',
+      'restaurant_parent_id' => 'required',
+      'dates' => 'required',
+    ]);
+    if ($validator->fails()) {
+      return response()->json($validator->errors(), 422);
+    }
+
+    $row = Report::findOrFail((int)$values['item']);
+    if (!$row) {
+      return response()->json([
+        'error' => 'Invalid item'
+      ], 422);
+    }
+
+    $dates = $this->_sys_app->parse_date_range($values['dates']);
+
+    $row->update([
+      'name' => trim($values['name']),
+      'restaurant_parent_id' => (int)$values['restaurant_parent_id'],
+      'date_from' => $dates['time_from'],
+      'date_to' => $dates['time_to'],
+    ]);
+
+    return response()->json([
+      'status' => true,
+      'item' => $row->name,
+    ], 200);
+  }
+
+  public function delete(Request $request)
+  {
+    $values = $request->post();
+
+    //required
+    $validator = Validator::make($values, [
+      'item' => 'required',
+    ]);
+    if ($validator->fails()) {
+      return response()->json($validator->errors(), 422);
+    }
+
+    $row = Report::findOrFail((int)$values['item']);
+    if (!$row) {
+      return response()->json([
+        'error' => 'Invalid item'
+      ], 422);
+    }
+
+    $row->update([
+      'deleted' => $this->_viewer->id,
+    ]);
+
+    return response()->json([
+      'status' => true,
+      'item' => $row->name,
+    ], 200);
+  }
+
+  public function start(Request $request)
+  {
+    $values = $request->post();
+
+    //required
+    $validator = Validator::make($values, [
+      'item' => 'required',
+    ]);
+    if ($validator->fails()) {
+      return response()->json($validator->errors(), 422);
+    }
+
+    $row = Report::findOrFail((int)$values['item']);
+    if (!$row) {
+      return response()->json([
+        'error' => 'Invalid item'
+      ], 422);
+    }
+
+    $row->start();
+
+    return response()->json([
+      'status' => true,
+      'item' => $row->name,
+    ], 200);
+  }
+
 
 }
