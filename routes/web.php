@@ -327,6 +327,7 @@ Route::post('/admin/report/store', [ReportController::class, 'store']);
 Route::post('/admin/report/update', [ReportController::class, 'update']);
 Route::post('/admin/report/delete', [ReportController::class, 'delete']);
 Route::get('/admin/report/info/{id}', [ReportController::class, 'show']);
+Route::post('/admin/report/table', [ReportController::class, 'table']);
 Route::post('/admin/report/start', [ReportController::class, 'start']);
 //datatable
 Route::get('/datatable/report', function (Request $request) {

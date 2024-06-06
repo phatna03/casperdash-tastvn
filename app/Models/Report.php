@@ -44,6 +44,51 @@ class Report extends Model
     return RestaurantParent::find($this->restaurant_parent_id);
   }
 
+  public function get_items()
+  {
+    $items = [];
+
+    $rows = ReportFood::query('report_foods')
+      ->select('report_foods.food_id as food_id', 'foods.name as food_name',
+        'report_foods.total_photos', 'report_foods.total_points', 'report_foods.point',
+      )
+      ->leftJoin('foods', 'foods.id', '=', 'report_foods.food_id')
+      ->where('report_foods.report_id', $this->id)
+      ->orderBy('report_foods.total_photos', 'desc')
+      ->orderBy('report_foods.total_points', 'desc')
+      ->orderBy('report_foods.point', 'desc')
+      ->orderByRaw('TRIM(LOWER(foods.name)) + 0')
+      ->get();
+    if (count($rows)) {
+      foreach ($rows as $row) {
+
+        $ing_full = 0;
+        $ing_miss_right = 0;
+        $ing_miss_wrong_total = 0;
+        $ing_miss_wrong_point = 0;
+        $ing_miss_wrong_failed = 0;
+        $not_found = 0;
+
+        $items[] = [
+          'food_id' => $row['food_id'],
+          'food_name' => $row['food_name'],
+          'total_photos' => $row['total_photos'],
+          'total_points' => $row['total_points'],
+          'point' => $row['point'],
+
+          'ing_full' => $ing_full,
+          'ing_miss_right' => $ing_miss_right,
+          'ing_miss_wrong_total' => $ing_miss_wrong_total,
+          'ing_miss_wrong_point' => $ing_miss_wrong_point,
+          'ing_miss_wrong_failed' => $ing_miss_wrong_failed,
+          'not_found' => $not_found,
+        ];
+      }
+    }
+
+    return $items;
+  }
+
   public function start()
   {
     $sensors = Restaurant::select('id')

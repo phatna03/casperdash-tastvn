@@ -155,7 +155,7 @@ class ReportController extends Controller
     }
 
     $row = Report::find((int)$id);
-    if (!$row || $row->deleted) {
+    if (!$row || $row->deleted || !count($row->get_items())) {
       if ($this->_viewer->is_dev()) {
 
       } else {
@@ -176,6 +176,35 @@ class ReportController extends Controller
     ];
 
     return view('tastevn.pages.report_info', ['pageConfigs' => $pageConfigs]);
+  }
+
+  public function table(Request $request)
+  {
+    $values = $request->post();
+
+    //required
+    $validator = Validator::make($values, [
+      'item' => 'required',
+    ]);
+    if ($validator->fails()) {
+      return response()->json($validator->errors(), 422);
+    }
+
+    $row = Report::findOrFail((int)$values['item']);
+    if (!$row) {
+      return response()->json([
+        'error' => 'Invalid item'
+      ], 422);
+    }
+
+    $html = view('tastevn.htmls.item_report')
+      ->with('items', $row->get_items())
+      ->render();
+
+    return response()->json([
+      'status' => true,
+      'html' => $html,
+    ], 200);
   }
 
   public function start(Request $request)
@@ -204,6 +233,4 @@ class ReportController extends Controller
       'item' => $row->name,
     ], 200);
   }
-
-
 }

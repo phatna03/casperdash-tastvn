@@ -2587,3 +2587,26 @@ function report_start(ele) {
 function report_info(itd) {
   page_url(acmcfs.link_base_url + '/admin/report/info/' + itd);
 }
+function report_load(itd) {
+  var wrap = $('#wrap-datas');
+
+  axios.post('/admin/report/table', {
+    item: itd,
+  })
+    .then(response => {
+
+      wrap.empty().append(response.data.html);
+
+    })
+    .catch(error => {
+
+      if (error.response.data && Object.values(error.response.data).length) {
+        Object.values(error.response.data).forEach(function (v, k) {
+          message_from_toast('error', acmcfs.message_title_error, v);
+        });
+      }
+
+    });
+
+  return false;
+}
