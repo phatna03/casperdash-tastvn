@@ -145,6 +145,39 @@ class ReportController extends Controller
     ], 200);
   }
 
+  public function show(string $id, Request $request)
+  {
+    $values = $request->all();
+
+    $invalid_roles = ['user'];
+    if (in_array($this->_viewer->role, $invalid_roles)) {
+      return redirect('error/404');
+    }
+
+    $row = Report::find((int)$id);
+    if (!$row || $row->deleted) {
+      if ($this->_viewer->is_dev()) {
+
+      } else {
+        return redirect('error/404');
+      }
+    }
+
+    //search
+    $debug = isset($values['debug']) ? (int)$values['debug'] : 0;
+
+    $pageConfigs = [
+      'myLayout' => 'horizontal',
+      'hasCustomizer' => false,
+
+      'item' => $row,
+
+      'debug' => $debug,
+    ];
+
+    return view('tastevn.pages.report_info', ['pageConfigs' => $pageConfigs]);
+  }
+
   public function start(Request $request)
   {
     $values = $request->post();

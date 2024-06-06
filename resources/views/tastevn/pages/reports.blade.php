@@ -40,7 +40,7 @@
         <tr>
           <th></th>
           <th>Name</th>
-          <th>Total Photos / Dishes</th>
+          <th>Total Photos / Points / Dishes</th>
           <th>Date Range</th>
           <th class="d-none"></th>
           <th class="d-none"></th>
@@ -277,7 +277,7 @@
             } else if (full['status'] == 'done') {
               html += '<div>' +
                 '<div>' +
-                '<span class="text-dark">' + full['total_photos'] + ' / ' + full['total_dishes'] + '</span>' +
+                '<span class="text-dark">' + full['total_photos'] + ' / ' + full['total_points'] + ' / ' + full['total_foods'] + '</span>' +
                 '</div>' +
                 '<div>' +
                 '<span class="badge bg-success">' + full['status'] + '</span>' +
@@ -286,7 +286,7 @@
             } else {
               html += '<div>' +
                 '<div>' +
-                '<span class="text-dark">' + full['total_photos'] + ' / ' + full['total_foods'] + '</span>' +
+                '<span class="text-dark">' + full['total_photos'] + ' / ' + full['total_points'] + ' / ' + full['total_foods'] + '</span>' +
                 '</div>' +
                 '<div>' +
                 '<span class="badge bg-info">' + full['status'] + '</span>' +

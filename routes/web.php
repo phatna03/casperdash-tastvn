@@ -326,6 +326,7 @@ Route::get('/admin/reports', [ReportController::class, 'index']);
 Route::post('/admin/report/store', [ReportController::class, 'store']);
 Route::post('/admin/report/update', [ReportController::class, 'update']);
 Route::post('/admin/report/delete', [ReportController::class, 'delete']);
+Route::get('/admin/report/info/{id}', [ReportController::class, 'show']);
 Route::post('/admin/report/start', [ReportController::class, 'start']);
 //datatable
 Route::get('/datatable/report', function (Request $request) {
@@ -342,7 +343,7 @@ Route::get('/datatable/report', function (Request $request) {
 
   $select = App\Models\Report::query("reports")
     ->select("reports.id", "reports.name", "reports.status",
-      "reports.date_from", "reports.date_to", "reports.total_photos", "reports.total_foods",
+      "reports.date_from", "reports.date_to", "reports.total_photos", "reports.total_points", "reports.total_foods",
       "reports.restaurant_parent_id", "restaurant_parents.name as restaurant_name",
     )
     ->leftJoin('restaurant_parents', 'restaurant_parents.id', '=', 'reports.restaurant_parent_id')

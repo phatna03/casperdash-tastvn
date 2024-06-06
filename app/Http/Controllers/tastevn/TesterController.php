@@ -22,6 +22,7 @@ use App\Api\SysRobo;
 
 use App\Models\User;
 use App\Models\Restaurant;
+use App\Models\RestaurantParent;
 use App\Models\RestaurantAccess;
 use App\Models\Food;
 use App\Models\Ingredient;
@@ -34,6 +35,7 @@ use App\Models\FoodRecipe;
 use App\Models\FoodCategory;
 use App\Models\Log;
 use App\Models\SysNotification;
+use App\Models\Report;
 
 class TesterController extends Controller
 {
@@ -41,36 +43,15 @@ class TesterController extends Controller
   public function index(Request $request)
   {
     echo '<pre>';
+
     $user = Auth::user();
     $sys_app = new SysApp();
-    $restaurant = Restaurant::find(5);
 
+    $restaurant = RestaurantParent::find(1);
+    $sensor = Restaurant::find(5);
 
-
-//    $row = RestaurantFoodScan::find(20764);
-//
-//    $row->predict_food([
-//      'debug' => true,
-//
-//      'notification' => false,
-//    ]);
-
-//    $sys_app->sys_stats_count();
-
-
-//    $count = $this->clear_photos();
-//    var_dump($count);
-
-
-    //check old photos
-//    SysRobo::photo_get([
-//      'limit' => 1,
-//      'page' => 5,
-//
-//      'date' => '2024-06-02',
-//      'hour' => 10,
-//    ]);
-
+//    $report = Report::find(1);
+//    $report->start();
 
     echo '<br />';
     die('test ok...');
