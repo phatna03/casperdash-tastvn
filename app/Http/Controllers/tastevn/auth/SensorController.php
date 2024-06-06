@@ -374,7 +374,6 @@ class SensorController extends Controller
 
     if ($type == 1) {
       //re-predict
-      $row->predict_reset();
       $row->predict_food([
         'notification' => false,
       ]);

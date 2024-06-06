@@ -43,8 +43,9 @@
     var $ = jQuery.noConflict();
     $(document).ready(function() {
 
-
-
+      if (notify_realtime) {
+        clearInterval(notify_realtime);
+      }
     });
 
     function photo_check(evt, frm) {
@@ -71,8 +72,16 @@
 
           form.find('.wrap-datas .total').text(response.data.count);
 
+          setTimeout(function () {
+            form.find('.wrap-btns .btn-submit')[0].click();
+          }, 2000);
+
         })
         .catch(error => {
+
+          console.log('===========================================');
+          console.log(error);
+
           if (error.response.data && Object.values(error.response.data).length) {
             Object.values(error.response.data).forEach(function (v, k) {
               message_from_toast('error', acmcfs.message_title_error, v);
@@ -83,10 +92,6 @@
         .then(() => {
 
           form_loading(form, false);
-
-          setTimeout(function () {
-            form.find('.wrap-btns .btn-submit')[0].click();
-          }, 2000);
         });
 
       return false;

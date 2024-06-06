@@ -61,7 +61,7 @@ class ErrorController extends Controller
       ->whereDate('time_photo', '>=', '2024-05-01')
       ->where('sys_confidence', 0)
       ->orderBy('id', 'asc')
-      ->limit(12);
+      ->limit(6);
 
     $rows = $select->get();
     if (count($rows)) {
@@ -69,6 +69,26 @@ class ErrorController extends Controller
 
         //step 1= photo check
         $img_url = $row->get_photo();
+
+        if (!@getimagesize($img_url)) {
+
+          $row->update([
+            'deleted' => 1,
+          ]);
+
+          continue;
+        }
+
+        //jpg
+        $ext = array_filter(explode('.', $img_url));
+        if (count($ext) && $ext[count($ext) - 1] != 'jpg') {
+
+          $row->update([
+            'sys_confidence' => 2,
+          ]);
+
+          continue;
+        }
 
         //step 2= photo scan
         $datas = SysRobo::photo_scan($img_url, [
@@ -83,7 +103,6 @@ class ErrorController extends Controller
         ]);
 
         //step 3= photo predict
-        $row->predict_reset();
         $row->predict_food([
           'notification' => false,
         ]);
