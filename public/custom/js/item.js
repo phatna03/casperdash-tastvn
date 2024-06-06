@@ -2599,6 +2599,7 @@ function report_load(itd) {
 
       $('#not_found_dishes').text(response.data.not_found);
 
+      bind_datad($('body'));
     })
     .catch(error => {
 
