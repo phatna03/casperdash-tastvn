@@ -165,7 +165,7 @@ class UserController extends Controller
       return response()->json($validator->errors(), 422);
     }
     //invalid
-    $row = User::findOrFail((int)$values['item']);
+    $row = User::find((int)$values['item']);
     if (!$row) {
       return response()->json([
         'error' => 'Invalid item'
@@ -253,7 +253,7 @@ class UserController extends Controller
       return response()->json($validator->errors(), 422);
     }
 
-    $row = User::findOrFail((int)$values['item']);
+    $row = User::find((int)$values['item']);
     if (!$row) {
       return response()->json([
         'error' => 'Invalid item'

@@ -60,7 +60,7 @@ class ErrorController extends Controller
     $select = RestaurantFoodScan::where('deleted', 0)
       ->whereIn('restaurant_id', [5, 6])
       ->whereDate('time_photo', '>=', $date)
-      ->where('sys_confidence', 0)
+      ->where('sys_confidence', 1)
       ->orderBy('id', 'asc')
       ->limit(6);
 
@@ -95,6 +95,8 @@ class ErrorController extends Controller
         $datas = SysRobo::photo_scan($img_url, [
           'confidence' => SysRobo::_SCAN_CONFIDENCE,
           'overlap' => SysRobo::_SCAN_OVERLAP,
+
+          'version' => 33,
         ]);
 
         $row->update([
@@ -109,7 +111,7 @@ class ErrorController extends Controller
         ]);
 
         $row->update([
-          'sys_confidence' => 1,
+          'sys_confidence' => 0,
         ]);
 
         $ids[] = $row->id;
@@ -119,7 +121,7 @@ class ErrorController extends Controller
     $count = RestaurantFoodScan::where('deleted', 0)
       ->whereIn('restaurant_id', [5, 6])
       ->whereDate('time_photo', '>=', $date)
-      ->where('sys_confidence', 0)
+      ->where('sys_confidence', 1)
       ->orderBy('id', 'asc')
       ->count();
 

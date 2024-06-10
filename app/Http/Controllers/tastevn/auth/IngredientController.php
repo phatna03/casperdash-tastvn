@@ -157,7 +157,7 @@ class IngredientController extends Controller
       return response()->json($validator->errors(), 422);
     }
     //invalid
-    $row = Ingredient::findOrFail((int)$values['item']);
+    $row = Ingredient::find((int)$values['item']);
     if (!$row) {
       return response()->json([
         'error' => 'Invalid item'

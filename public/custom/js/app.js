@@ -17,6 +17,7 @@ function bind_selectize(wrap) {
       var select = $(v);
       var value = select.attr('data-value');
       var chosen = select.attr('data-chosen');
+      var restaurant_parent_id = select.attr('data-restaurant');
 
       plugins = [];
       if (select.hasClass('multi_selectize')) {
@@ -205,6 +206,45 @@ function bind_selectize(wrap) {
               type: 'post',
               data: {
                 keyword: query,
+                _token: acmcfs.var_csrf,
+              },
+              complete: function (xhr, textStatus) {
+                var rsp = xhr.responseJSON;
+
+                if (xhr.status == 200) {
+                  select.options = rsp.items;
+                  callback(rsp.items);
+
+                  if (chosen && parseInt(chosen)) {
+                    setTimeout(function () {
+                      select.selectize()[0].selectize.setValue(chosen);
+                    }, acmcfs.timeout_quick);
+                  }
+                }
+              },
+            });
+          },
+        });
+
+        select.removeClass('ajx_selectize');
+
+      } else if (value === 'restaurant_food') {
+
+        select.selectize({
+          valueField: 'id',
+          labelField: 'name',
+          searchField: 'name',
+          plugins: plugins,
+          preload: true,
+          clearCache: function (template) {
+          },
+          load: function (query, callback) {
+            $.ajax({
+              url: acmcfs.link_base_url + '/admin/restaurant/food/get',
+              type: 'post',
+              data: {
+                keyword: query,
+                restaurant_parent_id: restaurant_parent_id,
                 _token: acmcfs.var_csrf,
               },
               complete: function (xhr, textStatus) {

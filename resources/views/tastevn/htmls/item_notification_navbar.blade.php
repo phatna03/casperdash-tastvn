@@ -47,13 +47,9 @@
         </div>
       @elseif(in_array($notification->type, $type2s))
         <div class="text-dark acm-fs-13">
-          @if($rfs->confidence)
-            @if($rfs->get_food())
-              Predicted Dish: <b><span class="acm-mr-px-5 text-danger">{{$rfs->confidence}}%</span><span
-                  class="acm-mr-px-5">{{$rfs->get_food()->name}}</span></b>
-            @endif
-          @else
-            Predicted Dish: <b><span class="acm-mr-px-5">{{$rfs->get_food()->name}}</span></b>
+          @if($rfs->get_food())
+            Predicted Dish: <b><span class="acm-mr-px-5 text-danger">{{$rfs->confidence}}%</span><span
+                class="acm-mr-px-5">{{$rfs->get_food()->name}}</span></b>
           @endif
         </div>
         @php

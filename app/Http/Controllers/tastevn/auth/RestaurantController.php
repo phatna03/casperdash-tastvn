@@ -113,7 +113,7 @@ class RestaurantController extends Controller
       return response()->json($validator->errors(), 422);
     }
     //invalid
-    $row = RestaurantParent::findOrFail((int)$values['item']);
+    $row = RestaurantParent::find((int)$values['item']);
     if (!$row) {
       return response()->json([
         'error' => 'Invalid item'
@@ -177,7 +177,7 @@ class RestaurantController extends Controller
       return response()->json($validator->errors(), 422);
     }
 
-    $row = RestaurantParent::findOrFail((int)$values['item']);
+    $row = RestaurantParent::find((int)$values['item']);
     if (!$row) {
       return response()->json([
         'error' => 'Invalid item'
@@ -282,7 +282,7 @@ class RestaurantController extends Controller
       return response()->json($validator->errors(), 422);
     }
     //invalid
-    $row = RestaurantParent::findOrFail((int)$values['item']);
+    $row = RestaurantParent::find((int)$values['item']);
     if (!$row) {
       return response()->json([
         'error' => 'Invalid item'
@@ -300,6 +300,45 @@ class RestaurantController extends Controller
       'restaurant' => $row,
       'html' => $html
     ], 200);
+  }
+
+  public function food_get(Request $request)
+  {
+    $values = $request->post();
+    $keyword = isset($values['keyword']) && !empty($values['keyword']) ? $values['keyword'] : NULL;
+    $restaurant_parent_id = isset($values['restaurant_parent_id']) ? (int)$values['restaurant_parent_id'] : 0;
+    $restaurant_parent = RestaurantParent::find($restaurant_parent_id);
+
+    $items = [];
+
+    if ($restaurant_parent) {
+
+      $sensor = $restaurant_parent->get_sensors([
+        'one_sensor' => 1,
+      ]);
+
+      if ($sensor) {
+
+        $select = RestaurantFood::query('restaurant_foods')
+          ->where('restaurant_foods.restaurant_id', $sensor->id)
+          ->distinct()
+          ->select('foods.id', 'foods.name',)
+          ->where('restaurant_foods.deleted', 0)
+          ->leftJoin('foods', 'foods.id', '=', 'restaurant_foods.food_id')
+          ->leftJoin('food_categories', 'food_categories.id', '=', 'restaurant_foods.food_category_id')
+          ->orderByRaw('TRIM(LOWER(foods.name))');
+
+        if (!empty($keyword)) {
+          $select->where('foods.name', 'LIKE', "%{$keyword}%");
+        }
+
+        $items = $select->get()->toArray();
+      }
+    }
+
+    return response()->json([
+      'items' => $items,
+    ]);
   }
 
   public function food_import(Request $request)

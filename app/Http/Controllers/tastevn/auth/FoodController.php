@@ -173,7 +173,7 @@ class FoodController extends Controller
     }
 
     //invalid
-    $row = Food::findOrFail((int)$values['item']);
+    $row = Food::find((int)$values['item']);
     if (!$row) {
       return response()->json([
         'error' => 'Invalid item'
@@ -270,7 +270,7 @@ class FoodController extends Controller
     }
 
     //invalid
-    $row = Food::findOrFail((int)$values['item']);
+    $row = Food::find((int)$values['item']);
     if (!$row) {
       return response()->json([
         'error' => 'Invalid item'
@@ -353,7 +353,7 @@ class FoodController extends Controller
     }
 
     //invalid
-    $row = Food::findOrFail((int)$values['item']);
+    $row = Food::find((int)$values['item']);
     if (!$row) {
       return response()->json([
         'error' => 'Invalid item'
@@ -486,7 +486,7 @@ class FoodController extends Controller
       return response()->json($validator->errors(), 422);
     }
     //invalid
-    $row = Food::findOrFail((int)$values['item']);
+    $row = Food::find((int)$values['item']);
     if (!$row) {
       return response()->json([
         'error' => 'Invalid item'
@@ -516,7 +516,7 @@ class FoodController extends Controller
       return response()->json($validator->errors(), 422);
     }
     //invalid
-    $row = Food::findOrFail((int)$values['item']);
+    $row = Food::find((int)$values['item']);
     if (!$row) {
       return response()->json([
         'error' => 'Invalid item'
@@ -563,7 +563,7 @@ class FoodController extends Controller
       return response()->json($validator->errors(), 422);
     }
     //invalid
-    $row = Food::findOrFail((int)$values['item']);
+    $row = Food::find((int)$values['item']);
     $restaurant_parent_id = (int)$values['restaurant_parent_id'];
     if (!$row || !$restaurant_parent_id) {
       return response()->json([
@@ -596,7 +596,7 @@ class FoodController extends Controller
       return response()->json($validator->errors(), 422);
     }
     //invalid
-    $row = Food::findOrFail((int)$values['item']);
+    $row = Food::find((int)$values['item']);
     $restaurant_parent_id = (int)$values['restaurant_parent_id'];
     if (!$row || !$restaurant_parent_id) {
       return response()->json([

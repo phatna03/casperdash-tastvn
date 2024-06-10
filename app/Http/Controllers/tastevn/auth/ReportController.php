@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers\tastevn\auth;
 use App\Http\Controllers\Controller;
+use App\Models\Food;
+use App\Models\ReportPhoto;
+use App\Models\RestaurantFoodScan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
@@ -94,7 +97,7 @@ class ReportController extends Controller
       return response()->json($validator->errors(), 422);
     }
 
-    $row = Report::findOrFail((int)$values['item']);
+    $row = Report::find((int)$values['item']);
     if (!$row) {
       return response()->json([
         'error' => 'Invalid item'
@@ -128,7 +131,7 @@ class ReportController extends Controller
       return response()->json($validator->errors(), 422);
     }
 
-    $row = Report::findOrFail((int)$values['item']);
+    $row = Report::find((int)$values['item']);
     if (!$row) {
       return response()->json([
         'error' => 'Invalid item'
@@ -156,11 +159,7 @@ class ReportController extends Controller
 
     $row = Report::find((int)$id);
     if (!$row || $row->deleted || !count($row->get_items())) {
-      if ($this->_viewer->is_dev()) {
-
-      } else {
-        return redirect('error/404');
-      }
+      return redirect('error/404');
     }
 
     //search
@@ -190,7 +189,7 @@ class ReportController extends Controller
       return response()->json($validator->errors(), 422);
     }
 
-    $row = Report::findOrFail((int)$values['item']);
+    $row = Report::find((int)$values['item']);
     if (!$row) {
       return response()->json([
         'error' => 'Invalid item'
@@ -220,7 +219,7 @@ class ReportController extends Controller
       return response()->json($validator->errors(), 422);
     }
 
-    $row = Report::findOrFail((int)$values['item']);
+    $row = Report::find((int)$values['item']);
     if (!$row) {
       return response()->json([
         'error' => 'Invalid item'
@@ -232,6 +231,94 @@ class ReportController extends Controller
     return response()->json([
       'status' => true,
       'item' => $row->name,
+    ], 200);
+  }
+
+  public function photo_not_found(Request $request)
+  {
+    $values = $request->post();
+
+    //required
+    $validator = Validator::make($values, [
+      'item' => 'required',
+    ]);
+    if ($validator->fails()) {
+      return response()->json($validator->errors(), 422);
+    }
+
+    $row = Report::find((int)$values['item']);
+    if (!$row) {
+      return response()->json([
+        'error' => 'Invalid item'
+      ], 422);
+    }
+
+    $photo = ReportPhoto::where('report_id', $row->id)
+      ->where('reporting', 0)
+      ->orderBy('id', 'asc')
+      ->limit(1)
+      ->first();
+
+    $html = view('tastevn.htmls.item_report_photo_not_found')
+      ->with('rfs', $photo->get_rfs())
+      ->with('comments', $photo->get_rfs()->get_comments())
+      ->render();
+
+    return response()->json([
+      'status' => true,
+      'item' => $row,
+      'rfs_id' => $photo->get_rfs()->id,
+      'html' => $html,
+    ], 200);
+  }
+
+  public function photo_update(Request $request)
+  {
+    $values = $request->post();
+
+    //required
+    $validator = Validator::make($values, [
+      'item' => 'required',
+      'rfs' => 'required',
+    ]);
+    if ($validator->fails()) {
+      return response()->json($validator->errors(), 422);
+    }
+
+    $row = Report::find((int)$values['item']);
+    $rfs = RestaurantFoodScan::find((int)$values['rfs']);
+    if (!$row || !$rfs) {
+      return response()->json([
+        'error' => 'Invalid item'
+      ], 422);
+    }
+
+    $food = isset($values['food']) ? (int)$values['food'] : 0;
+    $point = isset($values['point']) ? (float)$values['point'] : 0;
+    $note = isset($values['note']) && !empty($values['note']) ? $values['note'] : NULL;
+
+    $food = Food::find($food);
+    if (!$food) {
+      return response()->json([
+        'error' => 'Invalid data'
+      ], 422);
+    }
+
+    $photo = ReportPhoto::where('report_id', $row->id)
+      ->where('restaurant_food_scan_id', $rfs->id)
+      ->where('reporting', 0)
+      ->first();
+    if ($photo) {
+      $photo->update([
+        'food_id' => $food->id,
+        'point' => $point,
+        'note' => $note,
+      ]);
+    }
+
+    return response()->json([
+      'status' => true,
+      'item' => $row,
     ], 200);
   }
 }

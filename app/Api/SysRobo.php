@@ -60,6 +60,10 @@ class SysRobo
     $version = $sys_app->get_setting('rbf_dataset_ver');
     $api_key = $sys_app->get_setting('rbf_api_key');
 
+    if (isset($pars['version'])) {
+      $version = (int)$pars['version'];
+    }
+
     //pars
     $confidence = isset($pars['confidence']) ? (int)$pars['confidence'] : 50;
     $overlap = isset($pars['overlap']) ? (int)$pars['overlap'] : 50;

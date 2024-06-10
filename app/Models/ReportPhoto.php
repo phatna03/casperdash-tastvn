@@ -26,5 +26,8 @@ class ReportPhoto extends Model
     return 'report_photo';
   }
 
-
+  public function get_rfs()
+  {
+    return RestaurantFoodScan::find($this->restaurant_food_scan_id);
+  }
 }

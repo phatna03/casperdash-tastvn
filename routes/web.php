@@ -227,6 +227,7 @@ Route::post('/admin/restaurant/delete', [RestaurantController::class, 'delete'])
 Route::post('/admin/restaurant/restore', [RestaurantController::class, 'restore']);
 Route::post('/admin/restaurant/selectize', [RestaurantController::class, 'selectize']);
 Route::post('/admin/restaurant/info', [RestaurantController::class, 'info']);
+Route::post('/admin/restaurant/food/get', [RestaurantController::class, 'food_get']);
 Route::post('/admin/restaurant/food/import', [RestaurantController::class, 'food_import']);
 Route::post('/admin/restaurant/food/remove', [RestaurantController::class, 'food_remove']);
 Route::post('/admin/restaurant/food/group', [RestaurantController::class, 'food_group']);
@@ -330,6 +331,9 @@ Route::post('/admin/report/delete', [ReportController::class, 'delete']);
 Route::get('/admin/report/info/{id}', [ReportController::class, 'show']);
 Route::post('/admin/report/table', [ReportController::class, 'table']);
 Route::post('/admin/report/start', [ReportController::class, 'start']);
+Route::post('/admin/report/photo/not-found', [ReportController::class, 'photo_not_found']);
+Route::post('/admin/report/photo/update', [ReportController::class, 'photo_update']);
+Route::post('/admin/report/photo/clear', [ReportController::class, 'photo_clear']);
 //datatable
 Route::get('/datatable/report', function (Request $request) {
   $values = $request->all();

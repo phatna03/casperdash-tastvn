@@ -323,7 +323,7 @@ class RoboflowController extends Controller
     $restaurant_parent = RestaurantParent::find($restaurant_parent_id);
 
     //invalid
-    $row = Food::findOrFail((int)$values['item']);
+    $row = Food::find((int)$values['item']);
     if (!$row || !$restaurant_parent) {
       return response()->json([
         'error' => 'Invalid item'

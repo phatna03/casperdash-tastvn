@@ -22,7 +22,9 @@
       <div class="acm-float-right acm-ml-px-5">
         <div>
           <span class="text-uppercase text-dark acm-fs-13 fw-bold">Robot not found dishes: </span>
-          <span class="badge bg-warning acm-fs-15 cursor-pointer" id="not_found_dishes"></span>
+          <span class="badge bg-warning acm-fs-15 cursor-pointer" id="not_found_dishes"
+            onclick="report_not_found()"
+          ></span>
         </div>
       </div>
 
@@ -30,6 +32,152 @@
     </div>
     <div class="card-body" id="wrap-datas">
 
+    </div>
+  </div>
+
+  <!-- modal not found -->
+  <div class="modal animate__animated animate__zoomIn" id="modal_not_found" aria-hidden="true">
+    <div class="modal-dialog modal-xl acm-modal-xxl" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title text-danger fw-bold">Robot not found dishes</h4>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="row">
+            <div class="col-lg-9 mb-1 position-relative">
+              <div class="p-1 sensor-wrapper wrap_datas">
+
+              </div>
+            </div>
+
+            <div class="col-lg-3 mb-1 position-relative wrap_infos">
+              <form class="p-1" onsubmit="return event.preventDefault();">
+                <div class="row">
+                  <div class="col-lg-12 mb-3 acm-text-right">
+                    <div class="wrap-btns">
+                      @include('tastevn.htmls.form_button_loading')
+                      <button type="button" class="btn btn-danger btn-ok btn-submit" onclick="report_photo_clear_prepare()">Clear Result</button>
+                      <button type="button" class="btn btn-primary btn-ok btn-submit" onclick="report_photo_update_prepare()">Submit</button>
+                    </div>
+
+                    <input type="hidden" name="rfs" />
+                    <input type="hidden" name="item" value="{{$pageConfigs['item']->id}}" />
+                  </div>
+                  <div class="col-lg-9 mb-3">
+                    <div class="form-floating form-floating-outline">
+                      <div class="form-control acm-wrap-selectize" id="failed-update-food" style="line-height: 38px;">
+                        <select class="ajx_selectize" name="food"
+                                data-value="restaurant_food"
+                                data-restaurant="{{$pageConfigs['item']->restaurant_parent_id}}"
+                                data-placeholder="dish name..."
+                        ></select>
+                      </div>
+                      <label for="failed-update-food" class="text-danger">Dish</label>
+                    </div>
+                  </div>
+                  <div class="col-lg-3 mb-3">
+                    <div class="form-floating form-floating-outline">
+                      <div class="form-control acm-wrap-selectize" id="failed-update-point">
+                        <select class="form-control" name="point"
+                                placeholder="points achieved..."
+                        >
+                          @php
+                            for($p=0; $p < 1; ):
+
+                            if ($p > 1) {
+                                break;
+                            }
+                          @endphp
+                          <option value="{{$p}}">{{$p}}</option>
+                          @php
+                            $p += 0.1;
+                            endfor;
+                          @endphp
+                        </select>
+                      </div>
+                      <label for="failed-update-point" class="text-danger">Point</label>
+                    </div>
+                  </div>
+                  <div class="col-lg-12 mb-3">
+                    <div class="form-floating form-floating-outline">
+                      <div class="form-control acm-wrap-selectize" id="failed-update-note">
+                        <textarea name="note" class="form-control h-px-300" placeholder="take note..."></textarea>
+                      </div>
+                      <label for="failed-update-note" class="text-danger">Note</label>
+                    </div>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <div class="acm-modal-arrow acm-modal-arrow-prev" onclick="report_not_found_action()">
+          <img src="{{url('custom/img/arrow_left.png')}}" />
+        </div>
+        <div class="acm-modal-arrow acm-modal-arrow-next" onclick="report_not_found_action(1)">
+          <img src="{{url('custom/img/arrow_right.png')}}" />
+        </div>
+
+        <input type="hidden" name="report_id" value="{{$pageConfigs['item']->id}}" />
+        <input type="hidden" name="popup_view_ids" />
+        <input type="hidden" name="popup_view_id_itm" />
+      </div>
+    </div>
+  </div>
+  <!-- modal confirm to photo update -->
+  <div class="modal fade modal-second" id="modal_photo_update" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title">Confirmation?</h4>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="row">
+            <div class="col mb-12 mt-2">
+              <div class="alert alert-danger">Are you sure you want to update result for this photo?</div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <div class="wrap-btns">
+            @include('tastevn.htmls.form_button_loading')
+            <button type="button" class="btn btn-primary btn-ok btn-submit acm-float-right" onclick="report_photo_update(this)">Submit</button>
+            <button type="button" class="btn btn-outline-secondary btn-ok btn-cancel" data-bs-dismiss="modal">Cancel</button>
+          </div>
+
+          <input type="hidden" name="item" />
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- modal confirm to photo clear -->
+  <div class="modal fade modal-second" id="modal_photo_clear" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title">Confirmation?</h4>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="row">
+            <div class="col mb-12 mt-2">
+              <div class="alert alert-danger">Are you sure you want to clear updated result for this photo?</div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <div class="wrap-btns">
+            @include('tastevn.htmls.form_button_loading')
+            <button type="button" class="btn btn-primary btn-ok btn-submit acm-float-right" onclick="report_photo_clear(this)">Submit</button>
+            <button type="button" class="btn btn-outline-secondary btn-ok btn-cancel" data-bs-dismiss="modal">Cancel</button>
+          </div>
+
+          <input type="hidden" name="item" />
+        </div>
+      </div>
     </div>
   </div>
 

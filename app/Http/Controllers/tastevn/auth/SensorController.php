@@ -126,7 +126,7 @@ class SensorController extends Controller
       return response()->json($validator->errors(), 422);
     }
     //invalid
-    $row = Restaurant::findOrFail((int)$values['item']);
+    $row = Restaurant::find((int)$values['item']);
     if (!$row) {
       return response()->json([
         'error' => 'Invalid item'
@@ -191,7 +191,7 @@ class SensorController extends Controller
       return response()->json($validator->errors(), 422);
     }
 
-    $row = Restaurant::findOrFail((int)$values['item']);
+    $row = Restaurant::find((int)$values['item']);
     if (!$row) {
       return response()->json([
         'error' => 'Invalid item'
@@ -335,7 +335,7 @@ class SensorController extends Controller
       return response()->json($validator->errors(), 422);
     }
 
-    $row = RestaurantFoodScan::findOrFail((int)$values['item']);
+    $row = RestaurantFoodScan::find((int)$values['item']);
     if (!$row) {
       return response()->json([
         'error' => 'Invalid item'
@@ -363,7 +363,7 @@ class SensorController extends Controller
       return response()->json($validator->errors(), 422);
     }
     //invalid
-    $row = RestaurantFoodScan::findOrFail((int)$values['item']);
+    $row = RestaurantFoodScan::find((int)$values['item']);
     if (!$row) {
       return response()->json([
         'error' => 'Invalid item'
@@ -419,7 +419,7 @@ class SensorController extends Controller
       return response()->json($validator->errors(), 422);
     }
     //invalid
-    $row = RestaurantFoodScan::findOrFail((int)$values['item']);
+    $row = RestaurantFoodScan::find((int)$values['item']);
     if (!$row) {
       return response()->json([
         'error' => 'Invalid item'
@@ -615,14 +615,14 @@ class SensorController extends Controller
       return response()->json($validator->errors(), 422);
     }
     //invalid
-    $row = Restaurant::findOrFail((int)$values['item']);
+    $row = Restaurant::find((int)$values['item']);
     if (!$row) {
       return response()->json([
         'error' => 'Invalid item'
       ], 422);
     }
 
-    $food = Food::findOrFail((int)$values['food']);
+    $food = Food::find((int)$values['food']);
     if (!$food) {
       return response()->json([
         'error' => 'Invalid item'
@@ -685,7 +685,7 @@ class SensorController extends Controller
       return response()->json($validator->errors(), 422);
     }
     //invalid
-    $row = RestaurantFoodScan::findOrFail((int)$values['item']);
+    $row = RestaurantFoodScan::find((int)$values['item']);
     if (!$row) {
       return response()->json([
         'error' => 'Invalid item'
@@ -819,8 +819,8 @@ class SensorController extends Controller
       return response()->json($validator->errors(), 422);
     }
     //invalid
-    $rfs = RestaurantFoodScan::findOrFail((int)$values['rfs']);
-    $food = Food::findOrFail((int)$values['food']);
+    $rfs = RestaurantFoodScan::find((int)$values['rfs']);
+    $food = Food::find((int)$values['food']);
     if (!$rfs || !$food) {
       return response()->json([
         'error' => 'Invalid item'
@@ -850,7 +850,7 @@ class SensorController extends Controller
       return response()->json($validator->errors(), 422);
     }
     //invalid
-    $row = RestaurantFoodScan::findOrFail((int)$values['item']);
+    $row = RestaurantFoodScan::find((int)$values['item']);
     if (!$row) {
       return response()->json([
         'error' => 'Invalid item'
@@ -899,7 +899,7 @@ class SensorController extends Controller
       return response()->json($validator->errors(), 422);
     }
     //invalid
-    $row = Restaurant::findOrFail((int)$values['item']);
+    $row = Restaurant::find((int)$values['item']);
     if (!$row) {
       return response()->json([
         'error' => 'Invalid item'
@@ -948,7 +948,7 @@ class SensorController extends Controller
       return response()->json($validator->errors(), 422);
     }
     //invalid
-    $restaurant = Restaurant::findOrFail((int)$values['item']);
+    $restaurant = Restaurant::find((int)$values['item']);
     if (!$restaurant) {
       return response()->json([
         'error' => 'Invalid item'
@@ -1026,8 +1026,8 @@ class SensorController extends Controller
       return response()->json($validator->errors(), 422);
     }
     //invalid
-    $row = RestaurantFoodScan::findOrFail((int)$values['item']);
-    $restaurant = Restaurant::findOrFail((int)$values['restaurant_id']);
+    $row = RestaurantFoodScan::find((int)$values['item']);
+    $restaurant = Restaurant::find((int)$values['restaurant_id']);
     if (!$restaurant || !$row) {
       return response()->json([
         'error' => 'Invalid item'

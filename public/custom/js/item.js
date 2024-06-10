@@ -2674,3 +2674,88 @@ function report_load(itd) {
 
   return false;
 }
+function report_not_found() {
+  var popup = $('#modal_not_found');
+  var form = popup.find('form');
+
+  var not_found = parseInt($('#not_found_dishes').text());
+  if (!not_found) {
+    return false;
+  }
+
+  popup.modal('show');
+
+  popup.find('.modal-body .wrap_datas').addClass('text-center').empty()
+    .append('<div class="m-auto">' + acmcfs.html_loading + '</div>');
+
+  axios.post('/admin/report/photo/not-found', {
+    item: popup.find('input[name=report_id]'),
+  })
+    .then(response => {
+
+      form.find('input[name=rfs]').val(response.data.rfs_id);
+
+      popup.find('.modal-body .wrap_datas').empty()
+        .append(response.data.html);
+
+      bind_datad(popup);
+    })
+    .catch(error => {
+
+      if (error.response.data && Object.values(error.response.data).length) {
+        Object.values(error.response.data).forEach(function (v, k) {
+          message_from_toast('error', acmcfs.message_title_error, v);
+        });
+      }
+
+    });
+
+  return false;
+}
+function report_not_found_action(next = 0) {
+
+}
+function report_photo_update_prepare(ele) {
+  var popup = $('#modal_photo_update');
+  popup.modal('show');
+}
+function report_photo_update(ele) {
+  var popup = $(ele).closest('.modal');
+  var form = $('#modal_not_found').find('form');
+  form_loading(popup);
+
+  const formData = new FormData();
+  formData.append("item", form.find('input[name=item]').val()); //report_id
+  formData.append("rfs", form.find('input[name=rfs]').val()); //rfs_id
+  formData.append("food", form.find('select[name=food]').val());
+  formData.append("point", form.find('select[name=point]').val());
+  formData.append("note", form.find('textarea[name=note]').val());
+
+  axios.post('/admin/report/photo/update', formData)
+    .then(response => {
+
+      message_from_toast('success', acmcfs.message_title_success, acmcfs.message_description_success_update, true);
+
+      report_load(response.data.item.id);
+    })
+    .catch(error => {
+      if (error.response.data && Object.values(error.response.data).length) {
+        Object.values(error.response.data).forEach(function (v, k) {
+          message_from_toast('error', acmcfs.message_title_error, v);
+        });
+      }
+    })
+    .then(() => {
+      form_loading(popup, false);
+      form_close(popup);
+    });
+
+  return false;
+}
+function report_photo_clear_prepare(ele) {
+  var popup = $('#modal_photo_clear');
+  popup.modal('show');
+}
+function report_photo_clear(ele) {
+  var popup = $(ele).closest('.modal');
+}

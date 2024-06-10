@@ -156,7 +156,7 @@ class FoodCategoryController extends Controller
       return response()->json($validator->errors(), 422);
     }
     //invalid
-    $row = FoodCategory::findOrFail((int)$values['item']);
+    $row = FoodCategory::find((int)$values['item']);
     if (!$row) {
       return response()->json([
         'error' => 'Invalid item'

@@ -170,7 +170,8 @@ class NotificationController extends Controller
           }
 
           //time
-          if (strtotime(date('Y-m-d H:i:s', strtotime($this->_viewer->time_notification))) > strtotime(date('Y-m-d H:i:s', strtotime($row->created_at)))) {
+          if (strtotime(date('Y-m-d H:i:s', strtotime($this->_viewer->time_notification)))
+            >= strtotime(date('Y-m-d H:i:s', strtotime($row->created_at)))) {
             continue;
           }
 
@@ -213,7 +214,7 @@ class NotificationController extends Controller
     }
 
     $this->_viewer->update([
-      'time_notification' => date('Y-m-d H:i:s')
+      'time_notification' => count($items) ? $items[0]['created_at'] : $this->_viewer->time_notification,
     ]);
 
     return response()->json([

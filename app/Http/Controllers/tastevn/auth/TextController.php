@@ -155,7 +155,7 @@ class TextController extends Controller
       return response()->json($validator->errors(), 422);
     }
     //invalid
-    $row = Text::findOrFail((int)$values['item']);
+    $row = Text::find((int)$values['item']);
     if (!$row) {
       return response()->json([
         'error' => 'Invalid item'
