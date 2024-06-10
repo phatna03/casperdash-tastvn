@@ -38,7 +38,7 @@ class RestaurantController extends Controller
 
   public function index(Request $request)
   {
-    $invalid_roles = ['user', 'moderator'];
+    $invalid_roles = ['user'];
     if (in_array($this->_viewer->role, $invalid_roles)) {
       return redirect('admin/photos');
     }

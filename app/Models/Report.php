@@ -55,9 +55,6 @@ class Report extends Model
       ->selectRaw('round(( report_foods.point/report_foods.total_points * 100 ),2) AS percentage')
       ->leftJoin('foods', 'foods.id', '=', 'report_foods.food_id')
       ->where('report_foods.report_id', $this->id)
-//      ->orderBy('report_foods.total_photos', 'desc')
-//      ->orderBy('report_foods.total_points', 'desc')
-//      ->orderBy('report_foods.point', 'desc')
       ->orderBy('percentage', 'desc')
       ->orderBy('report_foods.total_photos', 'desc')
       ->orderByRaw('TRIM(LOWER(foods.name))')
@@ -84,6 +81,14 @@ class Report extends Model
           ->where('restaurant_food_scans.status', 'checked')
           ->where('report_photos.status', 'passed')
           ->count();
+        $ing_miss_right_ids = ReportPhoto::query('report_photos')
+          ->select('report_photos.restaurant_food_scan_id')
+          ->leftJoin('restaurant_food_scans', 'restaurant_food_scans.id', '=', 'report_photos.restaurant_food_scan_id')
+          ->where('report_photos.report_id', $this->id)
+          ->where('restaurant_food_scans.food_id', $row['food_id'])
+          ->where('restaurant_food_scans.missing_ids', '<>', NULL)
+          ->where('restaurant_food_scans.status', 'checked')
+          ->where('report_photos.status', 'passed');
 
         $ing_miss_wrong_total = ReportPhoto::query('report_photos')
           ->select('report_photos.restaurant_food_scan_id')
@@ -117,6 +122,17 @@ class Report extends Model
           ->where('report_photos.reporting', 0)
           ->sum('report_photos.point');
 
+        //subs
+        $ing_miss_items = RestaurantFoodScanMissing::query('restaurant_food_scan_missings')
+          ->select('ingredients.name as ingredient_name')
+          ->selectRaw('SUM(restaurant_food_scan_missings.ingredient_quantity) as ingredient_total')
+          ->leftJoin('ingredients', 'ingredients.id', '=', 'restaurant_food_scan_missings.ingredient_id')
+          ->whereIn('restaurant_food_scan_missings.restaurant_food_scan_id', $ing_miss_right_ids)
+          ->groupBy('restaurant_food_scan_missings.ingredient_quantity', 'ingredients.name')
+          ->orderBy('ingredient_total', 'desc')
+          ->orderByRaw('TRIM(LOWER(ingredients.name))')
+          ->get();
+
         $items[] = [
           'food_id' => $row['food_id'],
           'food_name' => $row['food_name'],
@@ -130,6 +146,8 @@ class Report extends Model
           'ing_miss_wrong_point' => $ing_miss_wrong_point,
           'ing_miss_wrong_failed' => $ing_miss_wrong_failed,
           'not_found' => $not_found,
+
+          'ing_miss_items' => $ing_miss_items,
         ];
       }
     }

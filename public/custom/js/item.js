@@ -315,6 +315,7 @@ function restaurant_food_photo_prepare(ele) {
   form.find('input[name=food_id]').val(food_item.attr('data-food_id'));
   form.find('input[name=restaurant_parent_id]').val(food_item.attr('data-restaurant_parent_id'));
 
+  form.find('input[type=file]').val("");
   form.find('input[type=file]')[0].click();
 }
 function restaurant_food_photo(ele) {
@@ -328,14 +329,7 @@ function restaurant_food_photo(ele) {
   var ext = url.substring(url.lastIndexOf('.') + 1).toLowerCase();
   var img_exts = ['jpg', 'jpeg', 'png'];
 
-  // console.log('1111111111');
-  // console.log(ele.files[0].size);
-  // console.log(ext);
-  // console.log(!img_exts.includes(ext));
-  // return false;
-
   if (ele.files[0].size < 0 || !img_exts.includes(ext)) {
-
     bind.val("");
 
     message_from_toast('error', acmcfs.message_title_error, 'Invalid photo', true);

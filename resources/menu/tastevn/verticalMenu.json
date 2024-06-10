@@ -34,7 +34,7 @@
 
     {
       "name": "Restaurants",
-      "icon": "menu-icon tf-icons mdi mdi-room-service no_user no_moderator",
+      "icon": "menu-icon tf-icons mdi mdi-room-service no_user",
       "slug": "dashboard",
       "submenu": [
         {

@@ -34,7 +34,16 @@
     }
   @endphp
   <tr>
-    <td class="text-dark">{{$stt . '. ' . $item['food_name']}}</td>
+    <td class="text-dark position-relative acm-clearfix">
+      @if(count($item['ing_miss_items']))
+      <div class="acm-float-right acm-ml-px-5">
+        <button type="button" class="btn btn-primary p-0" onclick="$('.tr_sub_food_{{$item['food_id']}}').toggleClass('d-none');">
+          <i class="mdi mdi-expand-all"></i>
+        </button>
+      </div>
+      @endif
+      <div>{{$stt . '. ' . $item['food_name']}}</div>
+    </td>
     <td class="text-center">
       @if($item['ing_full'])
         <div class="fnumber text-primary cursor-pointer">{{$item['ing_full']}}</div>
@@ -81,5 +90,35 @@
       @endif
     </td>
   </tr>
+  @if(count($item['ing_miss_items']))
+    <tr class="tr_sub_food tr_sub_food_{{$item['food_id']}} d-none">
+      <td></td>
+      <td></td>
+      <td class="text-center align-middle text-dark bg-warning-subtle">Quantities</td>
+      <td colspan="3" class="align-middle text-dark bg-warning-subtle">
+        <div class="acm-ml-px-10">Missing ingredients</div>
+      </td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+    @foreach($item['ing_miss_items'] as $ing)
+      <tr class="tr_sub_food tr_sub_food_{{$item['food_id']}} d-none">
+        <td></td>
+        <td></td>
+        <td class="text-center">
+          <div class="fnumber text-dark">{{$ing['ingredient_total']}}</div>
+        </td>
+        <td colspan="3">
+          <div class="text-dark acm-ml-px-10">{{$ing['ingredient_name']}}</div>
+        </td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+      </tr>
+    @endforeach
+  @endif
   @endforeach
 </table>
