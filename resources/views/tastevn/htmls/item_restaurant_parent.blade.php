@@ -2,6 +2,18 @@
   <div class="col-12 mb-1">
     <h4 class="text-dark text-uppercase fw-bold">List of dishes <b class="text-primary acm-ml-px-5">({{count($foods)}})</b></h4>
 
+    <div class="d-none">
+      <form onsubmit="return event.preventDefault();" id="frm_food_photo_standard">
+        <input type="file" name="photo"
+               onchange="restaurant_food_photo(this)"
+               accept=".jpg,.jpeg,.png"
+        />
+
+        <input type="hidden" name="food_id" />
+        <input type="hidden" name="restaurant_parent_id" />
+      </form>
+    </div>
+
     @if(count($foods))
       @php
         $food_id = 0;
@@ -15,6 +27,9 @@
         }
 
         $food = $sys_app->get_item($obj->food_id, 'food');
+        $food_photo = $food->get_photo([
+          'restaurant_parent_id' => $restaurant_parent->id
+        ]);
 
         $recipes = $food->get_recipes([
           'restaurant_parent_id' => $restaurant_parent->id
@@ -27,7 +42,9 @@
         $count++;
       @endphp
       <div class="acm-border-css border-dark @if($count%2) bg-warning-subtle @endif p-3 mb-2 data_food_item data_food_item_{{$food->id}}"
-           data-food_id="{{$food->id}}">
+           data-food_id="{{$food->id}}"
+           data-restaurant_parent_id="{{$restaurant_parent->id}}"
+      >
         <div class="row">
           <div class="col-lg-4 mb-1">
             <div class="text-dark fw-bold fs-4">{{$food->name}}</div>
@@ -71,8 +88,14 @@
           </div>
 
           <div class="col-lg-4 mb-1">
-            <div class="text-center w-100">
-              <img class="w-100" loading="lazy" src="{{$obj->food_photo}}"/>
+            <div class="text-center w-100 wrap_food_photo_standard">
+              <button type="button" class="btn btn-danger p-1 position-absolute acm-right-5px"
+                      onclick="restaurant_food_photo_prepare(this)"
+              >
+                <i class="mdi mdi-upload"></i> Upload Photo
+              </button>
+              <img class="w-100 food_photo_standard" id="food_photo_standard_{{$restaurant_parent->id}}_{{$food->id}}"
+                   title="{{$food_photo}}" loading="lazy" src="{{$food_photo}}"/>
             </div>
           </div>
 

@@ -472,18 +472,9 @@ class SensorController extends Controller
         $food_ingredients = $row->get_food()->get_ingredients();
         $food_recipes = $row->get_food()->get_recipes();
 
-        $restaurant_ids = Restaurant::where('deleted', 0)
-          ->select('id')
-          ->where('restaurant_parent_id', $restaurant->restaurant_parent_id);
-
-        $restaurant_food = RestaurantFood::where('deleted', 0)
-          ->whereIn('restaurant_id', $restaurant_ids)
-          ->where('food_id', $row->get_food()->id)
-          ->where('photo', '<>', NULL)
-          ->orderBy('updated_at', 'desc')
-          ->limit(1)
-          ->first();
-        $food_photo = $restaurant_food ? $restaurant_food->photo : $food_photo;
+        $food_photo = $row->get_food()->get_photo([
+          'restaurant_parent_id' => $restaurant->restaurant_parent_id,
+        ]);
 
         $rbf_food = Food::find($row->rbf_predict);
         if ($rbf_food) {
@@ -1191,20 +1182,9 @@ class SensorController extends Controller
 
       $food_id = $food->id;
       $food_name = $food->name;
-
-      //photo standard
-      $restaurant_ids = Restaurant::where('deleted', 0)
-        ->select('id')
-        ->where('restaurant_parent_id', $restaurant->restaurant_parent_id);
-
-      $restaurant_food = RestaurantFood::where('deleted', 0)
-        ->whereIn('restaurant_id', $restaurant_ids)
-        ->where('food_id', $food->id)
-        ->where('photo', '<>', NULL)
-        ->orderBy('updated_at', 'desc')
-        ->limit(1)
-        ->first();
-      $food_photo = $restaurant_food ? $restaurant_food->photo : url('custom/img/no_photo.png');
+      $food_photo = $food->get_photo([
+        'restaurant_parent_id' => $restaurant->restaurant_parent_id
+      ]);
 
       //info recipe
       $html_info = view('tastevn.htmls.item_food_dashboard')

@@ -114,12 +114,15 @@ class RoboflowController extends Controller
 
     $datas = [];
     $result = [];
+    $img_url = '';
 
     if (!empty($imgFILE)) {
 
       foreach ($imgFILE as $file) {
 
-        $pathStr = '/roboflow/test/';
+        $folder = time();
+
+        $pathStr = "/roboflow/test/{$folder}/";
         $path = public_path($pathStr);
         //os
         if (strtoupper(substr(PHP_OS, 0, 3)) == 'WIN') {
@@ -140,9 +143,9 @@ class RoboflowController extends Controller
         $storagePath = public_path($photoPath);
 
         //roboflow
-        $img_url = "http://ai.block8910.com/sensors/58-5b-69-20-11-7b/SENSOR/1/2024-05-28/22/SENSOR_2024-05-28-22-14-02-628_248.jpg";
+        $img_url = "https://s3.ap-southeast-1.amazonaws.com/cargo.tastevietnam.asia/58-5b-69-19-ad-83/SENSOR/1/2024-06-06/21/SENSOR_2024-06-06-21-21-34-723_176.jpg";
         if (App::environment() == 'production') {
-          $img_url = url("roboflow/test") . '/' . $photoName;
+          $img_url = url("roboflow/test") . "/{$folder}/" . $photoName;
         }
 
         //step 2= photo scan
@@ -224,6 +227,8 @@ class RoboflowController extends Controller
 
     return response()->json([
       'status' => $status,
+
+      'img_url' => $img_url,
 
       'data' => $data,
       'food' => $food ? $food->id : 0,
@@ -325,18 +330,9 @@ class RoboflowController extends Controller
       ], 422);
     }
 
-    $restaurant_ids = Restaurant::where('deleted', 0)
-      ->select('id')
-      ->where('restaurant_parent_id', $restaurant_parent_id);
-
-    $restaurant_food = RestaurantFood::where('deleted', 0)
-      ->whereIn('restaurant_id', $restaurant_ids)
-      ->where('food_id', $row->id)
-      ->where('photo', '<>', NULL)
-      ->orderBy('updated_at', 'desc')
-      ->limit(1)
-      ->first();
-    $food_photo = $restaurant_food ? $restaurant_food->photo : url('custom/img/no_photo.png');
+    $food_photo = $row->get_photo([
+      'restaurant_parent_id' => $restaurant_parent_id
+    ]);
 
     //info
     $html_info = view('tastevn.htmls.item_food_roboflow')

@@ -70,8 +70,8 @@ class RestaurantParent extends Model
         ->where('restaurant_foods.restaurant_id', $sensor->id)
         ->distinct()
         ->select(
-          'restaurant_foods.food_id', 'foods.name as food_name',
-          'restaurant_foods.photo as food_photo', 'restaurant_foods.live_group as food_live_group',
+          'restaurant_foods.food_id', 'foods.name as food_name', 'restaurant_foods.live_group as food_live_group',
+          'restaurant_foods.photo as food_photo', 'restaurant_foods.local_storage',
           'restaurant_foods.food_category_id', 'food_categories.name as food_category_name'
         )
         ->where('restaurant_foods.deleted', 0)

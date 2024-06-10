@@ -553,18 +553,10 @@ class FoodController extends Controller
     }
 
     $restaurant_parent_id = isset($values['restaurant_parent_id']) ? (int)$values['restaurant_parent_id'] : 0;
-    $restaurant_ids = Restaurant::where('deleted', 0)
-      ->select('id')
-      ->where('restaurant_parent_id', $restaurant_parent_id);
 
-    $restaurant_food = RestaurantFood::where('deleted', 0)
-      ->whereIn('restaurant_id', $restaurant_ids)
-      ->where('food_id', $row->id)
-      ->where('photo', '<>', NULL)
-      ->orderBy('updated_at', 'desc')
-      ->limit(1)
-      ->first();
-    $food_photo = $restaurant_food ? $restaurant_food->photo : '';
+    $food_photo = $row->get_photo([
+      'restaurant_parent_id' => $restaurant_parent_id,
+    ]);
 
     //info
     $html_ingredient = view('tastevn.htmls.item_food_info_ingredient')

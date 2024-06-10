@@ -170,6 +170,10 @@
   left: 0;
 }
 
+.acm-right-5px {
+  right: 5px;
+}
+
 .acm-right-10px {
   right: 10px;
 }
@@ -623,6 +627,18 @@
   position: relative;
   clear: both;
   overflow: hidden;
+}
+
+.wrap_food_photo_standard {
+  position: relative;
+}
+
+.wrap_food_photo_standard button {
+  display: none !important;
+}
+
+.wrap_food_photo_standard:hover button {
+  display: block !important;
 }
 
 /*modal 2*/

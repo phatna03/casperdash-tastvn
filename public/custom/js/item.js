@@ -308,6 +308,73 @@ function restaurant_food_live_group(ele) {
 
   return false;
 }
+function restaurant_food_photo_prepare(ele) {
+  var food_item = $(ele).closest('.data_food_item');
+  var form = $('#frm_food_photo_standard');
+
+  form.find('input[name=food_id]').val(food_item.attr('data-food_id'));
+  form.find('input[name=restaurant_parent_id]').val(food_item.attr('data-restaurant_parent_id'));
+
+  form.find('input[type=file]')[0].click();
+}
+function restaurant_food_photo(ele) {
+  var form = $('#frm_food_photo_standard');
+  var food_id = form.find('input[name=food_id]').val();
+  var restaurant_parent_id = form.find('input[name=restaurant_parent_id]').val();
+
+  //photo
+  var bind = $(ele);
+  var url = bind.val();
+  var ext = url.substring(url.lastIndexOf('.') + 1).toLowerCase();
+  var img_exts = ['jpg', 'jpeg', 'png'];
+
+  // console.log('1111111111');
+  // console.log(ele.files[0].size);
+  // console.log(ext);
+  // console.log(!img_exts.includes(ext));
+  // return false;
+
+  if (ele.files[0].size < 0 || !img_exts.includes(ext)) {
+
+    bind.val("");
+
+    message_from_toast('error', acmcfs.message_title_error, 'Invalid photo', true);
+    return false;
+  }
+
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    $('#food_photo_standard_' + restaurant_parent_id + '_' + food_id).removeAttr('src')
+      .attr('src', e.target.result);
+  }
+  reader.readAsDataURL(ele.files[0]);
+
+  //check
+  const formData = new FormData();
+  formData.append("food_id", food_id);
+  formData.append("restaurant_parent_id", restaurant_parent_id);
+
+  // Read selected files
+  if (form.find('input[type=file]')[0].files.length) {
+    formData.append('photo[]', form.find('input[type=file]')[0].files[0]);
+  }
+
+  axios.post('/admin/restaurant/food/photo', formData)
+    .then(response => {
+
+      message_from_toast('success', acmcfs.message_title_success, acmcfs.message_description_success_update, true);
+
+    })
+    .catch(error => {
+      if (error.response.data && Object.values(error.response.data).length) {
+        Object.values(error.response.data).forEach(function (v, k) {
+          message_from_toast('error', acmcfs.message_title_error, v);
+        });
+      }
+    });
+
+  return false;
+}
 //sensor
 function sensor_add(evt, frm) {
   evt.preventDefault();

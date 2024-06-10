@@ -59,9 +59,9 @@ class ApiController extends Controller
 
           $foods[] = [
             'name' => strtolower($food->name),
-            'photo' => $food->get_photo_standard($restaurant_parent->get_sensors([
-              'one_sensor' => 1,
-            ])),
+            'photo' => $food->get_photo([
+              'restaurant_parent_id' => $restaurant_parent->id,
+            ]),
             'ingredients' => $ings,
           ];
         }

@@ -542,5 +542,68 @@ class RestaurantController extends Controller
     ], 200);
   }
 
+  public function food_photo(Request $request)
+  {
+    $values = $request->post();
 
+    //required
+    $validator = Validator::make($values, [
+      'food_id' => 'required',
+      'restaurant_parent_id' => 'required',
+    ]);
+    if ($validator->fails()) {
+      return response()->json($validator->errors(), 422);
+    }
+
+    $food = Food::find((int)$values['food_id']);
+    $restaurant_parent = RestaurantParent::find((int)$values['restaurant_parent_id']);
+    if (!$food || !$restaurant_parent) {
+      return response()->json([
+        'error' => 'Invalid data'
+      ], 404);
+    }
+
+    $file_photo = $request->file('photo');
+    if (!empty($file_photo)) {
+      foreach ($file_photo as $file) {
+        $file_path = '/photos/foods/';
+        $full_path = public_path($file_path);
+        //os
+        if (strtoupper(substr(PHP_OS, 0, 3)) == 'WIN') {
+          $full_path = str_replace('/', '\\', $full_path);
+        }
+        if (!file_exists($full_path)) {
+          mkdir($full_path, 0777, true);
+        }
+
+        $file_name = 'food_' . $restaurant_parent->id . '_' . $food->id . '.' . $file->getClientOriginalExtension();
+        $file->move(public_path($file_path), $file_name);
+
+        $sensors = $restaurant_parent->get_sensors();
+        if (count($sensors)) {
+          foreach ($sensors as $sensor) {
+            $row = RestaurantFood::where('restaurant_id', $sensor->id)
+              ->where('food_id', $food->id)
+              ->first();
+            if (!$row) {
+              $row = RestaurantFood::create([
+                'restaurant_id' => $sensor->id,
+                'food_id' => $food->id,
+                'creator_id' => $this->_viewer->id,
+              ]);
+            }
+            $row->update([
+              'photo' => $file_name,
+              'local_storage' => 1,
+              'deleted' => 0,
+            ]);
+          }
+        }
+      }
+    }
+
+    return response()->json([
+      'status' => true,
+    ], 200);
+  }
 }
