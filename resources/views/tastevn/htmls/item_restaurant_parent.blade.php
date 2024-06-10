@@ -89,7 +89,7 @@
 
           <div class="col-lg-4 mb-1">
             <div class="text-center w-100 wrap_food_photo_standard">
-              <button type="button" class="btn btn-danger p-1 position-absolute acm-right-5px"
+              <button type="button" class="btn btn-danger p-1 position-absolute acm-right-5px @if($isMobi) d-block @endif"
                       onclick="restaurant_food_photo_prepare(this)"
               >
                 <i class="mdi mdi-upload"></i> Upload Photo

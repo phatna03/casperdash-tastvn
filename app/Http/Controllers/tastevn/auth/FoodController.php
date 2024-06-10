@@ -493,29 +493,6 @@ class FoodController extends Controller
       ], 422);
     }
 
-    //info
-    $html_info = view('tastevn.htmls.item_food_info')
-      ->with('item', $row)
-      ->with('recipes', $row->get_recipes())
-      ->with('ingredients', $row->get_ingredients())
-      ->with('restaurants', $row->get_restaurants())
-      ->render();
-
-    //edit
-    $html_edit = view('tastevn.htmls.item_ingredient_input')
-      ->with('ingredients', $row->get_ingredients())
-      ->render();
-
-    //scan update
-    $html_scan_update = view('tastevn.htmls.item_ingredient_select')
-      ->with('ingredients', $row->get_ingredients())
-      ->render();
-
-    //selected
-    $html_selected = view('tastevn.htmls.item_food_selected')
-      ->with('ingredients', $row->get_ingredients())
-      ->render();
-
     $this->_viewer->add_log([
       'type' => 'view_item_' . $row->get_type(),
       'item_id' => (int)$row->id,
@@ -524,12 +501,6 @@ class FoodController extends Controller
 
     return response()->json([
       'item' => $row,
-      'item_photo' => $row->get_photo(),
-
-      'html_scan_update' => $html_scan_update,
-      'html_info' => $html_info,
-      'html_ingredients' => $html_edit,
-      'html_selected' => $html_selected,
     ]);
   }
 

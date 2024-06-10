@@ -27,7 +27,7 @@
     },
     {
       "name": "Review Report",
-      "icon": "menu-icon tf-icons mdi mdi-message-draw no_admin no_superadmin no_user no_moderator",
+      "icon": "menu-icon tf-icons mdi mdi-message-draw no_user",
       "url": "admin/reports",
       "slug": "admin-reports"
     },

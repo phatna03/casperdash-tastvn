@@ -469,8 +469,12 @@ class SensorController extends Controller
       if ($row->get_food()) {
 
         $food_name = $row->get_food()->name;
-        $food_ingredients = $row->get_food()->get_ingredients();
-        $food_recipes = $row->get_food()->get_recipes();
+        $food_ingredients = $row->get_food()->get_ingredients([
+          'restaurant_parent_id' => $restaurant->restaurant_parent_id,
+        ]);
+        $food_recipes = $row->get_food()->get_recipes([
+          'restaurant_parent_id' => $restaurant->restaurant_parent_id,
+        ]);
 
         $food_photo = $row->get_food()->get_photo([
           'restaurant_parent_id' => $restaurant->restaurant_parent_id,

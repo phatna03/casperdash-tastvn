@@ -55,10 +55,11 @@ class ErrorController extends Controller
     $values = $request->post();
 
     $ids = [];
+    $date = '2024-06-09';
 
     $select = RestaurantFoodScan::where('deleted', 0)
       ->whereIn('restaurant_id', [5, 6])
-      ->whereDate('time_photo', '>=', '2024-05-01')
+      ->whereDate('time_photo', '>=', $date)
       ->where('sys_confidence', 0)
       ->orderBy('id', 'asc')
       ->limit(6);
@@ -117,7 +118,7 @@ class ErrorController extends Controller
 
     $count = RestaurantFoodScan::where('deleted', 0)
       ->whereIn('restaurant_id', [5, 6])
-      ->whereDate('time_photo', '>=', '2024-05-01')
+      ->whereDate('time_photo', '>=', $date)
       ->where('sys_confidence', 0)
       ->orderBy('id', 'asc')
       ->count();

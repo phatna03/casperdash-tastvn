@@ -394,44 +394,6 @@ class Food extends Model
     return $rows;
   }
 
-  public function check_food_confidence_by_ingredients($predictionsIds = [])
-  {
-    $count = 0;
-
-    $ingredients = $this->get_ingredients();
-    if (count($ingredients) && count($predictionsIds)) {
-      foreach ($ingredients as $ingredient) {
-        if (in_array($ingredient->id, $predictionsIds)) {
-          $count++;
-        }
-      }
-      if ($count) {
-        $count = (int)($count / count($ingredients) * 100);
-      }
-    }
-
-    return $count;
-  }
-
-  public function found_ingredients($predictions = [])
-  {
-    $arr = [];
-
-    $ingredients = $this->get_ingredients();
-    if (count($ingredients) && count($predictions)) {
-      foreach ($ingredients as $ingredient) {
-        foreach ($predictions as $prediction) {
-          if ($prediction['id'] == $ingredient['id']) {
-            $prediction['quantity'] = $prediction['quantity'] >= $ingredient['ingredient_quantity'] ? $ingredient['ingredient_quantity'] : $prediction['quantity'];
-            $arr[] = $prediction;
-          }
-        }
-      }
-    }
-
-    return $arr;
-  }
-
   public function missing_ingredients($pars = [])
   {
     $predictions = isset($pars['ingredients']) ? (array)$pars['ingredients'] : [];
