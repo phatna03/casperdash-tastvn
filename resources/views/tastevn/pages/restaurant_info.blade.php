@@ -434,6 +434,7 @@
             type: 'post',
             data: {
               keyword: query,
+              restaurant_parent_id: '{{$pageConfigs['item']->restaurant_parent_id}}',
               _token: acmcfs.var_csrf,
             },
             complete: function (xhr, textStatus) {
@@ -478,7 +479,7 @@
             type: 'post',
             data: {
               keyword: query,
-              restaurant: selectize_food.attr('data-restaurant'),
+              restaurant_parent_id: '{{$pageConfigs['item']->restaurant_parent_id}}',
               _token: acmcfs.var_csrf,
             },
             complete: function (xhr, textStatus) {

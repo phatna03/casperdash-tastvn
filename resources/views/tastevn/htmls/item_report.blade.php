@@ -64,27 +64,27 @@
     </td>
     <td class="text-center">
       @if($item['ing_miss_wrong_point'] > 0)
-        <div class="fnumber text-primary cursor-pointer">{{$item['ing_miss_wrong_point']}}</div>
+        <div class="nfnumber text-primary cursor-pointer">{{$item['ing_miss_wrong_point']}}</div>
       @endif
     </td>
     <td class="text-center">
       @if($item['ing_miss_wrong_failed'] > 0)
-        <div class="fnumber text-danger cursor-pointer">{{$item['ing_miss_wrong_failed']}}</div>
+        <div class="nfnumber text-danger cursor-pointer">{{$item['ing_miss_wrong_failed']}}</div>
       @endif
     </td>
     <td class="text-center">
-      @if($item['not_found'])
-        <div class="fnumber text-danger cursor-pointer">{{$item['not_found']}}</div>
+      @if($item['not_found_total'])
+        <div class="fnumber text-dark cursor-pointer">{{$item['not_found_total']}}</div>
       @endif
     </td>
     <td class="text-center">
-      @if($item['not_found'])
-        <div class="fnumber text-danger cursor-pointer">{{$item['not_found']}}</div>
+      @if($item['not_found_point'] > 0)
+        <div class="nfnumber text-primary cursor-pointer">{{$item['not_found_point']}}</div>
       @endif
     </td>
     <td class="text-center">
-      @if($item['not_found'])
-        <div class="fnumber text-danger cursor-pointer">{{$item['not_found']}}</div>
+      @if($item['not_found_failed'] > 0)
+        <div class="nfnumber text-danger cursor-pointer">{{$item['not_found_failed']}}</div>
       @endif
     </td>
     <td class="text-center">

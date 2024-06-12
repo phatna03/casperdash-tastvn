@@ -96,7 +96,6 @@ class Report extends Model
           ->where('report_photos.report_id', $this->id)
           ->where('restaurant_food_scans.food_id', $row['food_id'])
           ->where('restaurant_food_scans.status', 'edited')
-//          ->where('report_photos.status', 'failed')
           ->where('report_photos.reporting', 1)
           ->count();
 
@@ -106,23 +105,30 @@ class Report extends Model
           ->where('report_photos.report_id', $this->id)
           ->where('restaurant_food_scans.food_id', $row['food_id'])
           ->where('restaurant_food_scans.status', 'edited')
-//          ->where('report_photos.status', 'failed')
           ->where('report_photos.reporting', 1)
           ->sum('report_photos.point');
 
         $ing_miss_wrong_failed = $ing_miss_wrong_total - $ing_miss_wrong_point;
 
-        $not_found = ReportPhoto::query('report_photos')
+        $not_found_total = ReportPhoto::query('report_photos')
           ->select('report_photos.restaurant_food_scan_id')
           ->leftJoin('restaurant_food_scans', 'restaurant_food_scans.id', '=', 'report_photos.restaurant_food_scan_id')
           ->where('report_photos.report_id', $this->id)
           ->where('restaurant_food_scans.food_id', $row['food_id'])
           ->where('restaurant_food_scans.status', 'edited')
-//          ->where('report_photos.status', 'failed')
           ->where('report_photos.reporting', 0)
+          ->count();
 
-          ->where('report_photos.food_id', $row['food_id'])
+        $not_found_point = ReportPhoto::query('report_photos')
+          ->select('report_photos.restaurant_food_scan_id')
+          ->leftJoin('restaurant_food_scans', 'restaurant_food_scans.id', '=', 'report_photos.restaurant_food_scan_id')
+          ->where('report_photos.report_id', $this->id)
+          ->where('restaurant_food_scans.food_id', $row['food_id'])
+          ->where('restaurant_food_scans.status', 'edited')
+          ->where('report_photos.reporting', 0)
           ->sum('report_photos.point');
+
+        $not_found_failed = $not_found_total - $not_found_point;
 
         //subs
         $ing_miss_items = RestaurantFoodScanMissing::query('restaurant_food_scan_missings')
@@ -147,7 +153,10 @@ class Report extends Model
           'ing_miss_wrong_total' => $ing_miss_wrong_total,
           'ing_miss_wrong_point' => $ing_miss_wrong_point,
           'ing_miss_wrong_failed' => $ing_miss_wrong_failed,
-          'not_found' => $not_found,
+
+          'not_found_total' => $not_found_total,
+          'not_found_point' => $not_found_point,
+          'not_found_failed' => $not_found_failed,
 
           'ing_miss_items' => $ing_miss_items,
         ];
@@ -225,7 +234,6 @@ class Report extends Model
       foreach ($foods as $food) {
 
         $total = ReportPhoto::where('food_id', $food->food_id)
-          ->where('reporting', 1)
           ->count();
 
         $point = ReportPhoto::where('food_id', $food->food_id)
