@@ -434,31 +434,39 @@ class FoodController extends Controller
 
   protected function selectize_items($pars = [])
   {
-    $select = Food::query("foods")
-      ->select('foods.id', 'foods.name');
-
-    //dev
-    if ($this->_viewer->is_dev()) {
-
-    } else {
-      $select->where('foods.deleted', 0);
-    }
-
     $keyword = isset($pars['keyword']) && !empty($pars['keyword']) ? $pars['keyword'] : NULL;
-    if (!empty($keyword)) {
-      $select->where('foods.name', 'LIKE', "%{$keyword}%");
+    $restaurant_parent_id = isset($pars['restaurant_parent_id']) ? (int)$pars['restaurant_parent_id'] : 0;
+    $restaurant_parent = RestaurantParent::find($restaurant_parent_id);
+
+    $items = [];
+
+    if ($restaurant_parent) {
+
+      $sensor = $restaurant_parent->get_sensors([
+        'one_sensor' => 1,
+      ]);
+
+      if ($sensor) {
+
+        $select = RestaurantFood::query('restaurant_foods')
+          ->where('restaurant_foods.restaurant_id', $sensor->id)
+          ->distinct()
+          ->select('foods.id', 'foods.name',)
+          ->where('restaurant_foods.deleted', 0)
+          ->where('foods.deleted', 0)
+          ->leftJoin('foods', 'foods.id', '=', 'restaurant_foods.food_id')
+          ->leftJoin('food_categories', 'food_categories.id', '=', 'restaurant_foods.food_category_id')
+          ->orderByRaw('TRIM(LOWER(foods.name))');
+
+        if (!empty($keyword)) {
+          $select->where('foods.name', 'LIKE', "%{$keyword}%");
+        }
+
+        $items = $select->get()->toArray();
+      }
     }
 
-    $restaurant_id = isset($pars['restaurant']) && !empty($pars['restaurant']) ? (int)$pars['restaurant'] : 0;
-    if ($restaurant_id) {
-      $ids = RestaurantFood::select('food_id')
-        ->where('restaurant_id', $restaurant_id)
-        ->where('deleted', 0);
-
-      $select->whereNotIn('foods.id', $ids);
-    }
-
-    return $select->get()->toArray();
+    return $items;
   }
 
   public function ingredient_html(Request $request)

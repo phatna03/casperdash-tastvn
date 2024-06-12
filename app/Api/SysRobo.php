@@ -72,6 +72,11 @@ class SysRobo
     $status = true;
     $error = [];
 
+    $img_1024 = 'https://resize.sardo.work/?imageUrl=' . $img_url . '&width=1024';
+    if (@getimagesize($img_1024)) {
+      $img_url = $img_1024;
+    }
+
     // URL for Http Request
     $api_url =  "https://detect.roboflow.com/" . $dataset . "/" . $version
       . "?api_key=" . $api_key

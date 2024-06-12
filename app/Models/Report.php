@@ -96,7 +96,7 @@ class Report extends Model
           ->where('report_photos.report_id', $this->id)
           ->where('restaurant_food_scans.food_id', $row['food_id'])
           ->where('restaurant_food_scans.status', 'edited')
-          ->where('report_photos.status', 'failed')
+//          ->where('report_photos.status', 'failed')
           ->where('report_photos.reporting', 1)
           ->count();
 
@@ -106,7 +106,7 @@ class Report extends Model
           ->where('report_photos.report_id', $this->id)
           ->where('restaurant_food_scans.food_id', $row['food_id'])
           ->where('restaurant_food_scans.status', 'edited')
-          ->where('report_photos.status', 'failed')
+//          ->where('report_photos.status', 'failed')
           ->where('report_photos.reporting', 1)
           ->sum('report_photos.point');
 
@@ -117,8 +117,8 @@ class Report extends Model
           ->leftJoin('restaurant_food_scans', 'restaurant_food_scans.id', '=', 'report_photos.restaurant_food_scan_id')
           ->where('report_photos.report_id', $this->id)
           ->where('restaurant_food_scans.food_id', $row['food_id'])
-          ->where('restaurant_food_scans.status', 'failed')
-          ->where('report_photos.status', 'failed')
+          ->where('restaurant_food_scans.status', 'edited')
+//          ->where('report_photos.status', 'failed')
           ->where('report_photos.reporting', 0)
 
           ->where('report_photos.food_id', $row['food_id'])
@@ -181,18 +181,31 @@ class Report extends Model
         $status = 'passed';
 
         switch ($row->status) {
+
           case 'checked':
+
             $total_points++;
+
             break;
+
           case 'edited':
+
             $total_points++;
             $point = 0;
-            $status = 'failed';
+            $status = 'edited';
+
+            if (!$row->rbf_predict && !$row->sys_predict) {
+              $reporting = 0;
+            }
+
             break;
+
           case 'failed':
+
             $reporting = 0;
             $point = 0;
             $status = 'failed';
+
             break;
         }
 

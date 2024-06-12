@@ -29,7 +29,9 @@
 @section('content')
 
   <h4 class="mb-2"><span class="text-muted fw-light">Admin /</span> Sensor: {{$pageConfigs['item']->name}}</h4>
+
   <input type="hidden" name="current_restaurant" value="{{$pageConfigs['item']->id}}"/>
+  <input type="hidden" name="current_restaurant_parent_id" value="{{$pageConfigs['item']->restaurant_parent_id}}"/>
   <input type="hidden" name="debug" value="{{$pageConfigs['debug']}}"/>
 
   <div class="row g-4 mb-4">

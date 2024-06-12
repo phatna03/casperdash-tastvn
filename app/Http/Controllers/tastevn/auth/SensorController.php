@@ -438,6 +438,7 @@ class SensorController extends Controller
     $rbf_food_confidence = 0;
     $rbf_ingredients_found = [];
     $rbf_ingredients_missing = [];
+    $rbf_predictions = [];
 
     $sys_food_id = 0;
     $sys_food_name = NULL;
@@ -452,6 +453,8 @@ class SensorController extends Controller
     //data
     $apid = (array)json_decode($row->rbf_api, true);
     if (count($apid)) {
+
+      $rbf_predictions = $apid['predictions'];
 
       $founds = SysRobo::ingredients_compact($apid['predictions']);
       if (count($founds)) {
@@ -562,6 +565,8 @@ class SensorController extends Controller
 
         'ingredients_found' => $rbf_ingredients_found,
         'ingredients_missing' => $rbf_ingredients_missing,
+
+        'predictions' => $rbf_predictions,
       ],
       'sys' => [
         'food_id' => $sys_food_id,

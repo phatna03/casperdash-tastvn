@@ -78,6 +78,8 @@ function bind_selectize(wrap) {
 
       } else if (value === 'food') {
 
+        var restaurant_parent_id = $('body input[name=current_restaurant_parent_id]').val();
+
         select.selectize({
           valueField: 'id',
           labelField: 'name',
@@ -92,6 +94,7 @@ function bind_selectize(wrap) {
               type: 'post',
               data: {
                 keyword: query,
+                restaurant_parent_id: restaurant_parent_id,
                 _token: acmcfs.var_csrf,
               },
               complete: function (xhr, textStatus) {

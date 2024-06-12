@@ -324,6 +324,7 @@ class RestaurantController extends Controller
           ->distinct()
           ->select('foods.id', 'foods.name',)
           ->where('restaurant_foods.deleted', 0)
+          ->where('foods.deleted', 0)
           ->leftJoin('foods', 'foods.id', '=', 'restaurant_foods.food_id')
           ->leftJoin('food_categories', 'food_categories.id', '=', 'restaurant_foods.food_category_id')
           ->orderByRaw('TRIM(LOWER(foods.name))');

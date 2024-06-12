@@ -248,12 +248,12 @@ class ApiController extends Controller
 
     $valid_cart = true;
     foreach ($items as $item) {
-      $item_id = isset($item['item_id']) && !empty($values['item_id']) ? (int)$values['item_id'] : 0;
-      $item_quantity = isset($item['quantity']) && !empty($values['quantity']) ? (int)$values['quantity'] : 1;
-      $item_code = isset($item['item_code']) && !empty($values['item_code']) ? trim($values['item_code']) : NULL;
-      $item_name = isset($item['item_name']) && !empty($values['item_name']) ? trim($values['item_name']) : NULL;
-      $item_status = isset($item['status']) && !empty($values['status']) ? trim($values['status']) : NULL;
-      $item_note = isset($item['note']) && !empty($values['note']) ? trim($values['note']) : NULL;
+      $item_id = isset($item['item_id']) && !empty($item['item_id']) ? (int)$item['item_id'] : 0;
+      $item_quantity = isset($item['quantity']) && !empty($item['quantity']) ? (int)$item['quantity'] : 1;
+      $item_code = isset($item['item_code']) && !empty($item['item_code']) ? trim($item['item_code']) : NULL;
+      $item_name = isset($item['item_name']) && !empty($item['item_name']) ? trim($item['item_name']) : NULL;
+      $item_status = isset($item['status']) && !empty($item['status']) ? trim($item['status']) : NULL;
+      $item_note = isset($item['note']) && !empty($item['note']) ? trim($item['note']) : NULL;
 
       if (empty($item_id) || empty($item_code) || empty($item_name) || empty($item_status)) {
         $valid_cart = false;

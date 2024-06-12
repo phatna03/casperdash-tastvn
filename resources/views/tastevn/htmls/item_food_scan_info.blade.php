@@ -179,7 +179,7 @@
         </div>
       </div>
     @else
-      <div class="col-lg-4 mb-1">
+      <div class="col-lg-4 mb-1 wrap_rbf">
         <div class="acm-border-css p-1 @if($item['found_by'] == 'rbf') bg-success-subtle @endif">
           <div class="row">
             <div class="col-12 mb-1 text-center">
@@ -237,6 +237,24 @@
             @endif
           </div>
         </div>
+
+        @if(count($data['rbf']['predictions']) && ($viewer->is_super_admin() || $viewer->is_dev()))
+          <ul class="cmt-wrapper">
+            @php
+              $count = 0;
+              foreach($data['rbf']['predictions'] as $prediction):
+              $count++;
+              $confidence = round($prediction['confidence'] * 100);
+            @endphp
+            <li class="cmt-itm">
+              <div class="d-flex overflow-hidden">
+                <span class="fw-bold acm-mr-px-5">{{$confidence . '%'}}</span>
+                <span>{{$prediction['class']}}</span>
+              </div>
+            </li>
+            @endforeach
+          </ul>
+        @endif
       </div>
       <div class="col-lg-4 mb-1">
         <div class="acm-border-css p-1 @if($item['found_by'] == 'sys') bg-success-subtle @endif">

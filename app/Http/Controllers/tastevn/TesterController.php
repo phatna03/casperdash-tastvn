@@ -36,6 +36,7 @@ use App\Models\FoodCategory;
 use App\Models\Log;
 use App\Models\SysNotification;
 use App\Models\Report;
+use App\Models\KasWebhook;
 
 class TesterController extends Controller
 {

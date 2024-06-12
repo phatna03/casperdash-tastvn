@@ -66,7 +66,7 @@ return new class extends Migration {
         $table->bigInteger('report_id');
         $table->bigInteger('restaurant_food_scan_id');
         $table->bigInteger('food_id')->default(0);
-        $table->enum('status', ['passed', 'failed'])->default('passed');
+        $table->enum('status', ['passed', 'failed', 'edited'])->default('passed');
         $table->bigInteger('reporting')->default(1);
         $table->decimal('point')->default(1);
         $table->text('note')->nullable();
