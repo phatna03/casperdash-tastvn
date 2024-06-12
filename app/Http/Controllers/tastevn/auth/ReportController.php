@@ -2,9 +2,6 @@
 
 namespace App\Http\Controllers\tastevn\auth;
 use App\Http\Controllers\Controller;
-use App\Models\Food;
-use App\Models\ReportPhoto;
-use App\Models\RestaurantFoodScan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
@@ -15,6 +12,11 @@ use App\Api\SysApp;
 use App\Api\SysRobo;
 //model
 use App\Models\Report;
+use App\Models\Food;
+use App\Models\Ingredient;
+use App\Models\ReportPhoto;
+use App\Models\RestaurantFoodScan;
+use App\Models\Text;
 
 class ReportController extends Controller
 {
@@ -165,11 +167,16 @@ class ReportController extends Controller
     //search
     $debug = isset($values['debug']) ? (int)$values['debug'] : 0;
 
+    $texts = Text::where('deleted', 0)
+      ->orderByRaw('TRIM(LOWER(name)) + 0')
+      ->get();
+
     $pageConfigs = [
       'myLayout' => 'horizontal',
       'hasCustomizer' => false,
 
       'item' => $row,
+      'texts' => $texts,
 
       'debug' => $debug,
     ];
@@ -296,6 +303,8 @@ class ReportController extends Controller
     $food = isset($values['food']) ? (int)$values['food'] : 0;
     $point = isset($values['point']) ? (float)$values['point'] : 0;
     $note = isset($values['note']) && !empty($values['note']) ? $values['note'] : NULL;
+    $missing = isset($values['missing']) ? (int)$values['missing'] : 0;
+    $ingredients = isset($values['ingredients']) ? (array)$values['ingredients'] : [];
 
     $food = Food::find($food);
     if (!$food) {
@@ -304,6 +313,10 @@ class ReportController extends Controller
       ], 422);
     }
 
+    //food_scan_update
+
+
+    //report photo_update
     $photo = ReportPhoto::where('report_id', $row->id)
       ->where('restaurant_food_scan_id', $rfs->id)
       ->where('reporting', 0)
@@ -312,13 +325,46 @@ class ReportController extends Controller
       $photo->update([
         'food_id' => $food->id,
         'point' => $point,
-        'note' => $note,
+//        'note' => $note,
       ]);
     }
 
     return response()->json([
       'status' => true,
       'item' => $row,
+    ], 200);
+  }
+
+  public function photo_food(Request $request)
+  {
+    $values = $request->post();
+
+    //required
+    $validator = Validator::make($values, [
+      'item' => 'required',
+      'food' => 'required',
+    ]);
+    if ($validator->fails()) {
+      return response()->json($validator->errors(), 422);
+    }
+
+    $row = Report::find((int)$values['item']);
+    $food = Food::find((int)$values['food']);
+    if (!$row || !$food) {
+      return response()->json([
+        'error' => 'Invalid item'
+      ], 422);
+    }
+
+    $html = view('tastevn.htmls.item_report_photo_food')
+      ->with('ingredients', $food->get_ingredients([
+        'restaurant_parent_id' => $row->restaurant_parent_id,
+      ]))
+      ->render();
+
+    return response()->json([
+      'status' => true,
+      'html' => $html,
     ], 200);
   }
 }

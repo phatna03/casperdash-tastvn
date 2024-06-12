@@ -64,22 +64,35 @@
                     <input type="hidden" name="rfs" />
                     <input type="hidden" name="item" value="{{$pageConfigs['item']->id}}" />
                   </div>
-                  <div class="col-lg-9 mb-3">
+                  <div class="col-lg-12 mb-3">
                     <div class="form-floating form-floating-outline">
-                      <div class="form-control acm-wrap-selectize" id="failed-update-food" style="line-height: 38px;">
+                      <div class="form-control acm-wrap-selectize pb-0" id="failed-update-food">
                         <select class="ajx_selectize" name="food"
                                 data-value="restaurant_food"
                                 data-restaurant="{{$pageConfigs['item']->restaurant_parent_id}}"
                                 data-placeholder="dish name..."
+                                onchange="report_photo_nf_food_select();"
                         ></select>
                       </div>
-                      <label for="failed-update-food" class="text-danger">Dish</label>
+                      <label for="failed-update-food" class="text-danger">Select Dish Valid</label>
                     </div>
                   </div>
-                  <div class="col-lg-3 mb-3">
+                  <div class="col-lg-6 mb-3 acm-pr-px-0">
+                    <div class="form-floating form-floating-outline">
+                      <div class="form-control acm-wrap-selectize" id="failed-update-missing">
+                        <div class="form-control text-center pb-0 pt-0 border-0">
+                          <input class="form-check-input m-auto" type="checkbox" name="missing"
+                                 onchange="report_photo_nf_ingredient_missing();"
+                          />
+                        </div>
+                      </div>
+                      <label for="failed-update-missing" class="text-danger acm-fs-15">Missing Ingredients?</label>
+                    </div>
+                  </div>
+                  <div class="col-lg-6 mb-3">
                     <div class="form-floating form-floating-outline">
                       <div class="form-control acm-wrap-selectize" id="failed-update-point">
-                        <select class="form-control" name="point"
+                        <select class="form-control text-center pb-0 pt-0 border-0" name="point"
                                 placeholder="points achieved..."
                         >
                           @php
@@ -99,12 +112,39 @@
                       <label for="failed-update-point" class="text-danger">Point</label>
                     </div>
                   </div>
+                  <div class="col-lg-12 mb-3 d-none wrap_ingredients_missing">
+                    <div class="form-floating form-floating-outline">
+                      <div class="form-control acm-wrap-selectize datas" id="failed-update-ingredients">
+
+                      </div>
+                      <label for="failed-update-ingredients" class="text-danger">Ingredients Missing</label>
+                    </div>
+                  </div>
                   <div class="col-lg-12 mb-3">
                     <div class="form-floating form-floating-outline">
                       <div class="form-control acm-wrap-selectize" id="failed-update-note">
-                        <textarea name="note" class="form-control h-px-300" placeholder="take note..."></textarea>
+                        <textarea name="note" class="form-control h-px-100 pb-0 pt-0 border-0" placeholder="take note..."></textarea>
                       </div>
                       <label for="failed-update-note" class="text-danger">Note</label>
+                    </div>
+                  </div>
+                  <div class="col-lg-12 mb-3">
+                    <div class="form-floating form-floating-outline mt-4 mb-2 wrap-texts @if(!count($pageConfigs['texts'])) d-none @endif">
+                      <div class="form-control acm-height-px-auto acm-overflow-y-auto acm-height-300-max p-2" id="user-update-text">
+                        @if(count($pageConfigs['texts']))
+                          @foreach($pageConfigs['texts'] as $k => $text)
+                            <div class="mt-1 position-relative clearfix itm-text">
+                              <div class="form-check m-0">
+                                <input class="form-check-input" type="checkbox" id="for-text-{{$k}}"
+                                       data-itd="{{$text->id}}" name="text_{{$k}}"
+                                />
+                                <label class="form-check-label" for="for-text-{{$k}}">{{$text->name}}</label>
+                              </div>
+                            </div>
+                          @endforeach
+                        @endif
+                      </div>
+                      <label for="user-update-text" class="text-danger">Text Notes</label>
                     </div>
                   </div>
                 </div>

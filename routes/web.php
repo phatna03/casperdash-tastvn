@@ -334,6 +334,7 @@ Route::post('/admin/report/start', [ReportController::class, 'start']);
 Route::post('/admin/report/photo/not-found', [ReportController::class, 'photo_not_found']);
 Route::post('/admin/report/photo/update', [ReportController::class, 'photo_update']);
 Route::post('/admin/report/photo/clear', [ReportController::class, 'photo_clear']);
+Route::post('/admin/report/photo/food', [ReportController::class, 'photo_food']);
 //datatable
 Route::get('/datatable/report', function (Request $request) {
   $values = $request->all();

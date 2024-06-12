@@ -2,7 +2,7 @@
   <tr>
     <th class="text-center align-middle" rowspan="4">Dishes</th>
     <th class="text-center align-middle" colspan="5">Robot found dishes</th>
-    <th class="text-center align-middle" rowspan="4">Robot not<br/> found dishes</th>
+    <th class="text-center align-middle" rowspan="3" colspan="3">Robot not<br/> found dishes</th>
     <th class="text-center align-middle" rowspan="4">Total<br/> points</th>
     <th class="text-center align-middle" rowspan="4">Points<br/> achieved</th>
     <th class="text-center align-middle" rowspan="4">Rate<br/> (%)</th>
@@ -16,9 +16,12 @@
     <th class="text-center align-middle" colspan="3">Robot found wrong</th>
   </tr>
   <tr>
-    <th class="text-center align-middle">Total photos</th>
-    <th class="text-center align-middle">Points achieved</th>
-    <th class="text-center align-middle">Points deducted</th>
+    <th class="text-center align-middle">Total<br/> photos</th>
+    <th class="text-center align-middle">Points<br/> achieved</th>
+    <th class="text-center align-middle">Points<br/> deducted</th>
+    <th class="text-center align-middle">Total<br/> photos</th>
+    <th class="text-center align-middle">Points<br/> achieved</th>
+    <th class="text-center align-middle">Points<br/> deducted</th>
   </tr>
   @php
     $stt = 0;
@@ -75,6 +78,16 @@
       @endif
     </td>
     <td class="text-center">
+      @if($item['not_found'])
+        <div class="fnumber text-danger cursor-pointer">{{$item['not_found']}}</div>
+      @endif
+    </td>
+    <td class="text-center">
+      @if($item['not_found'])
+        <div class="fnumber text-danger cursor-pointer">{{$item['not_found']}}</div>
+      @endif
+    </td>
+    <td class="text-center">
       @if($item['total_points'])
         <div class="fnumber text-dark fw-bold">{{$item['total_points']}}</div>
       @endif
@@ -102,6 +115,8 @@
       <td></td>
       <td></td>
       <td></td>
+      <td></td>
+      <td></td>
     </tr>
     @foreach($item['ing_miss_items'] as $ing)
       <tr class="tr_sub_food tr_sub_food_{{$item['food_id']}} d-none">
@@ -113,6 +128,8 @@
         <td colspan="3">
           <div class="text-dark acm-ml-px-10">{{$ing['ingredient_name']}}</div>
         </td>
+        <td></td>
+        <td></td>
         <td></td>
         <td></td>
         <td></td>

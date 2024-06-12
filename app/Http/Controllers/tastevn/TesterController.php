@@ -48,7 +48,21 @@ class TesterController extends Controller
     $sys_app = new SysApp();
 
     $restaurant = RestaurantParent::find(1);
-    $sensor = Restaurant::find(5);
+    $sensor = Restaurant::find(11);
+
+
+    //old s3 photo
+//    $sensor->s3_photo([
+//      's3_region' => $sys_app->get_setting('s3_region'),
+//      's3_api_key' => $sys_app->get_setting('s3_api_key'),
+//      's3_api_secret' => $sys_app->get_setting('s3_api_secret'),
+//
+//      's3_bucket' => $sensor->s3_bucket_name,
+//      's3_address' => $sys_app->parse_s3_bucket_address($sensor->s3_bucket_address),
+//
+//      'scan_date' => '2024-06-05',
+////      'scan_hour' => 20,
+//    ]);
 
 //    $report = Report::find(1);
 //    $report->start();

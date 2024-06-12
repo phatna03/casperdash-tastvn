@@ -2724,12 +2724,42 @@ function report_photo_update(ele) {
   var form = $('#modal_not_found').find('form');
   form_loading(popup);
 
+  var missing = 0;
+  var ingredients = [];
+
+  if (form.find('input[name=missing]').is(':checked')) {
+
+    missing = 1;
+
+    form.find('.wrap_ingredients_missing .datas .js-item-row').each(function (k, v) {
+      var tr = $(v);
+      ingredients.push({
+        id: tr.attr('data-itd'),
+        type: tr.attr('data-ingredient_type'),
+        quantity: input_number_only(tr.find('input[name=quantity]').val()),
+      });
+    });
+  }
+
+  var texts = [];
+  if (form.find('.wrap-texts .itm-text').length) {
+    form.find('.wrap-texts .itm-text').each(function (k, v) {
+      var tr = $(v);
+      if (tr.find('input').is(':checked')) {
+        texts.push(tr.find('input').attr('data-itd'));
+      }
+    });
+  }
+
   const formData = new FormData();
   formData.append("item", form.find('input[name=item]').val()); //report_id
   formData.append("rfs", form.find('input[name=rfs]').val()); //rfs_id
+  formData.append("missing", missing);
+  formData.append("ingredients", ingredients);
   formData.append("food", form.find('select[name=food]').val());
   formData.append("point", form.find('select[name=point]').val());
   formData.append("note", form.find('textarea[name=note]').val());
+  formData.append("texts", texts);
 
   axios.post('/admin/report/photo/update', formData)
     .then(response => {
@@ -2758,4 +2788,49 @@ function report_photo_clear_prepare(ele) {
 }
 function report_photo_clear(ele) {
   var popup = $(ele).closest('.modal');
+}
+function report_photo_nf_food_select() {
+  var popup = $('#modal_not_found');
+  var form = popup.find('form');
+
+  form.find('.wrap_ingredients_missing').addClass('d-none');
+
+  var food = parseInt(form.find('select[name=food]').val());
+  if (!food) {
+
+    form.find('.wrap_ingredients_missing .datas').empty();
+
+    return false;
+  }
+
+  axios.post('/admin/report/photo/food', {
+    'item': form.find('input[name=item]').val(),
+    'food': food,
+  })
+    .then(response => {
+
+      form.find('.wrap_ingredients_missing .datas').empty().append(response.data.html);
+
+      report_photo_nf_ingredient_missing();
+
+    })
+    .catch(error => {
+      if (error.response.data && Object.values(error.response.data).length) {
+        Object.values(error.response.data).forEach(function (v, k) {
+          message_from_toast('error', acmcfs.message_title_error, v);
+        });
+      }
+    });
+
+  return false;
+}
+function report_photo_nf_ingredient_missing() {
+  var popup = $('#modal_not_found');
+  var form = popup.find('form');
+
+  form.find('.wrap_ingredients_missing').addClass('d-none');
+
+  if (form.find('input[name=missing]').is(':checked')) {
+    form.find('.wrap_ingredients_missing').removeClass('d-none');
+  }
 }
