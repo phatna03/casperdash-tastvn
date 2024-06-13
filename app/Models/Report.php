@@ -259,5 +259,36 @@ class Report extends Model
     ]);
   }
 
+  public function re_count()
+  {
+    $count = ReportPhoto::where('report_id', $this->id)
+      ->whereIn('status', ['passed', 'edited'])
+      ->count();
 
+    $this->update([
+      'total_points' => $count,
+    ]);
+
+    $foods = ReportFood::where('report_id', $this->id)
+      ->get();
+    if (count($foods)) {
+      foreach ($foods as $food) {
+
+        $total = ReportPhoto::where('report_id', $this->id)
+          ->where('food_id', $food->food_id)
+          ->whereIn('status', ['passed', 'edited'])
+          ->count();
+        $point = ReportPhoto::where('report_id', $this->id)
+          ->where('food_id', $food->food_id)
+          ->whereIn('status', ['passed', 'edited'])
+          ->sum('point');
+
+        $food->update([
+          'total_photos' => $total,
+          'total_points' => $total,
+          'point' => $point,
+        ]);
+      }
+    }
+  }
 }

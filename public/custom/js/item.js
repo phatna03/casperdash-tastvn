@@ -2692,7 +2692,43 @@ function report_photo_nf() {
     .then(response => {
 
       //populate rfs
-      form.find('input[name=rfs]').val(response.data.rfs.id);
+      if (parseInt(response.data.rfs.id)) {
+        form.find('input[name=rfs]').val(response.data.rfs.id);
+        form.find('select[name=point]').val(response.data.photo.point);
+        form.find('textarea[name=note]').val(response.data.rfs.note);
+
+        if (form.find('.wrap-texts .itm-text').length && response.data.rfs.texts.length) {
+          form.find('.wrap-texts .itm-text input').each(function (k, v) {
+            var input = $(v);
+            input.prop('checked', false);
+
+            var itd = parseInt(input.attr('data-itd'));
+            if (response.data.rfs.texts.includes(itd)) {
+              input.prop('checked', true);
+            }
+          });
+        }
+
+        form.find('input[name=missing]').prop('checked', false);
+
+        setTimeout(function () {
+          form.find('select[name=food]').selectize()[0].selectize.setValue(response.data.rfs.food_id);
+
+          if (response.data.rfs.ingredients.length) {
+            form.find('input[name=missing]').click();
+
+            setTimeout(function () {
+              form.find('.wrap_ingredients_missing .datas .js-item-row').each(function (k, v) {
+                var tr = $(v);
+                var itd = parseInt(tr.attr('data-itd'));
+                if (response.data.rfs.ingredients.includes(itd)) {
+                  tr.find('button').click();
+                }
+              });
+            }, 888);
+          }
+        }, 888);
+      }
 
       popup.find('.modal-body .wrap_datas').empty()
         .append(response.data.html);
@@ -2758,7 +2794,7 @@ function report_photo_nf_update(ele) {
     point: form.find('select[name=point]').val(),
     missing: missing,
     ingredients: ingredients,
-    note: form.find('textarea[name=update_note]').val(),
+    note: form.find('textarea[name=note]').val(),
     texts: texts,
   })
     .then(response => {

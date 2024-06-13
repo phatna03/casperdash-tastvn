@@ -274,17 +274,24 @@ class ReportController extends Controller
       ->with('comments', $rfs->get_comments())
       ->render();
 
+    $texts = $rfs->get_texts(['text_id_only' => 1]);
+    $texts = count($texts) ? array_column($texts->toArray(), 'id') : [];
+
+    $ingredients = $rfs->get_ingredients_missing();
+    $ingredients = count($ingredients) ? array_column($ingredients->toArray(), 'id') : [];
+
     return response()->json([
       'status' => true,
-      'item' => [
-        'id' => $row->id,
-        'point' => $row->point,
+      'photo' => [
+        'id' => $photo->id,
+        'point' => number_format($photo->point, 1, '.', ''),
       ],
       'rfs' => [
         'id' => $rfs->id,
         'food_id' => $rfs->food_id,
         'note' => $rfs->note,
-        'texts' => $rfs->get_texts(['text_name_only' => 1])
+        'texts' => $texts,
+        'ingredients' => $ingredients,
       ],
       'html' => $html,
     ], 200);
@@ -311,53 +318,57 @@ class ReportController extends Controller
       ], 422);
     }
 
+    $item_old = $rfs->toArray();
+
     $food = isset($values['food']) ? (int)$values['food'] : 0;
     $point = isset($values['point']) ? (float)$values['point'] : 0;
     $noted = isset($values['note']) && !empty($values['note']) ? $values['note'] : NULL;
     $texts = isset($values['texts']) && count($values['texts']) ? (array)$values['texts'] : [];
     $missing = isset($values['missing']) ? (int)$values['missing'] : 0;
     $ingredients = isset($values['ingredients']) ? (array)$values['ingredients'] : [];
+    $type = isset($values['type']) && !empty($values['type']) ? $values['type'] : 'not_found';
 
-    $food = Food::find($food);
-    if (!$food) {
-      return response()->json([
-        'error' => 'Invalid data'
-      ], 422);
+    switch ($type) {
+
+      case 'not_found':
+
+        $food = Food::find($food);
+        if (!$food) {
+          return response()->json([
+            'error' => 'Invalid data'
+          ], 422);
+        }
+
+        //food_scan_update
+        $rfs->update([
+          'usr_predict' => $food->id,
+          'found_by' => 'usr',
+          'status' => 'edited',
+          'confidence' => 100,
+        ]);
+
+        //ingredients_missing
+        $ingredients_missing = [];
+        if ($missing && count($ingredients)) {
+          foreach ($ingredients as $ing) {
+            $ing = (array)$ing;
+            $ingredient = Ingredient::find($ing['id']);
+
+            $ingredients_missing[] = [
+              'id' => $ing['id'],
+              'quantity' => $ing['quantity'],
+              'type' => $ing['type'],
+              'name' => $ingredient->name,
+              'name_vi' => $ingredient->name_vi,
+            ];
+          }
+        }
+        $rfs->add_ingredients_missing($food, $ingredients_missing, false);
+
+        break;
+
+
     }
-
-    $item_old = $rfs->toArray();
-
-    //food_scan_update
-    if ($food->id != $rfs->food_id) {
-      $rfs->update([
-        'food_id' => $food->id,
-      ]);
-    }
-
-    $rfs->update([
-      'usr_predict' => $food->id,
-      'found_by' => 'usr',
-      'status' => 'edited',
-      'confidence' => 100,
-    ]);
-
-    //ingredients_missing
-    $ingredients_missing = [];
-    if ($missing && count($ingredients)) {
-      foreach ($ingredients as $ing) {
-        $ing = (array)$ing;
-        $ingredient = Ingredient::find($ing['id']);
-
-        $ingredients_missing[] = [
-          'id' => $ing['id'],
-          'quantity' => $ing['quantity'],
-          'type' => $ing['type'],
-          'name' => $ingredient->name,
-          'name_vi' => $ingredient->name_vi,
-        ];
-      }
-    }
-    $rfs->add_ingredients_missing($food, $ingredients_missing, false);
 
     //texts
     RestaurantFoodScanText::where('restaurant_food_scan_id', $rfs->id)
@@ -383,6 +394,7 @@ class ReportController extends Controller
     ];
 
     $rfs->update([
+      'food_id' => $food ? $food->id : 0,
       'note' => $noted,
       'usr_edited' => json_encode($edited),
     ]);
@@ -394,11 +406,14 @@ class ReportController extends Controller
       ->first();
     if ($photo) {
       $photo->update([
-        'food_id' => $food->id,
+        'food_id' => $food ? $food->id : 0,
         'point' => $point,
+        'status' => 'edited',
 //        'note' => $noted,
       ]);
     }
+
+    $row->re_count();
 
     return response()->json([
       'status' => true,

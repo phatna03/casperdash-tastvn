@@ -53,6 +53,8 @@ class TesterController extends Controller
     $restaurant = RestaurantParent::find(1);
     $sensor = Restaurant::find(10);
 
+    $rfs = RestaurantFoodScan::find(36639);
+
 
 
     //remove notify

@@ -129,7 +129,7 @@
                     </div>
                   </div>
                   <div class="col-lg-12 mb-3">
-                    <div class="form-floating form-floating-outline mt-4 mb-2 wrap-texts @if(!count($pageConfigs['texts'])) d-none @endif">
+                    <div class="form-floating form-floating-outline wrap-texts @if(!count($pageConfigs['texts'])) d-none @endif">
                       <div class="form-control acm-height-px-auto acm-overflow-y-auto acm-height-300-max p-2" id="user-update-text">
                         @if(count($pageConfigs['texts']))
                           @foreach($pageConfigs['texts'] as $k => $text)
