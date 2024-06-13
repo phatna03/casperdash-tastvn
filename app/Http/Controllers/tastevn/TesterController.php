@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 
+use Intervention\Image\ImageManagerStatic as Image;
+
 use Illuminate\Support\Facades\Notification;
 use App\Notifications\IngredientMissing;
 use App\Notifications\IngredientMissingMail;
@@ -49,8 +51,37 @@ class TesterController extends Controller
     $sys_app = new SysApp();
 
     $restaurant = RestaurantParent::find(1);
-    $sensor = Restaurant::find(11);
+    $sensor = Restaurant::find(5);
 
+    $date = '2024-06-12';
+
+    $rfs = RestaurantFoodScan::find(40667);
+
+//    $file = $rfs->img_1024();
+//    var_dump($file);
+
+    //remove notify
+//    $row1s = RestaurantFoodScan::select('id')
+//      ->where('deleted', 0)
+//      ->whereDate('time_photo', '>=', $date)
+//      ->where('missing_texts', '<>', NULL)
+//      ->where('food_id', '>', 0)
+//      ->where('confidence', '<', 70);
+//
+//    $row2s = DB::table('notifications')
+//      ->distinct()
+//      ->where('type', 'App\Notifications\IngredientMissing')
+//      ->whereIn('restaurant_food_scan_id', $row1s)
+//      ->get();
+//
+//    DB::table('notifications')
+//      ->distinct()
+//      ->where('type', 'App\Notifications\IngredientMissing')
+//      ->whereIn('restaurant_food_scan_id', $row1s)
+//      ->delete();
+//
+//    var_dump(count($row1s->get()));
+//    var_dump(count($row2s));
 
     //old s3 photo
 //    $sensor->s3_photo([
@@ -103,10 +134,8 @@ class TesterController extends Controller
 
       Storage::append($file_log, $row->id);
 
-      $img_url = $row->get_photo();
-
       //step 2= photo scan
-      $datas = SysRobo::photo_scan($img_url, [
+      $datas = SysRobo::photo_scan($row, [
         'confidence' => SysRobo::_SCAN_CONFIDENCE,
         'overlap' => SysRobo::_SCAN_OVERLAP,
       ]);

@@ -174,6 +174,7 @@ return [
     Aws\Laravel\AwsServiceProvider::class,
     Maatwebsite\Excel\ExcelServiceProvider::class,
     Yajra\DataTables\DataTablesServiceProvider::class,
+    Intervention\Image\ImageServiceProvider::class,
 
   ])->toArray(),
 
@@ -195,6 +196,7 @@ return [
     //tastevn
     'AWS' => Aws\Laravel\AwsFacade::class,
     'Excel' => Maatwebsite\Excel\Facades\Excel::class,
+    'Image' => Intervention\Image\Facades\Image::class,
 
   ])->toArray(),
 

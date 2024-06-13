@@ -385,9 +385,11 @@ class SensorController extends Controller
       }
 
       //step 2= photo scan
-      $datas = SysRobo::photo_scan($img_url, [
+      $datas = SysRobo::photo_scan($row, [
         'confidence' => SysRobo::_SCAN_CONFIDENCE,
         'overlap' => SysRobo::_SCAN_OVERLAP,
+
+        'img_url' => $img_url,
       ]);
 
       $row->update([
@@ -1052,9 +1054,11 @@ class SensorController extends Controller
           }
 
           //step 2= photo scan
-          $datas = SysRobo::photo_scan($img_url, [
+          $datas = SysRobo::photo_scan($row, [
             'confidence' => SysRobo::_SCAN_CONFIDENCE,
             'overlap' => SysRobo::_SCAN_OVERLAP,
+
+            'img_url' => $img_url,
           ]);
 
           $row->update([

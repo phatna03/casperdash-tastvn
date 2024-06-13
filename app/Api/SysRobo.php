@@ -51,7 +51,7 @@ class SysRobo
     ];
   }
 
-  public static function photo_scan($img_url, $pars = [])
+  public static function photo_scan($rfs, $pars = [])
   {
     $sys_app = new SysApp();
 
@@ -72,9 +72,27 @@ class SysRobo
     $status = true;
     $error = [];
 
-    $img_1024 = 'https://resize.sardo.work/?imageUrl=' . $img_url . '&width=1024';
-    if (@getimagesize($img_1024)) {
-      $img_url = $img_1024;
+    //img
+    $img_url = $rfs ? $rfs->img_1024() : null;
+    if (isset($pars['img_url']) && !empty($pars['img_url'])) {
+      $img_url = SysRobo::photo_1024($pars['img_url']);
+    }
+
+    if (empty($img_url) || !@getimagesize($img_url)) {
+
+      //s3 before 13/6/2024
+      if ($rfs) {
+        $img_url = $rfs->get_photo();
+      }
+
+      if (empty($img_url) || !@getimagesize($img_url)) {
+        return [
+          'status' => false,
+          'error' => 'invalid image URL',
+          'pars' => $pars,
+          'rfs' => $rfs,
+        ];
+      }
     }
 
     // URL for Http Request
@@ -119,6 +137,16 @@ class SysRobo
       'img_url' => $img_url,
       'result' => $result,
     ];
+  }
+
+  public static function photo_1024($img_url)
+  {
+    $img_1024 = 'https://resize.sardo.work/?imageUrl=' . $img_url . '&width=1024';
+    if (@getimagesize($img_1024)) {
+      $img_url = $img_1024;
+    }
+
+    return $img_url;
   }
 
   public static function photo_get($pars = [])
@@ -215,7 +243,7 @@ class SysRobo
           $row = RestaurantFoodScan::find($row->id);
 
           //step 2= photo scan
-          $datas = SysRobo::photo_scan($row->get_photo(), [
+          $datas = SysRobo::photo_scan($row, [
             'confidence' => SysRobo::_SCAN_CONFIDENCE,
             'overlap' => SysRobo::_SCAN_OVERLAP,
           ]);
@@ -304,7 +332,7 @@ class SysRobo
           var_dump('***** FOOD SERVE? = ' . $restaurant_parent->food_serve($food));
         }
 
-        if ($food && $restaurant_parent->food_serve($food)) {
+        if ($food && $restaurant_parent->food_serve($food) && $confidence >= 70) {
 
           //check valid ingredient
           $valid_food = true;

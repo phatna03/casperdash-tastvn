@@ -117,6 +117,14 @@ class SysApp
     return false;
   }
 
+  public function os_slash_file($path)
+  {
+    if (strtoupper(substr(PHP_OS, 0, 3)) == 'WIN') {
+      $path = str_replace('/', '\\', $path);
+    }
+    return $path;
+  }
+
   //aws
   public function aws_s3_polly($pars = [])
   {

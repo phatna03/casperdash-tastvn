@@ -1,15 +1,16 @@
 <?php
 
 namespace App\Models;
-use App\Api\SysRobo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
+//lib
 use App\Notifications\IngredientMissing;
 use App\Notifications\IngredientMissingMail;
-//lib
+use Intervention\Image\ImageManagerStatic as Image;
 use App\Api\SysApp;
+use App\Api\SysRobo;
 
 class RestaurantFoodScan extends Model
 {
@@ -415,6 +416,40 @@ class RestaurantFoodScan extends Model
       'missing_ids' => count($ids) ? $ids : NULL,
       'missing_texts' => $texts,
     ]);
+  }
+
+  public function img_1024()
+  {
+    $sys_app = new SysApp();
+
+    $temps = array_filter(explode('/', $this->photo_name));
+    $photo_name = $temps[count($temps) - 1];
+    $photo_path = str_replace($photo_name, '', $this->photo_name);
+
+    $path_1024 = $photo_path . '1024_' . $photo_name;
+    $path_1024 = public_path('sensors') . '/' . $path_1024;
+    $file_1024 = $sys_app->os_slash_file($path_1024);
+    if (is_file($file_1024)) {
+      return $path_1024;
+    }
+
+    $path_img = public_path('sensors') . '/' . $this->photo_name;
+    $file_img = $sys_app->os_slash_file($path_img);
+    if (is_file($file_img)) {
+
+      $thumb_1024 = Image::make($file_img);
+      $thumb_1024->resize(1024, 1024, function ($constraint) {
+        $constraint->aspectRatio();
+      });
+
+      $path_1024 = public_path('sensors') . '/' . $photo_path . '1024_' . $photo_name;
+      $path_1024 = $sys_app->os_slash_file($path_1024);
+      $thumb_1024->save($path_1024, 100);
+
+      return $path_1024;
+    }
+
+    return null;
   }
 
   //cmt

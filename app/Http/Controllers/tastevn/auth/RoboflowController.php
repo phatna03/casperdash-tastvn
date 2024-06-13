@@ -149,9 +149,11 @@ class RoboflowController extends Controller
         }
 
         //step 2= photo scan
-        $datas = SysRobo::photo_scan($img_url, [
+        $datas = SysRobo::photo_scan(null, [
           'confidence' => SysRobo::_SCAN_CONFIDENCE,
           'overlap' => SysRobo::_SCAN_OVERLAP,
+
+          'img_url' => $img_url,
         ]);
       }
 

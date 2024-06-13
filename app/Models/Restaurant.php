@@ -430,7 +430,7 @@ class Restaurant extends Model
 
             if ($row->status == 'new') {
               //step 2= photo scan
-              $datas = SysRobo::photo_scan($row->get_photo(), [
+              $datas = SysRobo::photo_scan($row, [
                 'confidence' => SysRobo::_SCAN_CONFIDENCE,
                 'overlap' => SysRobo::_SCAN_OVERLAP,
               ]);
