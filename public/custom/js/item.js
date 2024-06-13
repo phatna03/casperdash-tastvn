@@ -930,8 +930,6 @@ function sensor_food_scan_info(id) {
       bind_datad(popup);
       popup.modal('show');
 
-
-
     })
     .catch(error => {
       if (error.response.data && Object.values(error.response.data).length) {
@@ -2693,7 +2691,8 @@ function report_photo_nf() {
   })
     .then(response => {
 
-      form.find('input[name=rfs]').val(response.data.rfs_id);
+      //populate rfs
+      form.find('input[name=rfs]').val(response.data.rfs.id);
 
       popup.find('.modal-body .wrap_datas').empty()
         .append(response.data.html);
@@ -2751,18 +2750,17 @@ function report_photo_nf_update(ele) {
     });
   }
 
-  const formData = new FormData();
-  formData.append("type", 'not_found');
-  formData.append("item", form.find('input[name=item]').val()); //report_id
-  formData.append("rfs", form.find('input[name=rfs]').val()); //rfs_id
-  formData.append("missing", missing);
-  formData.append("ingredients", ingredients);
-  formData.append("food", form.find('select[name=food]').val());
-  formData.append("point", form.find('select[name=point]').val());
-  formData.append("note", form.find('textarea[name=note]').val());
-  formData.append("texts", texts);
-
-  axios.post('/admin/report/photo/update', formData)
+  axios.post('/admin/report/photo/update', {
+    item: form.find('input[name=item]').val(), //report_id
+    rfs: form.find('input[name=rfs]').val(), //rfs_id
+    type: 'not_found',
+    food: form.find('select[name=food]').val(),
+    point: form.find('select[name=point]').val(),
+    missing: missing,
+    ingredients: ingredients,
+    note: form.find('textarea[name=update_note]').val(),
+    texts: texts,
+  })
     .then(response => {
 
       message_from_toast('success', acmcfs.message_title_success, acmcfs.message_description_success_update, true);

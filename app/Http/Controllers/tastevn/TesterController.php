@@ -51,9 +51,7 @@ class TesterController extends Controller
     $sys_app = new SysApp();
 
     $restaurant = RestaurantParent::find(1);
-    $sensor = Restaurant::find(5);
-
-    $date = '2024-06-12';
+    $sensor = Restaurant::find(10);
 
 
 

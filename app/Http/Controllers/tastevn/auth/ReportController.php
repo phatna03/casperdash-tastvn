@@ -16,6 +16,7 @@ use App\Models\Food;
 use App\Models\Ingredient;
 use App\Models\ReportPhoto;
 use App\Models\RestaurantFoodScan;
+use App\Models\RestaurantFoodScanText;
 use App\Models\Text;
 
 class ReportController extends Controller
@@ -266,15 +267,25 @@ class ReportController extends Controller
       ->limit(1)
       ->first();
 
+    $rfs = $photo->get_rfs();
+
     $html = view('tastevn.htmls.item_report_photo_not_found')
-      ->with('rfs', $photo->get_rfs())
-      ->with('comments', $photo->get_rfs()->get_comments())
+      ->with('rfs', $rfs)
+      ->with('comments', $rfs->get_comments())
       ->render();
 
     return response()->json([
       'status' => true,
-      'item' => $row,
-      'rfs_id' => $photo->get_rfs()->id,
+      'item' => [
+        'id' => $row->id,
+        'point' => $row->point,
+      ],
+      'rfs' => [
+        'id' => $rfs->id,
+        'food_id' => $rfs->food_id,
+        'note' => $rfs->note,
+        'texts' => $rfs->get_texts(['text_name_only' => 1])
+      ],
       'html' => $html,
     ], 200);
   }
@@ -302,7 +313,8 @@ class ReportController extends Controller
 
     $food = isset($values['food']) ? (int)$values['food'] : 0;
     $point = isset($values['point']) ? (float)$values['point'] : 0;
-    $note = isset($values['note']) && !empty($values['note']) ? $values['note'] : NULL;
+    $noted = isset($values['note']) && !empty($values['note']) ? $values['note'] : NULL;
+    $texts = isset($values['texts']) && count($values['texts']) ? (array)$values['texts'] : [];
     $missing = isset($values['missing']) ? (int)$values['missing'] : 0;
     $ingredients = isset($values['ingredients']) ? (array)$values['ingredients'] : [];
 
@@ -313,8 +325,67 @@ class ReportController extends Controller
       ], 422);
     }
 
-    //food_scan_update
+    $item_old = $rfs->toArray();
 
+    //food_scan_update
+    if ($food->id != $rfs->food_id) {
+      $rfs->update([
+        'food_id' => $food->id,
+      ]);
+    }
+
+    $rfs->update([
+      'usr_predict' => $food->id,
+      'found_by' => 'usr',
+      'status' => 'edited',
+      'confidence' => 100,
+    ]);
+
+    //ingredients_missing
+    $ingredients_missing = [];
+    if ($missing && count($ingredients)) {
+      foreach ($ingredients as $ing) {
+        $ing = (array)$ing;
+        $ingredient = Ingredient::find($ing['id']);
+
+        $ingredients_missing[] = [
+          'id' => $ing['id'],
+          'quantity' => $ing['quantity'],
+          'type' => $ing['type'],
+          'name' => $ingredient->name,
+          'name_vi' => $ingredient->name_vi,
+        ];
+      }
+    }
+    $rfs->add_ingredients_missing($food, $ingredients_missing, false);
+
+    //texts
+    RestaurantFoodScanText::where('restaurant_food_scan_id', $rfs->id)
+      ->delete();
+    if (count($texts)) {
+      foreach ($texts as $text) {
+        RestaurantFoodScanText::create([
+          'restaurant_food_scan_id' => $rfs->id,
+          'text_id' => (int)$text,
+        ]);
+      }
+    }
+
+    $rfs->update_text_notes();
+
+    //edited
+    $rfs = RestaurantFoodScan::find($rfs->id);
+    $item_new = $rfs->toArray();
+
+    $edited = [
+      'before' => $item_old,
+      'after' => $item_new,
+    ];
+
+    $rfs->update([
+      'note' => $noted,
+      'usr_edited' => json_encode($edited),
+    ]);
 
     //report photo_update
     $photo = ReportPhoto::where('report_id', $row->id)
@@ -325,7 +396,7 @@ class ReportController extends Controller
       $photo->update([
         'food_id' => $food->id,
         'point' => $point,
-//        'note' => $note,
+//        'note' => $noted,
       ]);
     }
 

@@ -430,7 +430,7 @@ class RestaurantFoodScan extends Model
     $path_1024 = public_path('sensors') . '/' . $path_1024;
     $file_1024 = $sys_app->os_slash_file($path_1024);
     if (is_file($file_1024)) {
-      return $path_1024;
+      return url('sensors') . '/' . $photo_path . '1024_' . $photo_name;
     }
 
     $path_img = public_path('sensors') . '/' . $this->photo_name;
@@ -446,7 +446,7 @@ class RestaurantFoodScan extends Model
       $path_1024 = $sys_app->os_slash_file($path_1024);
       $thumb_1024->save($path_1024, 100);
 
-      return $path_1024;
+      return url('sensors') . '/' . $photo_path . '1024_' . $photo_name;
     }
 
     return null;

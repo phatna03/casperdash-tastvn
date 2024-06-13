@@ -701,7 +701,6 @@ class SensorController extends Controller
 
     $noted = isset($values['note']) ? $values['note'] : NULL;
     $texts = isset($values['texts']) && count($values['texts']) ? (array)$values['texts'] : [];
-    $ingredients_missing = isset($values['missings']) && count($values['missings']) ? (array)$values['missings'] : [];
     $unknown = true;
 
     $diffs['before'] = $row->get_log();
@@ -979,6 +978,13 @@ class SensorController extends Controller
       foreach ($files as $file) {
         $ext = array_filter(explode('.', $file));
         if (!count($ext) || $ext[count($ext) - 1] != 'jpg') {
+          continue;
+        }
+
+        //no 1024
+        $temps = array_filter(explode('/', $file));
+        $photo_name = $temps[count($temps) - 1];
+        if (substr($photo_name, 0, 5) == '1024_') {
           continue;
         }
 

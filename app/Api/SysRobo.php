@@ -110,6 +110,8 @@ class SysRobo
         'method'  => 'POST'
       ));
 
+    $result = [];
+
     try {
 
       $context = stream_context_create($options);
@@ -208,6 +210,14 @@ class SysRobo
         if (!count($ext) || $ext[count($ext) - 1] != 'jpg') {
           continue;
         }
+
+        //no 1024
+        $temps = array_filter(explode('/', $file));
+        $photo_name = $temps[count($temps) - 1];
+        if (substr($photo_name, 0, 5) == '1024_') {
+          continue;
+        }
+
         $count++;
 
         //check exist

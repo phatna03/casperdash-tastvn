@@ -151,11 +151,11 @@ class Report extends Model
           'ing_full' => $ing_full,
           'ing_miss_right' => $ing_miss_right,
           'ing_miss_wrong_total' => $ing_miss_wrong_total,
-          'ing_miss_wrong_point' => $ing_miss_wrong_point,
+          'ing_miss_wrong_point' => number_format($ing_miss_wrong_point, 1, '.', ''),
           'ing_miss_wrong_failed' => $ing_miss_wrong_failed,
 
           'not_found_total' => $not_found_total,
-          'not_found_point' => $not_found_point,
+          'not_found_point' => number_format($not_found_point, 1, '.', ''),
           'not_found_failed' => $not_found_failed,
 
           'ing_miss_items' => $ing_miss_items,
