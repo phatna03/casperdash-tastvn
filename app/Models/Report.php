@@ -81,7 +81,7 @@ class Report extends Model
           ->where('restaurant_food_scans.status', 'checked')
           ->where('report_photos.status', 'passed')
           ->count();
-        $ing_miss_right_ids = ReportPhoto::query('report_photos')
+        $wrong1s = ReportPhoto::query('report_photos')
           ->select('report_photos.restaurant_food_scan_id')
           ->leftJoin('restaurant_food_scans', 'restaurant_food_scans.id', '=', 'report_photos.restaurant_food_scan_id')
           ->where('report_photos.report_id', $this->id)
@@ -98,6 +98,13 @@ class Report extends Model
           ->where('restaurant_food_scans.status', 'edited')
           ->where('report_photos.reporting', 1)
           ->count();
+        $wrong2s = ReportPhoto::query('report_photos')
+          ->select('report_photos.restaurant_food_scan_id')
+          ->leftJoin('restaurant_food_scans', 'restaurant_food_scans.id', '=', 'report_photos.restaurant_food_scan_id')
+          ->where('report_photos.report_id', $this->id)
+          ->where('restaurant_food_scans.food_id', $row['food_id'])
+          ->where('restaurant_food_scans.status', 'edited')
+          ->where('report_photos.reporting', 1);
 
         $ing_miss_wrong_point = ReportPhoto::query('report_photos')
           ->select('report_photos.restaurant_food_scan_id')
@@ -118,6 +125,13 @@ class Report extends Model
           ->where('restaurant_food_scans.status', 'edited')
           ->where('report_photos.reporting', 0)
           ->count();
+        $wrong3s = ReportPhoto::query('report_photos')
+          ->select('report_photos.restaurant_food_scan_id')
+          ->leftJoin('restaurant_food_scans', 'restaurant_food_scans.id', '=', 'report_photos.restaurant_food_scan_id')
+          ->where('report_photos.report_id', $this->id)
+          ->where('restaurant_food_scans.food_id', $row['food_id'])
+          ->where('restaurant_food_scans.status', 'edited')
+          ->where('report_photos.reporting', 0);
 
         $not_found_point = ReportPhoto::query('report_photos')
           ->select('report_photos.restaurant_food_scan_id')
@@ -135,7 +149,11 @@ class Report extends Model
           ->select('ingredients.name as ingredient_name')
           ->selectRaw('SUM(restaurant_food_scan_missings.ingredient_quantity) as ingredient_total')
           ->leftJoin('ingredients', 'ingredients.id', '=', 'restaurant_food_scan_missings.ingredient_id')
-          ->whereIn('restaurant_food_scan_missings.restaurant_food_scan_id', $ing_miss_right_ids)
+          ->where(function ($q) use ($wrong1s, $wrong2s, $wrong3s) {
+            $q->whereIn('restaurant_food_scan_missings.restaurant_food_scan_id', $wrong1s)
+              ->orWhereIn('restaurant_food_scan_missings.restaurant_food_scan_id', $wrong2s)
+              ->orWhereIn('restaurant_food_scan_missings.restaurant_food_scan_id', $wrong3s);
+          })
           ->groupBy('restaurant_food_scan_missings.ingredient_quantity', 'ingredients.name')
           ->orderBy('ingredient_total', 'desc')
           ->orderByRaw('TRIM(LOWER(ingredients.name))')

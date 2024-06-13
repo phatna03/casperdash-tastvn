@@ -108,12 +108,9 @@
       <td></td>
       <td></td>
       <td class="text-center align-middle text-dark bg-warning-subtle">Quantities</td>
-      <td colspan="3" class="align-middle text-dark bg-warning-subtle">
+      <td colspan="6" class="align-middle text-dark bg-warning-subtle">
         <div class="acm-ml-px-10">Missing ingredients</div>
       </td>
-      <td></td>
-      <td></td>
-      <td></td>
       <td></td>
       <td></td>
       <td></td>
@@ -125,12 +122,9 @@
         <td class="text-center">
           <div class="fnumber text-dark">{{$ing['ingredient_total']}}</div>
         </td>
-        <td colspan="3">
+        <td colspan="6">
           <div class="text-dark acm-ml-px-10">{{$ing['ingredient_name']}}</div>
         </td>
-        <td></td>
-        <td></td>
-        <td></td>
         <td></td>
         <td></td>
         <td></td>
