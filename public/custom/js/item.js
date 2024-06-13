@@ -2754,7 +2754,67 @@ function report_photo_nf() {
   return false;
 }
 function report_photo_nf_action(next = 0) {
+  var popup = $('#modal_report_nf');
+  var arr = popup.find('input[name=popup_view_ids]').val().split(',').filter(Boolean);
+  var view_current = parseInt(popup.find('input[name=popup_view_id_itm]').val());
+  var view_next = 0;
+  var view_input = 1;
 
+  if (arr.length) {
+    switch (next) {
+      case 1:
+        for (var i = 0; i < arr.length; ++i) {
+          if (parseInt(arr[i]) == view_current) {
+            if (arr[i + 1]) {
+              view_next = arr[i + 1];
+            } else {
+              view_next = arr[0];
+            }
+          }
+        }
+
+        if (view_next) {
+          view_input = arr.indexOf(view_next) + 1;
+        }
+        break;
+
+      case 2:
+        var input = parseInt(popup.find('input[name=popup_view_input]').val());
+
+        if (input > arr.length) {
+          input = arr.length;
+        }
+
+        view_input = input;
+        view_next = arr[input - 1];
+
+        break;
+
+      default:
+        //0
+        for (var i = 0; i < arr.length; ++i) {
+          if (parseInt(arr[i]) == view_current) {
+            if (arr[i - 1]) {
+              view_next = arr[i - 1];
+            } else {
+              view_next = arr[arr.length - 1];
+            }
+          }
+        }
+
+        if (view_next) {
+          view_input = arr.indexOf(view_next) + 1;
+        }
+    }
+
+    console.log(view_next);
+
+    popup.find('input[name=popup_view_input]').val(view_input);
+    popup.find('input[name=popup_view_id_itm]').val(view_next);
+
+    //rebind
+    report_photo_nf_itm(view_next);
+  }
 }
 function report_photo_nf_update_prepare(ele) {
   var popup = $('#modal_photo_update');
@@ -2795,7 +2855,6 @@ function report_photo_nf_update(ele) {
   axios.post('/admin/report/photo/update', {
     item: form.find('input[name=item]').val(), //report_id
     rfs: form.find('input[name=rfs]').val(), //rfs_id
-    type: 'not_found',
     food: form.find('select[name=food]').val(),
     point: form.find('select[name=point]').val(),
     missing: missing,
@@ -2905,7 +2964,7 @@ function report_photo_clear(frm) {
   var form = $(frm);
 
   form.find('select[name=food]').selectize()[0].selectize.setValue('');
-  form.find('select[name=point]').val(0);
+  form.find('select[name=point]').val('');
   form.find('textarea[name=note]').val('');
 
   form.find('input[name=missing]').prop('checked', false);
@@ -2917,4 +2976,74 @@ function report_photo_clear(frm) {
       input.prop('checked', false);
     });
   }
+}
+function report_photo_nf_itm(itd) {
+  var popup = $('#modal_report_nf');
+  var form = popup.find('form');
+
+  popup.find('.modal-body .wrap_datas').addClass('text-center').empty()
+    .append('<div class="m-auto">' + acmcfs.html_loading + '</div>');
+
+  axios.post('/admin/report/photo/rfs', {
+    item: popup.find('input[name=report_id]'),
+    rfs: itd, //rfs_id
+  })
+    .then(response => {
+
+      report_photo_clear(form);
+
+      //populate rfs
+      if (parseInt(response.data.rfs.id)) {
+
+        popup.find('input[name=popup_view_id_itm]').val(response.data.rfs.id);
+
+        form.find('input[name=rfs]').val(response.data.rfs.id);
+        form.find('select[name=point]').val(response.data.photo.point);
+        form.find('textarea[name=note]').val(response.data.rfs.note);
+
+        if (form.find('.wrap-texts .itm-text').length && response.data.rfs.texts.length) {
+          form.find('.wrap-texts .itm-text input').each(function (k, v) {
+            var input = $(v);
+            var itd = parseInt(input.attr('data-itd'));
+            if (response.data.rfs.texts.includes(itd)) {
+              input.prop('checked', true);
+            }
+          });
+        }
+
+        setTimeout(function () {
+          form.find('select[name=food]').selectize()[0].selectize.setValue(response.data.rfs.food_id);
+
+          if (response.data.rfs.ingredients.length) {
+            form.find('input[name=missing]').click();
+
+            setTimeout(function () {
+              form.find('.wrap_ingredients_missing .datas .js-item-row').each(function (k, v) {
+                var tr = $(v);
+                var itd = parseInt(tr.attr('data-itd'));
+                if (!response.data.rfs.ingredients.includes(itd)) {
+                  tr.find('button').click();
+                }
+              });
+            }, 888);
+          }
+        }, 888);
+      }
+
+      popup.find('.modal-body .wrap_datas').empty()
+        .append(response.data.html);
+
+      bind_datad(popup);
+    })
+    .catch(error => {
+
+      if (error.response.data && Object.values(error.response.data).length) {
+        Object.values(error.response.data).forEach(function (v, k) {
+          message_from_toast('error', acmcfs.message_title_error, v);
+        });
+      }
+
+    });
+
+  return false;
 }

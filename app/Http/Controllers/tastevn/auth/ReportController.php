@@ -487,4 +487,67 @@ class ReportController extends Controller
       'item' => $row,
     ], 200);
   }
+
+  public function photo_rfs(Request $request)
+  {
+    $values = $request->post();
+
+    //required
+    $validator = Validator::make($values, [
+      'item' => 'required',
+      'rfs' => 'required',
+    ]);
+    if ($validator->fails()) {
+      return response()->json($validator->errors(), 422);
+    }
+
+    $row = Report::find((int)$values['item']);
+    $rfs = RestaurantFoodScan::find((int)$values['rfs']);
+    if (!$row || !$rfs) {
+      return response()->json([
+        'error' => 'Invalid item'
+      ], 422);
+    }
+
+    $photo = ReportPhoto::where('report_id', $row->id)
+      ->where('restaurant_food_scan_id', $rfs->id)
+      ->limit(1)
+      ->first();
+
+    $html = view('tastevn.htmls.item_report_photo_not_found')
+      ->with('rfs', $rfs)
+      ->with('comments', $rfs->get_comments())
+      ->render();
+
+    $texts = $rfs->get_texts(['text_id_only' => 1]);
+    $texts = count($texts) ? array_column($texts->toArray(), 'id') : [];
+
+    $ingredients = $rfs->get_ingredients_missing();
+    $ingredients = count($ingredients) ? array_column($ingredients->toArray(), 'id') : [];
+
+    $photo_ids = ReportPhoto::select('restaurant_food_scan_id as id')
+      ->where('report_id', $row->id)
+      ->where('reporting', 0)
+      ->where('status', 'failed')
+      ->orderBy('restaurant_food_scan_id', 'asc')
+      ->get();
+    $photo_ids = count($photo_ids) ? array_column($photo_ids->toArray(), 'id') : [];
+
+    return response()->json([
+      'status' => true,
+      'ids' => $photo_ids,
+      'photo' => [
+        'id' => $photo->id,
+        'point' => number_format($photo->point, 1, '.', ''),
+      ],
+      'rfs' => [
+        'id' => $rfs->id,
+        'food_id' => $rfs->food_id,
+        'note' => $rfs->note,
+        'texts' => $texts,
+        'ingredients' => $ingredients,
+      ],
+      'html' => $html,
+    ], 200);
+  }
 }

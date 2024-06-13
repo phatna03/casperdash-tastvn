@@ -41,7 +41,8 @@
       <div class="modal-content">
         <div class="modal-header acm-header-custom">
           <div class="mid_content acm-fs-18">
-            <input type="text" class="form-control text-center d-inline-block acm-fs-18 w-px-75 text-dark fw-bold view_current" />
+            <input type="text" class="form-control text-center d-inline-block acm-fs-18 w-px-75 text-dark fw-bold view_current"
+              name="popup_view_input" onblur="input_number_min_one(this); setTimeout(function () { report_photo_nf_action(2); }, 333);" />
             <span class="acm-mr-px-5 acm-ml-px-5">/</span>
             <span class="text-dark fw-bold view_all_count">1000</span>
           </div>
@@ -108,7 +109,7 @@
                                 break;
                             }
                           @endphp
-                          <option value="{{$p}}">{{$p}}</option>
+                          <option value="{{$p > 0 ? $p : ''}}">{{$p}}</option>
                           @php
                             $p += 0.1;
                             endfor;
@@ -235,6 +236,19 @@
     $(document).ready(function() {
 
       report_load('{{$pageConfigs['item']->id}}');
+
+      //keyCode
+      $(document).keydown(function(e) {
+        // console.log(e.keyCode);
+        if ($('#modal_report_nf').hasClass('show')) {
+          if (e.keyCode == 37) {
+            report_photo_nf_action();
+          } else if (e.keyCode == 39) {
+            report_photo_nf_action(1);
+          }
+        }
+      });
+
     });
   </script>
 @endsection
