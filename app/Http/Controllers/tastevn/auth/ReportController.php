@@ -263,7 +263,8 @@ class ReportController extends Controller
 
     $photo = ReportPhoto::where('report_id', $row->id)
       ->where('reporting', 0)
-      ->orderBy('id', 'asc')
+      ->where('status', 'failed')
+      ->orderBy('restaurant_food_scan_id', 'asc')
       ->limit(1)
       ->first();
 
@@ -280,8 +281,17 @@ class ReportController extends Controller
     $ingredients = $rfs->get_ingredients_missing();
     $ingredients = count($ingredients) ? array_column($ingredients->toArray(), 'id') : [];
 
+    $photo_ids = ReportPhoto::select('restaurant_food_scan_id as id')
+      ->where('report_id', $row->id)
+      ->where('reporting', 0)
+      ->where('status', 'failed')
+      ->orderBy('restaurant_food_scan_id', 'asc')
+      ->get();
+    $photo_ids = count($photo_ids) ? array_column($photo_ids->toArray(), 'id') : [];
+
     return response()->json([
       'status' => true,
+      'ids' => $photo_ids,
       'photo' => [
         'id' => $photo->id,
         'point' => number_format($photo->point, 1, '.', ''),
@@ -328,46 +338,39 @@ class ReportController extends Controller
     $ingredients = isset($values['ingredients']) ? (array)$values['ingredients'] : [];
     $type = isset($values['type']) && !empty($values['type']) ? $values['type'] : 'not_found';
 
-    switch ($type) {
+    //food
+    $food = Food::find($food);
+    if ($food) {
+      //food_scan_update
+      $rfs->update([
+        'usr_predict' => $food->id,
+        'found_by' => 'usr',
+        'status' => 'edited',
+        'confidence' => 100,
+      ]);
 
-      case 'not_found':
+      //ingredients_missing
+      $ingredients_missing = [];
+      if ($missing && count($ingredients)) {
+        foreach ($ingredients as $ing) {
+          $ing = (array)$ing;
+          $ingredient = Ingredient::find($ing['id']);
 
-        $food = Food::find($food);
-        if (!$food) {
-          return response()->json([
-            'error' => 'Invalid data'
-          ], 422);
+          $ingredients_missing[] = [
+            'id' => $ing['id'],
+            'quantity' => $ing['quantity'],
+            'type' => $ing['type'],
+            'name' => $ingredient->name,
+            'name_vi' => $ingredient->name_vi,
+          ];
         }
 
-        //food_scan_update
-        $rfs->update([
-          'usr_predict' => $food->id,
-          'found_by' => 'usr',
-          'status' => 'edited',
-          'confidence' => 100,
-        ]);
-
-        //ingredients_missing
-        $ingredients_missing = [];
-        if ($missing && count($ingredients)) {
-          foreach ($ingredients as $ing) {
-            $ing = (array)$ing;
-            $ingredient = Ingredient::find($ing['id']);
-
-            $ingredients_missing[] = [
-              'id' => $ing['id'],
-              'quantity' => $ing['quantity'],
-              'type' => $ing['type'],
-              'name' => $ingredient->name,
-              'name_vi' => $ingredient->name_vi,
-            ];
-          }
-        }
         $rfs->add_ingredients_missing($food, $ingredients_missing, false);
-
-        break;
-
-
+      }
+    }
+    else {
+      //no missing
+      $rfs->add_ingredients_missing($food, [], false);
     }
 
     //texts
@@ -396,7 +399,7 @@ class ReportController extends Controller
     $rfs->update([
       'food_id' => $food ? $food->id : 0,
       'note' => $noted,
-      'usr_edited' => json_encode($edited),
+//      'usr_edited' => json_encode($edited),
     ]);
 
     //report photo_update
@@ -451,6 +454,37 @@ class ReportController extends Controller
     return response()->json([
       'status' => true,
       'html' => $html,
+    ], 200);
+  }
+
+  public function photo_clear(Request $request)
+  {
+    $values = $request->post();
+
+    //required
+    $validator = Validator::make($values, [
+      'item' => 'required',
+      'rfs' => 'required',
+    ]);
+    if ($validator->fails()) {
+      return response()->json($validator->errors(), 422);
+    }
+
+    $row = Report::find((int)$values['item']);
+    $rfs = RestaurantFoodScan::find((int)$values['rfs']);
+    if (!$row || !$rfs) {
+      return response()->json([
+        'error' => 'Invalid item'
+      ], 422);
+    }
+
+
+
+    $row->re_count();
+
+    return response()->json([
+      'status' => true,
+      'item' => $row,
     ], 200);
   }
 }

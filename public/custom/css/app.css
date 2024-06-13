@@ -462,6 +462,29 @@
   background-color: #e0e0fc;
 }
 
+.acm-header-custom {
+  position: relative;
+  text-align: center;
+}
+
+.acm-header-custom .left_content {
+  position: absolute;
+  top: 25px;
+  left: 25px;
+}
+
+.acm-header-custom .right_content {
+  position: absolute;
+  top: 25px;
+  right: 25px;
+}
+
+.acm-header-custom .mid_content {
+  text-align: center;
+  margin: 0 auto;
+  width: auto;
+}
+
 #custCarousel .carousel-indicators {
   position: static;
   margin-top: 20px;

@@ -39,9 +39,15 @@
   <div class="modal animate__animated animate__zoomIn" id="modal_report_nf" aria-hidden="true">
     <div class="modal-dialog modal-xl acm-modal-xxl" role="document">
       <div class="modal-content">
-        <div class="modal-header">
-          <h4 class="modal-title text-danger fw-bold">Robot not found dishes</h4>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div class="modal-header acm-header-custom">
+          <div class="mid_content acm-fs-18">
+            <input type="text" class="form-control text-center d-inline-block acm-fs-18 w-px-75 text-dark fw-bold view_current" />
+            <span class="acm-mr-px-5 acm-ml-px-5">/</span>
+            <span class="text-dark fw-bold view_all_count">1000</span>
+          </div>
+
+          <h4 class="modal-title text-danger fw-bold left_content">Robot not found dishes</h4>
+          <button type="button" class="btn-close right_content" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
           <div class="row">

@@ -146,7 +146,7 @@ class Report extends Model
           'food_name' => $row['food_name'],
           'total_photos' => $row['total_photos'],
           'total_points' => $row['total_points'],
-          'point' => $row['point'],
+          'point' => number_format($row['point'], 1, '.', ''),
 
           'ing_full' => $ing_full,
           'ing_miss_right' => $ing_miss_right,
@@ -263,6 +263,7 @@ class Report extends Model
   {
     $count = ReportPhoto::where('report_id', $this->id)
       ->whereIn('status', ['passed', 'edited'])
+      ->where('food_id', '>', 0)
       ->count();
 
     $this->update([

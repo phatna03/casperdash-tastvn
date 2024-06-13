@@ -2691,8 +2691,18 @@ function report_photo_nf() {
   })
     .then(response => {
 
+      report_photo_clear(form);
+
+      popup.find('.view_current').val(1);
+      popup.find('.view_all_count').text(response.data.ids.length);
+
+      popup.find('input[name=popup_view_ids]').val(response.data.ids);
+
       //populate rfs
       if (parseInt(response.data.rfs.id)) {
+
+        popup.find('input[name=popup_view_id_itm]').val(response.data.rfs.id);
+
         form.find('input[name=rfs]').val(response.data.rfs.id);
         form.find('select[name=point]').val(response.data.photo.point);
         form.find('textarea[name=note]').val(response.data.rfs.note);
@@ -2700,16 +2710,12 @@ function report_photo_nf() {
         if (form.find('.wrap-texts .itm-text').length && response.data.rfs.texts.length) {
           form.find('.wrap-texts .itm-text input').each(function (k, v) {
             var input = $(v);
-            input.prop('checked', false);
-
             var itd = parseInt(input.attr('data-itd'));
             if (response.data.rfs.texts.includes(itd)) {
               input.prop('checked', true);
             }
           });
         }
-
-        form.find('input[name=missing]').prop('checked', false);
 
         setTimeout(function () {
           form.find('select[name=food]').selectize()[0].selectize.setValue(response.data.rfs.food_id);
@@ -2721,7 +2727,7 @@ function report_photo_nf() {
               form.find('.wrap_ingredients_missing .datas .js-item-row').each(function (k, v) {
                 var tr = $(v);
                 var itd = parseInt(tr.attr('data-itd'));
-                if (response.data.rfs.ingredients.includes(itd)) {
+                if (!response.data.rfs.ingredients.includes(itd)) {
                   tr.find('button').click();
                 }
               });
@@ -2823,6 +2829,32 @@ function report_photo_nf_clear_prepare(ele) {
 }
 function report_photo_nf_clear(ele) {
   var popup = $(ele).closest('.modal');
+  var form = $('#modal_report_nf').find('form');
+  form_loading(popup);
+
+  axios.post('/admin/report/photo/clear', {
+    item: form.find('input[name=item]').val(), //report_id
+    rfs: form.find('input[name=rfs]').val(), //rfs_id
+  })
+    .then(response => {
+
+      message_from_toast('success', acmcfs.message_title_success, acmcfs.message_description_success_update, true);
+      report_photo_clear(form);
+      report_load(response.data.item.id);
+    })
+    .catch(error => {
+      if (error.response.data && Object.values(error.response.data).length) {
+        Object.values(error.response.data).forEach(function (v, k) {
+          message_from_toast('error', acmcfs.message_title_error, v);
+        });
+      }
+    })
+    .then(() => {
+      form_loading(popup, false);
+      form_close(popup);
+    });
+
+  return false;
 }
 function report_photo_nf_food_select() {
   var popup = $('#modal_report_nf');
@@ -2867,5 +2899,22 @@ function report_photo_nf_ingredient_missing() {
 
   if (form.find('input[name=missing]').is(':checked')) {
     form.find('.wrap_ingredients_missing').removeClass('d-none');
+  }
+}
+function report_photo_clear(frm) {
+  var form = $(frm);
+
+  form.find('select[name=food]').selectize()[0].selectize.setValue('');
+  form.find('select[name=point]').val(0);
+  form.find('textarea[name=note]').val('');
+
+  form.find('input[name=missing]').prop('checked', false);
+  form.find('.wrap_ingredients_missing').addClass('d-none');
+
+  if (form.find('.wrap-texts .itm-text').length) {
+    form.find('.wrap-texts .itm-text input').each(function (k, v) {
+      var input = $(v);
+      input.prop('checked', false);
+    });
   }
 }
