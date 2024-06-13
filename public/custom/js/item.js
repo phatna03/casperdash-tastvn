@@ -2674,8 +2674,8 @@ function report_load(itd) {
 
   return false;
 }
-function report_not_found() {
-  var popup = $('#modal_not_found');
+function report_photo_nf() {
+  var popup = $('#modal_report_nf');
   var form = popup.find('form');
 
   var not_found = parseInt($('#not_found_dishes').text());
@@ -2712,16 +2712,16 @@ function report_not_found() {
 
   return false;
 }
-function report_not_found_action(next = 0) {
+function report_photo_nf_action(next = 0) {
 
 }
-function report_photo_update_prepare(ele) {
+function report_photo_nf_update_prepare(ele) {
   var popup = $('#modal_photo_update');
   popup.modal('show');
 }
-function report_photo_update(ele) {
+function report_photo_nf_update(ele) {
   var popup = $(ele).closest('.modal');
-  var form = $('#modal_not_found').find('form');
+  var form = $('#modal_report_nf').find('form');
   form_loading(popup);
 
   var missing = 0;
@@ -2752,6 +2752,7 @@ function report_photo_update(ele) {
   }
 
   const formData = new FormData();
+  formData.append("type", 'not_found');
   formData.append("item", form.find('input[name=item]').val()); //report_id
   formData.append("rfs", form.find('input[name=rfs]').val()); //rfs_id
   formData.append("missing", missing);
@@ -2782,15 +2783,15 @@ function report_photo_update(ele) {
 
   return false;
 }
-function report_photo_clear_prepare(ele) {
+function report_photo_nf_clear_prepare(ele) {
   var popup = $('#modal_photo_clear');
   popup.modal('show');
 }
-function report_photo_clear(ele) {
+function report_photo_nf_clear(ele) {
   var popup = $(ele).closest('.modal');
 }
 function report_photo_nf_food_select() {
-  var popup = $('#modal_not_found');
+  var popup = $('#modal_report_nf');
   var form = popup.find('form');
 
   form.find('.wrap_ingredients_missing').addClass('d-none');
@@ -2825,7 +2826,7 @@ function report_photo_nf_food_select() {
   return false;
 }
 function report_photo_nf_ingredient_missing() {
-  var popup = $('#modal_not_found');
+  var popup = $('#modal_report_nf');
   var form = popup.find('form');
 
   form.find('.wrap_ingredients_missing').addClass('d-none');

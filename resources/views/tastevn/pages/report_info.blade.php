@@ -23,7 +23,7 @@
         <div>
           <span class="text-uppercase text-dark acm-fs-13 fw-bold">Robot not found dishes: </span>
           <span class="badge bg-warning acm-fs-15 cursor-pointer" id="not_found_dishes"
-            onclick="report_not_found()"
+            onclick="report_photo_nf()"
           ></span>
         </div>
       </div>
@@ -36,7 +36,7 @@
   </div>
 
   <!-- modal not found -->
-  <div class="modal animate__animated animate__zoomIn" id="modal_not_found" aria-hidden="true">
+  <div class="modal animate__animated animate__zoomIn" id="modal_report_nf" aria-hidden="true">
     <div class="modal-dialog modal-xl acm-modal-xxl" role="document">
       <div class="modal-content">
         <div class="modal-header">
@@ -57,8 +57,8 @@
                   <div class="col-lg-12 mb-3 acm-text-right">
                     <div class="wrap-btns">
                       @include('tastevn.htmls.form_button_loading')
-                      <button type="button" class="btn btn-danger btn-ok btn-submit" onclick="report_photo_clear_prepare()">Clear Result</button>
-                      <button type="button" class="btn btn-primary btn-ok btn-submit" onclick="report_photo_update_prepare()">Submit</button>
+                      <button type="button" class="btn btn-danger btn-ok btn-submit" onclick="report_photo_nf_clear_prepare()">Clear Result</button>
+                      <button type="button" class="btn btn-primary btn-ok btn-submit" onclick="report_photo_nf_update_prepare()">Submit</button>
                     </div>
 
                     <input type="hidden" name="rfs" />
@@ -153,10 +153,10 @@
           </div>
         </div>
 
-        <div class="acm-modal-arrow acm-modal-arrow-prev" onclick="report_not_found_action()">
+        <div class="acm-modal-arrow acm-modal-arrow-prev" onclick="report_photo_nf_action()">
           <img src="{{url('custom/img/arrow_left.png')}}" />
         </div>
-        <div class="acm-modal-arrow acm-modal-arrow-next" onclick="report_not_found_action(1)">
+        <div class="acm-modal-arrow acm-modal-arrow-next" onclick="report_photo_nf_action(1)">
           <img src="{{url('custom/img/arrow_right.png')}}" />
         </div>
 
@@ -184,7 +184,7 @@
         <div class="modal-footer">
           <div class="wrap-btns">
             @include('tastevn.htmls.form_button_loading')
-            <button type="button" class="btn btn-primary btn-ok btn-submit acm-float-right" onclick="report_photo_update(this)">Submit</button>
+            <button type="button" class="btn btn-primary btn-ok btn-submit acm-float-right" onclick="report_photo_nf_update(this)">Submit</button>
             <button type="button" class="btn btn-outline-secondary btn-ok btn-cancel" data-bs-dismiss="modal">Cancel</button>
           </div>
 
@@ -211,7 +211,7 @@
         <div class="modal-footer">
           <div class="wrap-btns">
             @include('tastevn.htmls.form_button_loading')
-            <button type="button" class="btn btn-primary btn-ok btn-submit acm-float-right" onclick="report_photo_clear(this)">Submit</button>
+            <button type="button" class="btn btn-primary btn-ok btn-submit acm-float-right" onclick="report_photo_nf_clear(this)">Submit</button>
             <button type="button" class="btn btn-outline-secondary btn-ok btn-cancel" data-bs-dismiss="modal">Cancel</button>
           </div>
 
