@@ -332,7 +332,7 @@ class SysRobo
           var_dump('***** FOOD SERVE? = ' . $restaurant_parent->food_serve($food));
         }
 
-        if ($food && $restaurant_parent->food_serve($food) && $confidence >= 70) {
+        if ($food && $restaurant_parent->food_serve($food) && $confidence >= 50) {
 
           //check valid ingredient
           $valid_food = true;

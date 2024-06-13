@@ -143,9 +143,9 @@ class RoboflowController extends Controller
         $storagePath = public_path($photoPath);
 
         //roboflow
-        $img_url = "https://s3.ap-southeast-1.amazonaws.com/cargo.tastevietnam.asia/58-5b-69-19-ad-83/SENSOR/1/2024-06-06/21/SENSOR_2024-06-06-21-21-34-723_176.jpg";
-        if (App::environment() == 'production') {
-          $img_url = url("roboflow/test") . "/{$folder}/" . $photoName;
+        $img_url = url("roboflow/test") . "/{$folder}/" . $photoName;
+        if (App::environment() == 'local') {
+          $img_url = "https://s3.ap-southeast-1.amazonaws.com/cargo.tastevietnam.asia/58-5b-69-19-ad-83/SENSOR/1/2024-06-06/21/SENSOR_2024-06-06-21-21-34-723_176.jpg";
         }
 
         //step 2= photo scan

@@ -55,10 +55,7 @@ class TesterController extends Controller
 
     $date = '2024-06-12';
 
-    $rfs = RestaurantFoodScan::find(40667);
 
-//    $file = $rfs->img_1024();
-//    var_dump($file);
 
     //remove notify
 //    $row1s = RestaurantFoodScan::select('id')

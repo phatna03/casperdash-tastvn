@@ -381,7 +381,7 @@ class SensorController extends Controller
       //re-check
       $img_url = $row->get_photo();
       if (App::environment() == 'local') {
-        $img_url = "http://ai.block8910.com/sensors/58-5b-69-19-ad-83/SENSOR/1/2024-05-29/12/SENSOR_2024-05-29-12-13-05-742_145.jpg";
+        $img_url = "https://s3.ap-southeast-1.amazonaws.com/cargo.tastevietnam.asia/58-5b-69-19-ad-83/SENSOR/1/2024-06-06/21/SENSOR_2024-06-06-21-21-34-723_176.jpg";
       }
 
       //step 2= photo scan
@@ -1050,7 +1050,7 @@ class SensorController extends Controller
 
           $img_url = $row->get_photo();
           if (App::environment() == 'local') {
-            $img_url = "http://ai.block8910.com/sensors/58-5b-69-19-ad-83/SENSOR/1/2024-05-29/12/SENSOR_2024-05-29-12-13-05-742_145.jpg";
+            $img_url = "https://s3.ap-southeast-1.amazonaws.com/cargo.tastevietnam.asia/58-5b-69-19-ad-83/SENSOR/1/2024-06-06/21/SENSOR_2024-06-06-21-21-34-723_176.jpg";
           }
 
           //step 2= photo scan
