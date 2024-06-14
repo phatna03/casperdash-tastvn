@@ -386,20 +386,51 @@ function restaurant_food_update_prepare(ele, type) {
   }
 }
 function restaurant_food_update() {
-  var popup = $('#modal_food_update');
-  form_loading(popup);
+  var popup1 = $('#modal_info_item');
+  var popup2 = $('#modal_food_update');
+  form_loading(popup2);
+
+  var restaurant_parent_id = popup2.find('input[name=restaurant_parent_id]').val();
+  var food_id = popup2.find('input[name=food_id]').val();
+  var type = popup2.find('input[name=type]').val();
+  var live_group = popup2.find('input[name=live_group]:checked').val();
+  var model_name = popup2.find('input[name=model_name]').val();
+  var model_version = popup2.find('input[name=model_version]').val();
 
   axios.post('/admin/restaurant/food/update', {
-    restaurant_parent_id: popup.find('input[name=restaurant_parent_id]').val(),
-    food_id: popup.find('input[name=food_id]').val(),
-    type: popup.find('input[name=type]').val(),
-    live_group: popup.find('input[name=live_group]:checked').val(),
-    model_name: popup.find('input[name=model_name]').val(),
-    model_version: popup.find('input[name=model_version]').val(),
+    restaurant_parent_id: restaurant_parent_id,
+    food_id: food_id,
+    type: type,
+    live_group: live_group,
+    model_name: model_name,
+    model_version: model_version,
   })
     .then(response => {
 
       message_from_toast('success', acmcfs.message_title_success, acmcfs.message_description_success_update, true);
+
+      var food_item = popup1.find('.data_food_item_' + food_id);
+      switch (type) {
+        case 'live_group':
+          food_item.attr('data-live_group', live_group);
+
+          var texted = 'Super Confidence';
+          if (parseInt(live_group) == 2) {
+            texted = 'Less Training';
+          } else if (parseInt(live_group) == 3) {
+            texted = 'Not Trained Yet';
+          }
+          food_item.find('.btn_inputs input[name=live_group]').val(texted);
+          break;
+        case 'model_name':
+          food_item.attr('data-model_name', model_name);
+          food_item.find('.btn_inputs input[name=model_name]').val(model_name);
+          break;
+        case 'model_version':
+          food_item.attr('data-model_version', model_version);
+          food_item.find('.btn_inputs input[name=model_version]').val(model_version);
+          break;
+      }
 
     })
     .catch(error => {
@@ -410,7 +441,8 @@ function restaurant_food_update() {
       }
     })
     .then(res => {
-      form_loading(popup, false);
+      form_loading(popup2, false);
+      form_close(popup2);
     });
 
   return false;

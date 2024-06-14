@@ -131,6 +131,10 @@
                     <div class="col-lg-12 mb-1 wrap_notify_result d-none result_photo_itd">
                       <div class="acm-float-right acm-ml-px-5 wrap_notify_result d-none result_photo_status">
                         <div class="data_result"></div>
+                        <div class="data_btns d-none">
+                          <button type="button" class="btn btn-sm btn-secondary">Resolve</button>
+                          <button type="button" class="btn btn-sm btn-secondary">Mark</button>
+                        </div>
                       </div>
 
                       <div class="d-inline-block">
@@ -148,7 +152,7 @@
                       <div class="data_result d-inline-block"></div>
                     </div>
 
-                    <div class="col-lg-6 mb-1 wrap_notify_result d-none result_ingredients_found">
+                    <div class="col-lg-12 mb-1 wrap_notify_result d-none result_ingredients_found">
                       <div class="w-100">
                         <div class="text-dark fw-bold">+ Ingredients Found:</div>
                       </div>
@@ -156,13 +160,13 @@
                       <div class="data_result"></div>
                     </div>
 
-                    <div class="col-lg-6 mb-1 wrap_notify_result d-none result_ingredients_missing">
-                      <div class="w-100">
-                        <div class="text-dark fw-bold">+ Ingredients Missing:</div>
-                      </div>
+{{--                    <div class="col-lg-6 mb-1 wrap_notify_result d-none result_ingredients_missing">--}}
+{{--                      <div class="w-100">--}}
+{{--                        <div class="text-dark fw-bold">+ Ingredients Missing:</div>--}}
+{{--                      </div>--}}
 
-                      <div class="data_result"></div>
-                    </div>
+{{--                      <div class="data_result"></div>--}}
+{{--                    </div>--}}
 
                     <input type="hidden" name="current_file_id" />
                     <input type="hidden" name="current_file_url" />
@@ -179,6 +183,13 @@
 @endsection
 
 @section('js_end')
+  <div class="acm-toast-wrapper toast-bottom-right d-none result_ingredients_missing">
+    <div class="toast toast-error acm-width-500-min bg-danger-subtle" aria-live="assertive" style="display: block;">
+      <div class="toast-title"><span class="badge bg-danger text-uppercase fs-6">Please double check for missing ingredients</span>
+      </div>
+      <div class="toast-message data_result"></div>
+    </div>
+  </div>
 
 {{--  <script src="https://cdn.roboflow.com/0.2.26/roboflow.js"></script>--}}
   <script src="{{url('custom/library/roboflow/roboflow.js')}}"></script>
@@ -457,6 +468,9 @@
         //sensor
         $('.result_photo_status .data_result').empty()
           .append('<div class="badge bg-primary fw-bold acm-ml-px-10 acm-fs-13 d-none">checked</div>');
+        if (datas.ingredients_missing.length) {
+          $('.result_photo_status .data_btns').removeClass('d-none');
+        }
 
         //predicted_dish
         if (datas.food_name != '') {
@@ -470,7 +484,7 @@
         var html = '';
         if (datas.ingredients_missing.length) {
           datas.ingredients_missing.forEach(function (v, k) {
-            html += '<div class="text-danger acm-ml-px-10">- <b class="text-danger acm-mr-px-5">' + v.quantity + '</b> ' + v.name + '</div>';
+            html += '<div class="text-dark fw-bold fs-4">- <b class="text-dark acm-mr-px-5">' + v.quantity + '</b> ' + v.name + '</div>';
           });
         }
         if (html && html != '') {
@@ -481,11 +495,13 @@
         //ingredients_found
         html = '';
         if (datas.ingredients_found.length) {
-          // html += '<div class="row m-0">';
+          html += '<div class="row m-0">';
           datas.ingredients_found.forEach(function (v, k) {
+            html += '<div class="col-lg-6">';
             html += '<div class="text-dark acm-ml-px-10">- <b class="text-danger acm-mr-px-5">' + v.quantity + '</b> ' + v.name + '</div>';
+            html += '</div>';
           });
-          // html += '</div>';
+          html += '</div>';
         }
         if (html && html != '') {
           $('.result_ingredients_found .data_result').empty().append(html);

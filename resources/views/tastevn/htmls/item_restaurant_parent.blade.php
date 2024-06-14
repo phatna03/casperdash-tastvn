@@ -110,7 +110,7 @@
               <div>---</div>
             @endif
           </div>
-          <div class="col-lg-2 mb-1">
+          <div class="col-lg-2 mb-1 btn_inputs">
             @if($viewer->is_dev() || $viewer->is_admin())
               <button type="button" class="btn btn-sm btn-danger w-100 mb-4"
                       onclick="restaurant_food_remove_prepare(this)">

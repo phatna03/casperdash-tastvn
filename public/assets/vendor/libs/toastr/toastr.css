@@ -97,16 +97,20 @@ button.toast-close-button {
   left: 12px;
 }
 
+/*custome*/
+.acm-toast-wrapper,
 #toast-container {
   position: fixed;
   z-index: 999999;
   /*overrides*/
 }
 
+.acm-toast-wrapper *,
 #toast-container * {
   box-sizing: border-box;
 }
 
+.acm-toast-wrapper > div,
 #toast-container > div {
   position: relative;
   overflow: hidden;
@@ -123,6 +127,7 @@ button.toast-close-button {
   filter: alpha(opacity=80);
 }
 
+.acm-toast-wrapper > div:hover,
 #toast-container > div:hover {
   box-shadow: 0 0 12px #000000;
   opacity: 1;
@@ -135,6 +140,7 @@ button.toast-close-button {
   background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAGwSURBVEhLtZa9SgNBEMc9sUxxRcoUKSzSWIhXpFMhhYWFhaBg4yPYiWCXZxBLERsLRS3EQkEfwCKdjWJAwSKCgoKCcudv4O5YLrt7EzgXhiU3/4+b2ckmwVjJSpKkQ6wAi4gwhT+z3wRBcEz0yjSseUTrcRyfsHsXmD0AmbHOC9Ii8VImnuXBPglHpQ5wwSVM7sNnTG7Za4JwDdCjxyAiH3nyA2mtaTJufiDZ5dCaqlItILh1NHatfN5skvjx9Z38m69CgzuXmZgVrPIGE763Jx9qKsRozWYw6xOHdER+nn2KkO+Bb+UV5CBN6WC6QtBgbRVozrahAbmm6HtUsgtPC19tFdxXZYBOfkbmFJ1VaHA1VAHjd0pp70oTZzvR+EVrx2Ygfdsq6eu55BHYR8hlcki+n+kERUFG8BrA0BwjeAv2M8WLQBtcy+SD6fNsmnB3AlBLrgTtVW1c2QN4bVWLATaIS60J2Du5y1TiJgjSBvFVZgTmwCU+dAZFoPxGEEs8nyHC9Bwe2GvEJv2WXZb0vjdyFT4Cxk3e/kIqlOGoVLwwPevpYHT+00T+hWwXDf4AJAOUqWcDhbwAAAAASUVORK5CYII=") !important;
 }
 
+.acm-toast-wrapper > .toast-error,
 #toast-container > .toast-error {
   background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAHOSURBVEhLrZa/SgNBEMZzh0WKCClSCKaIYOED+AAKeQQLG8HWztLCImBrYadgIdY+gIKNYkBFSwu7CAoqCgkkoGBI/E28PdbLZmeDLgzZzcx83/zZ2SSXC1j9fr+I1Hq93g2yxH4iwM1vkoBWAdxCmpzTxfkN2RcyZNaHFIkSo10+8kgxkXIURV5HGxTmFuc75B2RfQkpxHG8aAgaAFa0tAHqYFfQ7Iwe2yhODk8+J4C7yAoRTWI3w/4klGRgR4lO7Rpn9+gvMyWp+uxFh8+H+ARlgN1nJuJuQAYvNkEnwGFck18Er4q3egEc/oO+mhLdKgRyhdNFiacC0rlOCbhNVz4H9FnAYgDBvU3QIioZlJFLJtsoHYRDfiZoUyIxqCtRpVlANq0EU4dApjrtgezPFad5S19Wgjkc0hNVnuF4HjVA6C7QrSIbylB+oZe3aHgBsqlNqKYH48jXyJKMuAbiyVJ8KzaB3eRc0pg9VwQ4niFryI68qiOi3AbjwdsfnAtk0bCjTLJKr6mrD9g8iq/S/B81hguOMlQTnVyG40wAcjnmgsCNESDrjme7wfftP4P7SP4N3CJZdvzoNyGq2c/HWOXJGsvVg+RA/k2MC/wN6I2YA2Pt8GkAAAAASUVORK5CYII=") !important;
 }
@@ -194,69 +200,100 @@ button.toast-close-button {
 
 /*Responsive Design*/
 @media all and (max-width: 240px) {
+  .acm-toast-wrapper > div,
   #toast-container > div {
     padding: 8px 8px 8px 50px;
     width: 11em;
   }
+
+  .acm-toast-wrapper .toast-close-button,
   #toast-container .toast-close-button {
     right: -0.2em;
     top: -0.2em;
   }
 }
 @media all and (min-width: 241px) and (max-width: 480px) {
+  .acm-toast-wrapper > div,
   #toast-container > div {
     padding: 8px 8px 8px 50px;
     width: 18em;
   }
+
+  .acm-toast-wrapper .toast-close-button,
   #toast-container .toast-close-button {
     right: -0.2em;
     top: -0.2em;
   }
 }
 @media all and (min-width: 481px) and (max-width: 768px) {
+  .acm-toast-wrapper > div,
   #toast-container > div {
     padding: 15px 15px 15px 50px;
     width: 25em;
   }
 }
+
+.acm-toast-wrapper > div,
 #toast-container > div {
   padding: 12px 10px 12px 40px !important;
   opacity: 1;
 }
+
+[dir=rtl] .acm-toast-wrapper > div,
 [dir=rtl] #toast-container > div {
   direction: rtl;
   background-position: center right 0.9375rem;
   padding: 12px 40px 12px 10px !important;
 }
+
+.acm-toast-wrapper .toast-header .btn-close,
 #toast-container .toast-header .btn-close {
   background-size: 0.6rem;
 }
+
+[dir=rtl] .acm-toast-wrapper.toast-top-left,
 [dir=rtl] #toast-container.toast-top-left {
   right: 12px;
   left: auto;
 }
+
+[dir=rtl] .acm-toast-wrapper.toast-top-right,
 [dir=rtl] #toast-container.toast-top-right {
   left: 12px;
   right: auto;
 }
+
+[dir=rtl] .acm-toast-wrapper.toast-bottom-left,
 [dir=rtl] #toast-container.toast-bottom-left {
   right: 12px;
   left: auto;
 }
+
+[dir=rtl] .acm-toast-wrapper.toast-bottom-right,
 [dir=rtl] #toast-container.toast-bottom-right {
   left: 12px;
   right: auto;
 }
-[dir=rtl] #toast-container.toast-top-full-width#toast-container > div, [dir=rtl] #toast-container.toast-bottom-full-width#toast-container > div {
+
+[dir=rtl] .acm-toast-wrapper.toast-top-full-width.acm-toast-wrapper > div,
+[dir=rtl] .acm-toast-wrapper.toast-bottom-full-width.acm-toast-wrapper > div,
+[dir=rtl] #toast-container.toast-top-full-width#toast-container > div,
+[dir=rtl] #toast-container.toast-bottom-full-width#toast-container > div {
   left: 0;
   right: 0;
 }
+
+.acm-toast-wrapper > .toast,
 #toast-container > .toast {
   max-width: 100%;
   background-size: 20px;
   background-repeat: no-repeat;
 }
-#toast-container.toast-bottom-full-width > div, #toast-container.toast-top-full-width > div {
+
+.acm-toast-wrapper.toast-bottom-full-width > div,
+.acm-toast-wrapper.toast-top-full-width > div,
+#toast-container.toast-bottom-full-width > div,
+#toast-container.toast-top-full-width > div {
   width: 100%;
   margin-bottom: 0;
   border-radius: 0 !important;
@@ -265,6 +302,8 @@ button.toast-close-button {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2326c6f9'%3E%3Ctitle%3Einformation%3C/title%3E%3Cpath d='M13,9H11V7H13M13,17H11V11H13M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z' /%3E%3C/svg%3E") !important;
   background-position: 0.75rem 0.85rem;
 }
+
+.acm-toast-wrapper > .toast-error,
 #toast-container > .toast-error {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ff4d49'%3E%3Ctitle%3Ealert-circle%3C/title%3E%3Cpath d='M13,13H11V7H13M13,17H11V15H13M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z' /%3E%3C/svg%3E") !important;
   background-position: 0.75rem 0.85rem;
@@ -278,6 +317,7 @@ button.toast-close-button {
   background-position: 0.75rem 0.85rem;
 }
 
+.acm-toast-wrapper:not(.toast-bottom-full-width, .toast-top-full-width) > div,
 #toast-container:not(.toast-bottom-full-width, .toast-top-full-width) > div {
   width: 20em !important;
 }

@@ -138,6 +138,7 @@ class Food extends Model
       ->where("{$tblFoodIngredient}.deleted", 0)
       ->where("{$tblFoodIngredient}.food_id", $this->id)
       ->orderBy("{$tblFoodIngredient}.ingredient_quantity", "desc")
+      ->orderByRaw("CHAR_LENGTH({$tblIngredient}.name)")
       ->orderBy("{$tblFoodIngredient}.id");
 
     if (isset($pars['restaurant_parent_id']) && !empty($pars['restaurant_parent_id'])) {
@@ -344,6 +345,7 @@ class Food extends Model
       ->where("{$tblFoodIngredient}.food_id", $this->id)
       ->orderBy("{$tblFoodIngredient}.ingredient_type", "asc")
       ->orderBy("{$tblFoodIngredient}.ingredient_quantity", "desc")
+      ->orderByRaw("CHAR_LENGTH({$tblIngredient}.name)")
       ->orderBy("{$tblFoodIngredient}.id");
 
     if (isset($pars['restaurant_parent_id']) && !empty($pars['restaurant_parent_id'])) {
