@@ -82,7 +82,7 @@ class SysRobo
 
       //s3 before 13/6/2024
       if ($rfs) {
-        $img_url = $rfs->get_photo();
+        $img_url = SysRobo::photo_1024($rfs->get_photo());
       }
 
       if (empty($img_url) || !@getimagesize($img_url)) {

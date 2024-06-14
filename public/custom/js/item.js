@@ -374,6 +374,16 @@ function restaurant_food_update_prepare(ele, type) {
   popup2.find('.wrap_live_group .live_group_' + live_group).prop('checked', true);
 
   popup2.modal('show');
+
+  if (type == 'model_name') {
+    setTimeout(function () {
+      popup2.find('input[name=model_name]').focus();
+    }, acmcfs.timeout_quick);
+  } else if (type == 'model_version') {
+    setTimeout(function () {
+      popup2.find('input[name=model_version]').focus();
+    }, acmcfs.timeout_quick);
+  }
 }
 function restaurant_food_update() {
   var popup = $('#modal_food_update');

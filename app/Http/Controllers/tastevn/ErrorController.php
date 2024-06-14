@@ -55,12 +55,12 @@ class ErrorController extends Controller
     $values = $request->post();
 
     $ids = [];
-    $date = '2024-06-09';
+    $date = '2024-06-01';
 
     $select = RestaurantFoodScan::where('deleted', 0)
       ->whereIn('restaurant_id', [5, 6])
       ->whereDate('time_photo', '>=', $date)
-      ->where('sys_confidence', 0)
+      ->where('sys_confidence', '<>', 10)
       ->orderBy('id', 'asc')
       ->limit(6);
 
@@ -111,7 +111,7 @@ class ErrorController extends Controller
         ]);
 
         $row->update([
-          'sys_confidence' => 1,
+          'sys_confidence' => 10,
         ]);
 
         $ids[] = $row->id;
@@ -121,7 +121,7 @@ class ErrorController extends Controller
     $count = RestaurantFoodScan::where('deleted', 0)
       ->whereIn('restaurant_id', [5, 6])
       ->whereDate('time_photo', '>=', $date)
-      ->where('sys_confidence', 1)
+      ->where('sys_confidence', '<>', 10)
       ->orderBy('id', 'asc')
       ->count();
 
