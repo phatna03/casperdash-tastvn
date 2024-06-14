@@ -93,6 +93,8 @@ return new class extends Migration {
         $table->bigInteger('food_id');
         $table->text('photo')->nullable();
         $table->integer('live_group')->default(3);
+        $table->string('model_name')->nullable();
+        $table->string('model_version')->nullable();
         $table->bigInteger('creator_id')->default(0);
         $table->bigInteger('deleted')->default(0);
         $table->timestamps();

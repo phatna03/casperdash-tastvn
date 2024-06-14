@@ -279,49 +279,21 @@ function restaurant_food_remove() {
 
   return false;
 }
-function restaurant_food_live_group(ele) {
-  var live_group = $(ele).val();
-  var food_item = $(ele).closest('.data_food_item');
-  var popup = $(ele).closest('.modal');
-
-  if (!live_group || !parseInt(live_group)) {
-    return false;
-  }
-
-  axios.post('/admin/restaurant/food/group', {
-    restaurant_parent_id: popup.find('input[name=restaurant_parent_id]').val(),
-    food_id: food_item.attr('data-food_id'),
-    live_group: live_group,
-  })
-    .then(response => {
-
-      message_from_toast('success', acmcfs.message_title_success, acmcfs.message_description_success_update, true);
-
-    })
-    .catch(error => {
-      if (error.response.data && Object.values(error.response.data).length) {
-        Object.values(error.response.data).forEach(function (v, k) {
-          message_from_toast('error', acmcfs.message_title_error, v);
-        });
-      }
-    });
-
-  return false;
-}
 function restaurant_food_photo_prepare(ele) {
   var food_item = $(ele).closest('.data_food_item');
   var form = $('#frm_food_photo_standard');
 
   form.find('input[name=food_id]').val(food_item.attr('data-food_id'));
-  form.find('input[name=restaurant_parent_id]').val(food_item.attr('data-restaurant_parent_id'));
+  // form.find('input[name=restaurant_parent_id]').val(food_item.attr('data-restaurant_parent_id'));
 
   form.find('input[type=file]').val("");
   form.find('input[type=file]')[0].click();
 }
 function restaurant_food_photo(ele) {
   var form = $('#frm_food_photo_standard');
+  var popup = form.closest('.modal');
   var food_id = form.find('input[name=food_id]').val();
-  var restaurant_parent_id = form.find('input[name=restaurant_parent_id]').val();
+  var restaurant_parent_id = popup.find('input[name=restaurant_parent_id]').val();
 
   //photo
   var bind = $(ele);
@@ -365,6 +337,56 @@ function restaurant_food_photo(ele) {
           message_from_toast('error', acmcfs.message_title_error, v);
         });
       }
+    });
+
+  return false;
+}
+function restaurant_food_update_prepare(ele, type) {
+  var food_item = $(ele).closest('.data_food_item');
+  var popup1 = $(ele).closest('.modal');
+  var popup2 = $('#modal_food_update');
+
+  popup2.find('input[name=restaurant_parent_id]').val(popup1.find('input[name=restaurant_parent_id]').val());
+  popup2.find('input[name=food_id]').val(food_item.attr('data-food_id'));
+  popup2.find('input[name=type]').val(type);
+
+  popup2.find('.wrap_updated').addClass('d-none');
+  popup2.find('.wrap_' + type).removeClass('d-none');
+
+  popup2.find('input[name=model_name]').val(food_item.attr('data-model_name'));
+  popup2.find('input[name=model_version]').val(food_item.attr('data-model_version'));
+
+  var live_group = parseInt(food_item.attr('data-live_group'));
+  popup2.find('.wrap_live_group .live_group_' + live_group).prop('checked', true);
+
+  popup2.modal('show');
+}
+function restaurant_food_update() {
+  var popup = $('#modal_food_update');
+  form_loading(popup);
+
+  axios.post('/admin/restaurant/food/update', {
+    restaurant_parent_id: popup.find('input[name=restaurant_parent_id]').val(),
+    food_id: popup.find('input[name=food_id]').val(),
+    type: popup.find('input[name=type]').val(),
+    live_group: popup.find('input[name=live_group]:checked').val(),
+    model_name: popup.find('input[name=model_name]').val(),
+    model_version: popup.find('input[name=model_version]').val(),
+  })
+    .then(response => {
+
+      message_from_toast('success', acmcfs.message_title_success, acmcfs.message_description_success_update, true);
+
+    })
+    .catch(error => {
+      if (error.response.data && Object.values(error.response.data).length) {
+        Object.values(error.response.data).forEach(function (v, k) {
+          message_from_toast('error', acmcfs.message_title_error, v);
+        });
+      }
+    })
+    .then(res => {
+      form_loading(popup, false);
     });
 
   return false;

@@ -10,7 +10,6 @@
         />
 
         <input type="hidden" name="food_id" />
-        <input type="hidden" name="restaurant_parent_id" />
       </form>
     </div>
 
@@ -40,54 +39,26 @@
         ]);
 
         $count++;
+
+        $food_group = 'Super Confidence';
+        if ($obj->food_live_group == 2) {
+            $food_group = 'Less Training';
+        } elseif ($obj->food_live_group == 3) {
+            $food_group = 'Not Trained Yet';
+        }
+
       @endphp
       <div class="acm-border-css border-dark @if($count%2) bg-warning-subtle @endif p-3 mb-2 data_food_item data_food_item_{{$food->id}}"
            data-food_id="{{$food->id}}"
            data-restaurant_parent_id="{{$restaurant_parent->id}}"
+           data-live_group="{{$obj->food_live_group}}"
+           data-model_name="{{$obj->food_model_name}}"
+           data-model_version="{{$obj->food_model_version}}"
       >
         <div class="row">
           <div class="col-lg-4 mb-1">
             <div class="text-dark fw-bold fs-4">{{$food->name}}</div>
-            <div
-              class="text-dark acm-text-italic mt-1">{{$obj->food_category_id ? '(' . $obj->food_category_name . ')' : ''}}</div>
-          </div>
-
-          <div class="col-lg-4 mb-1">
-            @if($viewer->is_dev() || $viewer->is_admin())
-            <select class="opt_selectize w-100" onchange="restaurant_food_live_group(this)">
-              @for($i=1;$i<=3;$i++)
-                <option @if($obj->food_live_group == $i) selected="selected" @endif value="{{$i}}">
-                  @if($i==1)
-                    {{$i}}. Super Confidence
-                  @elseif($i==2)
-                    {{$i}}. Less Training
-                  @elseif($i==3)
-                    {{$i}}. Not Trained Yet
-                  @endif
-                </option>
-              @endfor
-            </select>
-            @else
-              @if($obj->food_live_group == 1)
-                <div class="badge bg-success acm-fs-16">1. Super Confidence</div>
-              @elseif($obj->food_live_group == 2)
-                <div class="badge bg-primary acm-fs-16">2. Less Training</div>
-              @else
-                <div class="badge bg-secondary acm-fs-16">3. Not Trained Yet</div>
-              @endif
-            @endif
-          </div>
-
-          <div class="col-lg-4 mb-1">
-            @if($viewer->is_dev() || $viewer->is_admin())
-            <button type="button" class="btn btn-sm btn-danger w-100"
-                    onclick="restaurant_food_remove_prepare(this)">
-              <i class="mdi mdi-trash-can"></i> <span class="acm-ml-px-5">Remove</span>
-            </button>
-            @endif
-          </div>
-
-          <div class="col-lg-4 mb-1">
+            <div class="text-dark acm-text-italic mb-2">{{$obj->food_category_id ? '(' . $obj->food_category_name . ')' : ''}}</div>
             <div class="text-center w-100 wrap_food_photo_standard">
               <button type="button" class="btn btn-danger p-1 position-absolute acm-right-5px @if($isMobi) d-block @endif"
                       onclick="restaurant_food_photo_prepare(this)"
@@ -98,8 +69,7 @@
                    title="{{$food_photo}}" loading="lazy" src="{{$food_photo}}"/>
             </div>
           </div>
-
-          <div class="col-lg-4 mb-1">
+          <div class="col-lg-3 mb-1">
             <div class="text-primary fw-bold">+ Recipe Ingredients</div>
             @if(count($recipes))
               @foreach($recipes as $recipe)
@@ -109,38 +79,82 @@
               <div>---</div>
             @endif
           </div>
-
-          <div class="col-lg-4 mb-1">
+          <div class="col-lg-3 mb-1">
             <div class="text-primary fw-bold">+ Roboflow Ingredients</div>
             @if(count($ingredients))
               @foreach($ingredients as $ingredient)
-              <div class="acm-clearfix acm-height-30-min">
-                <div class="acm-float-left acm-mr-px-5">
-                  @if($viewer->is_dev() || $viewer->is_admin())
-                  <select class="form-control p-1 acm-width-50-max"
-                          onchange="food_ingredient_confidence_quick(this, {{$ingredient->food_ingredient_id}})"
+                <div class="acm-clearfix acm-height-30-min">
+                  <div class="acm-float-left acm-mr-px-5">
+                    @if($viewer->is_dev() || $viewer->is_admin())
+                      <select class="form-control p-1 acm-width-50-max"
+                              onchange="food_ingredient_confidence_quick(this, {{$ingredient->food_ingredient_id}})"
+                      >
+                        @for($i=95; $i>=30; $i--)
+                          @if($i%5 == 0)
+                            <option value="{{$i}}" @if($i == $ingredient->confidence) selected="selected" @endif>{{$i . '%'}}</option>
+                          @endif
+                        @endfor
+                      </select>
+                    @else
+                      <div class="badge bg-secondary p-1">{{$ingredient->confidence . '%'}}</div>
+                    @endif
+                  </div>
+                  <div class="wrap_text_roboflow_ingredient overflow-hidden acm-height-30-min acm-line-height-30 @if($ingredient->ingredient_type == 'core') cored text-danger @else text-dark @endif"
+                       @if($viewer->is_dev()) onclick="food_ingredient_core_quick(this, {{$ingredient->food_ingredient_id}})" @endif
                   >
-                    @for($i=95; $i>=30; $i--)
-                      @if($i%5 == 0)
-                      <option value="{{$i}}" @if($i == $ingredient->confidence) selected="selected" @endif>{{$i . '%'}}</option>
-                      @endif
-                    @endfor
-                  </select>
-                  @else
-                    <div class="badge bg-secondary p-1">{{$ingredient->confidence . '%'}}</div>
-                  @endif
+                    - <b>{{$ingredient->ingredient_quantity}}</b> {{$ingredient->name}}
+                  </div>
                 </div>
-                <div class="wrap_text_roboflow_ingredient overflow-hidden acm-height-30-min acm-line-height-30 @if($ingredient->ingredient_type == 'core') cored text-danger @else text-dark @endif"
-                     @if($viewer->is_dev()) onclick="food_ingredient_core_quick(this, {{$ingredient->food_ingredient_id}})" @endif
-                >
-                  - <b>{{$ingredient->ingredient_quantity}}</b> {{$ingredient->name}}
-                </div>
-              </div>
               @endforeach
             @else
               <div>---</div>
             @endif
           </div>
+          <div class="col-lg-2 mb-1">
+            @if($viewer->is_dev() || $viewer->is_admin())
+              <button type="button" class="btn btn-sm btn-danger w-100 mb-4"
+                      onclick="restaurant_food_remove_prepare(this)">
+                <i class="mdi mdi-trash-can"></i> <span class="acm-ml-px-5">Remove</span>
+              </button>
+            @endif
+
+              <div class="form-floating form-floating-outline mb-3 position-relative">
+                @if($viewer->is_dev() || $viewer->is_admin())
+                  <button type="button" class="btn btn-sm btn-info p-1 position-absolute acm-right-0"
+                          onclick="restaurant_food_update_prepare(this, 'live_group')">
+                    <i class="mdi mdi-pencil"></i>
+                  </button>
+                @endif
+                <input type="text" class="form-control" id="robo-group-{{$food->id}}" name="live_group"
+                       disabled value="{{$food_group}}" />
+                <label class="text-dark fw-bold" for="robo-group-{{$food->id}}">Roboflow Confidence</label>
+              </div>
+
+              <div class="form-floating form-floating-outline mb-3 position-relative">
+                @if($viewer->is_dev() || $viewer->is_admin())
+                  <button type="button" class="btn btn-sm btn-info p-1 position-absolute acm-right-0"
+                          onclick="restaurant_food_update_prepare(this, 'model_name')">
+                    <i class="mdi mdi-pencil"></i>
+                  </button>
+                @endif
+                <input type="text" class="form-control" id="robo-model-{{$food->id}}" name="model_name"
+                       disabled value="{{$obj->food_model_name}}" />
+                <label class="text-dark fw-bold" for="robo-model-{{$food->id}}">Roboflow Model Name</label>
+              </div>
+
+              <div class="form-floating form-floating-outline mb-3 position-relative">
+                @if($viewer->is_dev() || $viewer->is_admin())
+                <button type="button" class="btn btn-sm btn-info p-1 position-absolute acm-right-0"
+                        onclick="restaurant_food_update_prepare(this, 'model_version')">
+                  <i class="mdi mdi-pencil"></i>
+                </button>
+                @endif
+                <input type="text" class="form-control" id="robo-version-{{$food->id}}" name="model_version"
+                       disabled value="{{$obj->food_model_version}}" />
+                <label class="text-dark fw-bold" for="robo-version-{{$food->id}}">Roboflow Model Version</label>
+              </div>
+          </div>
+
         </div>
       </div>
       @endforeach

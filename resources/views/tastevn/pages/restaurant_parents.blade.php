@@ -195,6 +195,61 @@
       </div>
     </div>
   </div>
+  <!-- modal food update -->
+  <div class="modal fade modal-second" id="modal_food_update" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title">Confirmation?</h4>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="row">
+            <div class="col-lg-12 mt-2 mb-2 d-none wrap_updated wrap_live_group">
+              <label class="text-dark fw-bold">Roboflow Confidence</label>
+              <div class="form-check mt-3">
+                <input name="live_group" class="form-check-input live_group live_group_1" type="radio" value="1" id="defaultRadio1" />
+                <label class="form-check-label" for="defaultRadio1">
+                  Super Confidence
+                </label>
+              </div>
+              <div class="form-check">
+                <input name="live_group" class="form-check-input live_group live_group_2" type="radio" value="2" id="defaultRadio2" />
+                <label class="form-check-label" for="defaultRadio2">
+                  Less Training
+                </label>
+              </div>
+              <div class="form-check">
+                <input name="live_group" class="form-check-input live_group live_group_3" type="radio" value="3" id="defaultRadio3" />
+                <label class="form-check-label" for="defaultRadio3">
+                  Not Trained Yet
+                </label>
+              </div>
+            </div>
+            <div class="col-lg-12 mt-2 mb-2 d-none wrap_updated wrap_model_name">
+              <label class="text-dark fw-bold">Roboflow Model Name</label>
+              <input type="text" class="form-control text-center" name="model_name" />
+            </div>
+            <div class="col-lg-12 mt-2 mb-2 d-none wrap_updated wrap_model_version">
+              <label class="text-dark fw-bold">Roboflow Model Version</label>
+              <input type="text" class="form-control text-center" name="model_version" />
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <div class="wrap-btns">
+            @include('tastevn.htmls.form_button_loading')
+            <button type="button" class="btn btn-primary btn-ok btn-submit acm-float-right" onclick="restaurant_food_update()">Submit</button>
+            <button type="button" class="btn btn-outline-secondary btn-ok btn-cancel" data-bs-dismiss="modal">Cancel</button>
+          </div>
+
+          <input type="hidden" name="restaurant_parent_id" />
+          <input type="hidden" name="food_id" />
+          <input type="hidden" name="type" />
+        </div>
+      </div>
+    </div>
+  </div>
   <!-- modal item info -->
   <div class="modal animate__animated animate__rollIn" id="modal_info_item" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-xl acm-modal-xxl" role="document">

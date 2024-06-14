@@ -18,6 +18,8 @@ class RestaurantFood extends Model
     'photo',
     'local_storage',
     'live_group',
+    'model_name',
+    'model_version',
     'creator_id',
     'deleted',
   ];

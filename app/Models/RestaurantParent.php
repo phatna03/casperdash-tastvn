@@ -18,6 +18,8 @@ class RestaurantParent extends Model
 
   protected $fillable = [
     'name',
+    'model_name',
+    'model_version',
     'count_sensors',
     'count_foods',
     'creator_id',
@@ -70,7 +72,9 @@ class RestaurantParent extends Model
         ->where('restaurant_foods.restaurant_id', $sensor->id)
         ->distinct()
         ->select(
-          'restaurant_foods.food_id', 'foods.name as food_name', 'restaurant_foods.live_group as food_live_group',
+          'restaurant_foods.food_id', 'foods.name as food_name',
+          'restaurant_foods.live_group as food_live_group',
+          'restaurant_foods.model_name as food_model_name', 'restaurant_foods.model_version as food_model_version',
           'restaurant_foods.photo as food_photo', 'restaurant_foods.local_storage',
           'restaurant_foods.food_category_id', 'food_categories.name as food_category_name'
         )

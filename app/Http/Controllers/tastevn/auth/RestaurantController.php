@@ -492,12 +492,9 @@ class RestaurantController extends Controller
     ], 200);
   }
 
-  public function food_group(Request $request)
+  public function food_update(Request $request)
   {
     $values = $request->post();
-
-    $live_group = isset($values['live_group']) && (int)$values['live_group'] && (int)$values['live_group'] < 4
-      ? (int)$values['live_group'] : 3;
 
     $restaurant_parent_id = isset($values['restaurant_parent_id']) ? (int)$values['restaurant_parent_id'] : 0;
     $restaurant_parent = RestaurantParent::find($restaurant_parent_id);
@@ -511,14 +508,46 @@ class RestaurantController extends Controller
       ], 404);
     }
 
-    RestaurantFood::where('food_id', $food->id)
-      ->whereIn('restaurant_id', function ($q) use ($restaurant_parent) {
-        $q->select('id')
-          ->from('restaurants')
-          ->where('restaurant_parent_id', $restaurant_parent->id);
-      })->update([
-        'live_group' => $live_group,
-      ]);
+    $type = isset($values['type']) ? $values['type'] : 'live_group';
+    $model_name = isset($values['model_name']) ? $values['model_name'] : NULL;
+    $model_version = isset($values['model_version']) ? $values['model_version'] : NULL;
+    $live_group = isset($values['live_group']) && (int)$values['live_group'] && (int)$values['live_group'] < 4
+      ? (int)$values['live_group'] : 3;
+
+    switch ($type) {
+      case 'live_group':
+        RestaurantFood::where('food_id', $food->id)
+          ->whereIn('restaurant_id', function ($q) use ($restaurant_parent) {
+            $q->select('id')
+              ->from('restaurants')
+              ->where('restaurant_parent_id', $restaurant_parent->id);
+          })->update([
+            'live_group' => $live_group,
+          ]);
+        break;
+
+      case 'model_name':
+        RestaurantFood::where('food_id', $food->id)
+          ->whereIn('restaurant_id', function ($q) use ($restaurant_parent) {
+            $q->select('id')
+              ->from('restaurants')
+              ->where('restaurant_parent_id', $restaurant_parent->id);
+          })->update([
+            'model_name' => $model_name,
+          ]);
+        break;
+
+      case 'model_version':
+        RestaurantFood::where('food_id', $food->id)
+          ->whereIn('restaurant_id', function ($q) use ($restaurant_parent) {
+            $q->select('id')
+              ->from('restaurants')
+              ->where('restaurant_parent_id', $restaurant_parent->id);
+          })->update([
+            'model_version' => $model_version,
+          ]);
+        break;
+    }
 
     return response()->json([
       'status' => true,

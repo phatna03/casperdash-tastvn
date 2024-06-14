@@ -26,6 +26,10 @@ return new class extends Migration {
       Schema::create('restaurant_parents', function (Blueprint $table) {
         $table->id();
         $table->text('name');
+        $table->string('model_name')->nullable();
+        $table->string('model_version')->nullable();
+        $table->bigInteger('count_sensors')->default(0);
+        $table->bigInteger('count_foods')->default(0);
         $table->bigInteger('deleted')->default(0);
         $table->timestamps();
       });

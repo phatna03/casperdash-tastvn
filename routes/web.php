@@ -230,10 +230,10 @@ Route::post('/admin/restaurant/info', [RestaurantController::class, 'info']);
 Route::post('/admin/restaurant/food/get', [RestaurantController::class, 'food_get']);
 Route::post('/admin/restaurant/food/import', [RestaurantController::class, 'food_import']);
 Route::post('/admin/restaurant/food/remove', [RestaurantController::class, 'food_remove']);
-Route::post('/admin/restaurant/food/group', [RestaurantController::class, 'food_group']);
 Route::post('/admin/restaurant/food/core', [RestaurantController::class, 'food_core']);
 Route::post('/admin/restaurant/food/confidence', [RestaurantController::class, 'food_confidence']);
 Route::post('/admin/restaurant/food/photo', [RestaurantController::class, 'food_photo']);
+Route::post('/admin/restaurant/food/update', [RestaurantController::class, 'food_update']);
 //sensor (restaurant)
 Route::get('/admin/sensors', [SensorController::class, 'index']);
 Route::post('/admin/sensor/store', [SensorController::class, 'store']);
