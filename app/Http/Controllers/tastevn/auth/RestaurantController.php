@@ -84,6 +84,9 @@ class RestaurantController extends Controller
     $row = RestaurantParent::create([
       'name' => ucwords(trim($values['name'])),
       'creator_id' => $this->_viewer->id,
+      'model_name' => isset($values['model_name']) ? trim($values['model_name']) : '',
+      'model_version' => isset($values['model_version']) ? trim($values['model_version']) : '',
+      'model_scan' => isset($values['model_scan']) && (int)$values['model_scan'] ? 1 : 0,
     ]);
 
     $row->on_create_after();
@@ -141,6 +144,9 @@ class RestaurantController extends Controller
 
     $row->update([
       'name' => ucwords(trim($values['name'])),
+      'model_name' => isset($values['model_name']) ? trim($values['model_name']) : '',
+      'model_version' => isset($values['model_version']) ? trim($values['model_version']) : '',
+      'model_scan' => isset($values['model_scan']) && (int)$values['model_scan'] ? 1 : 0,
     ]);
 
     $row->on_update_after();

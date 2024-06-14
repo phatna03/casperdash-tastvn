@@ -27,8 +27,10 @@
         <tr>
           <th class="acm-th-first"></th>
           <th>Name</th>
-          <th class="@if($isMobi) d-none @endif">Total sensors</th>
-          <th class="@if($isMobi) d-none @endif">Total dishes</th>
+          <th>Model</th>
+          <th>Total sensors / dishes</th>
+          <th class="d-none"></th>
+          <th class="d-none"></th>
         </tr>
         </thead>
       </table>
@@ -46,6 +48,23 @@
         <div class="form-floating form-floating-outline mb-4">
           <input type="text" class="form-control" id="add-item-name" name="name" />
           <label for="add-item-name">Name <b class="text-danger">*</b></label>
+        </div>
+        <div class="form-floating form-floating-outline mb-4">
+          <input type="text" class="form-control" id="add-item-model-name" name="model_name" />
+          <label for="add-item-model-name">Model name</label>
+        </div>
+        <div class="form-floating form-floating-outline mb-4">
+          <input type="text" class="form-control" id="add-item-model-version" name="model_version" />
+          <label for="add-item-model-version">Model version</label>
+        </div>
+        <div class="form-floating form-floating-outline mb-4">
+          <div class="form-control" id="add-item-model-scan">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" name="model_scan" id="add-item-model-scan-yes" />
+              <label class="form-check-label text-dark fw-bold" for="add-item-model-scan-yes">Yes</label>
+            </div>
+          </div>
+          <label for="add-item-model-scan" class="text-danger">Model scan?</label>
         </div>
 
         <div class="wrap-btns">
@@ -67,6 +86,23 @@
         <div class="form-floating form-floating-outline mb-4">
           <input type="text" class="form-control" id="edit-item-name" name="name" />
           <label for="edit-item-name">Name <b class="text-danger">*</b></label>
+        </div>
+        <div class="form-floating form-floating-outline mb-4">
+          <input type="text" class="form-control" id="edit-item-model-name" name="model_name" />
+          <label for="edit-item-model-name">Model name</label>
+        </div>
+        <div class="form-floating form-floating-outline mb-4">
+          <input type="text" class="form-control" id="edit-item-model-version" name="model_version" />
+          <label for="edit-item-model-version">Model version</label>
+        </div>
+        <div class="form-floating form-floating-outline mb-4">
+          <div class="form-control" id="edit-item-model-scan">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" name="model_scan" id="edit-item-model-scan-yes" />
+              <label class="form-check-label text-dark fw-bold" for="edit-item-model-scan-yes">Yes</label>
+            </div>
+          </div>
+          <label for="edit-item-model-scan" class="text-danger">Model scan?</label>
         </div>
 
         <div class="wrap-btns">
@@ -284,10 +320,15 @@
       "createdRow": function( row, data, dataIndex ) {
         $(row).attr('data-id', data.id);
         $(row).attr('data-name', data.name);
+        $(row).attr('data-model_name', data.model_name);
+        $(row).attr('data-model_version', data.model_version);
+        $(row).attr('data-model_scan', data.model_scan);
       },
       "columns": [
         {data: 'DT_RowIndex', name: 'DT_RowIndex' , orderable: false, searchable: false},
         {data: 'name', name: 'name'},
+        {data: 'model_name', name: 'model_name'},
+        {data: 'model_version', name: 'model_version'},
         {data: 'count_sensors', name: 'count_sensors'},
         {data: 'count_foods', name: 'count_foods'},
       ],
@@ -331,16 +372,57 @@
             return ('<div>' + html + '</div>');
           }
         },
-        @if($isMobi)
         {
           targets: 2,
-          className: 'd-none',
+          render: function (data, type, full, meta) {
+            var html = '';
+
+            var model_scan = '';
+            if (parseInt(full['model_scan'])) {
+              model_scan = '<i class="mdi mdi-check text-success acm-mr-px-5"></i>';
+            }
+
+            var model_name = '';
+            if (full['model_name'] && full['model_name'] != 'null') {
+              model_name = full['model_name'] + ' / ';
+            }
+
+            var model_version = '';
+            if (full['model_version'] && full['model_version'] != 'null') {
+              model_version = full['model_version'];
+            }
+
+            html += '<div class="cursor-pointer" onclick="restaurant_info(' + full['id'] + ')">' +
+              '<span class="text-dark">' + model_scan +
+              '</span>' +
+              '<span class="text-dark">' + model_name +
+              '</span>' +
+              '<span class="text-dark">' + model_version +
+              '</span>' +
+              '</div>';
+
+            return ('<div>' + html + '</div>');
+          }
         },
         {
           targets: 3,
+          render: function (data, type, full, meta) {
+            var html = '';
+            html += '<div class="cursor-pointer" onclick="restaurant_info(' + full['id'] + ')">' +
+              '<span class="text-dark">' + full['count_sensors'] + ' / ' + full['count_foods'] + '</span>' +
+              '</div>';
+
+            return ('<div>' + html + '</div>');
+          }
+        },
+        {
+          targets: 4,
           className: 'd-none',
         },
-        @endif
+        {
+          targets: 5,
+          className: 'd-none',
+        },
       ],
       buttons: [
         @if($viewer->is_admin())

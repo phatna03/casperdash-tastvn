@@ -6,6 +6,9 @@ function restaurant_add(evt, frm) {
 
   axios.post('/admin/restaurant/store', {
     name: form.find('input[name=name]').val(),
+    model_name: form.find('input[name=model_name]').val(),
+    model_version: form.find('input[name=model_version]').val(),
+    model_scan: form.find('input[name=model_scan]').is(':checked') ? 1 : 0,
   })
     .then(response => {
 
@@ -52,6 +55,14 @@ function restaurant_edit_prepare(ele) {
   form.find('input[name=item]').val(tr.attr('data-id'));
   form.find('input[name=name]').val(tr.attr('data-name'));
 
+  form.find('input[name=model_name]').val(tr.attr('data-model_name'));
+  form.find('input[name=model_version]').val(tr.attr('data-model_version'));
+
+  form.find('input[name=model_scan]').prop('checked', false);
+  if (parseInt(tr.attr('data-model_scan'))) {
+    form.find('input[name=model_scan]').prop('checked', true);
+  }
+
   setTimeout(function () {
     form.find('input[name=name]').focus();
   }, acmcfs.timeout_quick);
@@ -64,6 +75,9 @@ function restaurant_edit(evt, frm) {
   axios.post('/admin/restaurant/update', {
     item: form.find('input[name=item]').val(),
     name: form.find('input[name=name]').val(),
+    model_name: form.find('input[name=model_name]').val(),
+    model_version: form.find('input[name=model_version]').val(),
+    model_scan: form.find('input[name=model_scan]').is(':checked') ? 1 : 0,
   })
     .then(response => {
 
@@ -401,7 +415,7 @@ function sensor_add(evt, frm) {
     name: form.find('input[name=name]').val(),
     s3_bucket_name: form.find('input[name=s3_bucket_name]').val(),
     s3_bucket_address: form.find('input[name=s3_bucket_address]').val(),
-    rbf_scan: form.find('input[name=rbf_scan]').is(':checked') ? 1 : 0,
+    // rbf_scan: form.find('input[name=rbf_scan]').is(':checked') ? 1 : 0,
     restaurant_parent_id: form.find('select[name=restaurant]').val(),
   })
     .then(response => {
@@ -473,7 +487,7 @@ function sensor_edit(evt, frm) {
     name: form.find('input[name=name]').val(),
     s3_bucket_name: form.find('input[name=s3_bucket_name]').val(),
     s3_bucket_address: form.find('input[name=s3_bucket_address]').val(),
-    rbf_scan: form.find('input[name=rbf_scan]').is(':checked') ? 1 : 0,
+    // rbf_scan: form.find('input[name=rbf_scan]').is(':checked') ? 1 : 0,
     restaurant_parent_id: form.find('select[name=restaurant]').val(),
   })
     .then(response => {

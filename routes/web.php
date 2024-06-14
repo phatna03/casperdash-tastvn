@@ -384,6 +384,7 @@ Route::get('/datatable/restaurant', function (Request $request) {
 
   $select = App\Models\RestaurantParent::query("restaurant_parents")
     ->select("restaurant_parents.id", "restaurant_parents.name",
+      "restaurant_parents.model_name", "restaurant_parents.model_version", "restaurant_parents.model_scan",
       "restaurant_parents.count_sensors", "restaurant_parents.count_foods",
       "restaurant_parents.updated_at")
     ->where('restaurant_parents.deleted', 0);

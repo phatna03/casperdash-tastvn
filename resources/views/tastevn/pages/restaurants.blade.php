@@ -28,7 +28,7 @@
           <th class="acm-th-first"></th>
           <th>Name</th>
           <th class="@if($isMobi) d-none @endif">S3 Configuration</th>
-          <th class="@if($isMobi) d-none @endif">Roboflow Scan?</th>
+          <th class="d-none">Roboflow Scan?</th>
         </tr>
         </thead>
       </table>
@@ -64,7 +64,7 @@
           <input type="text" class="form-control" id="add-item-s3-address" name="s3_bucket_address" />
           <label for="add-item-s3-address">S3 bucket address</label>
         </div>
-        <div class="form-floating form-floating-outline mb-4">
+        <div class="form-floating form-floating-outline mb-4 d-none">
           <div class="form-control" id="add-item-rbf-scan">
             <div class="form-check">
               <input class="form-check-input" type="checkbox" name="rbf_scan" id="add-item-rbf-scan-yes" />
@@ -111,7 +111,7 @@
           <input type="text" class="form-control" id="edit-item-s3-address" name="s3_bucket_address" />
           <label for="edit-item-s3-address">S3 bucket address</label>
         </div>
-        <div class="form-floating form-floating-outline mb-4">
+        <div class="form-floating form-floating-outline mb-4 d-none">
           <div class="form-control" id="edit-item-rbf-scan">
             <div class="form-check">
               <input class="form-check-input" type="checkbox" name="rbf_scan" id="edit-item-rbf-scan-yes" />
@@ -277,9 +277,7 @@
         },
         {
           targets: 3,
-          @if($isMobi)
           className: 'd-none',
-          @endif
           render: function (data, type, full, meta) {
             var html = '';
 

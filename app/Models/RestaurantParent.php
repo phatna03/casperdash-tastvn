@@ -20,6 +20,7 @@ class RestaurantParent extends Model
     'name',
     'model_name',
     'model_version',
+    'model_scan',
     'count_sensors',
     'count_foods',
     'creator_id',
@@ -35,6 +36,9 @@ class RestaurantParent extends Model
   {
     return [
       'name' => $this->name,
+      'model_name' => $this->model_name,
+      'model_version' => $this->model_version,
+      'model_scan' => $this->model_scan,
     ];
   }
 

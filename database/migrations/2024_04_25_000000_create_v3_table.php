@@ -28,6 +28,7 @@ return new class extends Migration {
         $table->text('name');
         $table->string('model_name')->nullable();
         $table->string('model_version')->nullable();
+        $table->smallInteger('model_scan')->default(0);
         $table->bigInteger('count_sensors')->default(0);
         $table->bigInteger('count_foods')->default(0);
         $table->bigInteger('deleted')->default(0);

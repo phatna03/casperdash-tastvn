@@ -58,7 +58,7 @@
         <div class="row">
           <div class="col-lg-4 mb-1">
             <div class="text-dark fw-bold fs-4">{{$food->name}}</div>
-            <div class="text-dark acm-text-italic mb-2">{{$obj->food_category_id ? '(' . $obj->food_category_name . ')' : ''}}</div>
+            <div class="text-dark acm-fs-18 acm-text-italic mb-2">{{$obj->food_category_id ? '(' . $obj->food_category_name . ')' : ''}}</div>
             <div class="text-center w-100 wrap_food_photo_standard">
               <button type="button" class="btn btn-danger p-1 position-absolute acm-right-5px @if($isMobi) d-block @endif"
                       onclick="restaurant_food_photo_prepare(this)"
@@ -70,17 +70,17 @@
             </div>
           </div>
           <div class="col-lg-3 mb-1">
-            <div class="text-primary fw-bold">+ Recipe Ingredients</div>
+            <div class="text-primary fw-bold acm-fs-18">+ Recipe Ingredients</div>
             @if(count($recipes))
               @foreach($recipes as $recipe)
-                <div class="text-dark">- {{$recipe->name}}</div>
+                <div class="text-dark acm-fs-18">- {{$recipe->name}}</div>
               @endforeach
             @else
               <div>---</div>
             @endif
           </div>
           <div class="col-lg-3 mb-1">
-            <div class="text-primary fw-bold">+ Roboflow Ingredients</div>
+            <div class="text-primary fw-bold acm-fs-18">+ Roboflow Ingredients</div>
             @if(count($ingredients))
               @foreach($ingredients as $ingredient)
                 <div class="acm-clearfix acm-height-30-min">
@@ -99,7 +99,7 @@
                       <div class="badge bg-secondary p-1">{{$ingredient->confidence . '%'}}</div>
                     @endif
                   </div>
-                  <div class="wrap_text_roboflow_ingredient overflow-hidden acm-height-30-min acm-line-height-30 @if($ingredient->ingredient_type == 'core') cored text-danger @else text-dark @endif"
+                  <div class="wrap_text_roboflow_ingredient overflow-hidden acm-height-30-min acm-line-height-30 acm-fs-18 @if($ingredient->ingredient_type == 'core') cored text-danger @else text-dark @endif"
                        @if($viewer->is_dev()) onclick="food_ingredient_core_quick(this, {{$ingredient->food_ingredient_id}})" @endif
                   >
                     - <b>{{$ingredient->ingredient_quantity}}</b> {{$ingredient->name}}
