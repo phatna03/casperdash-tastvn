@@ -581,8 +581,6 @@ function sensor_stats() {
   })
     .then(response => {
 
-      // console.log(response.data.stats.sql1);
-
       wrap.find('.stats-total-found-count').text(response.data.stats.total_found);
 
       wrap.find('.stats-today-found .fnumber').text(response.data.stats.today_found);
@@ -2439,7 +2437,6 @@ function food_ingredient_core_quick(ele, itd) {
       message_from_toast('success', acmcfs.message_title_success, acmcfs.message_description_success_update);
     })
     .catch(error => {
-      console.log(error);
       if (error.response.data && Object.values(error.response.data).length) {
         Object.values(error.response.data).forEach(function (v, k) {
           message_from_toast('error', acmcfs.message_title_error, v);
@@ -2463,7 +2460,6 @@ function food_ingredient_confidence_quick(ele, itd) {
       message_from_toast('success', acmcfs.message_title_success, acmcfs.message_description_success_update);
     })
     .catch(error => {
-      console.log(error);
       if (error.response.data && Object.values(error.response.data).length) {
         Object.values(error.response.data).forEach(function (v, k) {
           message_from_toast('error', acmcfs.message_title_error, v);
@@ -2806,8 +2802,6 @@ function report_photo_nf_action(next = 0) {
           view_input = arr.indexOf(view_next) + 1;
         }
     }
-
-    console.log(view_next);
 
     popup.find('input[name=popup_view_input]').val(view_input);
     popup.find('input[name=popup_view_id_itm]').val(view_next);

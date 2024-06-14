@@ -197,7 +197,7 @@
   </div>
   <!-- modal item info -->
   <div class="modal animate__animated animate__rollIn" id="modal_info_item" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-xl" role="document">
+    <div class="modal-dialog modal-xl acm-modal-xxl" role="document">
       <div class="modal-content">
         <div class="modal-header">
           <h4 class="modal-title text-danger fw-bold"></h4>

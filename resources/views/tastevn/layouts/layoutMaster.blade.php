@@ -150,7 +150,7 @@
     </div>
   </div>
   <div class="modal animate__animated animate__rollIn" id="modal_food_info" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
+    <div class="modal-dialog modal-xl acm-modal-xxl" role="document">
       <div class="modal-content">
         <div class="modal-header">
           <h4 class="modal-title text-danger fw-bold"></h4>
@@ -160,7 +160,7 @@
           <input type="hidden" name="item" />
 
           <div class="row">
-            <div class="col-lg-4 mb-2">
+            <div class="col-lg-6 mb-2">
               <div class="food_info_select">
                 <select class="ajx_selectize"
                         data-value="restaurant_parent"
@@ -175,7 +175,7 @@
                 <img class="w-100" />
               </div>
             </div>
-            <div class="col-lg-4 mb-2">
+            <div class="col-lg-3 mb-2">
               <div class="row">
                 <div class="col-lg-12 mb-2">
                   <div class="text-primary fw-bold">+ Roboflow Ingredients</div>
@@ -184,7 +184,7 @@
                 </div>
               </div>
             </div>
-            <div class="col-lg-4 mb-2">
+            <div class="col-lg-3 mb-2">
               <div class="row">
                 <div class="col-lg-12 mb-2">
                   <div class="text-primary fw-bold">+ Recipe Ingredients</div>

@@ -11,7 +11,7 @@
           <div class="text-center w-auto p-1">
             <div class="text-uppercase fw-bold text-dark">photo standard</div>
             <img class="w-100 acm-height-300-max" loading="lazy"
-                 src="{{$food->get_photo(['restaurant_parent_id' => $restaurant->restaurant_parent->id])}}" />
+                 src="{{$food->get_photo(['restaurant_parent_id' => $restaurant->restaurant_parent_id])}}" />
           </div>
         </div>
         <div class="col-6 mb-1">
