@@ -355,6 +355,7 @@ class SysApp
         'rbf_api_key' => $this->get_setting('rbf_api_key'),
         'rbf_dataset_scan' => $this->get_setting('rbf_dataset_scan'),
         'rbf_dataset_ver' => $this->get_setting('rbf_dataset_ver'),
+        'rbf_food_confidence' => $this->get_setting('rbf_food_confidence'),
       ],
       'mail_server' => [
         'mail_mailer' => $this->get_setting('mail_mailer'),

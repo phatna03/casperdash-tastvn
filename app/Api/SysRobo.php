@@ -14,6 +14,7 @@ class SysRobo
 {
   public const _SCAN_CONFIDENCE = 30;
   public const _SCAN_OVERLAP = 60;
+  public const _FOOD_CONFIDENCE = 70;
 
   public static function s3_bucket_folder()
   {
@@ -314,6 +315,11 @@ class SysRobo
 
     $arr = [];
 
+    $food_confidence = (int)$sys_app->get_setting('rbf_food_confidence');
+    if (!$food_confidence || $food_confidence >= 100) {
+      $food_confidence = SysRobo::_FOOD_CONFIDENCE;
+    }
+
     $debug = isset($pars['debug']) ? (bool)$pars['debug'] : false;
     $restaurant_parent_id = isset($pars['restaurant_parent_id']) ? (int)$pars['restaurant_parent_id'] : 0;
     $restaurant_parent = RestaurantParent::find($restaurant_parent_id);
@@ -342,7 +348,7 @@ class SysRobo
           var_dump('***** FOOD SERVE? = ' . $restaurant_parent->food_serve($food));
         }
 
-        if ($food && $restaurant_parent->food_serve($food) && $confidence >= 50) {
+        if ($food && $restaurant_parent->food_serve($food) && $confidence >= $food_confidence) {
 
           //check valid ingredient
           $valid_food = true;

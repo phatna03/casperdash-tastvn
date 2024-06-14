@@ -1513,6 +1513,7 @@ function sys_setting() {
     rbf_api_key: form.find('input[name=rbf_api_key]').val(),
     rbf_dataset_scan: form.find('input[name=rbf_dataset_scan]').val(),
     rbf_dataset_ver: form.find('input[name=rbf_dataset_ver]').val(),
+    rbf_food_confidence: form.find('input[name=rbf_food_confidence]').val(),
     mail_mailer: form.find('input[name=mail_mailer]').val(),
     mail_host: form.find('input[name=mail_host]').val(),
     mail_username: form.find('input[name=mail_username]').val(),
