@@ -132,8 +132,14 @@
                       <div class="acm-float-right acm-ml-px-5 wrap_notify_result d-none result_photo_status">
                         <div class="data_result"></div>
                         <div class="data_btns d-none">
-                          <button type="button" class="btn btn-sm btn-secondary">Resolve</button>
-                          <button type="button" class="btn btn-sm btn-secondary">Mark</button>
+                          <button type="button" class="btn btn-sm btn-primary btn_resolved"
+                                  data-value="0"
+                                  onclick="photo_resolve(this)"
+                          >Resolve</button>
+                          <button type="button" class="btn btn-sm btn-primary btn_marked"
+                                  data-value="0"
+                                  onclick="photo_mark(this)"
+                          >Mark</button>
                         </div>
                       </div>
 
@@ -159,14 +165,6 @@
 
                       <div class="data_result"></div>
                     </div>
-
-{{--                    <div class="col-lg-6 mb-1 wrap_notify_result d-none result_ingredients_missing">--}}
-{{--                      <div class="w-100">--}}
-{{--                        <div class="text-dark fw-bold">+ Ingredients Missing:</div>--}}
-{{--                      </div>--}}
-
-{{--                      <div class="data_result"></div>--}}
-{{--                    </div>--}}
 
                     <input type="hidden" name="current_file_id" />
                     <input type="hidden" name="current_file_url" />
@@ -444,12 +442,6 @@
         })
         .catch(error => {
           console.log(error);
-
-          // if (error.response.data && Object.values(error.response.data).length) {
-          //   Object.values(error.response.data).forEach(function (v, k) {
-          //     message_from_toast('error', acmcfs.message_title_error, v);
-          //   });
-          // }
         })
         .then(res => {
           sys_running = 0;
@@ -495,6 +487,35 @@
           $('.result_ingredients_missing').removeClass('d-none');
         }
 
+        //btns
+        $('.result_photo_status .data_btns .btn_resolved').removeClass('btn-success')
+          .addClass('btn-primary');
+        $('.result_photo_status .data_btns .btn_resolved').text('Resolve');
+        $('.result_photo_status .data_btns .btn_resolved').attr('data-value', 0);
+
+        $('.result_photo_status .data_btns .btn_marked').removeClass('btn-success')
+          .addClass('btn-primary');
+        $('.result_photo_status .data_btns .btn_marked').text('Mark');
+        $('.result_photo_status .data_btns .btn_marked').attr('data-value', 0);
+
+        //is_resolved
+        if (datas.is_resolved) {
+          $('.result_ingredients_missing').addClass('d-none');
+
+          $('.result_photo_status .data_btns .btn_resolved').addClass('btn-success')
+            .removeClass('btn-primary');
+          $('.result_photo_status .data_btns .btn_resolved').text('Resolved');
+          $('.result_photo_status .data_btns .btn_resolved').attr('data-value', 1);
+        }
+        //is_marked
+        if (datas.is_marked) {
+
+          $('.result_photo_status .data_btns .btn_marked').addClass('btn-success')
+            .removeClass('btn-primary');
+          $('.result_photo_status .data_btns .btn_marked').text('Marked');
+          $('.result_photo_status .data_btns .btn_marked').attr('data-value', 1);
+        }
+
         //ingredients_found
         html = '';
         if (datas.ingredients_found.length) {
@@ -521,5 +542,72 @@
       }
     }
 
+    function photo_resolve(ele) {
+      var bind = $(ele);
+      var parent = bind.closest('.data_btns');
+      var rfs_id = $('.wrap_food_tester input[name=current_file_id]').val();
+
+      var status = parseInt(bind.attr('data-value'));
+      var value = 0;
+      if (status) {
+
+        bind.addClass('btn-primary').removeClass('btn-success');
+        bind.text('Resolve');
+
+      } else {
+
+        value = 1;
+        bind.removeClass('btn-primary').addClass('btn-success');
+        bind.text('Resolved');
+
+        $('.result_ingredients_missing').addClass('d-none');
+      }
+
+      bind.attr('data-value', value);
+
+      axios.post('/admin/sensor/food/scan/resolve', {
+        rfs: rfs_id,
+        val: value,
+      })
+        .then(response => {
+          message_from_toast('success', acmcfs.message_title_success, acmcfs.message_description_success_update);
+        })
+        .catch(error => {
+          console.log(error);
+        });
+    }
+
+    function photo_mark(ele) {
+      var bind = $(ele);
+      var parent = bind.closest('.data_btns');
+      var rfs_id = $('.wrap_food_tester input[name=current_file_id]').val();
+
+      var status = parseInt(bind.attr('data-value'));
+      var value = 0;
+      if (status) {
+
+        bind.addClass('btn-primary').removeClass('btn-success');
+        bind.text('Mark');
+
+      } else {
+
+        value = 1;
+        bind.removeClass('btn-primary').addClass('btn-success');
+        bind.text('Marked');
+      }
+
+      bind.attr('data-value', value);
+
+      axios.post('/admin/sensor/food/scan/mark', {
+        rfs: rfs_id,
+        val: value,
+      })
+        .then(response => {
+          message_from_toast('success', acmcfs.message_title_success, acmcfs.message_description_success_update);
+        })
+        .catch(error => {
+          console.log(error);
+        });
+    }
   </script>
 @endsection

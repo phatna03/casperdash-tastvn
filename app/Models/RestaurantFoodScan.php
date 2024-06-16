@@ -47,6 +47,9 @@ class RestaurantFoodScan extends Model
     'usr_edited',
     'usr_predict',
 
+    'is_marked',
+    'is_resolved',
+
     'rbf_predict',
     'rbf_confidence',
     'rbf_api',

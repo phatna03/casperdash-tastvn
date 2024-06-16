@@ -131,9 +131,12 @@ return new class extends Migration {
         $table->smallInteger('rbf_retrain')->default(0);
         $table->longText('rbf_api')->nullable();
         $table->longText('rbf_api_js')->nullable();
+        $table->text('rbf_version')->nullable();
         $table->smallInteger('rbf_model')->default(0);
         $table->longText('rbf_api_1')->nullable();
         $table->longText('rbf_api_2')->nullable();
+        $table->bigInteger('is_marked')->default(0);
+        $table->bigInteger('is_resolved')->default(0);
         $table->longText('usr_edited')->nullable();
         $table->bigInteger('deleted')->default(0);
         $table->timestamps();

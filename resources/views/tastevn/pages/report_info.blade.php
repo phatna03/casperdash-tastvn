@@ -64,7 +64,7 @@
                   <div class="col-lg-12 mb-3 acm-text-right">
                     <div class="wrap-btns">
                       @include('tastevn.htmls.form_button_loading')
-                      <button type="button" class="btn btn-danger btn-ok btn-submit" onclick="report_photo_nf_clear_prepare()">Clear Result</button>
+                      <button type="button" class="btn btn-danger btn-ok btn-submit d-none" onclick="report_photo_nf_clear_prepare()">Clear Result</button>
                       <button type="button" class="btn btn-primary btn-ok btn-submit" onclick="report_photo_nf_update_prepare()">Submit</button>
                     </div>
 

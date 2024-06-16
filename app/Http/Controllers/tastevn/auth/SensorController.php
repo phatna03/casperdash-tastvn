@@ -903,6 +903,64 @@ class SensorController extends Controller
     ], 200);
   }
 
+  public function food_scan_resolve(Request $request)
+  {
+    $values = $request->all();
+
+    $validator = Validator::make($values, [
+      'rfs' => 'required',
+    ]);
+    if ($validator->fails()) {
+      return response()->json($validator->errors(), 422);
+    }
+    //invalid
+    $rfs = RestaurantFoodScan::find((int)$values['rfs']);
+    if (!$rfs) {
+      return response()->json([
+        'error' => 'Invalid item'
+      ], 422);
+    }
+
+    $val = isset($values['val']) ? (int)$values['val'] : 0;
+
+    $rfs->update([
+      'is_resolved' => $val ? $this->_viewer->id : 0,
+    ]);
+
+    return response()->json([
+      'is_resolved' => $rfs->is_resolved,
+    ]);
+  }
+
+  public function food_scan_mark(Request $request)
+  {
+    $values = $request->all();
+
+    $validator = Validator::make($values, [
+      'rfs' => 'required',
+    ]);
+    if ($validator->fails()) {
+      return response()->json($validator->errors(), 422);
+    }
+    //invalid
+    $rfs = RestaurantFoodScan::find((int)$values['rfs']);
+    if (!$rfs) {
+      return response()->json([
+        'error' => 'Invalid item'
+      ], 422);
+    }
+
+    $val = isset($values['val']) ? (int)$values['val'] : 0;
+
+    $rfs->update([
+      'is_marked' => $val ? $this->_viewer->id : 0,
+    ]);
+
+    return response()->json([
+      'is_marked' => $rfs->is_marked,
+    ]);
+  }
+
   public function stats(Request $request)
   {
     $values = $request->post();
@@ -1210,6 +1268,8 @@ class SensorController extends Controller
     $food_id = 0;
     $food_name = '';
     $food_photo = '';
+    $is_resolved = 0;
+    $is_marked = 0;
 
     if ($food) {
 
@@ -1218,6 +1278,9 @@ class SensorController extends Controller
       $food_photo = $food->get_photo([
         'restaurant_parent_id' => $restaurant->restaurant_parent_id
       ]);
+
+      $is_resolved = $row->is_resolved;
+      $is_marked = $row->is_marked;
 
       //info recipe
       $html_info = view('tastevn.htmls.item_food_dashboard')
@@ -1293,6 +1356,8 @@ class SensorController extends Controller
       'food_id' => $food_id,
       'food_photo' => $food_photo,
       'food_name' => $food_name,
+      'is_resolved' => $is_resolved,
+      'is_marked' => $is_marked,
 
       'html_info' => $html_info,
 
