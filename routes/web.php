@@ -458,6 +458,8 @@ Route::get('/datatable/sensor-food-scans', function (Request $request) {
   $restaurant = isset($values['restaurant']) ? (int)$values['restaurant'] : 0;
   $statuses = isset($values['statuses']) ? (array)$values['statuses'] : [];
   $missing = isset($values['missing']) && !empty($values['missing']) ? $values['missing'] : NULL;
+  $resolved = isset($values['resolved']) && !empty($values['resolved']) ? $values['resolved'] : NULL;
+  $marked = isset($values['marked']) && !empty($values['marked']) ? $values['marked'] : NULL;
   $food_catetories = isset($values['categories']) ? (array)$values['categories'] : [];
   $foods = isset($values['foods']) ? (array)$values['foods'] : [];
   $users = isset($values['users']) ? (array)$values['users'] : [];
@@ -470,6 +472,7 @@ Route::get('/datatable/sensor-food-scans', function (Request $request) {
       "restaurant_food_scans.status", "restaurant_food_scans.found_by", "restaurant_food_scans.note", "restaurant_food_scans.confidence",
       "restaurant_food_scans.food_id", "restaurant_food_scans.food_category_id", "restaurant_food_scans.rbf_retrain",
       "foods.name as food_name", "food_categories.name as category_name",
+      "restaurant_food_scans.is_resolved", "restaurant_food_scans.is_marked"
     )
     ->leftJoin("foods", "restaurant_food_scans.food_id", "=", "foods.id")
     ->leftJoin("food_categories", "restaurant_food_scans.food_category_id", "=", "food_categories.id")
@@ -499,15 +502,6 @@ Route::get('/datatable/sensor-food-scans', function (Request $request) {
         ->whereIn('user_id', $users);
     });
   }
-//  if (!empty($time_scan)) {
-//    $times = $sys_app->parse_date_range($time_scan);
-//    if (!empty($times['time_from'])) {
-//      $select->where('restaurant_food_scans.time_scan', '>=', $times['time_from']);
-//    }
-//    if (!empty($times['time_to'])) {
-//      $select->where('restaurant_food_scans.time_scan', '<=', $times['time_to']);
-//    }
-//  }
   if (!empty($time_upload)) {
     $times = $sys_app->parse_date_range($time_upload);
     if (!empty($times['time_from'])) {
@@ -528,6 +522,20 @@ Route::get('/datatable/sensor-food-scans', function (Request $request) {
 
       case 'no':
         $select->where("restaurant_food_scans.missing_ids", NULL);
+        break;
+    }
+  }
+  if (!empty($resolved)) {
+    switch ($resolved) {
+      case 'yes':
+        $select->where("restaurant_food_scans.is_resolved", '>', 0);
+        break;
+    }
+  }
+  if (!empty($marked)) {
+    switch ($marked) {
+      case 'yes':
+        $select->where("restaurant_food_scans.is_marked", '>', 0);
         break;
     }
   }

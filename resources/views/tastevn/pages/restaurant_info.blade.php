@@ -176,7 +176,7 @@
         <div class="wrap-search-form">
           <h5 class="card-title">Search Conditions</h5>
           <form onsubmit="event.preventDefault(); return datatable_listing_scan_refresh();">
-            <div class="d-flex justify-content-between align-items-center row py-1 gap-3 gap-md-0">
+            <div class="d-flex align-items-center row py-1 gap-3 gap-md-0">
               <div class="col-md-6 mb-2">
                 <div class="form-floating form-floating-outline wrap-select-food-category">
                   <div class="form-control acm-wrap-selectize" id="scan-search-food-category">
@@ -248,6 +248,28 @@
                     </select>
                   </div>
                   <label for="scan-search-users">Commentators</label>
+                </div>
+              </div>
+              <div class="col-md-3 mb-2">
+                <div class="form-floating form-floating-outline">
+                  <div class="form-control acm-wrap-selectize" id="scan-search-missing">
+                    <select name="marked" class="opt_selectize" onchange="sensor_search_food_scan(this)">
+                      <option value="">All dishes</option>
+                      <option value="yes">Dish is marked</option>
+                    </select>
+                  </div>
+                  <label for="scan-search-missing">Mark?</label>
+                </div>
+              </div>
+              <div class="col-md-3 mb-2">
+                <div class="form-floating form-floating-outline">
+                  <div class="form-control acm-wrap-selectize" id="scan-search-missing">
+                    <select name="resolved" class="opt_selectize" onchange="sensor_search_food_scan(this)">
+                      <option value="">All dishes</option>
+                      <option value="yes">Dish with missing ingredients & resolved</option>
+                    </select>
+                  </div>
+                  <label for="scan-search-missing">Resolve?</label>
                 </div>
               </div>
             </div>
@@ -525,6 +547,8 @@
           d.users = $('#datatable-listing-scan .wrap-search-form form select[name=users]').val();
           d.time_upload = $('#datatable-listing-scan .wrap-search-form form input[name=time_upload]').val();
           d.time_scan = $('#datatable-listing-scan .wrap-search-form form input[name=time_scan]').val();
+          d.resolved = $('#datatable-listing-scan .wrap-search-form form select[name=resolved]').val();
+          d.marked = $('#datatable-listing-scan .wrap-search-form form select[name=marked]').val();
         },
       },
       "createdRow": function (row, data, dataIndex) {
