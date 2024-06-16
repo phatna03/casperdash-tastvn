@@ -36,7 +36,9 @@
     $rate = number_format($rate, 2, '.', '');
     }
   @endphp
-  <tr>
+  <tr class="food_item_report"
+      data-food_id="{{$item['food_id']}}"
+  >
     <td class="text-dark position-relative acm-clearfix">
       @if(count($item['ing_miss_items']))
       <div class="acm-float-right acm-ml-px-5">
@@ -49,42 +51,58 @@
     </td>
     <td class="text-center">
       @if($item['ing_full'])
-        <div class="fnumber text-primary cursor-pointer">{{$item['ing_full']}}</div>
+        <div class="fnumber text-primary cursor-pointer"
+          onclick="report_photo_nf_full('{{$item['food_id']}}', 'full')"
+        >{{$item['ing_full']}}</div>
       @endif
     </td>
     <td class="text-center">
       @if($item['ing_miss_right'])
-        <div class="fnumber text-primary cursor-pointer">{{$item['ing_miss_right']}}</div>
+        <div class="fnumber text-primary cursor-pointer"
+             onclick="report_photo_nf_full('{{$item['food_id']}}', 'miss_right')"
+        >{{$item['ing_miss_right']}}</div>
       @endif
     </td>
     <td class="text-center">
       @if($item['ing_miss_wrong_total'])
-        <div class="fnumber text-dark cursor-pointer">{{$item['ing_miss_wrong_total']}}</div>
+        <div class="fnumber text-dark cursor-pointer"
+             onclick="report_photo_nf_full('{{$item['food_id']}}', 'miss_wrong')"
+        >{{$item['ing_miss_wrong_total']}}</div>
       @endif
     </td>
     <td class="text-center">
       @if($item['ing_miss_wrong_point'] > 0)
-        <div class="nfnumber text-primary cursor-pointer">{{$item['ing_miss_wrong_point']}}</div>
+        <div class="nfnumber text-primary cursor-pointer"
+             onclick="report_photo_nf_full('{{$item['food_id']}}', 'miss_wrong')"
+        >{{$item['ing_miss_wrong_point']}}</div>
       @endif
     </td>
     <td class="text-center">
       @if($item['ing_miss_wrong_failed'] > 0)
-        <div class="nfnumber text-danger cursor-pointer">{{$item['ing_miss_wrong_failed']}}</div>
+        <div class="nfnumber text-danger cursor-pointer"
+             onclick="report_photo_nf_full('{{$item['food_id']}}', 'miss_wrong')"
+        >{{$item['ing_miss_wrong_failed']}}</div>
       @endif
     </td>
     <td class="text-center">
       @if($item['not_found_total'])
-        <div class="fnumber text-dark cursor-pointer">{{$item['not_found_total']}}</div>
+        <div class="fnumber text-dark cursor-pointer"
+             onclick="report_photo_nf_full('{{$item['food_id']}}', 'nf_wrong')"
+        >{{$item['not_found_total']}}</div>
       @endif
     </td>
     <td class="text-center">
       @if($item['not_found_point'] > 0)
-        <div class="nfnumber text-primary cursor-pointer">{{$item['not_found_point']}}</div>
+        <div class="nfnumber text-primary cursor-pointer"
+             onclick="report_photo_nf_full('{{$item['food_id']}}', 'nf_wrong')"
+        >{{$item['not_found_point']}}</div>
       @endif
     </td>
     <td class="text-center">
       @if($item['not_found_failed'] > 0)
-        <div class="nfnumber text-danger cursor-pointer">{{$item['not_found_failed']}}</div>
+        <div class="nfnumber text-danger cursor-pointer"
+             onclick="report_photo_nf_full('{{$item['food_id']}}', 'nf_wrong')"
+        >{{$item['not_found_failed']}}</div>
       @endif
     </td>
     <td class="text-center">

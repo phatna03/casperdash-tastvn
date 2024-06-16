@@ -261,40 +261,229 @@ class ReportController extends Controller
       ], 422);
     }
 
-    $photo = ReportPhoto::where('report_id', $row->id)
-      ->where('reporting', 0)
-      ->where('status', 'failed')
-      ->orderBy('restaurant_food_scan_id', 'asc')
-      ->limit(1)
-      ->first();
+    $type = isset($values['type']) ? $values['type'] : 'not_found';
+    $food_id = isset($values['food_id']) ? (int)$values['food_id'] : 0;
 
-    $rfs = $photo->get_rfs();
+    switch ($type) {
 
-    $html = view('tastevn.htmls.item_report_photo_not_found')
-      ->with('rfs', $rfs)
-      ->with('comments', $rfs->get_comments())
-      ->render();
+      case 'full':
 
-    $texts = $rfs->get_texts(['text_id_only' => 1]);
-    $texts = count($texts) ? array_column($texts->toArray(), 'id') : [];
+        $food = Food::find($food_id);
 
-    $ingredients = $rfs->get_ingredients_missing();
-    $ingredients = count($ingredients) ? array_column($ingredients->toArray(), 'id') : [];
+        $photo = ReportPhoto::query('report_photos')
+          ->leftJoin('restaurant_food_scans', 'restaurant_food_scans.id', '=', 'report_photos.restaurant_food_scan_id')
+          ->where('report_photos.report_id', $row->id)
+          ->where('report_photos.food_id', $food_id)
+          ->where('report_photos.reporting', 1)
+          ->where('restaurant_food_scans.missing_texts', NULL)
+          ->where('restaurant_food_scans.status', 'checked')
+          ->where('report_photos.status', 'passed')
+          ->orderBy('report_photos.restaurant_food_scan_id', 'asc')
+          ->limit(1)
+          ->first();
 
-    $photo_ids = ReportPhoto::select('restaurant_food_scan_id as id')
-      ->where('report_id', $row->id)
-      ->where('reporting', 0)
-      ->where('status', 'failed')
-      ->orderBy('restaurant_food_scan_id', 'asc')
-      ->get();
-    $photo_ids = count($photo_ids) ? array_column($photo_ids->toArray(), 'id') : [];
+        $rfs = $photo->get_rfs();
+
+        $html = view('tastevn.htmls.item_report_photo_not_found')
+          ->with('rfs', $rfs)
+          ->with('comments', $rfs->get_comments())
+          ->render();
+
+        $texts = $rfs->get_texts(['text_id_only' => 1]);
+        $texts = count($texts) ? array_column($texts->toArray(), 'id') : [];
+
+        $ingredients = $rfs->get_ingredients_missing();
+        $ingredients = count($ingredients) ? array_column($ingredients->toArray(), 'id') : [];
+
+        $photo_ids = ReportPhoto::query('report_photos')
+          ->select('restaurant_food_scan_id as id')
+          ->leftJoin('restaurant_food_scans', 'restaurant_food_scans.id', '=', 'report_photos.restaurant_food_scan_id')
+          ->where('report_photos.report_id', $row->id)
+          ->where('report_photos.food_id', $food_id)
+          ->where('report_photos.reporting', 1)
+          ->where('restaurant_food_scans.missing_texts', NULL)
+          ->where('restaurant_food_scans.status', 'checked')
+          ->where('report_photos.status', 'passed')
+          ->get();
+        $photo_ids = count($photo_ids) ? array_column($photo_ids->toArray(), 'id') : [];
+
+        break;
+
+      case 'miss_right':
+
+        $food = Food::find($food_id);
+
+        $photo = ReportPhoto::query('report_photos')
+          ->leftJoin('restaurant_food_scans', 'restaurant_food_scans.id', '=', 'report_photos.restaurant_food_scan_id')
+          ->where('report_photos.report_id', $row->id)
+          ->where('report_photos.food_id', $food_id)
+          ->where('report_photos.reporting', 1)
+          ->where('restaurant_food_scans.missing_ids', '<>', NULL)
+          ->where('restaurant_food_scans.status', 'checked')
+          ->where('report_photos.status', 'passed')
+          ->orderBy('report_photos.restaurant_food_scan_id', 'asc')
+          ->limit(1)
+          ->first();
+
+        $rfs = $photo->get_rfs();
+
+        $html = view('tastevn.htmls.item_report_photo_not_found')
+          ->with('rfs', $rfs)
+          ->with('comments', $rfs->get_comments())
+          ->render();
+
+        $texts = $rfs->get_texts(['text_id_only' => 1]);
+        $texts = count($texts) ? array_column($texts->toArray(), 'id') : [];
+
+        $ingredients = $rfs->get_ingredients_missing();
+        $ingredients = count($ingredients) ? array_column($ingredients->toArray(), 'id') : [];
+
+        $photo_ids = ReportPhoto::query('report_photos')
+          ->select('restaurant_food_scan_id as id')
+          ->leftJoin('restaurant_food_scans', 'restaurant_food_scans.id', '=', 'report_photos.restaurant_food_scan_id')
+          ->where('report_photos.report_id', $row->id)
+          ->where('report_photos.food_id', $food_id)
+          ->where('report_photos.reporting', 1)
+          ->where('restaurant_food_scans.missing_ids', '<>', NULL)
+          ->where('restaurant_food_scans.status', 'checked')
+          ->where('report_photos.status', 'passed')
+          ->get();
+        $photo_ids = count($photo_ids) ? array_column($photo_ids->toArray(), 'id') : [];
+
+        break;
+
+      case 'miss_wrong':
+
+        $food = Food::find($food_id);
+
+        $photo = ReportPhoto::query('report_photos')
+          ->leftJoin('restaurant_food_scans', 'restaurant_food_scans.id', '=', 'report_photos.restaurant_food_scan_id')
+          ->where('report_photos.report_id', $row->id)
+          ->where('report_photos.food_id', $food_id)
+          ->where('report_photos.reporting', 1)
+          ->where('restaurant_food_scans.missing_ids', '<>', NULL)
+          ->where('restaurant_food_scans.status', 'edited')
+//          ->where('report_photos.status', 'passed')
+          ->orderBy('report_photos.restaurant_food_scan_id', 'asc')
+          ->limit(1)
+          ->first();
+
+        $rfs = $photo->get_rfs();
+
+        $html = view('tastevn.htmls.item_report_photo_not_found')
+          ->with('rfs', $rfs)
+          ->with('comments', $rfs->get_comments())
+          ->render();
+
+        $texts = $rfs->get_texts(['text_id_only' => 1]);
+        $texts = count($texts) ? array_column($texts->toArray(), 'id') : [];
+
+        $ingredients = $rfs->get_ingredients_missing();
+        $ingredients = count($ingredients) ? array_column($ingredients->toArray(), 'id') : [];
+
+        $photo_ids = ReportPhoto::query('report_photos')
+          ->select('restaurant_food_scan_id as id')
+          ->leftJoin('restaurant_food_scans', 'restaurant_food_scans.id', '=', 'report_photos.restaurant_food_scan_id')
+          ->where('report_photos.report_id', $row->id)
+          ->where('report_photos.food_id', $food_id)
+          ->where('report_photos.reporting', 1)
+          ->where('restaurant_food_scans.missing_ids', '<>', NULL)
+          ->where('restaurant_food_scans.status', 'edited')
+//          ->where('report_photos.status', 'passed')
+          ->get();
+        $photo_ids = count($photo_ids) ? array_column($photo_ids->toArray(), 'id') : [];
+
+        break;
+
+      case 'nf_wrong':
+
+        $food = Food::find($food_id);
+
+        $photo = ReportPhoto::query('report_photos')
+          ->leftJoin('restaurant_food_scans', 'restaurant_food_scans.id', '=', 'report_photos.restaurant_food_scan_id')
+          ->where('report_photos.report_id', $row->id)
+          ->where('report_photos.food_id', $food_id)
+          ->where('report_photos.reporting', 0)
+//          ->where('restaurant_food_scans.missing_ids', '<>', NULL)
+          ->where('restaurant_food_scans.status', 'edited')
+//          ->where('report_photos.status', 'passed')
+          ->orderBy('report_photos.restaurant_food_scan_id', 'asc')
+          ->limit(1)
+          ->first();
+
+        $rfs = $photo->get_rfs();
+
+        $html = view('tastevn.htmls.item_report_photo_not_found')
+          ->with('rfs', $rfs)
+          ->with('comments', $rfs->get_comments())
+          ->render();
+
+        $texts = $rfs->get_texts(['text_id_only' => 1]);
+        $texts = count($texts) ? array_column($texts->toArray(), 'id') : [];
+
+        $ingredients = $rfs->get_ingredients_missing();
+        $ingredients = count($ingredients) ? array_column($ingredients->toArray(), 'id') : [];
+
+        $photo_ids = ReportPhoto::query('report_photos')
+          ->select('restaurant_food_scan_id as id')
+          ->leftJoin('restaurant_food_scans', 'restaurant_food_scans.id', '=', 'report_photos.restaurant_food_scan_id')
+          ->where('report_photos.report_id', $row->id)
+          ->where('report_photos.food_id', $food_id)
+          ->where('report_photos.reporting', 0)
+//          ->where('restaurant_food_scans.missing_ids', '<>', NULL)
+          ->where('restaurant_food_scans.status', 'edited')
+//          ->where('report_photos.status', 'passed')
+          ->get();
+        $photo_ids = count($photo_ids) ? array_column($photo_ids->toArray(), 'id') : [];
+
+        break;
+
+      default:
+
+        $photo = ReportPhoto::where('report_id', $row->id)
+          ->where('reporting', 0)
+          ->where('status', 'failed')
+          ->orderBy('restaurant_food_scan_id', 'asc')
+          ->limit(1)
+          ->first();
+
+        $rfs = $photo->get_rfs();
+
+        $html = view('tastevn.htmls.item_report_photo_not_found')
+          ->with('rfs', $rfs)
+          ->with('comments', $rfs->get_comments())
+          ->render();
+
+        $texts = $rfs->get_texts(['text_id_only' => 1]);
+        $texts = count($texts) ? array_column($texts->toArray(), 'id') : [];
+
+        $ingredients = $rfs->get_ingredients_missing();
+        $ingredients = count($ingredients) ? array_column($ingredients->toArray(), 'id') : [];
+
+        $photo_ids = ReportPhoto::select('restaurant_food_scan_id as id')
+          ->where('report_id', $row->id)
+          ->where('reporting', 0)
+          ->where('status', 'failed')
+          ->orderBy('restaurant_food_scan_id', 'asc')
+          ->get();
+        $photo_ids = count($photo_ids) ? array_column($photo_ids->toArray(), 'id') : [];
+    }
+
+    $point = $photo->point;
+    if ($point <= 0) {
+      $point = 0;
+    } elseif ($point >= 1) {
+      $point = 1;
+    } else {
+      $point = number_format($photo->point, 1, '.', '');
+    }
 
     return response()->json([
       'status' => true,
       'ids' => $photo_ids,
       'photo' => [
         'id' => $photo->id,
-        'point' => number_format($photo->point, 1, '.', ''),
+        'point' => $point,
       ],
       'rfs' => [
         'id' => $rfs->id,
@@ -405,7 +594,7 @@ class ReportController extends Controller
     //report photo_update
     $photo = ReportPhoto::where('report_id', $row->id)
       ->where('restaurant_food_scan_id', $rfs->id)
-      ->where('reporting', 0)
+//      ->where('reporting', 0)
       ->first();
     if ($photo) {
       $photo->update([

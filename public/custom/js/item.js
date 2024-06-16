@@ -3120,3 +3120,81 @@ function report_photo_nf_itm(itd) {
 
   return false;
 }
+function report_photo_nf_full(food_id, type) {
+  var popup = $('#modal_report_nf');
+  var form = popup.find('form');
+
+  popup.modal('show');
+
+  popup.find('.modal-body .wrap_datas').addClass('text-center').empty()
+    .append('<div class="m-auto">' + acmcfs.html_loading + '</div>');
+
+  axios.post('/admin/report/photo/not-found', {
+    item: popup.find('input[name=report_id]'),
+    food_id: food_id,
+    type: type,
+  })
+    .then(response => {
+
+      report_photo_clear(form);
+
+      popup.find('.view_current').val(1);
+      popup.find('.view_all_count').text(response.data.ids.length);
+
+      popup.find('input[name=popup_view_ids]').val(response.data.ids);
+
+      //populate rfs
+      if (parseInt(response.data.rfs.id)) {
+
+        popup.find('input[name=popup_view_id_itm]').val(response.data.rfs.id);
+
+        form.find('input[name=rfs]').val(response.data.rfs.id);
+        form.find('select[name=point]').val(response.data.photo.point);
+        form.find('textarea[name=note]').val(response.data.rfs.note);
+
+        if (form.find('.wrap-texts .itm-text').length && response.data.rfs.texts.length) {
+          form.find('.wrap-texts .itm-text input').each(function (k, v) {
+            var input = $(v);
+            var itd = parseInt(input.attr('data-itd'));
+            if (response.data.rfs.texts.includes(itd)) {
+              input.prop('checked', true);
+            }
+          });
+        }
+
+        setTimeout(function () {
+          form.find('select[name=food]').selectize()[0].selectize.setValue(response.data.rfs.food_id);
+
+          if (response.data.rfs.ingredients.length) {
+            form.find('input[name=missing]').click();
+
+            setTimeout(function () {
+              form.find('.wrap_ingredients_missing .datas .js-item-row').each(function (k, v) {
+                var tr = $(v);
+                var itd = parseInt(tr.attr('data-itd'));
+                if (!response.data.rfs.ingredients.includes(itd)) {
+                  tr.find('button').click();
+                }
+              });
+            }, 888);
+          }
+        }, 888);
+      }
+
+      popup.find('.modal-body .wrap_datas').empty()
+        .append(response.data.html);
+
+      bind_datad(popup);
+    })
+    .catch(error => {
+
+      if (error.response.data && Object.values(error.response.data).length) {
+        Object.values(error.response.data).forEach(function (v, k) {
+          message_from_toast('error', acmcfs.message_title_error, v);
+        });
+      }
+
+    });
+
+  return false;
+}
