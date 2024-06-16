@@ -104,7 +104,7 @@
 
     @auth
     //notify
-    notification_newest();
+    // notification_newest();
     notify_realtime = setInterval(function () {
       notification_newest();
     }, acmcfs.timeout_notification);

@@ -53,9 +53,82 @@ class TesterController extends Controller
     $restaurant = RestaurantParent::find(1);
     $sensor = Restaurant::find(10);
 
-    $rfs = RestaurantFoodScan::find(36639);
+    $rfs = RestaurantFoodScan::find(40663);
+
+    var_dump($rfs->get_photo());
+
+    $rfs->model_api_1([
+      'confidence' => SysRobo::_SCAN_CONFIDENCE,
+      'overlap' => SysRobo::_SCAN_OVERLAP,
+
+      'debug' => 1,
+    ]);
+
+    die('111111111111111');
 
 
+
+
+
+
+    $dataset = 'missing-dish-ingredients';
+    $version = '33';
+
+    $arr = SysRobo::photo_scan($rfs, [
+      'dataset' => $dataset,
+      'version' => $version,
+
+      'confidence' => SysRobo::_SCAN_CONFIDENCE,
+      'overlap' => SysRobo::_SCAN_OVERLAP,
+    ]);
+
+    var_dump($arr);
+    var_dump('========================================================================================');
+    var_dump('========================================================================================');
+
+    if ($arr['status'] && count($arr['result'])) {
+      //find foods
+      $foods = SysRobo::foods_find([
+        'predictions' => $arr['result']['predictions'],
+        'restaurant_parent_id' => 1,
+      ]);
+
+      var_dump($arr['result']['predictions']);
+      var_dump('========================================================================================');
+      var_dump('========================================================================================');
+
+      var_dump($foods);
+      var_dump('========================================================================================');
+      var_dump('========================================================================================');
+
+      //food highest confidence
+      $foods = SysRobo::foods_valid($foods);
+
+      var_dump($foods);
+      var_dump('========================================================================================');
+      var_dump('========================================================================================');
+
+      $dataset = 'missing-dish-ingredients';
+      $version = '67';
+
+      $arr = SysRobo::photo_scan($rfs, [
+        'dataset' => $dataset,
+        'version' => $version,
+
+        'confidence' => SysRobo::_SCAN_CONFIDENCE,
+        'overlap' => SysRobo::_SCAN_OVERLAP,
+      ]);
+
+      var_dump($arr);
+      var_dump('========================================================================================');
+      var_dump('========================================================================================');
+
+      var_dump($arr['result']['predictions']);
+      var_dump('========================================================================================');
+      var_dump('========================================================================================');
+    }
+
+    die('endddd...');
 
     //remove notify
 //    $row1s = RestaurantFoodScan::select('id')

@@ -33,12 +33,12 @@ class Kernel extends ConsoleKernel
     //deli
     $schedule->command('local:check-images', [1, 3])
       ->withoutOverlapping()
-      ->everyFiveSeconds()
+      ->everyFifteenSeconds()
       ->runInBackground();
 
     $schedule->command('local:check-images', [1, 4])
       ->withoutOverlapping()
-      ->everyFiveSeconds()
+      ->everyFifteenSeconds()
       ->runInBackground();
     //market
     $schedule->command('local:check-images', [1, 5])

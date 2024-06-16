@@ -389,6 +389,9 @@
 
           if (response.data.file && response.data.file != '' && current_file_url != response.data.file) {
 
+            $('.result_ingredients_missing').addClass('d-none');
+            $('.result_photo_status .data_btns').addClass('d-none');
+
             $('.wrap_food_tester input[name=current_file_id]').val(response.data.file_id);
 
             $('.wrap_notify_result').addClass('d-none');

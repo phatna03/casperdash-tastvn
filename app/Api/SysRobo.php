@@ -64,6 +64,9 @@ class SysRobo
     if (isset($pars['version'])) {
       $version = (int)$pars['version'];
     }
+    if (isset($pars['dataset'])) {
+      $dataset = $pars['dataset'];
+    }
 
     //pars
     $confidence = isset($pars['confidence']) ? (int)$pars['confidence'] : 50;
@@ -332,6 +335,7 @@ class SysRobo
       $ingredients_found = SysRobo::ingredients_compact($predictions);
 
       foreach ($predictions as $prediction) {
+        $prediction = (array)$prediction;
 
         $confidence = (int)($prediction['confidence'] * 100);
         $class = strtolower(trim($prediction['class']));

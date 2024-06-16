@@ -51,6 +51,10 @@ class RestaurantFoodScan extends Model
     'rbf_confidence',
     'rbf_api',
     'rbf_api_js',
+    'rbf_version',
+    'rbf_model',
+    'rbf_api_1',
+    'rbf_api_2',
     //1= need retrain //2= retrain success //3= retrain failed
     'rbf_retrain',
     'deleted',
@@ -450,6 +454,200 @@ class RestaurantFoodScan extends Model
     }
 
     return null;
+  }
+
+  public function model_reset()
+  {
+    $this->update([
+
+      'food_category_id' => 0,
+      'food_id' => 0,
+      'confidence' => 0,
+      'found_by' => NULL,
+      'total_seconds' => 0,
+      'missing_ids' => NULL,
+      'missing_texts' => NULL,
+
+      'sys_predict' => 0,
+      'sys_confidence' => 0,
+      'usr_predict' => 0,
+      'rbf_predict' => 0,
+      'rbf_confidence' => 0,
+      'usr_edited' => NULL,
+
+      'status' => 'new',
+      'rbf_api' => NULL,
+      'rbf_api_js' => NULL,
+      'rbf_version' => NULL,
+      'rbf_model' => 0,
+      'rbf_api_1' => NULL,
+      'rbf_api_2' => NULL,
+    ]);
+  }
+
+  public function model_api_1($pars = [])
+  {
+    $sys_app = new SysApp();
+
+    $debug = isset($pars['debug']) ? (bool)$pars['debug'] : false;
+    $dataset = isset($pars['dataset']) ? $pars['dataset'] : $sys_app->get_setting('rbf_dataset_scan');
+    $version = isset($pars['version']) ? $pars['version'] : $sys_app->get_setting('rbf_dataset_ver');
+
+    $this->model_reset();
+
+    $this->update([
+      'rbf_model' => 3, //running
+      'time_scan' => date('Y-m-d H:i:s'),
+    ]);
+
+    if ($debug) {
+      var_dump('====================================================== START ID= ' . $this->id);
+    }
+
+    $rbf_version = [
+      'dataset' => $dataset,
+      'version' => $version,
+    ];
+
+    $arr = SysRobo::photo_scan($this, $pars);
+
+    $this->update([
+      'status' => $arr['status'] ? 'scanned' : 'failed',
+      'rbf_api' => $arr['status'] ? json_encode($arr['result']) : NULL,
+      'rbf_version' => json_encode($rbf_version),
+      'rbf_model' => 0,
+    ]);
+
+    if ($debug) {
+      var_dump('====================================================== API CALL= ');
+      var_dump($arr);
+    }
+  }
+
+  public function model_api_2($pars = [])
+  {
+    $sys_app = new SysApp();
+
+    $debug = isset($pars['debug']) ? (bool)$pars['debug'] : false;
+    $dataset = isset($pars['dataset']) ? $pars['dataset'] : $sys_app->get_setting('rbf_dataset_scan');
+    $version = isset($pars['version']) ? $pars['version'] : $sys_app->get_setting('rbf_dataset_ver');
+
+    $sensor = $this->get_restaurant();
+
+    $this->model_reset();
+
+    $this->update([
+      'rbf_model' => 3, //running
+      'time_scan' => date('Y-m-d H:i:s'),
+    ]);
+
+    if ($debug) {
+      var_dump('====================================================== START ID= ' . $this->id);
+    }
+
+    $rbf_version = [];
+    $rbf_version[] = [
+      'dataset' => $dataset,
+      'version' => $version,
+    ];
+
+    $arr = SysRobo::photo_scan($this, [
+      'dataset' => $dataset,
+      'version' => $version,
+
+      'confidence' => SysRobo::_SCAN_CONFIDENCE,
+      'overlap' => SysRobo::_SCAN_OVERLAP,
+    ]);
+
+    if ($debug) {
+      var_dump('====================================================== FIRST CALL= ');
+      var_dump($arr);
+    }
+
+    $this->update([
+      'time_end' => date('Y-m-d H:i:s'),
+      'status' => $arr['status'] ? 'scanned' : 'failed',
+      'rbf_api_1' => $arr['status'] ? json_encode($arr['result']) : NULL,
+      'rbf_version' => json_encode($rbf_version),
+      'rbf_model' => 1,
+    ]);
+
+    if ($arr['status'] && count($arr['result'])) {
+
+      if ($debug) {
+        var_dump('====================================================== FIRST RESTAURANT= ' . $sensor->get_parent()->name);
+        var_dump('====================================================== FIRST PREDICTIONS= ');
+        var_dump($arr['result']['predictions']);
+      }
+
+      //find foods
+      $foods = SysRobo::foods_find([
+        'predictions' => $arr['result']['predictions'],
+        'restaurant_parent_id' => $sensor->restaurant_parent_id,
+      ]);
+
+      if ($debug) {
+        var_dump('====================================================== FIRST FOODS= ');
+        var_dump($foods);
+      }
+
+      //food highest confidence
+      $foods = SysRobo::foods_valid($foods);
+
+      if ($debug) {
+        var_dump('====================================================== FIRST FOOD= ');
+        var_dump($foods);
+      }
+
+      if (count($foods)) {
+
+        $this->update([
+          'rbf_model' => 3, //running
+        ]);
+
+        $food = Food::find($foods[0]['food']);
+        $models = $food->get_model();
+
+        if ($debug) {
+          var_dump('====================================================== FOOD NAME= ' . $food->name);
+          var_dump('====================================================== FOOD CONFIDENCE= ' . $foods[0]['confidence']);
+          var_dump('====================================================== FOOD MODEL= ');
+          var_dump($models);
+        }
+
+        $dataset = count($models) ? $models['model_name'] : $sys_app->get_setting('rbf_dataset_scan');
+        $version = count($models) ? $models['model_version'] : $sys_app->get_setting('rbf_dataset_ver');
+
+        $rbf_version[] = [
+          'dataset' => $dataset,
+          'version' => $version,
+        ];
+
+        $arr = SysRobo::photo_scan($this, [
+          'dataset' => $dataset,
+          'version' => $version,
+
+          'confidence' => SysRobo::_SCAN_CONFIDENCE,
+          'overlap' => SysRobo::_SCAN_OVERLAP,
+        ]);
+
+        if ($debug) {
+          var_dump('====================================================== SECOND CALL= ');
+          var_dump($arr);
+        }
+
+        $this->update([
+          'time_end' => date('Y-m-d H:i:s'),
+          'status' => $arr['status'] ? 'scanned' : 'failed',
+          'rbf_api_2' => $arr['status'] ? json_encode($arr['result']) : NULL,
+          'rbf_model' => 2,
+          'rbf_version' => json_encode($rbf_version),
+        ]);
+
+
+      }
+    }
+
   }
 
   //cmt

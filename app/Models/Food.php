@@ -645,4 +645,37 @@ class Food extends Model
 
     return $live_group;
   }
+
+  public function get_model($pars = [])
+  {
+    $arr = [];
+
+    if (count($pars)) {
+      if (isset($pars['restaurant_parent_id']) && !empty($pars['restaurant_parent_id'])) {
+        $restaurant_parent = RestaurantParent::find((int)$pars['restaurant_parent_id']);
+        if ($restaurant_parent) {
+          $sensor = $restaurant_parent->get_sensors([
+            'one_sensor' => 1,
+          ]);
+          if ($sensor) {
+            $row = RestaurantFood::select('model_name', 'model_version')
+              ->where('deleted', 0)
+              ->where('restaurant_id', $sensor->id)
+              ->where('food_id', $this->id)
+              ->orderBy('id', 'desc')
+              ->limit(1)
+              ->first();
+            if ($row) {
+              $arr = [
+                'model_name' => $row->model_name,
+                'model_version' => $row->model_version,
+              ];
+            }
+          }
+        }
+      }
+    }
+
+    return $arr;
+  }
 }

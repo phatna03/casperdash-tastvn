@@ -1047,7 +1047,16 @@ class SensorController extends Controller
       ], 422);
     }
 
+    $restaurant_parent = $restaurant->get_parent();
+
     $type = isset($values['type']) ? $values['type'] : NULL;
+    //model2
+    $model2 = false;
+    if ($restaurant_parent && $restaurant_parent->model_scan
+      && !empty($restaurant_parent->model_name) && !empty($restaurant_parent->model_version)
+    ) {
+      $model2 = true;
+    }
 
     switch ($type) {
       case 'api':
@@ -1060,18 +1069,21 @@ class SensorController extends Controller
           }
 
           //step 2= photo scan
-          $datas = SysRobo::photo_scan($row, [
-            'confidence' => SysRobo::_SCAN_CONFIDENCE,
-            'overlap' => SysRobo::_SCAN_OVERLAP,
+          //model2
+          if ($model2) {
+            $row->model_api_2([
+              'dataset' => $restaurant_parent->model_name,
+              'version' => $restaurant_parent->model_version,
+            ]);
+          }
+          else {
+            $row->model_api_1([
+              'confidence' => SysRobo::_SCAN_CONFIDENCE,
+              'overlap' => SysRobo::_SCAN_OVERLAP,
 
-            'img_url' => $img_url,
-          ]);
-
-          $row->update([
-            'time_scan' => date('Y-m-d H:i:s'),
-            'status' => $datas['status'] ? 'scanned' : 'failed',
-            'rbf_api' => $datas['status'] ? json_encode($datas['result']) : NULL,
-          ]);
+              'img_url' => $img_url,
+            ]);
+          }
 
           //step 3= photo predict
           $row->predict_food();
