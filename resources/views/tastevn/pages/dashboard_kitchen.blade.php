@@ -183,7 +183,7 @@
 @section('js_end')
   <div class="acm-toast-wrapper toast-bottom-right d-none result_ingredients_missing">
     <div class="toast toast-error acm-width-500-min bg-danger-subtle" aria-live="assertive" style="display: block;">
-      <div class="toast-title"><span class="badge bg-danger text-uppercase fs-6">Please double check for missing ingredients</span>
+      <div class="toast-title"><span class="badge bg-danger text-uppercase fs-6">Please double check</span>
       </div>
       <div class="toast-message data_result"></div>
     </div>

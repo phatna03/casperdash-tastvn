@@ -72,7 +72,7 @@ class Restaurant extends Model
 
         $row->update([
           'food_category_id' => isset($data['food_category_id']) ? (int)$data['food_category_id'] : 0,
-          'photo' => isset($data['photo']) ? $data['photo'] : NULL,
+          'photo' => isset($data['photo']) ? $data['photo'] : $row->photo,
           'local_storage' => isset($data['photo']) ? 0 : $row->local_storage,
           'live_group' => isset($data['live_group']) ? (int)$data['live_group'] : 3,
           'deleted' => 0,

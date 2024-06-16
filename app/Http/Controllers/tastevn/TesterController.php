@@ -53,7 +53,40 @@ class TesterController extends Controller
     $restaurant = RestaurantParent::find(1);
     $sensor = Restaurant::find(10);
 
+    $rows = RestaurantFoodScan::where('deleted', 0)
+      ->whereDate('time_photo', '2024-06-15')
+      ->whereIn('restaurant_id', [5, 6])
+      ->whereIn('status', ['edited', 'checked'])
+      ->get();
 
+    var_dump(count($rows));
+    var_dump('==============================');
+
+//    var_dump($arr);
+    $arr = [];
+
+    foreach ($rows as $row) {
+//      var_dump('ID= ' . $row->id);
+//      var_dump('PHOTO= ' . $row->time_photo);
+//      var_dump('TIME= ' . date('s', strtotime($row->time_end) - strtotime($row->time_photo)));
+//      var_dump('==============================');
+
+      $arr[] = [
+        'id' => $row->id,
+        'photo' => $row->time_photo,
+        'time' => date('s', strtotime($row->time_end) - strtotime($row->time_photo))
+      ];
+    }
+
+    $a1 = [];
+    $a2 = [];
+    foreach ($arr as $key => $val) {
+      $a1[$key] = $val['time'];
+      $a2[$key] = $val['photo'];
+    }
+    array_multisort($a1, SORT_DESC, $a2, SORT_DESC, $arr);
+
+    var_dump($arr);
 
     //remove notify
 //    $row1s = RestaurantFoodScan::select('id')

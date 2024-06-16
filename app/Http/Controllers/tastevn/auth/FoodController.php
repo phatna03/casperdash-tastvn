@@ -317,13 +317,13 @@ class FoodController extends Controller
         'food_id' => $row->id,
       ];
 
-      $sensors = $restaurant_parent->get_sensors();
-      foreach ($sensors as $sensor) {
-        $sensor->import_foods($items);
-      }
+//      $sensors = $restaurant_parent->get_sensors();
+//      foreach ($sensors as $sensor) {
+//        $sensor->import_foods($items);
+//      }
 
       //re-count
-      $this->_sys_app->sys_stats_count();
+//      $this->_sys_app->sys_stats_count();
 
       $this->_viewer->add_log([
         'type' => 'edit_' . $row->get_type() . '_ingredient',
