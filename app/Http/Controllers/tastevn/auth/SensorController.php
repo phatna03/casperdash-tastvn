@@ -441,6 +441,7 @@ class SensorController extends Controller
     $rbf_ingredients_found = [];
     $rbf_ingredients_missing = [];
     $rbf_predictions = [];
+    $rbf_versions = !empty($row->rbf_version) ? (array)json_decode($row->rbf_version, true) : [];
 
     $sys_food_id = 0;
     $sys_food_name = NULL;
@@ -518,6 +519,12 @@ class SensorController extends Controller
       }
     }
 
+    //model2
+    if ($row->rbf_model) {
+      $api2 = (array)json_decode($row->rbf_api_2, true);
+      $rbf_predictions = count($api2) ? $api2['predictions'] : [];
+    }
+
     //v2
     $data2s = $this->kitchen_food_datas($row);
     if (count($data2s) && count($data2s['ingredients_found'])) {
@@ -569,6 +576,8 @@ class SensorController extends Controller
         'ingredients_missing' => $rbf_ingredients_missing,
 
         'predictions' => $rbf_predictions,
+        'versions' => $rbf_versions,
+        'model' => $row->rbf_model,
       ],
       'sys' => [
         'food_id' => $sys_food_id,
@@ -1193,13 +1202,6 @@ class SensorController extends Controller
 
     $restaurant = $row->get_restaurant();
     $food = $row->get_food() ? $row->get_food() : NULL;
-
-    $result1s = (array)json_decode($row->rbf_api, true);
-    $result2s = (array)json_decode($row->rbf_api_js, true);
-    $predictions = count($result1s) ? (array)$result1s['predictions'] : [];
-    if (!count($predictions) && count($result2s)) {
-      $predictions = $result2s;
-    }
 
     $ingredients_found = [];
     $ingredients_missing = [];

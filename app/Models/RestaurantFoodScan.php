@@ -172,6 +172,13 @@ class RestaurantFoodScan extends Model
 
   public function predict_food($pars = [])
   {
+    if ($this->rbf_model) {
+
+      $this->predict_food_2($pars);
+
+      return false;
+    }
+
     $sys_app = new SysApp();
 
     $debug = isset($pars['debug']) ? (bool)$pars['debug'] : false;

@@ -240,6 +240,26 @@
 
         @if(count($data['rbf']['predictions']) && ($viewer->is_super_admin() || $viewer->is_dev()))
           <ul class="cmt-wrapper">
+            @if(count($data['rbf']['versions']))
+              @if($data['rbf']['model'] > 0)
+                @php
+                foreach($data['rbf']['versions'] as $version):
+                $version = (array)$version;
+                @endphp
+                  <li class="cmt-itm">
+                    <div class="d-flex overflow-hidden">
+                      <span>Dataset: {{$version['dataset'] . '/' . $version['version']}}</span>
+                    </div>
+                  </li>
+                @endforeach
+              @else
+                <li class="cmt-itm">
+                  <div class="d-flex overflow-hidden">
+                    <span>Dataset: {{$data['rbf']['versions']['dataset'] . '/' . $data['rbf']['versions']['version']}}</span>
+                  </div>
+                </li>
+              @endif
+            @endif
             @php
               $count = 0;
               foreach($data['rbf']['predictions'] as $prediction):
