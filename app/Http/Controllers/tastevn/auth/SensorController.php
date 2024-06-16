@@ -559,6 +559,11 @@ class SensorController extends Controller
       }
     }
 
+    //resolved
+    if ($row->is_resolved) {
+      $rbf_ingredients_missing = [];
+    }
+
     $data = [
       'food' => [
         'name' => $food_name,
@@ -926,6 +931,17 @@ class SensorController extends Controller
     $rfs->update([
       'is_resolved' => $val ? $this->_viewer->id : 0,
     ]);
+
+    if ($val) {
+      RestaurantFoodScanMissing::where('restaurant_food_scan_id', $rfs->id)
+        ->delete();
+      $rfs->update_ingredients_missing_text();
+    } else {
+      //refresh
+      $rfs->predict_food([
+        'notification' => false,
+      ]);
+    }
 
     return response()->json([
       'is_resolved' => $rfs->is_resolved,

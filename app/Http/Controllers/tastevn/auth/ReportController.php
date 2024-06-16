@@ -284,17 +284,6 @@ class ReportController extends Controller
 
         $rfs = $photo->get_rfs();
 
-        $html = view('tastevn.htmls.item_report_photo_not_found')
-          ->with('rfs', $rfs)
-          ->with('comments', $rfs->get_comments())
-          ->render();
-
-        $texts = $rfs->get_texts(['text_id_only' => 1]);
-        $texts = count($texts) ? array_column($texts->toArray(), 'id') : [];
-
-        $ingredients = $rfs->get_ingredients_missing();
-        $ingredients = count($ingredients) ? array_column($ingredients->toArray(), 'id') : [];
-
         $photo_ids = ReportPhoto::query('report_photos')
           ->select('restaurant_food_scan_id as id')
           ->leftJoin('restaurant_food_scans', 'restaurant_food_scans.id', '=', 'report_photos.restaurant_food_scan_id')
@@ -326,17 +315,6 @@ class ReportController extends Controller
           ->first();
 
         $rfs = $photo->get_rfs();
-
-        $html = view('tastevn.htmls.item_report_photo_not_found')
-          ->with('rfs', $rfs)
-          ->with('comments', $rfs->get_comments())
-          ->render();
-
-        $texts = $rfs->get_texts(['text_id_only' => 1]);
-        $texts = count($texts) ? array_column($texts->toArray(), 'id') : [];
-
-        $ingredients = $rfs->get_ingredients_missing();
-        $ingredients = count($ingredients) ? array_column($ingredients->toArray(), 'id') : [];
 
         $photo_ids = ReportPhoto::query('report_photos')
           ->select('restaurant_food_scan_id as id')
@@ -370,17 +348,6 @@ class ReportController extends Controller
 
         $rfs = $photo->get_rfs();
 
-        $html = view('tastevn.htmls.item_report_photo_not_found')
-          ->with('rfs', $rfs)
-          ->with('comments', $rfs->get_comments())
-          ->render();
-
-        $texts = $rfs->get_texts(['text_id_only' => 1]);
-        $texts = count($texts) ? array_column($texts->toArray(), 'id') : [];
-
-        $ingredients = $rfs->get_ingredients_missing();
-        $ingredients = count($ingredients) ? array_column($ingredients->toArray(), 'id') : [];
-
         $photo_ids = ReportPhoto::query('report_photos')
           ->select('restaurant_food_scan_id as id')
           ->leftJoin('restaurant_food_scans', 'restaurant_food_scans.id', '=', 'report_photos.restaurant_food_scan_id')
@@ -413,17 +380,6 @@ class ReportController extends Controller
 
         $rfs = $photo->get_rfs();
 
-        $html = view('tastevn.htmls.item_report_photo_not_found')
-          ->with('rfs', $rfs)
-          ->with('comments', $rfs->get_comments())
-          ->render();
-
-        $texts = $rfs->get_texts(['text_id_only' => 1]);
-        $texts = count($texts) ? array_column($texts->toArray(), 'id') : [];
-
-        $ingredients = $rfs->get_ingredients_missing();
-        $ingredients = count($ingredients) ? array_column($ingredients->toArray(), 'id') : [];
-
         $photo_ids = ReportPhoto::query('report_photos')
           ->select('restaurant_food_scan_id as id')
           ->leftJoin('restaurant_food_scans', 'restaurant_food_scans.id', '=', 'report_photos.restaurant_food_scan_id')
@@ -449,17 +405,6 @@ class ReportController extends Controller
 
         $rfs = $photo->get_rfs();
 
-        $html = view('tastevn.htmls.item_report_photo_not_found')
-          ->with('rfs', $rfs)
-          ->with('comments', $rfs->get_comments())
-          ->render();
-
-        $texts = $rfs->get_texts(['text_id_only' => 1]);
-        $texts = count($texts) ? array_column($texts->toArray(), 'id') : [];
-
-        $ingredients = $rfs->get_ingredients_missing();
-        $ingredients = count($ingredients) ? array_column($ingredients->toArray(), 'id') : [];
-
         $photo_ids = ReportPhoto::select('restaurant_food_scan_id as id')
           ->where('report_id', $row->id)
           ->where('reporting', 0)
@@ -477,6 +422,34 @@ class ReportController extends Controller
     } else {
       $point = number_format($photo->point, 1, '.', '');
     }
+
+    $rbf_predictions = [];
+    $rbf_versions = !empty($rfs->rbf_version) ? (array)json_decode($rfs->rbf_version, true) : [];
+
+    //predictions
+    $apid = (array)json_decode($rfs->rbf_api, true);
+    if (count($apid)) {
+      $rbf_predictions = $apid['predictions'];
+    }
+    //model2
+    if ($rfs->rbf_model) {
+      $api2 = (array)json_decode($rfs->rbf_api_2, true);
+      $rbf_predictions = count($api2) ? $api2['predictions'] : [];
+    }
+
+    $html = view('tastevn.htmls.item_report_photo_not_found')
+      ->with('rfs', $rfs)
+      ->with('predictions', $rbf_predictions)
+      ->with('versions', $rbf_versions)
+      ->with('model', $rfs->rbf_model)
+      ->with('comments', $rfs->get_comments())
+      ->render();
+
+    $texts = $rfs->get_texts(['text_id_only' => 1]);
+    $texts = count($texts) ? array_column($texts->toArray(), 'id') : [];
+
+    $ingredients = $rfs->get_ingredients_missing();
+    $ingredients = count($ingredients) ? array_column($ingredients->toArray(), 'id') : [];
 
     return response()->json([
       'status' => true,
@@ -698,6 +671,20 @@ class ReportController extends Controller
       ], 422);
     }
 
+    $rbf_predictions = [];
+    $rbf_versions = !empty($rfs->rbf_version) ? (array)json_decode($rfs->rbf_version, true) : [];
+
+    //predictions
+    $apid = (array)json_decode($rfs->rbf_api, true);
+    if (count($apid)) {
+      $rbf_predictions = $apid['predictions'];
+    }
+    //model2
+    if ($rfs->rbf_model) {
+      $api2 = (array)json_decode($rfs->rbf_api_2, true);
+      $rbf_predictions = count($api2) ? $api2['predictions'] : [];
+    }
+
     $photo = ReportPhoto::where('report_id', $row->id)
       ->where('restaurant_food_scan_id', $rfs->id)
       ->limit(1)
@@ -705,6 +692,9 @@ class ReportController extends Controller
 
     $html = view('tastevn.htmls.item_report_photo_not_found')
       ->with('rfs', $rfs)
+      ->with('predictions', $rbf_predictions)
+      ->with('versions', $rbf_versions)
+      ->with('model', $rfs->rbf_model)
       ->with('comments', $rfs->get_comments())
       ->render();
 

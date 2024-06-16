@@ -44,15 +44,15 @@
             <input type="text" class="form-control text-center d-inline-block acm-fs-18 w-px-75 text-dark fw-bold view_current"
               name="popup_view_input" onblur="input_number_min_one(this); setTimeout(function () { report_photo_nf_action(2); }, 333);" />
             <span class="acm-mr-px-5 acm-ml-px-5">/</span>
-            <span class="text-dark fw-bold view_all_count">1000</span>
+            <span class="text-dark fw-bold view_all_count">0</span>
           </div>
 
-          <h4 class="modal-title text-danger fw-bold left_content">Robot not found dishes</h4>
+          <h4 class="modal-title text-danger fw-bold left_content">Review photos</h4>
           <button type="button" class="btn-close right_content" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
           <div class="row">
-            <div class="col-lg-9 mb-1 position-relative">
+            <div class="col-lg-9 mb-1 position-relative wrap_report">
               <div class="p-1 sensor-wrapper wrap_datas">
 
               </div>

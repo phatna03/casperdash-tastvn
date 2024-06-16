@@ -625,6 +625,17 @@
   max-height: 300px;
 }
 
+.wrap_report {
+  position: relative;
+}
+.wrap_report .cmt-wrapper {
+  left: unset;
+  right: 0;
+  background-color: #fff;
+  width: 400px;
+  max-height: 300px;
+}
+
 .btn-close {
   background: #aaa var(--bs-btn-close-bg) center/1rem auto no-repeat;
   opacity: 1;
