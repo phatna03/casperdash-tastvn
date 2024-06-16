@@ -53,15 +53,20 @@ class TesterController extends Controller
     $restaurant = RestaurantParent::find(1);
     $sensor = Restaurant::find(10);
 
-    $rfs = RestaurantFoodScan::find(40663);
+    $rfs = RestaurantFoodScan::find(36706); //36706
 
     var_dump($rfs->get_photo());
 
-    $rfs->model_api_1([
-      'confidence' => SysRobo::_SCAN_CONFIDENCE,
-      'overlap' => SysRobo::_SCAN_OVERLAP,
+    $rfs->model_api_2([
+      'dataset' => 'missing-dish-ingredients',
+      'version' => '64',
 
       'debug' => 1,
+    ]);
+
+    $rfs->predict_food_2([
+      'notification' => false,
+      'debug' => true,
     ]);
 
     die('111111111111111');

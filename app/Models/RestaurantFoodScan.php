@@ -584,6 +584,10 @@ class RestaurantFoodScan extends Model
       $foods = SysRobo::foods_find([
         'predictions' => $arr['result']['predictions'],
         'restaurant_parent_id' => $sensor->restaurant_parent_id,
+
+        'food_only' => true,
+
+        'debug' => $debug,
       ]);
 
       if ($debug) {
@@ -599,18 +603,18 @@ class RestaurantFoodScan extends Model
         var_dump($foods);
       }
 
-      if (count($foods)) {
+      if (count($foods) && $foods['food']) {
 
         $this->update([
           'rbf_model' => 3, //running
         ]);
 
-        $food = Food::find($foods[0]['food']);
+        $food = Food::find($foods['food']);
         $models = $food->get_model();
 
         if ($debug) {
           var_dump('====================================================== FOOD NAME= ' . $food->name);
-          var_dump('====================================================== FOOD CONFIDENCE= ' . $foods[0]['confidence']);
+          var_dump('====================================================== FOOD CONFIDENCE= ' . $foods['confidence']);
           var_dump('====================================================== FOOD MODEL= ');
           var_dump($models);
         }
@@ -620,7 +624,7 @@ class RestaurantFoodScan extends Model
 
         $rbf_version[] = [
           'dataset' => $dataset,
-          'version' => $version,
+          'version' => '52', //$version,
         ];
 
         $arr = SysRobo::photo_scan($this, [
@@ -648,6 +652,137 @@ class RestaurantFoodScan extends Model
       }
     }
 
+  }
+
+  public function predict_food_2($pars = [])
+  {
+    $sys_app = new SysApp();
+
+    $debug = isset($pars['debug']) ? (bool)$pars['debug'] : false;
+    $notification = isset($pars['notification']) ? (bool)$pars['notification'] : true;
+    $restaurant = $this->get_restaurant();
+
+    $result1s = (array)json_decode($this->rbf_api_1, true);
+    $result2s = (array)json_decode($this->rbf_api_2, true);
+
+    $rbf_time = 0;
+    if (count($result1s)) {
+//      $rbf_time = $result1s['time'];
+    }
+
+    $prediction1s = count($result1s) ? (array)$result1s['predictions'] : [];
+    $prediction2s = count($result2s) ? (array)$result2s['predictions'] : [];
+
+    if ($debug) {
+      var_dump('====================================================== START ID= ' . $this->id);
+    }
+
+    if (!count($prediction1s)) {
+
+      $this->update([
+        'status' => 'failed',
+      ]);
+
+      if ($debug) {
+        var_dump('====== NO DATA...');
+      }
+
+      return false;
+    }
+
+    if ($debug) {
+      var_dump('====== PREDICTION 1= ');
+      var_dump($prediction1s);
+    }
+
+    //reset
+    $this->predict_reset();
+
+    //find foods
+    $foods = SysRobo::foods_find([
+      'predictions' => $prediction1s,
+      'restaurant_parent_id' => $restaurant->restaurant_parent_id,
+
+      'food_only' => true,
+
+      'debug' => $debug,
+    ]);
+
+    if ($debug) {
+      var_dump('====== FOODS FIND?');
+      var_dump($foods);
+    }
+
+    //food highest confidence
+    $foods = SysRobo::foods_valid($foods);
+
+    if ($debug) {
+      var_dump('====== FOODS COMPACT?');
+      var_dump($foods);
+    }
+
+    //pars
+    $food = null;
+    $status = 'failed';
+    $end_time = date('Y-m-d H:i:s');
+
+    if (count($foods) && $foods['food']) {
+
+      $status = 'checked';
+      $food = Food::find($foods['food']);
+
+      $this->update([
+        'food_id' => $foods['food'],
+        'confidence' => $foods['confidence'],
+        'rbf_confidence' => $foods['confidence'],
+        'found_by' => 'rbf',
+        'rbf_predict' => $foods['food'],
+      ]);
+
+      if ($debug) {
+        var_dump('====== FOODS FOUND?');
+        var_dump($foods);
+      }
+    }
+
+    $this->update([
+      'status' => $status,
+      'total_seconds' => $rbf_time,
+      'time_end' => $end_time,
+    ]);
+
+    if ($debug) {
+      var_dump('====== PREDICTION 2= ');
+      var_dump($prediction2s);
+    }
+
+    //find missing ingredients
+    if ($food) {
+
+      $ingredients_found = $food->get_ingredients_info([
+        'restaurant_parent_id' => $restaurant->restaurant_parent_id,
+        'predictions' => $prediction2s,
+
+        'debug' => $debug,
+      ]);
+
+      if ($debug) {
+        var_dump('====== INGREDIENT FOUND?');
+        var_dump($ingredients_found);
+      }
+
+      $ingredients_missing = $food->missing_ingredients([
+        'restaurant_parent_id' => $restaurant->restaurant_parent_id,
+        'ingredients' => $ingredients_found,
+      ]);
+
+      if ($debug) {
+        var_dump('====== INGREDIENT MISSING?');
+        var_dump($ingredients_missing);
+      }
+
+      $this->add_ingredients_missing($food, $ingredients_missing, $notification);
+    }
   }
 
   //cmt

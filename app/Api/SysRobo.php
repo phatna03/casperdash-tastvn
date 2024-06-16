@@ -324,6 +324,7 @@ class SysRobo
     }
 
     $debug = isset($pars['debug']) ? (bool)$pars['debug'] : false;
+    $food_only = isset($pars['food_only']) ? (bool)$pars['food_only'] : false;
     $restaurant_parent_id = isset($pars['restaurant_parent_id']) ? (int)$pars['restaurant_parent_id'] : 0;
     $restaurant_parent = RestaurantParent::find($restaurant_parent_id);
 
@@ -380,6 +381,9 @@ class SysRobo
             if ($found_count != count($core_ids)) {
               $valid_core = false;
             }
+          }
+          if ($food_only) {
+            $valid_core = $food_only;
           }
 
           if ($debug) {
