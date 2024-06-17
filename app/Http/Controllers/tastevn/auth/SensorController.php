@@ -1066,7 +1066,7 @@ class SensorController extends Controller
         }
 
         //no duplicate
-
+        $keyword = $this->photo_name_query($file);
 
         //check exist
         $row = RestaurantFoodScan::where('restaurant_id', $restaurant->id)
@@ -1074,12 +1074,22 @@ class SensorController extends Controller
           ->first();
         if (!$row) {
 
+          $status = 'new';
+
+          $rows = RestaurantFoodScan::where('photo_name', 'LIKE', $keyword)
+            ->get();
+          if (count($rows)) {
+            $status = 'duplicated';
+          }
+
           $row = $restaurant->photo_save([
             'local_storage' => 1,
             'photo_url' => NULL,
             'photo_name' => $file,
             'photo_ext' => 'jpg',
             'time_photo' => date('Y-m-d H:i:s'),
+
+            'status' => $status,
           ]);
         }
 
@@ -1088,8 +1098,9 @@ class SensorController extends Controller
       }
     }
 
-    if (!$row) {
+    if (!$row || ($row && $row->status == 'duplicated')) {
       $row = RestaurantFoodScan::where('restaurant_id', $restaurant->id)
+        ->where('status', '<>', 'duplicated')
         ->where('deleted', 0)
         ->orderBy('id', 'desc')
         ->limit(1)
@@ -1377,5 +1388,27 @@ class SensorController extends Controller
       'ingredients_missing' => $ingredients_missing,
       'ingredients_found' => $ingredients_found,
     ];
+  }
+
+  protected function photo_name_query($file)
+  {
+    $temps = array_filter(explode('/', $file));
+    $photo_name = $temps[count($temps) - 1];
+
+    $photo_address = str_replace($photo_name, '', $file);
+
+    $photo_name = str_replace('.jpg', '', $photo_name);
+    $temp1s = array_filter(explode('_', $photo_name));
+    $temp2s = array_filter(explode('-', $temp1s[1]));
+
+    $keyword = '%' . trim($photo_address, '/')
+      . '/' . $temp1s[0] . '_'
+      . $temp2s[0] . '-' . $temp2s[1] . '-' . $temp2s[2] . '-' . $temp2s[3] . '-' . $temp2s[4]
+      . '-%'
+      . '_' . $temp1s[2]
+      . '.jpg%'
+    ;
+
+    return $keyword;
   }
 }

@@ -332,7 +332,6 @@ class Restaurant extends Model
     if (!$row) {
       $row = RestaurantFoodScan::create([
         'restaurant_id' => $this->id,
-        'status' => 'new',
 
         'photo_url' => isset($pars['photo_url']) ? $pars['photo_url'] : NULL,
         'local_storage' => isset($pars['local_storage']) ? (int)$pars['local_storage'] : 0,
@@ -340,6 +339,8 @@ class Restaurant extends Model
         'photo_name' => $pars['photo_name'],
         'photo_ext' => $pars['photo_ext'],
         'time_photo' => $pars['time_photo'],
+
+        'status' => isset($pars['status']) ? $pars['status'] : 'new',
       ]);
     }
 
