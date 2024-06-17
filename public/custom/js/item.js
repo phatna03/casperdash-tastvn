@@ -2762,7 +2762,7 @@ function report_photo_nf() {
     .append('<div class="m-auto">' + acmcfs.html_loading + '</div>');
 
   axios.post('/admin/report/photo/not-found', {
-    item: popup.find('input[name=report_id]'),
+    item: popup.find('input[name=report_id]').val(),
   })
     .then(response => {
 
@@ -3130,7 +3130,7 @@ function report_photo_nf_full(food_id, type) {
     .append('<div class="m-auto">' + acmcfs.html_loading + '</div>');
 
   axios.post('/admin/report/photo/not-found', {
-    item: popup.find('input[name=report_id]'),
+    item: popup.find('input[name=report_id]').val(),
     food_id: food_id,
     type: type,
   })

@@ -264,6 +264,9 @@ class ReportController extends Controller
     $type = isset($values['type']) ? $values['type'] : 'not_found';
     $food_id = isset($values['food_id']) ? (int)$values['food_id'] : 0;
 
+    $date_from = $row->date_from;
+    $date_to = $row->date_to;
+
     switch ($type) {
 
       case 'full':
@@ -278,6 +281,8 @@ class ReportController extends Controller
           ->where('restaurant_food_scans.missing_texts', NULL)
           ->where('restaurant_food_scans.status', 'checked')
           ->where('report_photos.status', 'passed')
+//          ->where('restaurant_food_scans.time_photo', '>=', $date_from)
+//          ->where('restaurant_food_scans.time_photo', '<=', $date_to)
           ->orderBy('report_photos.restaurant_food_scan_id', 'asc')
           ->limit(1)
           ->first();
@@ -293,6 +298,8 @@ class ReportController extends Controller
           ->where('restaurant_food_scans.missing_texts', NULL)
           ->where('restaurant_food_scans.status', 'checked')
           ->where('report_photos.status', 'passed')
+//          ->where('restaurant_food_scans.time_photo', '>=', $date_from)
+//          ->where('restaurant_food_scans.time_photo', '<=', $date_to)
           ->get();
         $photo_ids = count($photo_ids) ? array_column($photo_ids->toArray(), 'id') : [];
 
@@ -310,6 +317,8 @@ class ReportController extends Controller
           ->where('restaurant_food_scans.missing_ids', '<>', NULL)
           ->where('restaurant_food_scans.status', 'checked')
           ->where('report_photos.status', 'passed')
+//          ->where('restaurant_food_scans.time_photo', '>=', $date_from)
+//          ->where('restaurant_food_scans.time_photo', '<=', $date_to)
           ->orderBy('report_photos.restaurant_food_scan_id', 'asc')
           ->limit(1)
           ->first();
@@ -325,6 +334,8 @@ class ReportController extends Controller
           ->where('restaurant_food_scans.missing_ids', '<>', NULL)
           ->where('restaurant_food_scans.status', 'checked')
           ->where('report_photos.status', 'passed')
+//          ->where('restaurant_food_scans.time_photo', '>=', $date_from)
+//          ->where('restaurant_food_scans.time_photo', '<=', $date_to)
           ->get();
         $photo_ids = count($photo_ids) ? array_column($photo_ids->toArray(), 'id') : [];
 
@@ -341,7 +352,8 @@ class ReportController extends Controller
           ->where('report_photos.reporting', 1)
           ->where('restaurant_food_scans.missing_ids', '<>', NULL)
           ->where('restaurant_food_scans.status', 'edited')
-//          ->where('report_photos.status', 'passed')
+//          ->where('restaurant_food_scans.time_photo', '>=', $date_from)
+//          ->where('restaurant_food_scans.time_photo', '<=', $date_to)
           ->orderBy('report_photos.restaurant_food_scan_id', 'asc')
           ->limit(1)
           ->first();
@@ -356,7 +368,8 @@ class ReportController extends Controller
           ->where('report_photos.reporting', 1)
           ->where('restaurant_food_scans.missing_ids', '<>', NULL)
           ->where('restaurant_food_scans.status', 'edited')
-//          ->where('report_photos.status', 'passed')
+//          ->where('restaurant_food_scans.time_photo', '>=', $date_from)
+//          ->where('restaurant_food_scans.time_photo', '<=', $date_to)
           ->get();
         $photo_ids = count($photo_ids) ? array_column($photo_ids->toArray(), 'id') : [];
 
@@ -371,9 +384,9 @@ class ReportController extends Controller
           ->where('report_photos.report_id', $row->id)
           ->where('report_photos.food_id', $food_id)
           ->where('report_photos.reporting', 0)
-//          ->where('restaurant_food_scans.missing_ids', '<>', NULL)
           ->where('restaurant_food_scans.status', 'edited')
-//          ->where('report_photos.status', 'passed')
+//          ->where('restaurant_food_scans.time_photo', '>=', $date_from)
+//          ->where('restaurant_food_scans.time_photo', '<=', $date_to)
           ->orderBy('report_photos.restaurant_food_scan_id', 'asc')
           ->limit(1)
           ->first();
@@ -386,9 +399,9 @@ class ReportController extends Controller
           ->where('report_photos.report_id', $row->id)
           ->where('report_photos.food_id', $food_id)
           ->where('report_photos.reporting', 0)
-//          ->where('restaurant_food_scans.missing_ids', '<>', NULL)
           ->where('restaurant_food_scans.status', 'edited')
-//          ->where('report_photos.status', 'passed')
+//          ->where('restaurant_food_scans.time_photo', '>=', $date_from)
+//          ->where('restaurant_food_scans.time_photo', '<=', $date_to)
           ->get();
         $photo_ids = count($photo_ids) ? array_column($photo_ids->toArray(), 'id') : [];
 

@@ -184,6 +184,9 @@ class RestaurantFoodScan extends Model
 
     $sys_app = new SysApp();
 
+    //reset
+    $this->predict_reset();
+
     $debug = isset($pars['debug']) ? (bool)$pars['debug'] : false;
     $notification = isset($pars['notification']) ? (bool)$pars['notification'] : true;
     $restaurant = $this->get_restaurant();
@@ -221,9 +224,6 @@ class RestaurantFoodScan extends Model
     if ($debug) {
       var_dump('====== CLASSES= ' . json_encode($predictions));
     }
-
-    //reset
-    $this->predict_reset();
 
     //find foods
     $foods = SysRobo::foods_find([
@@ -668,6 +668,9 @@ class RestaurantFoodScan extends Model
   {
     $sys_app = new SysApp();
 
+    //reset
+    $this->predict_reset();
+
     $debug = isset($pars['debug']) ? (bool)$pars['debug'] : false;
     $notification = isset($pars['notification']) ? (bool)$pars['notification'] : true;
     $restaurant = $this->get_restaurant();
@@ -704,9 +707,6 @@ class RestaurantFoodScan extends Model
       var_dump('====== PREDICTION 1= ');
       var_dump($prediction1s);
     }
-
-    //reset
-    $this->predict_reset();
 
     //find foods
     $foods = SysRobo::foods_find([
