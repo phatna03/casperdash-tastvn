@@ -182,7 +182,7 @@
 
 @section('js_end')
   <div class="acm-toast-wrapper toast-bottom-right d-none result_ingredients_missing">
-    <div class="toast toast-error acm-width-500-min bg-danger-subtle" aria-live="assertive" style="display: block;">
+    <div class="toast toast-error @if(!$isMobi) acm-width-500-min @endif bg-danger-subtle" aria-live="assertive" style="display: block;">
       <div class="toast-title"><span class="badge bg-danger text-uppercase fs-6">Please double check</span>
       </div>
       <div class="toast-message data_result"></div>
@@ -479,7 +479,7 @@
         var html = '';
         if (datas.ingredients_missing.length) {
           datas.ingredients_missing.forEach(function (v, k) {
-            html += '<div class="text-dark fw-bold fs-4">- <b class="text-dark acm-mr-px-5">' + v.quantity + '</b> ' + v.name + '</div>';
+            html += '<div class="text-dark fw-bold fs-1">- <b class="text-dark acm-mr-px-5">' + v.quantity + '</b> ' + v.name + '</div>';
           });
         }
         if (html && html != '') {
@@ -522,7 +522,7 @@
           html += '<div class="row m-0">';
           datas.ingredients_found.forEach(function (v, k) {
             html += '<div class="col-lg-6">';
-            html += '<div class="text-dark acm-ml-px-10">- <b class="text-danger acm-mr-px-5">' + v.quantity + '</b> ' + v.name + '</div>';
+            html += '<div class="text-dark acm-ml-px-10 acm-fs-20">- <b class="text-danger acm-mr-px-5">' + v.quantity + '</b> ' + v.name + '</div>';
             html += '</div>';
           });
           html += '</div>';

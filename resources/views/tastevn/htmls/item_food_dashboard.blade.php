@@ -3,7 +3,7 @@
   <div class="acm-clearfix">
   @foreach($recipes as $ite)
     <div class="acm-float-left w-50">
-      - <span class="text-dark">{{$ite->name}}</span>
+      - <span class="text-dark acm-fs-20">{{$ite->name}}</span>
     </div>
   @endforeach
   </div>
