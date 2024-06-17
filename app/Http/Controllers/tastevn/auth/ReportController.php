@@ -702,6 +702,11 @@ class ReportController extends Controller
       ->where('restaurant_food_scan_id', $rfs->id)
       ->limit(1)
       ->first();
+    if (!$photo) {
+      return response()->json([
+        'error' => 'Invalid data'
+      ], 422);
+    }
 
     $html = view('tastevn.htmls.item_report_photo_not_found')
       ->with('rfs', $rfs)

@@ -23,12 +23,12 @@ class Kernel extends ConsoleKernel
     //cargo
     $schedule->command('local:check-images', [1, 1])
       ->withoutOverlapping()
-      ->everyFiveSeconds()
+      ->everyFifteenSeconds()
       ->runInBackground();
 
     $schedule->command('local:check-images', [1, 2])
       ->withoutOverlapping()
-      ->everyFiveSeconds()
+      ->everyFifteenSeconds()
       ->runInBackground();
     //deli
     $schedule->command('local:check-images', [1, 3])
@@ -43,12 +43,12 @@ class Kernel extends ConsoleKernel
     //market
     $schedule->command('local:check-images', [1, 5])
       ->withoutOverlapping()
-      ->everyFiveSeconds()
+      ->everyFifteenSeconds()
       ->runInBackground();
     //poison
     $schedule->command('local:check-images', [1, 6])
       ->withoutOverlapping()
-      ->everyFiveSeconds()
+      ->everyFifteenSeconds()
       ->runInBackground();
 
     //sync photos

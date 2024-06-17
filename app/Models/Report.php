@@ -252,9 +252,11 @@ class Report extends Model
       foreach ($foods as $food) {
 
         $total = ReportPhoto::where('food_id', $food->food_id)
+          ->where('report_id', $this->id)
           ->count();
 
         $point = ReportPhoto::where('food_id', $food->food_id)
+          ->where('report_id', $this->id)
           ->where('reporting', 1)
           ->sum('point');
 

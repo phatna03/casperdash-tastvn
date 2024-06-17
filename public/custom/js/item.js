@@ -3058,7 +3058,7 @@ function report_photo_nf_itm(itd) {
     .append('<div class="m-auto">' + acmcfs.html_loading + '</div>');
 
   axios.post('/admin/report/photo/rfs', {
-    item: popup.find('input[name=report_id]'),
+    item: popup.find('input[name=report_id]').val(),
     rfs: itd, //rfs_id
   })
     .then(response => {
