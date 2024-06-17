@@ -606,16 +606,14 @@
           render: function (data, type, full, meta) {
             var html = '';
 
-            if (full['status'] == 'new') {
-              html = '<div><span class="badge bg-warning">' + full['status'] + '</span></div>';
-            } else if (full['status'] == 'failed') {
+            if (full['status'] == 'failed') {
               html = '<div><span class="badge bg-secondary">no data</span></div>';
-            } else if (full['status'] == 'scanned') {
-              html = '<div><span class="badge bg-primary">' + full['status'] + '</span></div>';
             } else if (full['status'] == 'checked') {
               html = '<div><span class="badge bg-success">' + full['status'] + '</span></div>';
             } else if (full['status'] == 'edited') {
               html = '<div><span class="badge bg-info">' + full['status'] + '</span></div>';
+            } else {
+              html = '<div><span class="badge bg-warning">' + full['status'] + '</span></div>';
             }
 
             var debug = $('input[name=debug]').val();

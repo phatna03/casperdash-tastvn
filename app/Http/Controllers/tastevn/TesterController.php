@@ -51,35 +51,48 @@ class TesterController extends Controller
     $sys_app = new SysApp();
 
     $restaurant = RestaurantParent::find(1);
-    $sensor = Restaurant::find(10);
+    $sensor = Restaurant::find(5);
 
     $date = '2024-06-16';
 
+    $cur_date = date('Y-m-d');
+    $cur_hour = (int)date('H');
+
+    $folder_setting = $sys_app->parse_s3_bucket_address($sensor->s3_bucket_address);
+    $directory = $folder_setting . '/' . $cur_date . '/' . $cur_hour . '/';
+
+    $files = Storage::disk('sensors')->files($directory);
+    if (count($files)) {
+      foreach ($files as $file) {
+        var_dump('=======================================================');
+        var_dump($file);
+      }
+    }
 
     //remove notify
-    $row1s = RestaurantFoodScan::select('id')
-      ->where('deleted', 0)
-      ->whereDate('time_photo', '>=', '2024-06-01')
-      ->whereDate('time_photo', '<=', '2024-06-17')
-      ->where('missing_texts', NULL)
-      ->where('food_id', '>', 0)
-
-    ;
-
-    $row2s = DB::table('notifications')
-      ->distinct()
-      ->where('type', 'App\Notifications\IngredientMissing')
-      ->whereIn('restaurant_food_scan_id', $row1s)
-      ->get();
-
-    DB::table('notifications')
-      ->distinct()
-      ->where('type', 'App\Notifications\IngredientMissing')
-      ->whereIn('restaurant_food_scan_id', $row1s)
-      ->delete();
-
-    var_dump(count($row1s->get()));
-    var_dump(count($row2s));
+//    $row1s = RestaurantFoodScan::select('id')
+//      ->where('deleted', 0)
+//      ->whereDate('time_photo', '>=', '2024-06-01')
+//      ->whereDate('time_photo', '<=', '2024-06-17')
+//      ->where('missing_texts', NULL)
+//      ->where('food_id', '>', 0)
+//
+//    ;
+//
+//    $row2s = DB::table('notifications')
+//      ->distinct()
+//      ->where('type', 'App\Notifications\IngredientMissing')
+//      ->whereIn('restaurant_food_scan_id', $row1s)
+//      ->get();
+//
+//    DB::table('notifications')
+//      ->distinct()
+//      ->where('type', 'App\Notifications\IngredientMissing')
+//      ->whereIn('restaurant_food_scan_id', $row1s)
+//      ->delete();
+//
+//    var_dump(count($row1s->get()));
+//    var_dump(count($row2s));
 
     //old s3 photo
 //    $sensor->s3_photo([

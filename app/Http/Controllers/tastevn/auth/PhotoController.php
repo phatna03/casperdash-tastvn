@@ -67,7 +67,11 @@ class PhotoController extends Controller
 
     } else {
       $select->where('restaurants.deleted', 0)
-        ->where('restaurant_food_scans.deleted', 0);
+        ->where('restaurant_food_scans.deleted', 0)
+        ->whereIn('restaurant_food_scans.status', [
+          'checked', 'edited', 'failed',
+        ])
+      ;
     }
 
     if (count($existed)) {
@@ -86,12 +90,15 @@ class PhotoController extends Controller
       }
     }
 
+    $aaa = $this->_sys_app->parse_to_query($select);
+
     $html = view('tastevn.htmls.item_photo')
       ->with('items', $select->get())
       ->render();
 
     return response()->json([
       'html' => $html,
+      'query' => $aaa,
     ]);
   }
 

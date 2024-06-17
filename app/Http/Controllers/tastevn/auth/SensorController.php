@@ -1065,6 +1065,9 @@ class SensorController extends Controller
           continue;
         }
 
+        //no duplicate
+
+
         //check exist
         $row = RestaurantFoodScan::where('restaurant_id', $restaurant->id)
           ->where('photo_name', $file)

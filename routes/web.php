@@ -455,6 +455,8 @@ Route::get('/datatable/sensor-food-scans', function (Request $request) {
     }
   }
 
+  $user = \Illuminate\Support\Facades\Auth::user();
+
   $restaurant = isset($values['restaurant']) ? (int)$values['restaurant'] : 0;
   $statuses = isset($values['statuses']) ? (array)$values['statuses'] : [];
   $missing = isset($values['missing']) && !empty($values['missing']) ? $values['missing'] : NULL;
@@ -477,6 +479,14 @@ Route::get('/datatable/sensor-food-scans', function (Request $request) {
     ->leftJoin("foods", "restaurant_food_scans.food_id", "=", "foods.id")
     ->leftJoin("food_categories", "restaurant_food_scans.food_category_id", "=", "food_categories.id")
     ->where("restaurant_food_scans.deleted", 0);
+
+  if ($user->is_dev()) {
+
+  } else {
+    $select->whereIn("restaurant_food_scans.status", [
+      'checked', 'edited', 'failed',
+    ]);
+  }
 
   if ($order_default) {
     $select
@@ -570,7 +580,14 @@ Route::get('/datatable/sensor-food-scan-errors', function (Request $request) {
     ->where('restaurant_food_scans.deleted', 0)
     ->where('restaurant_food_scans.food_id', '>', 0)
     ->where('restaurant_food_scans.missing_ids', '<>', NULL)
-    ->groupBy(['restaurant_food_scans.food_id', 'restaurant_food_scans.missing_ids', 'restaurant_food_scans.missing_texts', 'foods.name', 'food_categories.name']);
+    ->whereIn("restaurant_food_scans.status", [
+      'checked', 'edited', 'failed',
+    ])
+    ->groupBy([
+      'restaurant_food_scans.food_id',
+      'restaurant_food_scans.missing_ids', 'restaurant_food_scans.missing_texts',
+      'foods.name', 'food_categories.name'
+    ]);
 
   if ($order_default) {
     $select->orderBy('total_error', 'desc');
@@ -585,15 +602,7 @@ Route::get('/datatable/sensor-food-scan-errors', function (Request $request) {
   if (count($foods)) {
     $select->whereIn("restaurant_food_scans.food_id", $foods);
   }
-//  if (!empty($time_scan)) {
-//    $times = $sys_app->parse_date_range($time_scan);
-//    if (!empty($times['time_from'])) {
-//      $select->where('restaurant_food_scans.time_scan', '>=', $times['time_from']);
-//    }
-//    if (!empty($times['time_to'])) {
-//      $select->where('restaurant_food_scans.time_scan', '<=', $times['time_to']);
-//    }
-//  }
+
   if (!empty($time_upload)) {
     $times = $sys_app->parse_date_range($time_upload);
     if (!empty($times['time_from'])) {

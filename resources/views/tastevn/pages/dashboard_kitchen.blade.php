@@ -206,7 +206,7 @@
         if (sys_ready) {
           sensor_checker();
         }
-      }, 2000);
+      }, 1000);
 
     });
 
@@ -290,9 +290,9 @@
             });
 
 
-            if (response.data.printer) {
-              page_open(acmcfs.link_base_url + '/printer?ids=' + response.data.notify_ids.toString());
-            }
+            // if (response.data.printer) {
+              // page_open(acmcfs.link_base_url + '/printer?ids=' + response.data.notify_ids.toString());
+            // }
           }
 
           if (response.data.speaker) {
@@ -348,9 +348,9 @@
             });
 
 
-            if (response.data.printer) {
-              page_open(acmcfs.link_base_url + '/printer?ids=' + response.data.notify_ids.toString());
-            }
+            // if (response.data.printer) {
+              // page_open(acmcfs.link_base_url + '/printer?ids=' + response.data.notify_ids.toString());
+            // }
           }
 
           if (response.data.speaker) {
