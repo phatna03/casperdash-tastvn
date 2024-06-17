@@ -385,17 +385,11 @@ class SensorController extends Controller
       }
 
       //step 2= photo scan
-      $datas = SysRobo::photo_scan($row, [
+      $row->model_api_1([
         'confidence' => SysRobo::_SCAN_CONFIDENCE,
         'overlap' => SysRobo::_SCAN_OVERLAP,
 
         'img_url' => $img_url,
-      ]);
-
-      $row->update([
-        'time_scan' => date('Y-m-d H:i:s'),
-        'status' => $datas['status'] ? 'scanned' : 'failed',
-        'rbf_api' => $datas['status'] ? json_encode($datas['result']) : NULL,
       ]);
 
       //step 3= photo predict

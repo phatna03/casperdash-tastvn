@@ -256,16 +256,33 @@ class SysRobo
 
           $row = RestaurantFoodScan::find($row->id);
 
+          $dataset = $sys_app->parse_s3_bucket_address($sys_app->get_setting('rbf_dataset_scan'));
+          $version = $sys_app->get_setting('rbf_dataset_ver');
+
+          $rbf_version = [
+            'dataset' => $dataset,
+            'version' => $version,
+          ];
+
+          $row->update([
+            'rbf_model' => 3, //running
+            'time_scan' => date('Y-m-d H:i:s'),
+          ]);
+
           //step 2= photo scan
           $datas = SysRobo::photo_scan($row, [
             'confidence' => SysRobo::_SCAN_CONFIDENCE,
             'overlap' => SysRobo::_SCAN_OVERLAP,
+
+            'dataset' => $dataset,
+            'version' => $version,
           ]);
 
           $row->update([
-            'time_scan' => date('Y-m-d H:i:s'),
             'status' => $datas['status'] ? 'scanned' : 'failed',
             'rbf_api' => $datas['status'] ? json_encode($datas['result']) : NULL,
+            'rbf_version' => json_encode($rbf_version),
+            'rbf_model' => 0,
           ]);
 
           //step 3= photo predict

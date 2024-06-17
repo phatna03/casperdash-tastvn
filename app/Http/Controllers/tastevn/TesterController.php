@@ -53,63 +53,33 @@ class TesterController extends Controller
     $restaurant = RestaurantParent::find(1);
     $sensor = Restaurant::find(10);
 
-    $rows = RestaurantFoodScan::where('deleted', 0)
-      ->whereDate('time_photo', '2024-06-15')
-      ->whereIn('restaurant_id', [5, 6])
-      ->whereIn('status', ['edited', 'checked'])
-      ->get();
+    $date = '2024-06-16';
 
-    var_dump(count($rows));
-    var_dump('==============================');
-
-//    var_dump($arr);
-    $arr = [];
-
-    foreach ($rows as $row) {
-//      var_dump('ID= ' . $row->id);
-//      var_dump('PHOTO= ' . $row->time_photo);
-//      var_dump('TIME= ' . date('s', strtotime($row->time_end) - strtotime($row->time_photo)));
-//      var_dump('==============================');
-
-      $arr[] = [
-        'id' => $row->id,
-        'photo' => $row->time_photo,
-        'time' => date('s', strtotime($row->time_end) - strtotime($row->time_photo))
-      ];
-    }
-
-    $a1 = [];
-    $a2 = [];
-    foreach ($arr as $key => $val) {
-      $a1[$key] = $val['time'];
-      $a2[$key] = $val['photo'];
-    }
-    array_multisort($a1, SORT_DESC, $a2, SORT_DESC, $arr);
-
-    var_dump($arr);
 
     //remove notify
-//    $row1s = RestaurantFoodScan::select('id')
-//      ->where('deleted', 0)
-//      ->whereDate('time_photo', '>=', $date)
-//      ->where('missing_texts', '<>', NULL)
-//      ->where('food_id', '>', 0)
-//      ->where('confidence', '<', 70);
-//
-//    $row2s = DB::table('notifications')
-//      ->distinct()
-//      ->where('type', 'App\Notifications\IngredientMissing')
-//      ->whereIn('restaurant_food_scan_id', $row1s)
-//      ->get();
-//
-//    DB::table('notifications')
-//      ->distinct()
-//      ->where('type', 'App\Notifications\IngredientMissing')
-//      ->whereIn('restaurant_food_scan_id', $row1s)
-//      ->delete();
-//
-//    var_dump(count($row1s->get()));
-//    var_dump(count($row2s));
+    $row1s = RestaurantFoodScan::select('id')
+      ->where('deleted', 0)
+      ->whereDate('time_photo', '>=', '2024-06-01')
+      ->whereDate('time_photo', '<=', '2024-06-17')
+      ->where('missing_texts', NULL)
+      ->where('food_id', '>', 0)
+
+    ;
+
+    $row2s = DB::table('notifications')
+      ->distinct()
+      ->where('type', 'App\Notifications\IngredientMissing')
+      ->whereIn('restaurant_food_scan_id', $row1s)
+      ->get();
+
+    DB::table('notifications')
+      ->distinct()
+      ->where('type', 'App\Notifications\IngredientMissing')
+      ->whereIn('restaurant_food_scan_id', $row1s)
+      ->delete();
+
+    var_dump(count($row1s->get()));
+    var_dump(count($row2s));
 
     //old s3 photo
 //    $sensor->s3_photo([
