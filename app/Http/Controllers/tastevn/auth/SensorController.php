@@ -94,7 +94,7 @@ class SensorController extends Controller
       'name' => ucwords(trim($values['name'])),
       's3_bucket_name' => isset($values['s3_bucket_name']) ? trim($values['s3_bucket_name']) : '',
       's3_bucket_address' => isset($values['s3_bucket_address']) ? trim($values['s3_bucket_address']) : '',
-      'rbf_scan' => isset($values['rbf_scan']) && (int)$values['rbf_scan'] ? 1 : 0,
+      'rbf_scan' => 0, //isset($values['rbf_scan']) && (int)$values['rbf_scan'] ? 1 : 0,
       'creator_id' => $this->_viewer->id,
     ]);
 
@@ -157,7 +157,7 @@ class SensorController extends Controller
       'name' => trim($values['name']),
       's3_bucket_name' => isset($values['s3_bucket_name']) ? trim($values['s3_bucket_name']) : '',
       's3_bucket_address' => isset($values['s3_bucket_address']) ? trim($values['s3_bucket_address']) : '',
-      'rbf_scan' => isset($values['rbf_scan']) && (int)$values['rbf_scan'] ? 1 : 0,
+      'rbf_scan' => 0, //isset($values['rbf_scan']) && (int)$values['rbf_scan'] ? 1 : 0,
     ]);
 
     $row->on_update_after();
@@ -379,17 +379,10 @@ class SensorController extends Controller
       ]);
     } else {
       //re-check
-      $img_url = $row->get_photo();
-      if (App::environment() == 'local') {
-        $img_url = "https://s3.ap-southeast-1.amazonaws.com/cargo.tastevietnam.asia/58-5b-69-19-ad-83/SENSOR/1/2024-06-06/21/SENSOR_2024-06-06-21-21-34-723_176.jpg";
-      }
-
       //step 2= photo scan
       $row->model_api_1([
         'confidence' => SysRobo::_SCAN_CONFIDENCE,
         'overlap' => SysRobo::_SCAN_OVERLAP,
-
-        'img_url' => $img_url,
       ]);
 
       //step 3= photo predict
@@ -1066,7 +1059,7 @@ class SensorController extends Controller
         }
 
         //no duplicate
-        $keyword = $this->photo_name_query($file);
+        $keyword = SysRobo::photo_name_query($file);
 
         //check exist
         $row = RestaurantFoodScan::where('restaurant_id', $restaurant->id)
@@ -1077,6 +1070,7 @@ class SensorController extends Controller
           $status = 'new';
 
           $rows = RestaurantFoodScan::where('photo_name', 'LIKE', $keyword)
+            ->where('restaurant_id', $restaurant->id)
             ->get();
           if (count($rows)) {
             $status = 'duplicated';
@@ -1154,11 +1148,6 @@ class SensorController extends Controller
 
         if ($row->status == 'new') {
 
-          $img_url = $row->get_photo();
-          if (App::environment() == 'local') {
-            $img_url = "https://s3.ap-southeast-1.amazonaws.com/cargo.tastevietnam.asia/58-5b-69-19-ad-83/SENSOR/1/2024-06-06/21/SENSOR_2024-06-06-21-21-34-723_176.jpg";
-          }
-
           //step 2= photo scan
           //model2
           if ($model2) {
@@ -1171,8 +1160,6 @@ class SensorController extends Controller
             $row->model_api_1([
               'confidence' => SysRobo::_SCAN_CONFIDENCE,
               'overlap' => SysRobo::_SCAN_OVERLAP,
-
-              'img_url' => $img_url,
             ]);
           }
 
@@ -1390,25 +1377,4 @@ class SensorController extends Controller
     ];
   }
 
-  protected function photo_name_query($file)
-  {
-    $temps = array_filter(explode('/', $file));
-    $photo_name = $temps[count($temps) - 1];
-
-    $photo_address = str_replace($photo_name, '', $file);
-
-    $photo_name = str_replace('.jpg', '', $photo_name);
-    $temp1s = array_filter(explode('_', $photo_name));
-    $temp2s = array_filter(explode('-', $temp1s[1]));
-
-    $keyword = '%' . trim($photo_address, '/')
-      . '/' . $temp1s[0] . '_'
-      . $temp2s[0] . '-' . $temp2s[1] . '-' . $temp2s[2] . '-' . $temp2s[3] . '-' . $temp2s[4]
-      . '-%'
-      . '_' . $temp1s[2]
-      . '.jpg%'
-    ;
-
-    return $keyword;
-  }
 }

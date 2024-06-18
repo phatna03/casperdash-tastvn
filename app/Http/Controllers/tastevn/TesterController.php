@@ -55,6 +55,9 @@ class TesterController extends Controller
 
     $date = '2024-06-16';
 
+    var_dump((int)date('i'));
+
+    var_dump(date('Y-m-d', strtotime("-1 days")));
 
     //fix live
 //    $rfs = RestaurantFoodScan::find(36968);

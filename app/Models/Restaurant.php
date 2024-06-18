@@ -23,9 +23,11 @@ class Restaurant extends Model
     's3_bucket_name',
     's3_bucket_address',
     's3_checking',
-    'rbf_scan',
     'count_foods',
     'creator_id',
+
+    'rbf_scan', //live kitchen or not
+    'img_1024', //live config sensor
     'deleted',
   ];
 
@@ -342,6 +344,10 @@ class Restaurant extends Model
 
         'status' => isset($pars['status']) ? $pars['status'] : 'new',
       ]);
+
+      if ($row->status == 'new') {
+        $row->img_1024();
+      }
     }
 
     return $row;

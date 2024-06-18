@@ -206,12 +206,12 @@
         if (sys_ready) {
           sensor_checker();
         }
-      }, 2000);
+      }, 1000);
 
     });
 
     var sys_running = 0;
-    var sys_ready = !parseInt(acmcfs.rbf_js);
+    var sys_ready = 1; //!parseInt(acmcfs.rbf_js);
 
     if (parseInt(acmcfs.rbf_js)) {
       //roboflow init
@@ -347,7 +347,6 @@
               message_from_toast('info', v.restaurant_name, html_toast, true);
             });
 
-
             // if (response.data.printer) {
               // page_open(acmcfs.link_base_url + '/printer?ids=' + response.data.notify_ids.toString());
             // }
@@ -415,28 +414,28 @@
             if (sys_ready && response.data.status == 'new') {
               sys_ready = 0;
 
-              if (parseInt(acmcfs.rbf_js)) {
-                var photo_img = new Image();
-                photo_img.crossOrigin = "anonymous";
-                photo_img.src = response.data.file_url;
-
-                console.log("==============================================");
-                console.log("RBF start......");
-
-                if (acmcfs.rbf_model) {
-
-                  setTimeout(function () {
-                    acmcfs.rbf_model.detect(photo_img).then(function (predictions) {
-                      console.log("Photo URL: ", response.data.file_url);
-                      console.log("Predictions: ", predictions);
-                      food_predict_by_datas(response.data.file_id, predictions);
-
-                    });
-                  }, 888);
-                }
-              } else {
+              // if (parseInt(acmcfs.rbf_js)) {
+              //   var photo_img = new Image();
+              //   photo_img.crossOrigin = "anonymous";
+              //   photo_img.src = response.data.file_url;
+              //
+              //   console.log("==============================================");
+              //   console.log("RBF start......");
+              //
+              //   if (acmcfs.rbf_model) {
+              //
+              //     setTimeout(function () {
+              //       acmcfs.rbf_model.detect(photo_img).then(function (predictions) {
+              //         console.log("Photo URL: ", response.data.file_url);
+              //         console.log("Predictions: ", predictions);
+              //         food_predict_by_datas(response.data.file_id, predictions);
+              //
+              //       });
+              //     }, 888);
+              //   }
+              // } else {
                 food_predict_by_api(response.data.file_id);
-              }
+              // }
             }
           }
         })

@@ -436,6 +436,8 @@ class RestaurantFoodScan extends Model
   {
     $sys_app = new SysApp();
 
+    $sensor = $this->get_restaurant();
+
     $temps = array_filter(explode('/', $this->photo_name));
     $photo_name = $temps[count($temps) - 1];
     $photo_path = str_replace($photo_name, '', $this->photo_name);
@@ -447,23 +449,25 @@ class RestaurantFoodScan extends Model
       return url('sensors') . '/' . $photo_path . '1024_' . $photo_name;
     }
 
-    $path_img = public_path('sensors') . '/' . $this->photo_name;
-    $file_img = $sys_app->os_slash_file($path_img);
-    if (is_file($file_img)) {
+    if (!$sensor->img_1024) {
+      $path_img = public_path('sensors') . '/' . $this->photo_name;
+      $file_img = $sys_app->os_slash_file($path_img);
+      if (is_file($file_img)) {
 
-      $thumb_1024 = Image::make($file_img);
-      $thumb_1024->resize(1024, 1024, function ($constraint) {
-        $constraint->aspectRatio();
-      });
+        $thumb_1024 = Image::make($file_img);
+        $thumb_1024->resize(1024, 1024, function ($constraint) {
+          $constraint->aspectRatio();
+        });
 
-      $path_1024 = public_path('sensors') . '/' . $photo_path . '1024_' . $photo_name;
-      $path_1024 = $sys_app->os_slash_file($path_1024);
-      $thumb_1024->save($path_1024, 100);
+        $path_1024 = public_path('sensors') . '/' . $photo_path . '1024_' . $photo_name;
+        $path_1024 = $sys_app->os_slash_file($path_1024);
+        $thumb_1024->save($path_1024, 100);
 
-      return url('sensors') . '/' . $photo_path . '1024_' . $photo_name;
+        return url('sensors') . '/' . $photo_path . '1024_' . $photo_name;
+      }
     }
 
-    return null;
+    return $this->get_photo();
   }
 
   public function model_reset()

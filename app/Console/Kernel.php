@@ -23,7 +23,7 @@ class Kernel extends ConsoleKernel
     //cargo
     $schedule->command('local:check-images', [1, 1])
       ->withoutOverlapping()
-      ->everyFifteenSeconds()
+      ->everyMinute()
       ->runInBackground();
 
     $schedule->command('local:check-images', [1, 2])

@@ -1018,6 +1018,11 @@ function sensor_food_scan_info(id) {
   return false;
 }
 function sensor_food_scan_info_action(next = 0) {
+  var popup2 = $('#modal_food_scan_info_update');
+  if (popup2.hasClass('show')) {
+    return false;
+  }
+
   var popup = $('#modal_food_scan_info');
   var arr = popup.find('input[name=popup_view_ids]').val().split(';').filter(Boolean);
   var view_current = parseInt(popup.find('input[name=popup_view_id_itm]').val());

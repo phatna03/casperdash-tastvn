@@ -144,9 +144,6 @@ class RoboflowController extends Controller
 
         //roboflow
         $img_url = url("roboflow/test") . "/{$folder}/" . $photoName;
-        if (App::environment() == 'local') {
-          $img_url = "https://s3.ap-southeast-1.amazonaws.com/cargo.tastevietnam.asia/58-5b-69-19-ad-83/SENSOR/1/2024-06-06/21/SENSOR_2024-06-06-21-21-34-723_176.jpg";
-        }
 
         //step 2= photo scan
         $datas = SysRobo::photo_scan(null, [
@@ -154,6 +151,7 @@ class RoboflowController extends Controller
           'overlap' => SysRobo::_SCAN_OVERLAP,
 
           'img_url' => $img_url,
+          'api_testing' => 1,
         ]);
       }
 

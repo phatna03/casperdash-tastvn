@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Api;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Storage;
 //lib
 use App\Api\SysApp;
@@ -78,8 +79,20 @@ class SysRobo
 
     //img
     $img_url = $rfs ? $rfs->img_1024() : null;
+
+    //api_testing
     if (isset($pars['img_url']) && !empty($pars['img_url'])) {
-      $img_url = SysRobo::photo_1024($pars['img_url']);
+
+      $img_url = $pars['img_url'];
+
+      if (isset($pars['api_testing']) && !empty($pars['api_testing'])) {
+        $img_url = SysRobo::photo_1024($pars['img_url']);
+      }
+    }
+
+    //localhost
+    if (App::environment() == 'local') {
+      $img_url = "https://s3.ap-southeast-1.amazonaws.com/cargo.tastevietnam.asia/58-5b-69-19-ad-83/SENSOR/1/2024-06-06/21/SENSOR_2024-06-06-21-21-34-723_176.jpg";
     }
 
     if (empty($img_url) || !@getimagesize($img_url)) {
@@ -167,7 +180,7 @@ class SysRobo
       ->where('s3_bucket_name', '<>', NULL)
       ->where('s3_bucket_address', '<>', NULL)
       ->where('s3_checking', 0)
-      ->orderBy('rbf_scan', 'desc')
+      ->orderBy('rbf_scan', 'asc')
       ->orderBy('id', 'asc')
       ->paginate($limit, ['*'], 'page', $page)
       ->first();
@@ -202,6 +215,20 @@ class SysRobo
 //      $cur_hour += 11;
 //    }
 
+    //live call every hour
+    if ($restaurant->rbf_scan) {
+      if (int(date('i')) > 1) {
+        return false;
+      } else {
+        if (!$cur_hour || $cur_hour == 24) {
+          $cur_hour = 23;
+          $date = date('Y-m-d', strtotime("-1 days"));
+        } else {
+          $cur_hour -= 1;
+        }
+      }
+    }
+
     $files = Storage::disk('sensors')->files($directory);
     if (count($files)) {
       //desc
@@ -222,6 +249,9 @@ class SysRobo
           continue;
         }
 
+        //no duplicate
+        $keyword = SysRobo::photo_name_query($file);
+
         $count++;
 
         //check exist
@@ -230,6 +260,15 @@ class SysRobo
           ->first();
         if (!$row) {
 
+          $status = 'new';
+
+          $rows = RestaurantFoodScan::where('photo_name', 'LIKE', $keyword)
+            ->where('restaurant_id', $restaurant->id)
+            ->get();
+          if (count($rows)) {
+            $status = 'duplicated';
+          }
+
           //step 1= photo get
           $row = $restaurant->photo_save([
             'local_storage' => 1,
@@ -237,6 +276,8 @@ class SysRobo
             'photo_name' => $file,
             'photo_ext' => 'jpg',
             'time_photo' => date('Y-m-d H:i:s'),
+
+            'status' => $status,
           ]);
 
           if ($old) {
@@ -447,5 +488,27 @@ class SysRobo
       'food' => $food_id,
       'confidence' => $food_confidence,
     ];
+  }
+
+  public static function photo_name_query($file)
+  {
+    $temps = array_filter(explode('/', $file));
+    $photo_name = $temps[count($temps) - 1];
+
+    $photo_address = str_replace($photo_name, '', $file);
+
+    $photo_name = str_replace('.jpg', '', $photo_name);
+    $temp1s = array_filter(explode('_', $photo_name));
+    $temp2s = array_filter(explode('-', $temp1s[1]));
+
+    $keyword = '%' . trim($photo_address, '/')
+      . '/' . $temp1s[0] . '_'
+      . $temp2s[0] . '-' . $temp2s[1] . '-' . $temp2s[2] . '-' . $temp2s[3] . '-' . $temp2s[4]
+      . '-%'
+      . '_' . $temp1s[2]
+      . '.jpg%'
+    ;
+
+    return $keyword;
   }
 }
