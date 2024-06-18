@@ -2041,7 +2041,7 @@ function restaurant_food_scan_notes(id) {
           '<div class="acm-clearfix position-relative">' +
           '<div class="acm-float-right"></div>' +
           '<div class="text-dark fw-bold">System: </div>' +
-          '<div class="text-dark">' + response.data.note + '</div>' +
+          '<div class="text-dark">' + bind_nl2br(response.data.note) + '</div>' +
           '</div>' +
           '</div>';
       }
@@ -2050,15 +2050,13 @@ function restaurant_food_scan_notes(id) {
         noted = true;
 
         response.data.comments.forEach(function (v, k) {
-          html += '<div class="acm-clearfix position-relative p-2">' +
-            '<div class="acm-clearfix position-relative">' +
+          html += '<div class="acm-clearfix position-relative acm-col-noted p-2">' +
             '<div class="acm-float-right acm-fs-12 acm-text-right">' +
             '<div class="text-dark">' + v.created_at_1 + '</div>' +
             '<div class="text-dark">' + v.created_at_2 + '</div>' +
             '</div>' +
             '<div class="text-dark fw-bold">@' + v.user_name + ': </div>' +
-            '<div class="text-dark">' + v.user_noted + '</div>' +
-            '</div>' +
+            '<div class="text-dark">' + bind_nl2br(v.user_noted) + '</div>' +
             '</div>';
         });
       }

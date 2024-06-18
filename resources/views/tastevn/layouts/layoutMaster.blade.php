@@ -19,15 +19,15 @@
 <link rel="stylesheet" href="{{asset('assets/vendor/libs/animate-css/animate.css')}}"/>
 <link rel="stylesheet" href="{{url('custom/library/selectize/selectize.default.css')}}" />
 <link rel="stylesheet" href="{{url('custom/library/selectize/selectize.css')}}" />
-<link rel="stylesheet" href="{{url('custom/css/app.css?v=' . (int)date('Ymd'))}}"/>
+<link rel="stylesheet" href="{{url('custom/css/app.css?v=' . (int)date('Ymd') . '102')}}"/>
 {{--js--}}
 {{--<script src="{{url('custom/library/roboflow/roboflow.js')}}"></script>--}}
 <script src="{{asset('assets/vendor/libs/toastr/toastr.js')}}"></script>
 <script src="{{url('custom/library/currency/format_number.js')}}"></script>
 <script src="{{url('custom/library/selectize/selectize.min.js')}}"></script>
 <script src="{{url('custom/library/axios/axios.min.js')}}"></script>
-<script src="{{url('custom/js/app.js?v=' . (int)date('Ymd'))}}"></script>
-<script src="{{url('custom/js/item.js?v=' . (int)date('Ymd'))}}"></script>
+<script src="{{url('custom/js/app.js?v=' . (int)date('Ymd') . '102')}}"></script>
+<script src="{{url('custom/js/item.js?v=' . (int)date('Ymd') . '102')}}"></script>
 
 <script type="text/javascript">
   //tastevn
