@@ -629,8 +629,8 @@
   position: relative;
 }
 .wrap_report .cmt-wrapper {
-  left: unset;
-  right: 0;
+  left: 0;
+  /*right: 0;*/
   background-color: #fff;
   width: 400px;
   max-height: 300px;

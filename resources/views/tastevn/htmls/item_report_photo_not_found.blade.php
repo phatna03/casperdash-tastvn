@@ -3,12 +3,20 @@
     <div class="text-uppercase acm-fs-18 fw-bold">
       <span class="text-dark">photo sensor id:  <b class="text-danger">{{$rfs->id}}</b></span>
     </div>
-{{--    @if(count($comments))--}}
-{{--      <span class="badge bg-danger cmt-count">{{count($comments) . ' notes'}}</span>--}}
-{{--    @endif--}}
   </div>
   <img class="acm-width-max-100 h-auto acm-border-css" loading="lazy" src="{{$rfs->get_photo()}}"/>
 </div>
+
+@if($rfs->get_food())
+<div class="text-center w-auto p-1">
+  <div class="clearfix position-relative">
+    <div class="text-uppercase acm-fs-18 fw-bold">
+      <span class="text-dark">photo standard:  <b class="text-danger">{{$rfs->get_food()->name}}</b></span>
+    </div>
+  </div>
+  <img class="acm-width-max-100 h-auto acm-border-css" loading="lazy" src="{{$rfs->get_food()->get_photo(['restaurant_parent_id' => $rfs->get_restaurant()->restaurant_parent_id])}}"/>
+</div>
+@endif
 
 @if(count($predictions))
   <ul class="cmt-wrapper">
