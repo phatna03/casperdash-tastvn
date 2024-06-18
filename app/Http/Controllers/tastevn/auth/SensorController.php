@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 //lib
+use SebastianBergmann\Type\Exception;
 use Validator;
 use App\Api\SysApp;
 use App\Api\SysRobo;
@@ -1061,30 +1062,39 @@ class SensorController extends Controller
         //no duplicate
         $keyword = SysRobo::photo_name_query($file);
 
-        //check exist
-        $row = RestaurantFoodScan::where('restaurant_id', $restaurant->id)
-          ->where('photo_name', $file)
-          ->first();
-        if (!$row) {
+        DB::beginTransaction();
 
-          $status = 'new';
+        try {
+          //check exist
+          $row = RestaurantFoodScan::where('restaurant_id', $restaurant->id)
+            ->where('photo_name', $file)
+            ->first();
+          if (!$row) {
 
-          $rows = RestaurantFoodScan::where('photo_name', 'LIKE', $keyword)
-            ->where('restaurant_id', $restaurant->id)
-            ->get();
-          if (count($rows)) {
-            $status = 'duplicated';
+            $status = 'new';
+
+            $rows = RestaurantFoodScan::where('photo_name', 'LIKE', $keyword)
+              ->where('restaurant_id', $restaurant->id)
+              ->get();
+            if (count($rows)) {
+              $status = 'duplicated';
+            }
+
+            $row = $restaurant->photo_save([
+              'local_storage' => 1,
+              'photo_url' => NULL,
+              'photo_name' => $file,
+              'photo_ext' => 'jpg',
+              'time_photo' => date('Y-m-d H:i:s'),
+
+              'status' => $status,
+            ]);
           }
 
-          $row = $restaurant->photo_save([
-            'local_storage' => 1,
-            'photo_url' => NULL,
-            'photo_name' => $file,
-            'photo_ext' => 'jpg',
-            'time_photo' => date('Y-m-d H:i:s'),
+          DB::commit();
 
-            'status' => $status,
-          ]);
+        } catch (Exception $e) {
+          DB::rollBack();
         }
 
         //get 1 latest file

@@ -80,6 +80,8 @@ class SysRobo
     //img
     $img_url = $rfs ? $rfs->img_1024() : null;
 
+    $new_url = 'https://detect.roboflow.com';
+
     //api_testing
     if (isset($pars['img_url']) && !empty($pars['img_url'])) {
 
@@ -87,6 +89,8 @@ class SysRobo
 
       if (isset($pars['api_testing']) && !empty($pars['api_testing'])) {
         $img_url = SysRobo::photo_1024($pars['img_url']);
+
+        $new_url = 'http://47.128.217.148:9001';
       }
     }
 
@@ -113,7 +117,7 @@ class SysRobo
     }
 
     // URL for Http Request
-    $api_url =  "https://detect.roboflow.com/" . $dataset . "/" . $version
+    $api_url = $new_url . "/" . $dataset . "/" . $version
       . "?api_key=" . $api_key
       . "&confidence=" . $confidence
       . "&overlap=" . $overlap
@@ -217,7 +221,7 @@ class SysRobo
 
     //live call every hour
     if ($restaurant->rbf_scan) {
-      if (int(date('i')) > 1) {
+      if ((int)(date('i')) > 1) {
         return false;
       } else {
         if (!$cur_hour || $cur_hour == 24) {

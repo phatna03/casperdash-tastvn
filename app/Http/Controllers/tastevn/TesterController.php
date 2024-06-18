@@ -55,39 +55,20 @@ class TesterController extends Controller
 
     $date = '2024-06-16';
 
-    var_dump((int)date('i'));
 
-    var_dump(date('Y-m-d', strtotime("-1 days")));
+
 
     //fix live
-//    $rfs = RestaurantFoodScan::find(36968);
-//    $rfs->update([
-//      'rbf_api' => NULL,
-//    ]);
-//
-//    $rfsss = RestaurantFoodScan::whereIn('id', [
-//      41922, 42202, 42085, 42125, 41963, 41953,
-//      42058, 42163, 42057, 42174, 36968, 23020,
-//      23021, 35317, 36482,
-//    ])
-//      ->get();
-//    if (count($rfsss)) {
-//      foreach ($rfsss as $rfs) {
-//        $rfs->predict_food([
-//          'notification' => false,
-//        ]);
-//      }
-//    }
+
     //=======================================================================================
 
     //remove notify
 //    $row1s = RestaurantFoodScan::select('id')
-//      ->where('deleted', 0)
-//      ->whereDate('time_photo', '>=', '2024-06-01')
-//      ->whereDate('time_photo', '<=', '2024-06-17')
+//      ->where('deleted', '>', 0)
+//      ->whereDate('time_photo', '2024-06-18')
+//      ->whereDate('time_photo', '<=', '2024-06-18')
 //      ->where('missing_texts', NULL)
 //      ->where('food_id', '>', 0)
-//
 //    ;
 //
 //    $row2s = DB::table('notifications')
