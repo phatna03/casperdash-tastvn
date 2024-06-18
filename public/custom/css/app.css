@@ -694,6 +694,14 @@
   display: block !important;
 }
 
+#lcl_txt {
+  padding: 5px !important;
+}
+
+.wrap_notes {
+   background-color: #ffffff;
+}
+
 /*modal 2*/
 .layout-navbar-fixed body:not(.modal-open) .layout-navbar-full .layout-navbar,
 .layout-menu-fixed body:not(.modal-open) .layout-navbar-full .layout-navbar,

@@ -2013,9 +2013,68 @@ function restaurant_food_scan_view(id) {
   })
     .then(response => {
       //
+
+      restaurant_food_scan_notes(id);
     })
     .catch(error => {
       //
+    });
+
+  return false;
+}
+function restaurant_food_scan_notes(id) {
+  var wrap = $('#lcl_descr');
+
+  axios.post('/admin/photo/note/get', {
+    item: id,
+  })
+    .then(response => {
+
+      var wrap = $('#lcl_descr');
+      var noted = false;
+      var html = '';
+
+      if (response.data.note && response.data.note != '' && response.data.note != 'null') {
+        noted = true;
+
+        html += '<div class="acm-clearfix position-relative">' +
+          '<div class="acm-clearfix position-relative">' +
+          '<div class="acm-float-right"></div>' +
+          '<div class="text-dark fw-bold">System: </div>' +
+          '<div class="text-dark">' + response.data.note + '</div>' +
+          '</div>' +
+          '</div>';
+      }
+
+      if (response.data.comments && response.data.comments.length) {
+        noted = true;
+
+        response.data.comments.forEach(function (v, k) {
+          html += '<div class="acm-clearfix position-relative p-2">' +
+            '<div class="acm-clearfix position-relative">' +
+            '<div class="acm-float-right acm-fs-12 acm-text-right">' +
+            '<div class="text-dark">' + v.created_at_1 + '</div>' +
+            '<div class="text-dark">' + v.created_at_2 + '</div>' +
+            '</div>' +
+            '<div class="text-dark fw-bold">@' + v.user_name + ': </div>' +
+            '<div class="text-dark">' + v.user_noted + '</div>' +
+            '</div>' +
+            '</div>';
+        });
+      }
+
+      wrap.find('.wrap_notes').empty();
+      if (noted) {
+        wrap.find('.wrap_notes').append(html);
+      }
+
+    })
+    .catch(error => {
+      if (error.response.data && Object.values(error.response.data).length) {
+        Object.values(error.response.data).forEach(function (v, k) {
+          message_from_toast('error', acmcfs.message_title_error, v);
+        });
+      }
     });
 
   return false;

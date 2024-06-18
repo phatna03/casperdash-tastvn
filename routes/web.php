@@ -302,6 +302,7 @@ Route::post('/admin/food-category/selectize', [FoodCategoryController::class, 's
 Route::get('/admin/photos', [PhotoController::class, 'index']);
 Route::post('/admin/photo/get', [PhotoController::class, 'get']);
 Route::post('/admin/photo/view', [PhotoController::class, 'view']);
+Route::post('/admin/photo/note/get', [PhotoController::class, 'note_get']);
 //comment
 Route::post('/admin/comment/note', [CommentController::class, 'note']);
 //food

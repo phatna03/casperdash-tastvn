@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\tastevn\auth;
 use App\Http\Controllers\Controller;
+use App\Models\Comment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
@@ -147,6 +148,44 @@ class PhotoController extends Controller
 
     return response()->json([
 
+    ]);
+  }
+
+  public function note_get(Request $request)
+  {
+    $values = $request->post();
+
+    $row = RestaurantFoodScan::find((int)$values['item']);
+    if (!$row) {
+      return response()->json([
+        'error' => 'Invalid item'
+      ], 404);
+    }
+
+    $comments = [];
+
+    $select = Comment::query('comments')
+      ->select('users.name as user_name', 'comments.content', 'comments.created_at')
+      ->leftJoin('users', 'users.id', '=', 'comments.user_id')
+      ->where('comments.deleted', 0)
+      ->where('comments.object_id', $row->id)
+      ->where('comments.object_type', 'restaurant_food_scan')
+      ->orderBy('comments.id', 'asc');
+    $rows = $select->get();
+    if (count($rows)) {
+      foreach ($rows as $row) {
+        $comments[] = [
+          'user_name' => $row->user_name,
+          'user_noted' => $row->content,
+          'created_at_1' => date('d/m/Y', strtotime($row->created_at)),
+          'created_at_2' => date('H:i:s', strtotime($row->created_at)),
+        ];
+      }
+    }
+
+    return response()->json([
+      'note' => $row->note,
+      'comments' => $comments,
     ]);
   }
 }

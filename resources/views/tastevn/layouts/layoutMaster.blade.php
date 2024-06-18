@@ -19,7 +19,7 @@
 <link rel="stylesheet" href="{{asset('assets/vendor/libs/animate-css/animate.css')}}"/>
 <link rel="stylesheet" href="{{url('custom/library/selectize/selectize.default.css')}}" />
 <link rel="stylesheet" href="{{url('custom/library/selectize/selectize.css')}}" />
-<link rel="stylesheet" href="{{url('custom/css/app.css?v=' . (int)date('Ymd') . '01')}}"/>
+<link rel="stylesheet" href="{{url('custom/css/app.css?v=' . (int)date('Ymd'))}}"/>
 {{--js--}}
 {{--<script src="{{url('custom/library/roboflow/roboflow.js')}}"></script>--}}
 <script src="{{asset('assets/vendor/libs/toastr/toastr.js')}}"></script>
