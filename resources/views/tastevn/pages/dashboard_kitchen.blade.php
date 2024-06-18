@@ -29,8 +29,8 @@
 
         <span class="text-muted fw-light">Admin /</span> {{$pageConfigs['item']->name}}
 
-        <input type="hidden" name="restaurant_id" value="{{$pageConfigs['item']->id}}" />
-        <input type="hidden" name="restaurant_parent_id" value="{{$pageConfigs['item']->restaurant_parent_id}}" />
+        <input type="hidden" name="restaurant_id" value="{{$pageConfigs['item']->id}}"/>
+        <input type="hidden" name="restaurant_parent_id" value="{{$pageConfigs['item']->restaurant_parent_id}}"/>
       </h4>
     </div>
 
@@ -66,8 +66,8 @@
                         </div>
                         <label for="select-item-food" class="text-danger">Dish</label>
 
-                        <input type="hidden" name="current_food" />
-                        <input type="hidden" name="current_restaurant_parent_id" />
+                        <input type="hidden" name="current_food"/>
+                        <input type="hidden" name="current_restaurant_parent_id"/>
                       </div>
                     </div>
 
@@ -77,7 +77,7 @@
                       </div>
 
                       <div class="text-center w-auto">
-                        <img class="w-100 food-photo" loading="lazy" src="{{url('custom/img/no_photo.png')}}" />
+                        <img class="w-100 food-photo" loading="lazy" src="{{url('custom/img/no_photo.png')}}"/>
                       </div>
                     </div>
 
@@ -103,7 +103,8 @@
                                   data-placeholder="Please choose restaurant sensor..."
                           >
                             @foreach($viewer->get_sensors() as $sensor)
-                              <option value="{{$sensor->id}}" @if(count($viewer->get_sensors()) == 1) selected="selected" @endif>{{$sensor->name}}</option>
+                              <option value="{{$sensor->id}}"
+                                      @if(count($viewer->get_sensors()) == 1) selected="selected" @endif>{{$sensor->name}}</option>
                             @endforeach
                           </select>
 
@@ -114,17 +115,17 @@
                       </div>
                     </div>
 
-                    <input type="hidden" name="current_itd" />
+                    <input type="hidden" name="current_itd"/>
 
                     <div class="col-lg-6 mb-1 wrap_notify_result d-none result_photo_standard">
                       <div class="text-center w-100">
-                        <img class="w-100" loading="lazy" src="" />
+                        <img class="w-100" loading="lazy" src=""/>
                       </div>
                     </div>
 
                     <div class="col-lg-12 mb-1 wrap_notify_result d-none result_photo_sensor">
                       <div class="d-inline-block">
-                        <img class="w-100" loading="lazy" src="" />
+                        <img class="w-100" loading="lazy" src=""/>
                       </div>
                     </div>
 
@@ -135,11 +136,13 @@
                           <button type="button" class="btn btn-sm btn-primary btn_resolved"
                                   data-value="0"
                                   onclick="photo_resolve(this)"
-                          >Resolve</button>
+                          >Resolve
+                          </button>
                           <button type="button" class="btn btn-sm btn-primary btn_marked"
                                   data-value="0"
                                   onclick="photo_mark(this)"
-                          >Mark</button>
+                          >Mark
+                          </button>
                         </div>
                       </div>
 
@@ -166,8 +169,8 @@
                       <div class="data_result"></div>
                     </div>
 
-                    <input type="hidden" name="current_file_id" />
-                    <input type="hidden" name="current_file_url" />
+                    <input type="hidden" name="current_file_id"/>
+                    <input type="hidden" name="current_file_url"/>
                   </div>
                 </div>
               </div>
@@ -182,18 +185,30 @@
 
 @section('js_end')
   <div class="acm-toast-wrapper toast-bottom-right d-none result_ingredients_missing">
-    <div class="toast toast-error @if(!$isMobi) acm-width-500-min @endif bg-danger-subtle" aria-live="assertive" style="display: block;">
+    <div class="toast toast-error @if(!$isMobi) acm-width-500-min @endif bg-danger-subtle" aria-live="assertive"
+         style="display: block;">
       <div class="toast-title"><span class="badge bg-danger text-uppercase fs-6">Please double check</span>
       </div>
       <div class="toast-message data_result"></div>
     </div>
   </div>
 
-{{--  <script src="https://cdn.roboflow.com/0.2.26/roboflow.js"></script>--}}
+  @if($viewer->is_super_admin() || $viewer->is_dev())
+    <div class="acm-toast-wrapper toast-bottom-left d-none result_time_check">
+      <div class="toast toast-error @if(!$isMobi) acm-width-500-min @endif bg-danger-subtle" aria-live="assertive"
+           style="display: block;">
+        <div class="toast-title"><span class="badge bg-danger text-uppercase fs-6">Times</span>
+        </div>
+        <div class="toast-message data_result"></div>
+      </div>
+    </div>
+  @endif
+
+  {{--  <script src="https://cdn.roboflow.com/0.2.26/roboflow.js"></script>--}}
   <script src="{{url('custom/library/roboflow/roboflow.js')}}"></script>
 
   <script type="text/javascript">
-    $(document).ready(function() {
+    $(document).ready(function () {
 
       if (notify_realtime) {
         clearInterval(notify_realtime);
@@ -286,12 +301,12 @@
               });
 
               html_toast += '</div>';
-              message_from_toast('info', v.restaurant_name, html_toast, true);
+              // message_from_toast('info', v.restaurant_name, html_toast, true);
             });
 
 
             // if (response.data.printer) {
-              // page_open(acmcfs.link_base_url + '/printer?ids=' + response.data.notify_ids.toString());
+            // page_open(acmcfs.link_base_url + '/printer?ids=' + response.data.notify_ids.toString());
             // }
           }
 
@@ -344,11 +359,11 @@
               });
 
               html_toast += '</div>';
-              message_from_toast('info', v.restaurant_name, html_toast, true);
+              // message_from_toast('info', v.restaurant_name, html_toast, true);
             });
 
             // if (response.data.printer) {
-              // page_open(acmcfs.link_base_url + '/printer?ids=' + response.data.notify_ids.toString());
+            // page_open(acmcfs.link_base_url + '/printer?ids=' + response.data.notify_ids.toString());
             // }
           }
 
@@ -434,7 +449,7 @@
               //     }, 888);
               //   }
               // } else {
-                food_predict_by_api(response.data.file_id);
+              food_predict_by_api(response.data.file_id);
               // }
             }
           }
@@ -521,7 +536,7 @@
           html += '<div class="row m-0">';
           datas.ingredients_found.forEach(function (v, k) {
             html += '<div class="col-lg-6">';
-            html += '<div class="text-dark acm-ml-px-10 acm-fs-20">- <b class="text-danger acm-mr-px-5">' + v.quantity + '</b> ' + v.name + '</div>';
+            html += '<div class="text-dark acm-ml-px-10 fs-5">- <b class="text-danger acm-mr-px-5">' + v.quantity + '</b> ' + v.name + '</div>';
             html += '</div>';
           });
           html += '</div>';
@@ -530,8 +545,7 @@
           $('.result_ingredients_found .data_result').empty().append(html);
           $('.result_ingredients_found').removeClass('d-none');
         }
-      }
-      else {
+      } else {
 
         wrap.find('.food-photo').attr('src', acmcfs.link_food_no_photo);
         wrap.find('.wrap-ingredients').empty();
@@ -539,6 +553,33 @@
         $('.result_photo_status .data_result').empty()
           .append('<div class="badge bg-danger fw-bold acm-ml-px-10 acm-fs-13">Not Trained Yet</div>');
       }
+
+      @if($viewer->is_super_admin() || $viewer->is_dev())
+      var html_times = '';
+      var time_photo = datas.time_photo;
+      var time_scan = datas.time_scan;
+      var time_end = datas.time_end;
+
+      $('.result_time_check').removeClass('d-none');
+
+      html_times = '<div class="position-relative">' +
+        '<div class="mb-2 acm-clearfix">' +
+        '<div class="text-dark fw-bold acm-float-right">' + time_photo + '</div>' +
+        '<div class="text-dark overflow-hidden">Photo Uploaded At: </div>' +
+        '</div>' +
+        '<div class="mb-2 acm-clearfix">' +
+        '<div class="text-dark fw-bold acm-float-right">' + time_scan + '</div>' +
+        '<div class="text-dark overflow-hidden">Photo Begin Scan At: </div>' +
+        '</div>' +
+        '<div class="mb-2 acm-clearfix">' +
+        '<div class="text-dark fw-bold acm-float-right">' + time_end + '</div>' +
+        '<div class="text-dark overflow-hidden">Finish Predicted At: </div>' +
+        '</div>' +
+        '</div>';
+
+      $('.result_time_check .data_result').empty()
+        .append(html_times);
+      @endif
     }
 
     function photo_resolve(ele) {

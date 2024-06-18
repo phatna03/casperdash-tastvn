@@ -294,7 +294,7 @@
               <th class="acm-th-first"></th>
               <th>Status</th>
               <th>Dish</th>
-              <th>Confidence</th>
+              <th class="d-none">Confidence</th>
               <th>Ingredients missing</th>
               <th>Time upload</th>
 {{--              <th>Time scanned</th>--}}
@@ -665,7 +665,7 @@
               '</div>' +
               '<div class="overflow-hidden acm-max-line-3 acm-width-150-min">' +
               '<div>ID: ' + full['id'] + '</div>' +
-              '<div>' + food_name + '</div>' +
+              '<div>' + full['confidence'] + '% ' + food_name + '</div>' +
               '<div class="acm-text-italic">' + food_category + '</div>' +
               '</div>' +
               '</div>'
@@ -674,6 +674,7 @@
         },
         {
           targets: 3,
+          className: 'd-none',
           render: function (data, type, full, meta) {
             var html = '';
             var retrain = parseInt(full['rbf_retrain']);
@@ -728,6 +729,7 @@
           targets: 5,
           render: function (data, type, full, meta) {
             var html = '';
+
             var arr = full['time_photo'].split(' ');
             if (arr.length) {
               html = '<div>' + arr[0] + '</div>' +
@@ -735,6 +737,25 @@
             } else {
               html = full['time_photo'];
             }
+
+            @if($viewer->is_super_admin() || $viewer->is_dev())
+              html = '<div class="position-relative">' +
+              '<div class="acm-clearfix">' +
+              '<div class="text-dark fw-bold acm-float-right">' + full['time_photo'] + '</div>' +
+              '<div class="text-dark overflow-hidden">Uploaded At: </div>' +
+              '</div>' +
+              '<div class="acm-clearfix">' +
+              '<div class="text-dark fw-bold acm-float-right">' + full['time_scan'] + '</div>' +
+              '<div class="text-dark overflow-hidden">Begin Scan At: </div>' +
+              '</div>' +
+              '<div class="acm-clearfix">' +
+              '<div class="text-dark fw-bold acm-float-right">' + full['time_end'] + '</div>' +
+              '<div class="text-dark overflow-hidden">Predicted At: </div>' +
+              '</div>' +
+              '</div>';
+
+            @endif
+
             return ('<div class="cursor-pointer" onclick="sensor_food_scan_info(' + full['id'] + ')">' + html + '</div>');
           }
         },

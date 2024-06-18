@@ -1386,6 +1386,10 @@ class SensorController extends Controller
 
       'html_info' => $html_info,
 
+      'time_photo' => $row->time_photo,
+      'time_scan' => $row->time_scan,
+      'time_end' => $row->time_end,
+
       'ingredients_missing' => $ingredients_missing,
       'ingredients_found' => $ingredients_found,
     ];
