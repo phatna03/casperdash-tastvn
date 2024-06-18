@@ -485,6 +485,12 @@
   width: auto;
 }
 
+.acm-col-noted {
+  word-wrap: break-word;
+  word-break: break-word;
+  text-wrap: balance;
+}
+
 #custCarousel .carousel-indicators {
   position: static;
   margin-top: 20px;

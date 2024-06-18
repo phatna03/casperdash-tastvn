@@ -226,19 +226,52 @@
                   <label for="scan-search-status">Statuses</label>
                 </div>
               </div>
-              <div class="col-md-6 mb-2">
+              <div class="col-md-3 mb-2">
                 <div class="form-floating form-floating-outline">
-                  <div class="form-control acm-wrap-selectize" id="scan-search-missing">
+                  <div class="form-control acm-wrap-selectize" id="scan-search-marked">
+                    <select name="marked" class="opt_selectize" onchange="sensor_search_food_scan(this)">
+                      <option value="">All dishes</option>
+                      <option value="yes">Dish is marked</option>
+                    </select>
+                  </div>
+                  <label for="scan-search-marked">Mark?</label>
+                </div>
+              </div>
+              <div class="col-md-3 mb-2">
+                <div class="form-floating form-floating-outline">
+                  <div class="form-control acm-wrap-selectize" id="scan-search-resolved">
+                    <select name="resolved" class="opt_selectize" onchange="sensor_search_food_scan(this)">
+                      <option value="">All dishes</option>
+                      <option value="yes">Dish is resolved</option>
+                    </select>
+                  </div>
+                  <label for="scan-search-resolved">Resolve?</label>
+                </div>
+              </div>
+              <div class="col-md-3 mb-2">
+                <div class="form-floating form-floating-outline">
+                  <div class="form-control acm-wrap-selectize" id="scan-search-typed">
                     <select name="missing" class="opt_selectize" onchange="sensor_search_food_scan(this)">
                       <option value="">All dishes</option>
                       <option value="yes">Dish with missing ingredients only</option>
                       <option value="no">Dish has all the ingredients</option>
                     </select>
                   </div>
-                  <label for="scan-search-missing">Type</label>
+                  <label for="scan-search-typed">Type</label>
                 </div>
               </div>
-              <div class="col-md-6 mb-2">
+              <div class="col-md-3 mb-2">
+                <div class="form-floating form-floating-outline">
+                  <div class="form-control acm-wrap-selectize" id="scan-search-noted">
+                    <select name="noted" class="opt_selectize" onchange="sensor_search_food_scan(this)">
+                      <option value="">All dishes</option>
+                      <option value="yes">Photo with notes</option>
+                    </select>
+                  </div>
+                  <label for="scan-search-noted">Note?</label>
+                </div>
+              </div>
+              <div class="col-md-12 mb-2">
                 <div class="form-floating form-floating-outline wrap-select-users">
                   <div class="form-control acm-wrap-selectize" id="scan-search-users">
                     <select name="users" multiple onchange="sensor_search_food_scan(this)"
@@ -248,28 +281,6 @@
                     </select>
                   </div>
                   <label for="scan-search-users">Commentators</label>
-                </div>
-              </div>
-              <div class="col-md-3 mb-2">
-                <div class="form-floating form-floating-outline">
-                  <div class="form-control acm-wrap-selectize" id="scan-search-missing">
-                    <select name="marked" class="opt_selectize" onchange="sensor_search_food_scan(this)">
-                      <option value="">All dishes</option>
-                      <option value="yes">Dish is marked</option>
-                    </select>
-                  </div>
-                  <label for="scan-search-missing">Mark?</label>
-                </div>
-              </div>
-              <div class="col-md-3 mb-2">
-                <div class="form-floating form-floating-outline">
-                  <div class="form-control acm-wrap-selectize" id="scan-search-missing">
-                    <select name="resolved" class="opt_selectize" onchange="sensor_search_food_scan(this)">
-                      <option value="">All dishes</option>
-                      <option value="yes">Dish with missing ingredients & resolved</option>
-                    </select>
-                  </div>
-                  <label for="scan-search-missing">Resolve?</label>
                 </div>
               </div>
             </div>
@@ -549,6 +560,7 @@
           d.time_scan = $('#datatable-listing-scan .wrap-search-form form input[name=time_scan]').val();
           d.resolved = $('#datatable-listing-scan .wrap-search-form form select[name=resolved]').val();
           d.marked = $('#datatable-listing-scan .wrap-search-form form select[name=marked]').val();
+          d.noted = $('#datatable-listing-scan .wrap-search-form form select[name=noted]').val();
         },
       },
       "createdRow": function (row, data, dataIndex) {
@@ -772,7 +784,7 @@
                 html += '<div>+ ' + full['note'] + '</div>';
               }
 
-              return ('<div class="cursor-pointer" onclick="sensor_food_scan_info(' + full['id'] + ')">' + html + '</div>');
+              return ('<div class="cursor-pointer acm-col-noted acm-width-300-max" onclick="sensor_food_scan_info(' + full['id'] + ')">' + html + '</div>');
             }
           }
         },

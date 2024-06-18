@@ -188,6 +188,7 @@ class RestaurantFoodScan extends Model
     $this->predict_reset();
 
     $debug = isset($pars['debug']) ? (bool)$pars['debug'] : false;
+    $api_recall = isset($pars['api_recall']) ? (bool)$pars['api_recall'] : false;
     $notification = isset($pars['notification']) ? (bool)$pars['notification'] : true;
     $restaurant = $this->get_restaurant();
 
@@ -273,7 +274,7 @@ class RestaurantFoodScan extends Model
     $this->update([
       'status' => $status,
       'total_seconds' => $rbf_time,
-      'time_end' => $end_time,
+      'time_end' => !$api_recall ? $end_time : $this->time_end,
     ]);
 
     //find missing ingredients
@@ -504,6 +505,7 @@ class RestaurantFoodScan extends Model
     $sys_app = new SysApp();
 
     $debug = isset($pars['debug']) ? (bool)$pars['debug'] : false;
+    $api_recall = isset($pars['api_recall']) ? (bool)$pars['api_recall'] : false;
     $dataset = isset($pars['dataset']) ? $pars['dataset'] : $sys_app->get_setting('rbf_dataset_scan');
     $version = isset($pars['version']) ? $pars['version'] : $sys_app->get_setting('rbf_dataset_ver');
 
@@ -511,7 +513,7 @@ class RestaurantFoodScan extends Model
 
     $this->update([
       'rbf_model' => 3, //running
-      'time_scan' => date('Y-m-d H:i:s'),
+      'time_scan' => !$api_recall || empty($this->time_scan) ? date('Y-m-d H:i:s') : $this->time_scan,
     ]);
 
     if ($debug) {
@@ -543,6 +545,7 @@ class RestaurantFoodScan extends Model
     $sys_app = new SysApp();
 
     $debug = isset($pars['debug']) ? (bool)$pars['debug'] : false;
+    $api_recall = isset($pars['api_recall']) ? (bool)$pars['api_recall'] : false;
     $dataset = isset($pars['dataset']) ? $pars['dataset'] : $sys_app->get_setting('rbf_dataset_scan');
     $version = isset($pars['version']) ? $pars['version'] : $sys_app->get_setting('rbf_dataset_ver');
 
@@ -552,7 +555,7 @@ class RestaurantFoodScan extends Model
 
     $this->update([
       'rbf_model' => 3, //running
-      'time_scan' => date('Y-m-d H:i:s'),
+      'time_scan' => !$api_recall || empty($this->time_scan) ? date('Y-m-d H:i:s') : $this->time_scan,
     ]);
 
     if ($debug) {
@@ -676,6 +679,7 @@ class RestaurantFoodScan extends Model
     $this->predict_reset();
 
     $debug = isset($pars['debug']) ? (bool)$pars['debug'] : false;
+    $api_recall = isset($pars['api_recall']) ? (bool)$pars['api_recall'] : false;
     $notification = isset($pars['notification']) ? (bool)$pars['notification'] : true;
     $restaurant = $this->get_restaurant();
 
@@ -762,7 +766,7 @@ class RestaurantFoodScan extends Model
     $this->update([
       'status' => $status,
       'total_seconds' => $rbf_time,
-      'time_end' => $end_time,
+      'time_end' => !$api_recall ? $end_time : $this->time_end,
     ]);
 
     if ($debug) {

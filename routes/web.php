@@ -462,6 +462,7 @@ Route::get('/datatable/sensor-food-scans', function (Request $request) {
   $missing = isset($values['missing']) && !empty($values['missing']) ? $values['missing'] : NULL;
   $resolved = isset($values['resolved']) && !empty($values['resolved']) ? $values['resolved'] : NULL;
   $marked = isset($values['marked']) && !empty($values['marked']) ? $values['marked'] : NULL;
+  $noted = isset($values['noted']) && !empty($values['noted']) ? $values['noted'] : NULL;
   $food_catetories = isset($values['categories']) ? (array)$values['categories'] : [];
   $foods = isset($values['foods']) ? (array)$values['foods'] : [];
   $users = isset($values['users']) ? (array)$values['users'] : [];
@@ -546,6 +547,22 @@ Route::get('/datatable/sensor-food-scans', function (Request $request) {
     switch ($marked) {
       case 'yes':
         $select->where("restaurant_food_scans.is_marked", '>', 0);
+        break;
+    }
+  }
+  if (!empty($noted)) {
+    switch ($noted) {
+      case 'yes':
+        $select->where(function ($q) {
+          $q->where('restaurant_food_scans.note', '<>', NULL)
+            ->orWhereIn("restaurant_food_scans.id", function ($q1) {
+            $q1->select('object_id')
+              ->distinct()
+              ->from('comments')
+              ->where('object_type', 'restaurant_food_scan')
+              ->where('user_id', '>', 0);
+          });
+        });
         break;
     }
   }

@@ -384,11 +384,15 @@ class SensorController extends Controller
       $row->model_api_1([
         'confidence' => SysRobo::_SCAN_CONFIDENCE,
         'overlap' => SysRobo::_SCAN_OVERLAP,
+
+        'api_recall' => true,
       ]);
 
       //step 3= photo predict
       $row->predict_food([
         'notification' => false,
+
+        'api_recall' => true,
       ]);
 
     }
