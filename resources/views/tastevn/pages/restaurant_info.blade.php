@@ -739,7 +739,11 @@
             }
 
             @if($viewer->is_super_admin() || $viewer->is_dev())
-              html = '<div class="position-relative">' +
+
+            var ts1 = Math.floor(new Date(full['time_photo']).getTime() / 1000);
+            var ts2 = Math.floor(new Date(full['time_end']).getTime() / 1000);
+
+            html = '<div class="position-relative">' +
               '<div class="acm-clearfix">' +
               '<div class="text-dark fw-bold acm-float-right">' + full['time_photo'] + '</div>' +
               '<div class="text-dark overflow-hidden">Uploaded At: </div>' +
@@ -752,6 +756,10 @@
               '<div class="text-dark fw-bold acm-float-right">' + full['time_end'] + '</div>' +
               '<div class="text-dark overflow-hidden">Predicted At: </div>' +
               '</div>' +
+                '<div class="acm-clearfix">' +
+                '<div class="text-dark fw-bold acm-float-right">' + (ts2 - ts1) + '</div>' +
+                '<div class="text-dark overflow-hidden">Total (seconds): </div>' +
+                '</div>' +
               '</div>';
 
             @endif

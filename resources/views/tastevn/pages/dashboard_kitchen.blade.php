@@ -330,6 +330,8 @@
     function food_predict_by_api(item_id) {
       var wrap = $('.wrap-selected-food');
 
+      sys_running = 1;
+
       $('.result_photo_status .data_result').empty()
         .append('<div class="badge bg-success fw-bold acm-ml-px-10 acm-fs-13">predicting...</div>');
 
@@ -379,6 +381,9 @@
         })
         .catch(error => {
           console.log(error);
+        })
+        .then(res => {
+          sys_running = 0;
         });
 
       return false;
@@ -427,7 +432,7 @@
             }
 
             if (sys_ready && response.data.status == 'new') {
-              sys_ready = 0;
+              sys_running = 1;
 
               // if (parseInt(acmcfs.rbf_js)) {
               //   var photo_img = new Image();
@@ -559,6 +564,18 @@
       var time_photo = datas.time_photo;
       var time_scan = datas.time_scan;
       var time_end = datas.time_end;
+      var total_times = datas.total_times;
+      var localhost = parseInt(datas.localhost);
+
+      var html_robos = '';
+      @if($pageConfigs['debug'])
+      if (localhost) {
+        html_robos = '<div class="mb-2 acm-clearfix">' +
+          '<div class="text-dark fw-bold acm-float-right">' + datas.total_robos + '</div>' +
+          '<div class="text-dark overflow-hidden">Robos (seconds): </div>' +
+          '</div>';
+      }
+      @endif
 
       $('.result_time_check').removeClass('d-none');
 
@@ -574,6 +591,10 @@
         '<div class="mb-2 acm-clearfix">' +
         '<div class="text-dark fw-bold acm-float-right">' + time_end + '</div>' +
         '<div class="text-dark overflow-hidden">Finish Predicted At: </div>' +
+        '</div>' + html_robos +
+        '<div class="mb-2 acm-clearfix">' +
+        '<div class="text-dark fw-bold acm-float-right">' + total_times + '</div>' +
+        '<div class="text-dark overflow-hidden">Total (seconds): </div>' +
         '</div>' +
         '</div>';
 

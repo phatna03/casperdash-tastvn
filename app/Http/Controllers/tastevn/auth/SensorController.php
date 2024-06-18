@@ -997,8 +997,11 @@ class SensorController extends Controller
     ], 200);
   }
 
-  public function kitchen(string $id)
+  public function kitchen(string $id, Request $request)
   {
+    $values = $request->all();
+    $debug = isset($values['debug']) ? (int)$values['debug'] : 0;
+
     $row = Restaurant::find((int)$id);
     if (!$row || $row->deleted) {
       if ($this->_viewer->is_dev()) {
@@ -1013,6 +1016,7 @@ class SensorController extends Controller
       'hasCustomizer' => false,
 
       'item' => $row,
+      'debug' => $debug,
     ];
 
     return view('tastevn.pages.dashboard_kitchen', ['pageConfigs' => $pageConfigs]);
@@ -1389,6 +1393,11 @@ class SensorController extends Controller
       'time_photo' => $row->time_photo,
       'time_scan' => $row->time_scan,
       'time_end' => $row->time_end,
+      'total_times' => !empty($row->time_end)
+        ? (int)date('s', strtotime($row->time_end) - strtotime($row->time_photo)) : 0,
+      'total_robos' => $row->total_seconds,
+
+      'localhost' => App::environment() == 'local' ? 1 : 0,
 
       'ingredients_missing' => $ingredients_missing,
       'ingredients_found' => $ingredients_found,

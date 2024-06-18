@@ -81,6 +81,7 @@ class SysRobo
     $img_url = $rfs ? $rfs->img_1024() : null;
 
     $new_url = 'https://detect.roboflow.com';
+    $new_url = 'http://47.128.217.148:9001';
 
     //api_testing
     if (isset($pars['img_url']) && !empty($pars['img_url'])) {
