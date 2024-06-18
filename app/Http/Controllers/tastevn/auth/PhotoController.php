@@ -50,6 +50,8 @@ class PhotoController extends Controller
 //    echo '<pre>';var_dump($values);die;
     $existed = isset($values['existed']) ? (array)$values['existed'] : [];
     $restaurants = isset($values['restaurants']) ? (array)$values['restaurants'] : [];
+    $users = isset($values['users']) ? (array)$values['users'] : [];
+    $noted = isset($values['noted']) && !empty($values['time_upload']) ? $values['noted'] : NULL;
     $time_upload = isset($values['time_upload']) && !empty($values['time_upload']) ? $values['time_upload'] : NULL;
 
     $select = RestaurantFoodScan::query('restaurant_food_scans')
@@ -90,7 +92,34 @@ class PhotoController extends Controller
       }
     }
 
-    $aaa = $this->_sys_app->parse_to_query($select);
+    if (count($users)) {
+      $select->whereIn("restaurant_food_scans.id", function ($q) use ($users) {
+        $q->select('object_id')
+          ->distinct()
+          ->from('comments')
+          ->where('object_type', 'restaurant_food_scan')
+          ->whereIn('user_id', $users);
+      });
+    }
+
+    if (!empty($noted)) {
+      switch ($noted) {
+        case 'yes':
+          $select->where(function ($q) {
+            $q->where('restaurant_food_scans.note', '<>', NULL)
+              ->orWhereIn("restaurant_food_scans.id", function ($q1) {
+                $q1->select('object_id')
+                  ->distinct()
+                  ->from('comments')
+                  ->where('object_type', 'restaurant_food_scan')
+                  ->where('user_id', '>', 0);
+              });
+          });
+          break;
+      }
+    }
+
+    $query = $this->_sys_app->parse_to_query($select);
 
     $html = view('tastevn.htmls.item_photo')
       ->with('items', $select->get())
@@ -98,7 +127,7 @@ class PhotoController extends Controller
 
     return response()->json([
       'html' => $html,
-      'query' => $aaa,
+      'query' => $query,
     ]);
   }
 

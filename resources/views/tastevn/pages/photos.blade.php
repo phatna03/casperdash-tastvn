@@ -60,6 +60,29 @@
               <label for="filter-search-time-upload">Time upload</label>
             </div>
           </div>
+          <div class="col-md-6 mb-2">
+            <div class="form-floating form-floating-outline">
+              <div class="form-control acm-wrap-selectize" id="scan-search-noted">
+                <select name="noted" class="opt_selectize" onchange="form_photos_filter()">
+                  <option value="">All photos</option>
+                  <option value="yes">Only photos with comments</option>
+                </select>
+              </div>
+              <label for="scan-search-noted">Note?</label>
+            </div>
+          </div>
+          <div class="col-md-6 mb-2">
+            <div class="form-floating form-floating-outline wrap-select-users">
+              <div class="form-control acm-wrap-selectize" id="scan-search-users">
+                <select name="users" multiple onchange="form_photos_filter()"
+                        data-value="user" class="ajx_selectize multi_selectize"
+                >
+                  <option value="">All</option>
+                </select>
+              </div>
+              <label for="scan-search-users">Commentators</label>
+            </div>
+          </div>
         </div>
       </form>
     </div>
@@ -103,6 +126,8 @@
       axios.post('/admin/photo/get', {
         restaurants: form_search.find('select[name=restaurants]').val(),
         time_upload: form_search.find('input[name=time_upload]').val(),
+        users: form_search.find('select[name=users]').val(),
+        noted: form_search.find('select[name=noted]').val(),
         existed: existed,
       })
         .then(response => {

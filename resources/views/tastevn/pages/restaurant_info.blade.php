@@ -264,8 +264,8 @@
                 <div class="form-floating form-floating-outline">
                   <div class="form-control acm-wrap-selectize" id="scan-search-noted">
                     <select name="noted" class="opt_selectize" onchange="sensor_search_food_scan(this)">
-                      <option value="">All dishes</option>
-                      <option value="yes">Photo with notes</option>
+                      <option value="">All photos</option>
+                      <option value="yes">Only photos with comments</option>
                     </select>
                   </div>
                   <label for="scan-search-noted">Note?</label>
