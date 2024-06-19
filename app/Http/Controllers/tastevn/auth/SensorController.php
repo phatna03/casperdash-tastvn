@@ -1119,6 +1119,17 @@ class SensorController extends Controller
         ->first();
     }
 
+    $datas = [];
+    if ($row) {
+      $datas = $this->kitchen_food_datas($row, [
+        'kitchen' => true,
+      ]);
+
+      if (count($datas) && !$datas['confidence']) {
+
+      }
+    }
+
     return response()->json([
       'status' => $row ? $row->status : 'no_photo',
 
@@ -1126,7 +1137,7 @@ class SensorController extends Controller
       'file_url' => $row ? $row->get_photo() : '',
       'file_id' => $row ? $row->id : 0,
 
-      'datas' => $row ? $this->kitchen_food_datas($row) : [],
+      'datas' => $datas,
     ]);
   }
 
@@ -1266,12 +1277,27 @@ class SensorController extends Controller
       }
     }
 
+    $datas = [];
+    if ($row) {
+      $datas = $this->kitchen_food_datas($row, [
+        'kitchen' => true,
+      ]);
+
+      if (count($datas) && !$datas['confidence']) {
+        $notifys = [];
+        $notify_ids = [];
+        $text_to_speech = false;
+        $text_to_speak = '';
+        $printer = false;
+      }
+    }
+
     return response()->json([
       'status' => true,
 
       //data
       'food_id' => $row->get_food() ? $row->get_food()->id : 0,
-      'datas' => $this->kitchen_food_datas($row),
+      'datas' => $datas,
       //notify
       'notifys' => $notifys,
       'notify_ids' => $notify_ids,
@@ -1281,7 +1307,7 @@ class SensorController extends Controller
     ]);
   }
 
-  protected function kitchen_food_datas(RestaurantFoodScan $row)
+  protected function kitchen_food_datas(RestaurantFoodScan $row, $pars = [])
   {
     if (!$row) {
       return [];
@@ -1289,6 +1315,8 @@ class SensorController extends Controller
 
     $restaurant = $row->get_restaurant();
     $food = $row->get_food() ? $row->get_food() : NULL;
+
+    $kitchen = isset($pars['kitchen']) ? (bool)$pars['kitchen'] : false;
 
     $ingredients_found = [];
     $ingredients_missing = [];
@@ -1299,6 +1327,7 @@ class SensorController extends Controller
     $food_photo = '';
     $is_resolved = 0;
     $is_marked = 0;
+    $confidence = 0;
 
     if ($food) {
 
@@ -1379,6 +1408,27 @@ class SensorController extends Controller
         }
       }
 
+      if ($kitchen) {
+        //only active super confidence
+        $confidence = RestaurantFood::query('restaurant_foods')
+          ->where('restaurant_foods.restaurant_id', $restaurant->id)
+          ->where('restaurant_foods.food_id', $food->id)
+          ->where('restaurant_foods.live_group', 1)
+          ->first();
+
+        if ($confidence && $confidence->id) {
+          $confidence = 1;
+        } else {
+          $food_id = 0;
+          $food_name = '';
+          $food_photo = '';
+          $is_resolved = 0;
+          $is_marked = 0;
+          $html_info = '';
+          $ingredients_missing = [];
+          $ingredients_found = [];
+        }
+      }
     }
 
     return [
@@ -1387,6 +1437,8 @@ class SensorController extends Controller
       'food_name' => $food_name,
       'is_resolved' => $is_resolved,
       'is_marked' => $is_marked,
+
+      'confidence' => $confidence,
 
       'html_info' => $html_info,
 

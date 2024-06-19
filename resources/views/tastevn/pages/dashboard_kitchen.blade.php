@@ -541,7 +541,7 @@
           html += '<div class="row m-0">';
           datas.ingredients_found.forEach(function (v, k) {
             html += '<div class="col-lg-6">';
-            html += '<div class="text-dark acm-ml-px-10 fs-5">- <b class="text-danger acm-mr-px-5">' + v.quantity + '</b> ' + v.name + '</div>';
+            html += '<div class="text-dark acm-ml-px-10 fs-5 fw-bold">- <b class="text-danger acm-mr-px-5">' + v.quantity + '</b> ' + v.name + '</div>';
             html += '</div>';
           });
           html += '</div>';

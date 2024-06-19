@@ -1,21 +1,36 @@
-<div class="text-center w-auto p-1">
-  <div class="clearfix position-relative">
-    <div class="text-uppercase acm-fs-18 fw-bold">
-      <span class="text-dark">photo sensor id:  <b class="text-danger">{{$rfs->id}}</b></span>
-    </div>
-  </div>
-  <img class="acm-width-max-100 h-auto acm-border-css" loading="lazy" src="{{$rfs->get_photo()}}"/>
-</div>
-
 @if($rfs->get_food())
-<div class="text-center w-auto p-1">
-  <div class="clearfix position-relative">
-    <div class="text-uppercase acm-fs-18 fw-bold">
-      <span class="text-dark">photo standard:  <b class="text-danger">{{$rfs->get_food()->name}}</b></span>
+  <div class="row m-0">
+    <div class="col-lg-6 mb-1">
+      <div class="text-center w-auto p-1">
+        <div class="clearfix position-relative">
+          <div class="text-uppercase acm-fs-18 fw-bold">
+            <span class="text-dark">photo standard:  <b class="text-danger">{{$rfs->get_food()->name}}</b></span>
+          </div>
+        </div>
+        <img class="acm-width-max-100 h-auto acm-border-css" loading="lazy"
+             src="{{$rfs->get_food()->get_photo(['restaurant_parent_id' => $rfs->get_restaurant()->restaurant_parent_id])}}"/>
+      </div>
+    </div>
+    <div class="col-lg-6 mb-1">
+      <div class="text-center w-auto p-1">
+        <div class="clearfix position-relative">
+          <div class="text-uppercase acm-fs-18 fw-bold">
+            <span class="text-dark">photo sensor id:  <b class="text-danger">{{$rfs->id}}</b></span>
+          </div>
+        </div>
+        <img class="acm-width-max-100 h-auto acm-border-css" loading="lazy" src="{{$rfs->get_photo()}}"/>
+      </div>
     </div>
   </div>
-  <img class="acm-width-max-100 h-auto acm-border-css" loading="lazy" src="{{$rfs->get_food()->get_photo(['restaurant_parent_id' => $rfs->get_restaurant()->restaurant_parent_id])}}"/>
-</div>
+@else
+  <div class="text-center w-auto p-1">
+    <div class="clearfix position-relative">
+      <div class="text-uppercase acm-fs-18 fw-bold">
+        <span class="text-dark">photo sensor id:  <b class="text-danger">{{$rfs->id}}</b></span>
+      </div>
+    </div>
+    <img class="acm-width-max-100 h-auto acm-border-css" loading="lazy" src="{{$rfs->get_photo()}}"/>
+  </div>
 @endif
 
 @if(count($predictions))
