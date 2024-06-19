@@ -742,24 +742,36 @@
 
             var ts1 = Math.floor(new Date(full['time_photo']).getTime() / 1000);
             var ts2 = Math.floor(new Date(full['time_end']).getTime() / 1000);
+            var ts = ts2 - ts1;
+            var dev_call = false;
+            if (ts > 30 || ts < 0) {
+              dev_call = true;
+            }
+
+            var html2 = '<div class="acm-clearfix">' +
+              '<div class="text-dark fw-bold acm-float-right">' + full['time_scan'] + '</div>' +
+              '<div class="text-dark overflow-hidden">Time Start Scan: </div>' +
+              '</div>' +
+              '<div class="acm-clearfix">' +
+              '<div class="text-dark fw-bold acm-float-right">' + full['time_end'] + '</div>' +
+              '<div class="text-dark overflow-hidden">Time End Predict: </div>' +
+              '</div>' +
+              '<div class="acm-clearfix">' +
+              '<div class="text-dark fw-bold acm-float-right">' + ts + '</div>' +
+              '<div class="text-dark overflow-hidden">Total (seconds): </div>' +
+              '</div>';
+
+            if (dev_call) {
+              html2 = '<div class="acm-clearfix">' +
+                '<div class="text-dark overflow-hidden acm-text-italic">(dev called checking again)</div>' +
+                '</div>';
+            }
 
             html = '<div class="position-relative">' +
               '<div class="acm-clearfix">' +
               '<div class="text-dark fw-bold acm-float-right">' + full['time_photo'] + '</div>' +
-              '<div class="text-dark overflow-hidden">Uploaded At: </div>' +
-              '</div>' +
-              '<div class="acm-clearfix">' +
-              '<div class="text-dark fw-bold acm-float-right">' + full['time_scan'] + '</div>' +
-              '<div class="text-dark overflow-hidden">Begin Scan At: </div>' +
-              '</div>' +
-              '<div class="acm-clearfix">' +
-              '<div class="text-dark fw-bold acm-float-right">' + full['time_end'] + '</div>' +
-              '<div class="text-dark overflow-hidden">Predicted At: </div>' +
-              '</div>' +
-                '<div class="acm-clearfix">' +
-                '<div class="text-dark fw-bold acm-float-right">' + (ts2 - ts1) + '</div>' +
-                '<div class="text-dark overflow-hidden">Total (seconds): </div>' +
-                '</div>' +
+              '<div class="text-dark overflow-hidden">Time Upload: </div>' +
+              '</div>' + html2 +
               '</div>';
 
             @endif

@@ -53,7 +53,7 @@ class TesterController extends Controller
     $restaurant = RestaurantParent::find(1);
     $sensor = Restaurant::find(5);
 
-    $date = '2024-06-16';
+    $date = '2024-06-18';
 
 
 
@@ -117,44 +117,7 @@ class TesterController extends Controller
   {
     $values = $request->post();
 
-    $datas = (new ImportData())->toArray($request->file('excel'));
-    if (!count($datas) || !count($datas[0])) {
-      return response()->json([
-        'error' => 'Invalid data'
-      ], 404);
-    }
 
-    $file_log = 'public/logs/rbf_re_scan_data.log';
-
-    foreach ($datas[0] as $k => $data) {
-
-      $col1 = trim($data[0]);
-
-      $row = RestaurantFoodScan::find((int)$col1);
-      if (!$row) {
-        continue;
-      }
-
-      Storage::append($file_log, $row->id);
-
-      //step 2= photo scan
-      $datas = SysRobo::photo_scan($row, [
-        'confidence' => SysRobo::_SCAN_CONFIDENCE,
-        'overlap' => SysRobo::_SCAN_OVERLAP,
-      ]);
-
-      $row->update([
-        'time_scan' => date('Y-m-d H:i:s'),
-        'status' => $datas['status'] ? 'scanned' : 'failed',
-        'rbf_api' => $datas['status'] ? json_encode($datas['result']) : NULL,
-      ]);
-
-      //step 3= photo predict
-      $row->predict_food([
-        'notification' => false,
-      ]);
-
-    }
 
     return response()->json([
       'status' => true,

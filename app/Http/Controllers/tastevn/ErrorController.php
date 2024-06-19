@@ -55,10 +55,10 @@ class ErrorController extends Controller
     $values = $request->post();
 
     $ids = [];
-    $date = '2024-06-01';
+    $date = '2024-06-18';
 
     $select = RestaurantFoodScan::where('deleted', 0)
-      ->whereIn('restaurant_id', [5, 6])
+      ->whereIn('restaurant_id', [6])
       ->whereDate('time_photo', '>=', $date)
       ->where('sys_confidence', '<>', 10)
       ->orderBy('id', 'asc')
@@ -68,44 +68,11 @@ class ErrorController extends Controller
     if (count($rows)) {
       foreach ($rows as $row) {
 
-        //step 1= photo check
-        $img_url = $row->get_photo();
-
-        if (!@getimagesize($img_url)) {
-
-          $row->update([
-            'deleted' => 1,
-          ]);
-
-          continue;
-        }
-
-        //jpg
-        $ext = array_filter(explode('.', $img_url));
-        if (count($ext) && $ext[count($ext) - 1] != 'jpg') {
-
-          $row->update([
-            'sys_confidence' => 2,
-          ]);
-
-          continue;
-        }
-
-        //step 2= photo scan
-        $datas = SysRobo::photo_scan($row, [
+        $row->model_api_1([
           'confidence' => SysRobo::_SCAN_CONFIDENCE,
           'overlap' => SysRobo::_SCAN_OVERLAP,
-
-//          'version' => 33,
         ]);
 
-        $row->update([
-//          'time_scan' => date('Y-m-d H:i:s'),
-          'status' => $datas['status'] ? 'scanned' : 'failed',
-          'rbf_api' => $datas['status'] ? json_encode($datas['result']) : NULL,
-        ]);
-
-        //step 3= photo predict
         $row->predict_food([
           'notification' => false,
         ]);
@@ -114,12 +81,20 @@ class ErrorController extends Controller
           'sys_confidence' => 10,
         ]);
 
+        //time changed
+        $ts_end = strtotime($row->time_photo) + (strtotime($row->time_end) - strtotime($row->time_scan));
+
+        $row->update([
+          'time_scan' => $row->time_photo,
+          'time_end' => empty($row->time_end) ? NULL : date('Y-m-d H:i:s', $ts_end),
+        ]);
+
         $ids[] = $row->id;
       }
     }
 
     $count = RestaurantFoodScan::where('deleted', 0)
-      ->whereIn('restaurant_id', [5, 6])
+      ->whereIn('restaurant_id', [6])
       ->whereDate('time_photo', '>=', $date)
       ->where('sys_confidence', '<>', 10)
       ->orderBy('id', 'asc')

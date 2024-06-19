@@ -493,7 +493,7 @@ Route::get('/datatable/sensor-food-scans', function (Request $request) {
 
   if ($order_default) {
     $select
-//      ->orderBy('restaurant_food_scans.updated_at', 'desc')
+      ->orderBy('restaurant_food_scans.time_photo', 'desc')
       ->orderBy('restaurant_food_scans.id', 'desc');
   }
 

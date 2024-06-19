@@ -99,8 +99,8 @@
                       <div class="badge bg-secondary p-1">{{$ingredient->confidence . '%'}}</div>
                     @endif
                   </div>
-                  <div class="wrap_text_roboflow_ingredient overflow-hidden acm-height-30-min acm-line-height-30 acm-fs-18 @if($ingredient->ingredient_type == 'core') cored text-danger @else text-dark @endif"
-                       @if($viewer->is_dev()) onclick="food_ingredient_core_quick(this, {{$ingredient->food_ingredient_id}})" @endif
+                  <div class="wrap_text_roboflow_ingredient overflow-hidden acm-height-30-min acm-line-height-30 acm-fs-18 @if($viewer->is_dev() || $viewer->is_admin()) cursor-pointer @endif @if($ingredient->ingredient_type == 'core') cored text-danger @else text-dark @endif"
+                       @if($viewer->is_dev() || $viewer->is_admin()) onclick="food_ingredient_core_quick(this, {{$ingredient->food_ingredient_id}})" @endif
                   >
                     - <b>{{$ingredient->ingredient_quantity}}</b> {{$ingredient->name}}
                   </div>

@@ -221,18 +221,18 @@ class SysRobo
 //    }
 
     //live call every hour
-    if ($restaurant->rbf_scan) {
-      if ((int)(date('i')) > 1) {
-        return false;
-      } else {
-        if (!$cur_hour || $cur_hour == 24) {
-          $cur_hour = 23;
-          $date = date('Y-m-d', strtotime("-1 days"));
-        } else {
-          $cur_hour -= 1;
-        }
-      }
-    }
+//    if ($restaurant->rbf_scan) {
+//      if ((int)(date('i')) > 1) {
+//        return false;
+//      } else {
+//        if (!$cur_hour || $cur_hour == 24) {
+//          $cur_hour = 23;
+//          $date = date('Y-m-d', strtotime("-1 days"));
+//        } else {
+//          $cur_hour -= 1;
+//        }
+//      }
+//    }
 
     $files = Storage::disk('sensors')->files($directory);
     if (count($files)) {
