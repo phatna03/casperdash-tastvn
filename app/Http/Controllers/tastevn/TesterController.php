@@ -62,45 +62,6 @@ class TesterController extends Controller
 
     //=======================================================================================
 
-    //remove notify
-//    $row1s = RestaurantFoodScan::select('id')
-//      ->where('deleted', '>', 0)
-//      ->whereDate('time_photo', '2024-06-18')
-//      ->whereDate('time_photo', '<=', '2024-06-18')
-//      ->where('missing_texts', NULL)
-//      ->where('food_id', '>', 0)
-//    ;
-//
-//    $row2s = DB::table('notifications')
-//      ->distinct()
-//      ->where('type', 'App\Notifications\IngredientMissing')
-//      ->whereIn('restaurant_food_scan_id', $row1s)
-//      ->get();
-//
-//    DB::table('notifications')
-//      ->distinct()
-//      ->where('type', 'App\Notifications\IngredientMissing')
-//      ->whereIn('restaurant_food_scan_id', $row1s)
-//      ->delete();
-//
-//    var_dump(count($row1s->get()));
-//    var_dump(count($row2s));
-
-    //old s3 photo
-//    $sensor->s3_photo([
-//      's3_region' => $sys_app->get_setting('s3_region'),
-//      's3_api_key' => $sys_app->get_setting('s3_api_key'),
-//      's3_api_secret' => $sys_app->get_setting('s3_api_secret'),
-//
-//      's3_bucket' => $sensor->s3_bucket_name,
-//      's3_address' => $sys_app->parse_s3_bucket_address($sensor->s3_bucket_address),
-//
-//      'scan_date' => '2024-06-05',
-////      'scan_hour' => 20,
-//    ]);
-
-//    $report = Report::find(1);
-//    $report->start();
 
     echo '<br />';
     die('test ok...');

@@ -50,55 +50,15 @@ class ErrorController extends Controller
     return view('tastevn.pages.error_photo_check', ['pageConfigs' => $pageConfigs]);
   }
 
-  public function photo_scan(Request $request)
+  public function photo_rescan(Request $request)
   {
     $values = $request->post();
 
     $ids = [];
     $date = '2024-06-18';
+    $count = 0;
 
-    $select = RestaurantFoodScan::where('deleted', 0)
-      ->whereIn('restaurant_id', [6])
-      ->whereDate('time_photo', '>=', $date)
-      ->where('sys_confidence', '<>', 10)
-      ->orderBy('id', 'asc')
-      ->limit(6);
 
-    $rows = $select->get();
-    if (count($rows)) {
-      foreach ($rows as $row) {
-
-        $row->model_api_1([
-          'confidence' => SysRobo::_SCAN_CONFIDENCE,
-          'overlap' => SysRobo::_SCAN_OVERLAP,
-        ]);
-
-        $row->predict_food([
-          'notification' => false,
-        ]);
-
-        $row->update([
-          'sys_confidence' => 10,
-        ]);
-
-        //time changed
-        $ts_end = strtotime($row->time_photo) + (strtotime($row->time_end) - strtotime($row->time_scan));
-
-        $row->update([
-          'time_scan' => $row->time_photo,
-          'time_end' => empty($row->time_end) ? NULL : date('Y-m-d H:i:s', $ts_end),
-        ]);
-
-        $ids[] = $row->id;
-      }
-    }
-
-    $count = RestaurantFoodScan::where('deleted', 0)
-      ->whereIn('restaurant_id', [6])
-      ->whereDate('time_photo', '>=', $date)
-      ->where('sys_confidence', '<>', 10)
-      ->orderBy('id', 'asc')
-      ->count();
 
     return response()->json([
       'ids' => $ids,

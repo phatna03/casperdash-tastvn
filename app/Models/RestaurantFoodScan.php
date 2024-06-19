@@ -213,6 +213,7 @@ class RestaurantFoodScan extends Model
 
       $this->update([
         'status' => 'failed',
+        'time_end' => date('Y-m-d H:i:s'),
       ]);
 
       if ($debug) {
@@ -702,6 +703,7 @@ class RestaurantFoodScan extends Model
 
       $this->update([
         'status' => 'failed',
+        'time_end' => date('Y-m-d H:i:s'),
       ]);
 
       if ($debug) {

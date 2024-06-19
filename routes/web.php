@@ -215,7 +215,7 @@ Route::get('/printer/test', [PrinterController::class, 'test']);
 //error
 Route::get('/error/404', [ErrorController::class, 'index']);
 Route::get('/error/photo/check', [ErrorController::class, 'photo_check']);
-Route::post('/error/photo/scan', [ErrorController::class, 'photo_scan']);
+Route::post('/error/photo/scan', [ErrorController::class, 'photo_rescan']);
 //admin
 Route::get('/', [SensorController::class, 'index']);
 Route::get('/admin', [SensorController::class, 'index']);
