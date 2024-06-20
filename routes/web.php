@@ -459,7 +459,7 @@ Route::get('/datatable/sensor-food-scans', function (Request $request) {
   $user = \Illuminate\Support\Facades\Auth::user();
 
   $restaurant = isset($values['restaurant']) ? (int)$values['restaurant'] : 0;
-  $statuses = isset($values['statuses']) ? (array)$values['statuses'] : [];
+  $statuses = isset($values['statuses']) && !empty($values['statuses']) ? $values['statuses'] : NULL;
   $missing = isset($values['missing']) && !empty($values['missing']) ? $values['missing'] : NULL;
   $resolved = isset($values['resolved']) && !empty($values['resolved']) ? $values['resolved'] : NULL;
   $marked = isset($values['marked']) && !empty($values['marked']) ? $values['marked'] : NULL;
@@ -502,9 +502,6 @@ Route::get('/datatable/sensor-food-scans', function (Request $request) {
 
     //super-confidence only
     $sensor = App\Models\Restaurant::find($restaurant);
-    if ($sensor) {
-      $select->whereIn("restaurant_food_scans.food_id", $sensor->query_foods());
-    }
 
     //settings
     $confidence = (int)$sys_app->get_setting('rbf_food_confidence');
@@ -512,7 +509,39 @@ Route::get('/datatable/sensor-food-scans', function (Request $request) {
       $confidence = 70;
     }
 
-    $select->where('restaurant_food_scans.confidence', '>=', $confidence);
+    $select->where('status', '<>', 'duplicated');
+
+    if (!empty($statuses)) {
+      switch ($statuses) {
+        case 'group_1':
+          if ($sensor) {
+            $select->whereIn("restaurant_food_scans.food_id", $sensor->query_foods(1))
+              ->where('restaurant_food_scans.confidence', '>=', $confidence);
+          }
+          break;
+
+        case 'group_2':
+          if ($sensor) {
+            $select->whereIn("restaurant_food_scans.food_id", $sensor->query_foods(2))
+              ->where('restaurant_food_scans.confidence', '>=', $confidence);
+          }
+          break;
+
+        case 'group_3':
+          if ($sensor) {
+            $select->whereIn("restaurant_food_scans.food_id", $sensor->query_foods(3))
+              ->where('restaurant_food_scans.confidence', '>=', $confidence);
+          }
+          break;
+
+        case 'failed':
+          $select->where('status', 'failed')
+            ->where('food_id', 0);
+          break;
+      }
+    }
+
+
   }
   if (count($food_catetories)) {
     $select->whereIn("restaurant_food_scans.food_category_id", $food_catetories);
@@ -537,9 +566,6 @@ Route::get('/datatable/sensor-food-scans', function (Request $request) {
     if (!empty($times['time_to'])) {
       $select->where('restaurant_food_scans.time_photo', '<=', $times['time_to']);
     }
-  }
-  if (count($statuses)) {
-    $select->whereIn("restaurant_food_scans.status", $statuses);
   }
   if (!empty($missing)) {
     switch ($missing) {

@@ -324,12 +324,12 @@ class Restaurant extends Model
     return count($rows) ? true : false;
   }
 
-  public function query_foods()
+  public function query_foods($group = 1)
   {
     $select = RestaurantFood::select('food_id as id')
       ->where('deleted', 0)
       ->where('restaurant_id', $this->id)
-      ->where('live_group', 1);
+      ->where('live_group', $group);
 
     return $select;
   }

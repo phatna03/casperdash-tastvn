@@ -497,7 +497,7 @@ class SysRobo
 
   public static function photo_name_query($file)
   {
-    $temps = array_filter(explode('/', $file));
+    $temps = explode('/', $file);
     $photo_name = $temps[count($temps) - 1];
 
     $photo_address = str_replace($photo_name, '', $file);

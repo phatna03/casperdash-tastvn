@@ -216,14 +216,15 @@
               <div class="col-md-6 mb-2">
                 <div class="form-floating form-floating-outline">
                   <div class="form-control acm-wrap-selectize" id="scan-search-status">
-                    <select name="statuses" class="opt_selectize multi_selectize" multiple onchange="sensor_search_food_scan(this)">
+                    <select name="statuses" class="opt_selectize" onchange="sensor_search_food_scan(this)">
                       <option value="">All</option>
-                      <option value="checked" selected="selected">checked</option>
-                      <option value="failed">no data</option>
-                      <option value="edited" selected="selected">edited</option>
+                      <option value="group_1" selected="selected">Super Confidence</option>
+                      <option value="group_2">Less Training</option>
+                      <option value="group_3">Not Trained Yet</option>
+                      <option value="failed">No Data Found</option>
                     </select>
                   </div>
-                  <label for="scan-search-status">Statuses</label>
+                  <label for="scan-search-status">Group</label>
                 </div>
               </div>
               <div class="col-md-3 mb-2">
