@@ -54,6 +54,7 @@ class PhotoController extends Controller
     $users = isset($values['users']) ? (array)$values['users'] : [];
     $noted = isset($values['noted']) && !empty($values['time_upload']) ? $values['noted'] : NULL;
     $time_upload = isset($values['time_upload']) && !empty($values['time_upload']) ? $values['time_upload'] : NULL;
+    $keyword = isset($values['keyword']) && !empty($values['keyword']) ? trim($values['keyword']) : NULL;
 
     $select = RestaurantFoodScan::query('restaurant_food_scans')
       ->select('restaurant_food_scans.id',
@@ -77,6 +78,9 @@ class PhotoController extends Controller
       ;
     }
 
+    if (!empty($keyword)) {
+      $select->where('restaurant_food_scans.id', 'LIKE', "%{$keyword}%");
+    }
     if (count($existed)) {
       $select->whereNotIn("restaurant_food_scans.id", $existed);
     }

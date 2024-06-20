@@ -73,15 +73,19 @@ class SysRobo
     $confidence = isset($pars['confidence']) ? (int)$pars['confidence'] : 50;
     $overlap = isset($pars['overlap']) ? (int)$pars['overlap'] : 50;
     $max_objects = isset($pars['max_objects']) ? (int)$pars['max_objects'] : 100;
+    $img_no_resize = isset($pars['img_no_resize']) ? (bool)$pars['img_no_resize'] : false;
 
     $status = true;
     $error = [];
 
     //img
     $img_url = $rfs ? $rfs->img_1024() : null;
+    if ($img_no_resize) {
+      $img_url = $rfs ? $rfs->get_photo() : null;
+    }
 
-    $new_url = 'https://detect.roboflow.com';
-    $new_url = 'http://47.128.217.148:9001';
+    $server_url = 'https://detect.roboflow.com';
+    $server_url = 'http://47.128.217.148:9001';
 
     //api_testing
     if (isset($pars['img_url']) && !empty($pars['img_url'])) {
@@ -89,9 +93,9 @@ class SysRobo
       $img_url = $pars['img_url'];
 
       if (isset($pars['api_testing']) && !empty($pars['api_testing'])) {
-        $img_url = SysRobo::photo_1024($pars['img_url']);
-
-        $new_url = 'http://47.128.217.148:9001';
+        if (!$img_no_resize) {
+          $img_url = SysRobo::photo_1024($pars['img_url']);
+        }
       }
     }
 
@@ -105,6 +109,10 @@ class SysRobo
       //s3 before 13/6/2024
       if ($rfs) {
         $img_url = SysRobo::photo_1024($rfs->get_photo());
+
+        if ($img_no_resize) {
+          $img_url = $rfs ? $rfs->get_photo() : $img_url;
+        }
       }
 
       if (empty($img_url) || !@getimagesize($img_url)) {
@@ -118,7 +126,7 @@ class SysRobo
     }
 
     // URL for Http Request
-    $api_url = $new_url . "/" . $dataset . "/" . $version
+    $api_url = $server_url . "/" . $dataset . "/" . $version
       . "?api_key=" . $api_key
       . "&confidence=" . $confidence
       . "&overlap=" . $overlap
@@ -194,6 +202,8 @@ class SysRobo
       return false;
     }
 
+    $restaurant_parent = $restaurant->get_parent();
+
     $cur_date = date('Y-m-d');
     $cur_hour = (int)date('H');
 
@@ -233,6 +243,14 @@ class SysRobo
 //        }
 //      }
 //    }
+
+    //model2
+    $model2 = false;
+    if ($restaurant_parent && $restaurant_parent->model_scan
+      && !empty($restaurant_parent->model_name) && !empty($restaurant_parent->model_version)
+    ) {
+      $model2 = true;
+    }
 
     $files = Storage::disk('sensors')->files($directory);
     if (count($files)) {
@@ -330,6 +348,21 @@ class SysRobo
             'rbf_version' => json_encode($rbf_version),
             'rbf_model' => 0,
           ]);
+
+          //step 2= photo scan
+          //model2
+          if ($model2) {
+            $row->model_api_2([
+              'dataset' => $restaurant_parent->model_name,
+              'version' => $restaurant_parent->model_version,
+            ]);
+          }
+          else {
+            $row->model_api_1([
+              'confidence' => SysRobo::_SCAN_CONFIDENCE,
+              'overlap' => SysRobo::_SCAN_OVERLAP,
+            ]);
+          }
 
           //step 3= photo predict
           $row->predict_food([

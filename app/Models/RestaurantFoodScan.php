@@ -546,6 +546,11 @@ class RestaurantFoodScan extends Model
 
     $sensor = $this->get_restaurant();
 
+    $img_no_resize = false;
+    if (in_array($sensor->id, [8, 9, 10])) {
+      $img_no_resize = true;
+    }
+
     $this->model_reset();
 
     $this->update([
@@ -569,6 +574,8 @@ class RestaurantFoodScan extends Model
 
       'confidence' => SysRobo::_SCAN_CONFIDENCE,
       'overlap' => SysRobo::_SCAN_OVERLAP,
+
+      'img_no_resize' => $img_no_resize,
     ]);
 
     if ($debug) {
@@ -636,7 +643,7 @@ class RestaurantFoodScan extends Model
 
         $rbf_version[] = [
           'dataset' => $dataset,
-          'version' => '52', //$version,
+          'version' => $version,
         ];
 
         $arr = SysRobo::photo_scan($this, [
