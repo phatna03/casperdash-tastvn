@@ -499,6 +499,20 @@ Route::get('/datatable/sensor-food-scans', function (Request $request) {
 
   if ($restaurant) {
     $select->where("restaurant_food_scans.restaurant_id", $restaurant);
+
+    //super-confidence only
+    $sensor = App\Models\Restaurant::find($restaurant);
+    if ($sensor) {
+      $select->whereIn("restaurant_food_scans.food_id", $sensor->query_foods());
+    }
+
+    //settings
+    $confidence = (int)$sys_app->get_setting('rbf_food_confidence');
+    if (!$confidence) {
+      $confidence = 70;
+    }
+
+    $select->where('restaurant_food_scans.confidence', '>=', $confidence);
   }
   if (count($food_catetories)) {
     $select->whereIn("restaurant_food_scans.food_category_id", $food_catetories);

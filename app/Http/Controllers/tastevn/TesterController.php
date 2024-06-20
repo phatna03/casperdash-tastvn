@@ -47,16 +47,18 @@ class TesterController extends Controller
   {
     echo '<pre>';
 
-    $user = Auth::user();
-    $sys_app = new SysApp();
-
     $restaurant = RestaurantParent::find(1);
     $sensor = Restaurant::find(5);
 
     $date = '2024-06-18';
 
 
-
+//    $arr = $this->photo_duplicate([
+//      //market test
+//      'restaurant_id' => 10,
+//    ]);
+//
+//    var_dump($arr);
 
     //fix live
 
@@ -83,5 +85,76 @@ class TesterController extends Controller
     return response()->json([
       'status' => true,
     ]);
+  }
+
+  protected function photo_duplicate($pars = [])
+  {
+    $sys_app = new SysApp();
+
+    $select = RestaurantFoodScan::query('restaurant_food_scans');
+
+    if (isset($pars['restaurant_id']) && (int)$pars['restaurant_id']) {
+      $select->where('restaurant_food_scans.restaurant_id', (int)$pars['restaurant_id']);
+    }
+
+    //default
+    $date_from = date('Y-m-01');
+    $date_to = date('Y-m-t');
+
+    if (isset($pars['date_from']) && !empty($pars['date_from'])) {
+      $date_from = $pars['date_from'];
+    }
+    if (isset($pars['date_to']) && !empty($pars['date_to'])) {
+      $date_to = $pars['date_to'];
+    }
+
+    $select->whereDate('restaurant_food_scans.time_photo', '>=', $date_from)
+      ->whereDate('restaurant_food_scans.time_photo', '<=', $date_to)
+      ->limit(2)
+      ->orderBy('id', 'asc');
+
+    var_dump($sys_app::_DEBUG_BREAK);
+    var_dump('QUERY=');
+    var_dump($sys_app->parse_to_query($select));
+
+    $rows = $select->get();
+    var_dump('TOTAL PHOTOS= ' . count($rows));
+
+    if (count($rows)) {
+
+      //reset
+      $select->update([
+        'photo_main' => 0,
+      ]);
+
+      foreach ($rows as $row) {
+        var_dump($sys_app::_DEBUG_BREAK);
+        var_dump('ID CHECK= ' . $row->id);
+
+        $photo_name = SysRobo::photo_name_query($row->photo_name);
+        var_dump($row->photo_name);
+        var_dump($photo_name);
+
+        //find duplicate
+        $duplicates = RestaurantFoodScan::where('photo_name', 'LIKE', $photo_name)
+          ->where('id', '<>', $row->id)
+          ->get();
+        var_dump('TOTAL DUPLICATED= ' . count($duplicates));
+
+        $row->update([
+          'photo_main' => 1,
+        ]);
+
+        if (count($duplicates)) {
+
+        }
+      }
+    }
+
+  }
+
+  protected function notify_remove()
+  {
+
   }
 }

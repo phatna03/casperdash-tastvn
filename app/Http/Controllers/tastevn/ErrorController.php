@@ -59,58 +59,89 @@ class ErrorController extends Controller
     $date = '2024-06-18';
     $count = 0;
 
-    $rows = RestaurantFoodScan::where('deleted', 0)
-      ->whereIn('restaurant_id', [9, 10])
+    $rows = RestaurantFoodScan::whereIn('restaurant_id', [5,6,8,9,10,11])
+      ->where('rbf_api', '<>', NULL)
       ->whereDate('time_photo', '>=', '2024-06-10')
+//      ->whereDate('time_photo', '<', '2024-06-10')
       ->where('sys_confidence', 0)
-      ->orderBy('id', 'asc')
-      ->limit(8)
+      ->limit(24)
       ->get();
 
     if (count($rows)) {
       foreach ($rows as $row) {
 
-        DB::beginTransaction();
+        $row->predict_food([
+          'notification' => false,
+          'api_recall' => true,
+        ]);
 
-        try {
-          $row->model_api_1([
-            'confidence' => SysRobo::_SCAN_CONFIDENCE,
-            'overlap' => SysRobo::_SCAN_OVERLAP,
+        $row->update([
+          'sys_confidence' => 101
+        ]);
 
-            'api_recall' => true,
-          ]);
-
-          //step 3= photo predict
-          $row->predict_food([
-            'notification' => false,
-
-            'api_recall' => true,
-          ]);
-
-          $row->update([
-            'sys_confidence' => 10,
-          ]);
-
-          $ids[] = $row->id;
-
-          DB::commit();
-
-        } catch (\Exception $exception) {
-
-          DB::rollBack();
-
-          $row->update([
-            'sys_confidence' => 11,
-          ]);
-        }
+        $ids[] = $row->id;
       }
     }
 
-    $count = RestaurantFoodScan::where('deleted', 0)
-      ->whereIn('restaurant_id', [9, 10])
+    $count = RestaurantFoodScan::whereIn('restaurant_id', [5,6,8,9,10,11])
+      ->where('rbf_api', '<>', NULL)
       ->whereDate('time_photo', '>=', '2024-06-10')
       ->where('sys_confidence', 0)
       ->count();
+
+    //temp off
+//    $rows = RestaurantFoodScan::where('deleted', 0)
+//      ->whereIn('restaurant_id', [9, 10])
+//      ->whereDate('time_photo', '>=', '2024-06-10')
+//      ->where('sys_confidence', 0)
+//      ->orderBy('id', 'asc')
+//      ->limit(8)
+//      ->get();
+//
+//    if (count($rows)) {
+//      foreach ($rows as $row) {
+//
+//        DB::beginTransaction();
+//
+//        try {
+//          $row->model_api_1([
+//            'confidence' => SysRobo::_SCAN_CONFIDENCE,
+//            'overlap' => SysRobo::_SCAN_OVERLAP,
+//
+//            'api_recall' => true,
+//          ]);
+//
+//          //step 3= photo predict
+//          $row->predict_food([
+//            'notification' => false,
+//
+//            'api_recall' => true,
+//          ]);
+//
+//          $row->update([
+//            'sys_confidence' => 10,
+//          ]);
+//
+//          $ids[] = $row->id;
+//
+//          DB::commit();
+//
+//        } catch (\Exception $exception) {
+//
+//          DB::rollBack();
+//
+//          $row->update([
+//            'sys_confidence' => 11,
+//          ]);
+//        }
+//      }
+//    }
+//
+//    $count = RestaurantFoodScan::where('deleted', 0)
+//      ->whereIn('restaurant_id', [9, 10])
+//      ->whereDate('time_photo', '>=', '2024-06-10')
+//      ->where('sys_confidence', 0)
+//      ->count();
 
     return response()->json([
       'ids' => $ids,

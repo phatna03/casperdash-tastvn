@@ -98,6 +98,12 @@ class CommentController extends Controller
       }
     }
 
+    if (!$row) {
+      return response()->json([
+        'error' => 'Invalid data'
+      ], 422);
+    }
+
     return response()->json([
       'status' => true,
       'item' => $row->id,

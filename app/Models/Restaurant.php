@@ -324,6 +324,16 @@ class Restaurant extends Model
     return count($rows) ? true : false;
   }
 
+  public function query_foods()
+  {
+    $select = RestaurantFood::select('food_id as id')
+      ->where('deleted', 0)
+      ->where('restaurant_id', $this->id)
+      ->where('live_group', 1);
+
+    return $select;
+  }
+
   //photooo
   public function photo_save($pars = [])
   {

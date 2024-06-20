@@ -68,13 +68,13 @@
             });
           }
 
-          form.find('.wrap-ids .datas').append(html);
+          form.find('.wrap-ids .datas').prepend(html);
 
           form.find('.wrap-datas .total').text(response.data.count);
 
           setTimeout(function () {
             form.find('.wrap-btns .btn-submit')[0].click();
-          }, 2000);
+          }, 1500);
 
         })
         .catch(error => {

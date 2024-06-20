@@ -27,6 +27,7 @@ class RestaurantFoodScan extends Model
     'photo_url',
     'photo_name',
     'photo_ext',
+    'photo_main',
 
     'confidence',
     'found_by',
@@ -336,16 +337,9 @@ class RestaurantFoodScan extends Model
           if ($food->live_group > 1) {
             $valid_group = false;
           }
-          if ($user->is_admin()) {
+          if ($user->is_super_admin() || $user->is_dev()) {
             $valid_group = true;
           }
-
-          //user_setting
-          $valid_setting = true;
-          //force
-//          if ((int)$user->get_setting('missing_ingredient_receive')) {
-//            $valid_setting = true;
-//          }
 
           //isset notify
           $notify = DB::table('notifications')
@@ -358,7 +352,7 @@ class RestaurantFoodScan extends Model
             ->limit(1)
             ->first();
 
-          if (!$valid_group || !$valid_setting || $notify) {
+          if (!$valid_group || $notify) {
             continue;
           }
 

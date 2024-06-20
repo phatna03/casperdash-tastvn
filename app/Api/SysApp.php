@@ -27,6 +27,8 @@ class SysApp
   public const _DEBUG_LOG_FOLDER = 'public/logs/';
   public const _DEBUG_LOG_FILE_S3_CALLBACK = 'public/logs/s3_callback.log';
 
+  public const _DEBUG_BREAK = '===========================================================================';
+
   protected const _DEBUG_LOG_FILE_CRON = 'public/logs/cron_tastevn.log';
   protected const _DEBUG_LOG_FILE_S3_POLLY = 'public/logs/s3_polly.log';
   protected const _DEBUG_LOG_FILE_ROBOFLOW = 'public/logs/cron_tastevn_rbf_retrain.log';
