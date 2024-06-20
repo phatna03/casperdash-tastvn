@@ -54,12 +54,12 @@ class TesterController extends Controller
 
     $arr = $this->photo_duplicate([
       //market test
-      'restaurant_id' => 10,
+      'restaurant_id' => 5,
 
       'date_from' => '2024-06-01',
-      'date_to' => '2024-06-20',
+      'date_to' => '2024-06-30',
 
-      'rfs_id' => 40669,
+      'rfs_id' => 43496,
     ]);
 
     var_dump($arr);

@@ -252,6 +252,7 @@ Route::post('/admin/sensor/food/scan/error', [SensorController::class, 'food_sca
 Route::post('/admin/sensor/food/scan/get/food', [SensorController::class, 'food_scan_get_food']);
 Route::post('/admin/sensor/food/scan/resolve', [SensorController::class, 'food_scan_resolve']);
 Route::post('/admin/sensor/food/scan/mark', [SensorController::class, 'food_scan_mark']);
+Route::post('/admin/sensor/food/scan/view', [SensorController::class, 'food_scan_view']);
 Route::get('/admin/kitchen/{id}', [SensorController::class, 'kitchen']);
 Route::post('/admin/kitchen/checker', [SensorController::class, 'kitchen_checker']);
 Route::post('/admin/kitchen/predict', [SensorController::class, 'kitchen_predict']);

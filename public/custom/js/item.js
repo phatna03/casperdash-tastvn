@@ -641,6 +641,44 @@ function sensor_info(itd) {
 function sensor_kitchen(itd) {
   page_url(acmcfs.link_base_url + '/admin/kitchen/' + itd);
 }
+function sensor_stats_view_foods() {
+  sensor_stats_view('food', 0);
+}
+function sensor_stats_view_food(food_id) {
+  sensor_stats_view('food', food_id);
+}
+function sensor_stats_view_ingredients() {
+  sensor_stats_view('ingredient', 0);
+}
+function sensor_stats_view_ingredient(ingredient_id) {
+  sensor_stats_view('ingredient', ingredient_id);
+}
+function sensor_stats_view_times() {
+  sensor_stats_view('hour', 0);
+}
+function sensor_stats_view_time(hour) {
+  sensor_stats_view('hour', hour);
+}
+function sensor_stats_view(type, item = 0) {
+
+  axios.post('/admin/sensor/food/scan/view', {
+    item: $('body input[name=current_restaurant]').val(),
+    times: times,
+    type: 'total',
+    item_type: type,
+    item_id: item,
+  })
+    .then(response => {
+
+
+
+    })
+    .catch(error => {
+      console.log(error);
+    });
+
+  return false;
+}
 function sensor_stats() {
   var wrap = $('#wrap-stats-total');
 
@@ -693,10 +731,22 @@ function sensor_stats() {
       if (response.data.stats.food_error_list.length) {
         var html = '';
 
+        html += '<li>' +
+          '<a class="dropdown-item cursor-pointer" href="javascript:void(0);" onclick="sensor_stats_view_foods()">' +
+          'Total: ' +
+          '<b class="acm-mr-px-5">' + response.data.stats.food_error + '</b>' +
+          '</a>' +
+          '</li>';
+
         response.data.stats.food_error_list.forEach(function (v, k) {
           var title = v.food_name && v.food_name !== '' && v.food_name !== 'null'
             ? v.food_name : 'No food found';
-          html += '<li><a class="dropdown-item" href="javascript:void(0);"><b class="acm-mr-px-5">' + v.total_error + '</b>' + v.food_name + '</a></li>';
+
+          html += '<li>' +
+            '<a class="dropdown-item cursor-pointer" href="javascript:void(0);" onclick="sensor_stats_view_food(\'' + v.food_id + '\')">' +
+            '<b class="acm-mr-px-5">' + v.total_error + '</b>' +
+            v.food_name + '</a>' +
+            '</li>';
         });
 
         wrap.find('.stats-food-list').empty()
@@ -711,10 +761,22 @@ function sensor_stats() {
       if (response.data.stats.ingredient_missing_list.length) {
         var html = '';
 
+        html += '<li>' +
+          '<a class="dropdown-item cursor-pointer" href="javascript:void(0);" onclick="sensor_stats_view_ingredients()">' +
+          'Total: ' +
+          '<b class="acm-mr-px-5">' + response.data.stats.ingredient_missing + '</b>' +
+          '</a>' +
+          '</li>';
+
         response.data.stats.ingredient_missing_list.forEach(function (v, k) {
           var title = v.ingredient_name && v.ingredient_name !== '' && v.ingredient_name !== 'null'
             ? v.ingredient_name : 'No ingredient found';
-          html += '<li><a class="dropdown-item" href="javascript:void(0);"><b class="acm-mr-px-5">' + v.total_error + '</b>' + v.ingredient_name + '</a></li>';
+
+          html += '<li>' +
+            '<a class="dropdown-item" href="javascript:void(0);" onclick="sensor_stats_view_ingredient(\'' + v.ingredient_id + '\')">' +
+            '<b class="acm-mr-px-5">' + v.total_error + '</b>' +
+            v.ingredient_name + '</a>' +
+            '</li>';
         });
 
         wrap.find('.stats-ingredients-missing-list').empty()
@@ -727,11 +789,23 @@ function sensor_stats() {
       if (response.data.stats.time_frame_list.length) {
         var html = '';
 
+        html += '<li>' +
+          '<a class="dropdown-item cursor-pointer" href="javascript:void(0);" onclick="sensor_stats_view_times()">' +
+          'Total: ' +
+          '<b class="acm-mr-px-5">' + response.data.stats.time_frame + '</b>' +
+          '</a>' +
+          '</li>';
+
         response.data.stats.time_frame_list.forEach(function (v, k) {
           var title = v.hour_error < 10
             ? '0' + v.hour_error + ':00 - ' + '0' + v.hour_error + ':59'
             : v.hour_error + ':00 - ' + v.hour_error + ':59';
-          html += '<li><a class="dropdown-item" href="javascript:void(0);"><b class="acm-mr-px-5">' + v.total_error + '</b>' + title + '</a></li>';
+
+          html += '<li>' +
+            '<a class="dropdown-item" href="javascript:void(0);" onclick="sensor_stats_view_time(\'' + v.hour_error + '\')">' +
+            '<b class="acm-mr-px-5">' + v.total_error + '</b>' +
+            title + '</a>' +
+            '</li>';
         });
 
         wrap.find('.stats-time-frames-list').empty()

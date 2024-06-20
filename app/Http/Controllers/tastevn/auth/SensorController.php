@@ -969,6 +969,41 @@ class SensorController extends Controller
     ]);
   }
 
+  public function food_scan_view(Request $request)
+  {
+    $values = $request->post();
+
+    $validator = Validator::make($values, [
+      'item' => 'required',
+    ]);
+    if ($validator->fails()) {
+      return response()->json($validator->errors(), 422);
+    }
+    //invalid
+    $row = Restaurant::find((int)$values['item']);
+    if (!$row) {
+      return response()->json([
+        'error' => 'Invalid item'
+      ], 422);
+    }
+
+    $type = isset($values['type']) ? $values['type'] : 'total';
+    $times = isset($values['times']) ? $values['times'] : NULL;
+
+    $item_type = isset($values['item_type']) ? $values['item_type'] : NULL;
+    $item_id = isset($values['item_id']) ? (int)$values['item_id'] : 0;
+
+    return response()->json([
+      'stats' => $row->get_stats_by_conditions([
+        'times' => $times,
+        'item_type' => $item_type,
+        'item_id' => $item_id,
+      ]),
+
+      'status' => true,
+    ], 200);
+  }
+
   public function stats(Request $request)
   {
     $values = $request->post();

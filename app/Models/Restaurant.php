@@ -310,6 +310,125 @@ class Restaurant extends Model
     return $data;
   }
 
+  public function get_stats_by_conditions($pars = [])
+  {
+    $data = [];
+    $sys_app = new SysApp();
+
+    $search_time_from = NULL;
+    $search_time_to = NULL;
+
+    $times = isset($pars['times']) ? $pars['times'] : NULL;
+    $item_type = isset($pars['item_type']) ? $pars['item_type'] : 'food';
+    $item_id = isset($pars['item_id']) ? (int)$pars['item_id'] : 0;
+
+
+    if (!empty($times)) {
+      $search_time_from = $sys_app->parse_date_range($times)['time_from'];
+      $search_time_to = $sys_app->parse_date_range($times)['time_to'];
+    }
+
+    $status_valid = ['checked', 'failed'];
+
+    //food category
+    $error_food_category = RestaurantFoodScan::query("restaurant_food_scans")
+      ->distinct()
+      ->where('restaurant_food_scans.deleted', 0)
+      ->where('restaurant_food_scans.restaurant_id', $this->id)
+      ->whereIn('restaurant_food_scans.status', $status_valid)
+      ->where('restaurant_food_scans.food_category_id', '>', 0)
+      ->where('restaurant_food_scans.missing_ids', '<>', NULL);
+
+    //food
+    $error_food = RestaurantFoodScan::query("restaurant_food_scans")
+      ->distinct()
+      ->where('restaurant_food_scans.deleted', 0)
+      ->where('restaurant_food_scans.restaurant_id', $this->id)
+      ->whereIn('restaurant_food_scans.status', $status_valid)
+      ->where('restaurant_food_scans.food_id', '>', 0)
+      ->where('restaurant_food_scans.missing_ids', '<>', NULL);
+
+    //ingredient missing
+    $error_ingredient_missing = RestaurantFoodScanMissing::query("restaurant_food_scan_missings")
+      ->leftJoin("restaurant_food_scans", "restaurant_food_scans.id", "=", "restaurant_food_scan_missings.restaurant_food_scan_id")
+      ->where('restaurant_food_scans.deleted', 0)
+      ->where('restaurant_food_scans.restaurant_id', $this->id)
+      ->whereIn('restaurant_food_scans.status', $status_valid)
+      ->where('restaurant_food_scans.missing_ids', '<>', NULL)
+      ->where('restaurant_food_scans.food_id', '>', 0);
+
+    //time frames
+    $error_time_frame = RestaurantFoodScan::query("restaurant_food_scans")
+      ->where('restaurant_food_scans.deleted', 0)
+      ->where('restaurant_food_scans.restaurant_id', $this->id)
+      ->whereIn('restaurant_food_scans.status', $status_valid)
+      ->where('restaurant_food_scans.food_id', '>', 0)
+      ->where('restaurant_food_scans.missing_ids', '<>', NULL);
+
+    //search params
+    if (!empty($search_time_from)) {
+      $error_food_category->where('restaurant_food_scans.time_photo', '>=', $search_time_from);
+      $error_food->where('restaurant_food_scans.time_photo', '>=', $search_time_from);
+      $error_ingredient_missing->where('restaurant_food_scans.time_photo', '>=', $search_time_from);
+      $error_time_frame->where('restaurant_food_scans.time_photo', '>=', $search_time_from);
+    }
+    if (!empty($search_time_to)) {
+      $error_food_category->where('restaurant_food_scans.time_photo', '<=', $search_time_to);
+      $error_food->where('restaurant_food_scans.time_photo', '<=', $search_time_to);
+      $error_ingredient_missing->where('restaurant_food_scans.time_photo', '<=', $search_time_to);
+      $error_time_frame->where('restaurant_food_scans.time_photo', '<=', $search_time_to);
+    }
+
+    //food category
+    $error_food_category_list = clone $error_food_category;
+
+    $error_food_category = $error_food_category->select('restaurant_food_scans.food_category_id')
+      ->get();
+    $error_food_category_list->select('restaurant_food_scans.food_category_id', 'food_categories.name as food_category_name')
+      ->selectRaw('COUNT(restaurant_food_scans.id) as total_error')
+      ->leftJoin("food_categories", "food_categories.id", "=", "restaurant_food_scans.food_category_id")
+      ->groupBy(['restaurant_food_scans.food_category_id', 'food_categories.name'])
+      ->orderBy('total_error', 'desc');
+
+    $data['category_error_list'] = $error_food_category_list->get();
+
+    //food
+    $error_food_list = clone $error_food;
+
+    $error_food_list->select('restaurant_food_scans.food_id', 'foods.name as food_name')
+      ->selectRaw('COUNT(restaurant_food_scans.id) as total_error')
+      ->leftJoin("foods", "foods.id", "=", "restaurant_food_scans.food_id")
+      ->groupBy(['restaurant_food_scans.food_id', 'foods.name'])
+      ->orderBy('total_error', 'desc');
+
+    $data['food_error_list'] = $error_food_list->get();
+
+    //ingredient missing
+    $error_ingredient_missing_list = clone $error_ingredient_missing;
+
+    $error_ingredient_missing_list->select('restaurant_food_scan_missings.ingredient_id', 'ingredients.name as ingredient_name')
+      ->selectRaw('SUM(restaurant_food_scan_missings.ingredient_quantity) as total_error')
+      ->leftJoin("ingredients", "ingredients.id", "=", "restaurant_food_scan_missings.ingredient_id")
+      ->groupBy(['restaurant_food_scan_missings.ingredient_id', 'ingredients.name'])
+      ->orderBy('total_error', 'desc');
+
+    $data['ingredient_missing_list'] = $error_ingredient_missing_list->get();
+
+    //time frames
+    $error_time_frame_list = clone $error_time_frame;
+
+    $error_time_frame_list->select(DB::raw('hour(restaurant_food_scans.time_photo) as hour_error'),
+      DB::raw('COUNT(restaurant_food_scans.id) as total_error'))
+      ->groupBy(DB::raw('hour(restaurant_food_scans.time_photo)'))
+      ->orderBy('total_error', 'desc');
+
+    $data['time_frame_list'] = $error_time_frame_list->get();
+
+    $data['sql1'] = $sys_app->parse_to_query($error_time_frame_list);
+
+    return $data;
+  }
+
   public function serve_food($food)
   {
     $rows = [];
