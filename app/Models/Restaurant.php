@@ -414,25 +414,29 @@ class Restaurant extends Model
     if ($item_type == 'ingredient') {
       $error_ingredient_missing_list = clone $error_ingredient_missing;
 
-      $error_ingredient_missing_list->select('restaurant_food_scan_missings.ingredient_id', 'ingredients.name as ingredient_name')
-        ->selectRaw('SUM(restaurant_food_scan_missings.ingredient_quantity) as total_error')
-        ->leftJoin("ingredients", "ingredients.id", "=", "restaurant_food_scan_missings.ingredient_id")
-        ->groupBy(['restaurant_food_scan_missings.ingredient_id', 'ingredients.name'])
-        ->orderBy('total_error', 'desc');
+      if ($item_id) {
+        $error_ingredient_missing_list->select('restaurant_food_scans.id')
+          ->leftJoin("ingredients", "ingredients.id", "=", "restaurant_food_scan_missings.ingredient_id")
+          ->where('ingredients.id', $item_id);
+      } else {
+        $error_ingredient_missing_list->select('restaurant_food_scans.id');
+      }
 
-      $data['ingredient_missing_list'] = $error_ingredient_missing_list->get();
+      $data = $error_ingredient_missing_list->get()->toArray();
     }
 
     //time frames
     if ($item_type == 'hour') {
       $error_time_frame_list = clone $error_time_frame;
 
-      $error_time_frame_list->select(DB::raw('hour(restaurant_food_scans.time_photo) as hour_error'),
-        DB::raw('COUNT(restaurant_food_scans.id) as total_error'))
-        ->groupBy(DB::raw('hour(restaurant_food_scans.time_photo)'))
-        ->orderBy('total_error', 'desc');
+      if ($item_id) {
+        $error_time_frame_list->select('restaurant_food_scans.id')
+          ->where(DB::raw("HOUR(restaurant_food_scans.time_photo)"), $item_id);
+      } else {
+        $error_time_frame_list->select('restaurant_food_scans.id');
+      }
 
-      $data['time_frame_list'] = $error_time_frame_list->get();
+      $data = $error_time_frame_list->get()->toArray();
     }
 
     return $data;
