@@ -313,7 +313,7 @@ function restaurant_food_photo(ele) {
   var bind = $(ele);
   var url = bind.val();
   var ext = url.substring(url.lastIndexOf('.') + 1).toLowerCase();
-  var img_exts = ['jpg', 'jpeg', 'png'];
+  var img_exts = ['jpg', 'jpeg', 'png', 'webp'];
 
   if (ele.files[0].size < 0 || !img_exts.includes(ext)) {
     bind.val("");
@@ -784,7 +784,7 @@ function sensor_stats() {
 
         html += '<li>' +
           '<a class="dropdown-item cursor-pointer" href="javascript:void(0);" onclick="sensor_stats_view_foods()">' +
-          'Total: ' +
+          'View all photos: ' +
           '<b class="acm-mr-px-5">' + response.data.stats.food_error + '</b>' +
           '</a>' +
           '</li>';
@@ -814,7 +814,7 @@ function sensor_stats() {
 
         html += '<li>' +
           '<a class="dropdown-item cursor-pointer" href="javascript:void(0);" onclick="sensor_stats_view_ingredients()">' +
-          'Total: ' +
+          'View all photos: ' +
           '<b class="acm-mr-px-5">' + response.data.stats.ingredient_missing + '</b>' +
           '</a>' +
           '</li>';
@@ -842,7 +842,7 @@ function sensor_stats() {
 
         html += '<li>' +
           '<a class="dropdown-item cursor-pointer" href="javascript:void(0);" onclick="sensor_stats_view_times()">' +
-          'Total: ' +
+          'View all photos: ' +
           '<b class="acm-mr-px-5">' + response.data.stats.time_frame + '</b>' +
           '</a>' +
           '</li>';

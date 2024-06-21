@@ -27,7 +27,7 @@
 <script src="{{url('custom/library/selectize/selectize.min.js')}}"></script>
 <script src="{{url('custom/library/axios/axios.min.js')}}"></script>
 <script src="{{url('custom/js/app.js?v=' . (int)date('Ymd') . '103')}}"></script>
-<script src="{{url('custom/js/item.js?v=' . (int)date('Ymd') . '103')}}"></script>
+<script src="{{url('custom/js/item.js?v=' . (int)date('Ymd') . '104')}}"></script>
 
 <script type="text/javascript">
   //tastevn

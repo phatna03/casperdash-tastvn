@@ -421,11 +421,25 @@ class SysRobo
 
     $debug = isset($pars['debug']) ? (bool)$pars['debug'] : false;
     $food_only = isset($pars['food_only']) ? (bool)$pars['food_only'] : false;
+    $restaurant_id = isset($pars['restaurant_id']) ? (int)$pars['restaurant_id'] : 0;
     $restaurant_parent_id = isset($pars['restaurant_parent_id']) ? (int)$pars['restaurant_parent_id'] : 0;
     $restaurant_parent = RestaurantParent::find($restaurant_parent_id);
 
     $predictions = isset($pars['predictions']) ? (array)$pars['predictions'] : [];
 
+    switch ($restaurant_id) {
+      case 5:
+      case 6:
+      $food_confidence = 40;
+        break;
+
+      case 8:
+      case 9:
+      case 10:
+      case 11:
+      $food_confidence = 75;
+        break;
+    }
 
     if (count($predictions) && $restaurant_parent) {
 

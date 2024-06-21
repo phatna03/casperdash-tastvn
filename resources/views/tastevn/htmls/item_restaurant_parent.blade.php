@@ -6,7 +6,7 @@
       <form onsubmit="return event.preventDefault();" id="frm_food_photo_standard">
         <input type="file" name="photo"
                onchange="restaurant_food_photo(this)"
-               accept=".jpg,.jpeg,.png"
+               accept=".jpg,.jpeg,.png,.webp"
         />
 
         <input type="hidden" name="food_id" />

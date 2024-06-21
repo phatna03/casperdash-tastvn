@@ -232,6 +232,7 @@ class RestaurantFoodScan extends Model
     $foods = SysRobo::foods_find([
       'predictions' => $predictions,
       'restaurant_parent_id' => $restaurant->restaurant_parent_id,
+      'restaurant_id' => $restaurant->id,
 
       'debug' => $debug,
     ]);
@@ -603,6 +604,7 @@ class RestaurantFoodScan extends Model
       $foods = SysRobo::foods_find([
         'predictions' => $arr['result']['predictions'],
         'restaurant_parent_id' => $sensor->restaurant_parent_id,
+        'restaurant_id' => $sensor->id,
 
         'food_only' => true,
 
@@ -723,6 +725,7 @@ class RestaurantFoodScan extends Model
     $foods = SysRobo::foods_find([
       'predictions' => $prediction1s,
       'restaurant_parent_id' => $restaurant->restaurant_parent_id,
+      'restaurant_id' => $restaurant->id,
 
       'food_only' => true,
 
