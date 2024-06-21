@@ -660,6 +660,15 @@ function sensor_stats_view_time(hour) {
   sensor_stats_view('hour', hour);
 }
 function sensor_stats_view(type, item = 0) {
+  var wrap = $('#wrap-stats-total');
+
+  var times = wrap.find('input[name=search_time]').val();
+
+  wrap.find('.wrap-search-condition').addClass('d-none');
+  if (times && times !== '') {
+    wrap.find('.wrap-search-condition').removeClass('d-none');
+    wrap.find('.wrap-search-condition .search-time').empty().text(times);
+  }
 
   axios.post('/admin/sensor/food/scan/view', {
     item: $('body input[name=current_restaurant]').val(),
@@ -670,7 +679,49 @@ function sensor_stats_view(type, item = 0) {
   })
     .then(response => {
 
+      if (response.data.ids.length) {
+        var itd = response.data.itd;
 
+        //sensor_food_scan_info
+        var popup = $('#modal_food_scan_info');
+        popup.find('input[name=popup_view_id_itm]').val(itd);
+
+        var hidden_btns = true;
+        if (response.data.ids.length > 1) {
+          hidden_btns = false;
+        }
+
+        popup.find('input[name=popup_view_ids]').val(response.data.ids_string);
+
+        popup.find('.acm-modal-arrow').removeClass('d-none');
+        if (hidden_btns) {
+          popup.find('.acm-modal-arrow').addClass('d-none');
+        }
+
+        popup.find('.modal-header h4').text('Loading...');
+        popup.find('.modal-body').addClass('text-center').empty()
+          .append('<div class="m-auto">' + acmcfs.html_loading + '</div>');
+
+        axios.post('/admin/sensor/food/scan/info', {
+          item: itd,
+        })
+          .then(response => {
+
+            var title = response.data.restaurant.name + ' <span class="badge acm-ml-px-10 bg-primary">ID: ' + response.data.item.id + '</span>';
+            popup.find('.modal-header h4').empty().append(title);
+
+            popup.find('.modal-body').removeClass('text-center').empty()
+              .append(response.data.html_info);
+
+            bind_datad(popup);
+            popup.modal('show');
+
+          })
+          .catch(error => {
+            console.log(error);
+          });
+
+      }
 
     })
     .catch(error => {

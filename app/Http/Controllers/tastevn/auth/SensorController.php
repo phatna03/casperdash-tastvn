@@ -993,12 +993,22 @@ class SensorController extends Controller
     $item_type = isset($values['item_type']) ? $values['item_type'] : NULL;
     $item_id = isset($values['item_id']) ? (int)$values['item_id'] : 0;
 
+    $ids = [];
+
+    $ids = $row->get_stats_by_conditions([
+      'times' => $times,
+      'item_type' => $item_type,
+      'item_id' => $item_id,
+    ]);
+
+    if (count($ids)) {
+      $ids = array_column($ids, 'id');
+    }
+
     return response()->json([
-      'stats' => $row->get_stats_by_conditions([
-        'times' => $times,
-        'item_type' => $item_type,
-        'item_id' => $item_id,
-      ]),
+      'ids' => $ids,
+      'ids_string' => count($ids) ? implode(';', $ids) : '',
+      'itd' => count($ids) ? $ids[0] : 0,
 
       'status' => true,
     ], 200);

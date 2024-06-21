@@ -380,51 +380,60 @@ class Restaurant extends Model
     }
 
     //food category
-    $error_food_category_list = clone $error_food_category;
+    if ($item_type == 'food_category') {
+      $error_food_category_list = clone $error_food_category;
 
-    $error_food_category = $error_food_category->select('restaurant_food_scans.food_category_id')
-      ->get();
-    $error_food_category_list->select('restaurant_food_scans.food_category_id', 'food_categories.name as food_category_name')
-      ->selectRaw('COUNT(restaurant_food_scans.id) as total_error')
-      ->leftJoin("food_categories", "food_categories.id", "=", "restaurant_food_scans.food_category_id")
-      ->groupBy(['restaurant_food_scans.food_category_id', 'food_categories.name'])
-      ->orderBy('total_error', 'desc');
+      $error_food_category = $error_food_category->select('restaurant_food_scans.food_category_id')
+        ->get();
+      $error_food_category_list->select('restaurant_food_scans.food_category_id', 'food_categories.name as food_category_name')
+        ->selectRaw('COUNT(restaurant_food_scans.id) as total_error')
+        ->leftJoin("food_categories", "food_categories.id", "=", "restaurant_food_scans.food_category_id")
+        ->groupBy(['restaurant_food_scans.food_category_id', 'food_categories.name'])
+        ->orderBy('total_error', 'desc');
 
-    $data['category_error_list'] = $error_food_category_list->get();
+
+      $data['category_error_list'] = $error_food_category_list->get();
+    }
 
     //food
-    $error_food_list = clone $error_food;
+    if ($item_type == 'food') {
+      $error_food_list = clone $error_food;
 
-    $error_food_list->select('restaurant_food_scans.food_id', 'foods.name as food_name')
-      ->selectRaw('COUNT(restaurant_food_scans.id) as total_error')
-      ->leftJoin("foods", "foods.id", "=", "restaurant_food_scans.food_id")
-      ->groupBy(['restaurant_food_scans.food_id', 'foods.name'])
-      ->orderBy('total_error', 'desc');
+      if ($item_id) {
+        $error_food_list->select('restaurant_food_scans.id')
+          ->leftJoin("foods", "foods.id", "=", "restaurant_food_scans.food_id")
+          ->where('restaurant_food_scans.food_id', $item_id);
+      } else {
+        $error_food_list->select('restaurant_food_scans.id');
+      }
 
-    $data['food_error_list'] = $error_food_list->get();
+      $data = $error_food_list->get()->toArray();
+    }
 
     //ingredient missing
-    $error_ingredient_missing_list = clone $error_ingredient_missing;
+    if ($item_type == 'ingredient') {
+      $error_ingredient_missing_list = clone $error_ingredient_missing;
 
-    $error_ingredient_missing_list->select('restaurant_food_scan_missings.ingredient_id', 'ingredients.name as ingredient_name')
-      ->selectRaw('SUM(restaurant_food_scan_missings.ingredient_quantity) as total_error')
-      ->leftJoin("ingredients", "ingredients.id", "=", "restaurant_food_scan_missings.ingredient_id")
-      ->groupBy(['restaurant_food_scan_missings.ingredient_id', 'ingredients.name'])
-      ->orderBy('total_error', 'desc');
+      $error_ingredient_missing_list->select('restaurant_food_scan_missings.ingredient_id', 'ingredients.name as ingredient_name')
+        ->selectRaw('SUM(restaurant_food_scan_missings.ingredient_quantity) as total_error')
+        ->leftJoin("ingredients", "ingredients.id", "=", "restaurant_food_scan_missings.ingredient_id")
+        ->groupBy(['restaurant_food_scan_missings.ingredient_id', 'ingredients.name'])
+        ->orderBy('total_error', 'desc');
 
-    $data['ingredient_missing_list'] = $error_ingredient_missing_list->get();
+      $data['ingredient_missing_list'] = $error_ingredient_missing_list->get();
+    }
 
     //time frames
-    $error_time_frame_list = clone $error_time_frame;
+    if ($item_type == 'hour') {
+      $error_time_frame_list = clone $error_time_frame;
 
-    $error_time_frame_list->select(DB::raw('hour(restaurant_food_scans.time_photo) as hour_error'),
-      DB::raw('COUNT(restaurant_food_scans.id) as total_error'))
-      ->groupBy(DB::raw('hour(restaurant_food_scans.time_photo)'))
-      ->orderBy('total_error', 'desc');
+      $error_time_frame_list->select(DB::raw('hour(restaurant_food_scans.time_photo) as hour_error'),
+        DB::raw('COUNT(restaurant_food_scans.id) as total_error'))
+        ->groupBy(DB::raw('hour(restaurant_food_scans.time_photo)'))
+        ->orderBy('total_error', 'desc');
 
-    $data['time_frame_list'] = $error_time_frame_list->get();
-
-    $data['sql1'] = $sys_app->parse_to_query($error_time_frame_list);
+      $data['time_frame_list'] = $error_time_frame_list->get();
+    }
 
     return $data;
   }
