@@ -4,12 +4,12 @@ namespace App\Http\Controllers\tastevn;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 //lib
 use App\Api\SysApp;
 use App\Api\SysRobo;
 use App\Models\RestaurantFoodScan;
-use Illuminate\Support\Facades\DB;
 
 class ErrorController extends Controller
 {
@@ -56,8 +56,11 @@ class ErrorController extends Controller
     $values = $request->post();
 
     $ids = [];
-    $date = '2024-06-18';
+    $date = date('Y-m-d');
     $count = 0;
+
+
+    die;
 
     $rows = RestaurantFoodScan::whereIn('restaurant_id', [5,6,8,9,10,11])
       ->where('rbf_api', '<>', NULL)

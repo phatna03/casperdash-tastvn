@@ -52,17 +52,17 @@ class TesterController extends Controller
     $date = date('Y-m-d');
 
 
-    $arr = $this->photo_duplicate([
-      //market test
-      'restaurant_id' => 5,
+//    $arr = $this->photo_duplicate([
+//      //market test
+//      'restaurant_id' => 11,
+//
+//      'date_from' => '2024-06-17',
+//      'date_to' => '2024-06-21',
+//
+////      'rfs_id' => 43496,
+//    ]);
 
-      'date_from' => '2024-06-01',
-      'date_to' => '2024-06-30',
-
-      'rfs_id' => 43496,
-    ]);
-
-    var_dump($arr);
+//    var_dump($arr);
 
     //fix live
 
@@ -95,7 +95,8 @@ class TesterController extends Controller
   {
     $sys_app = new SysApp();
 
-    $select = RestaurantFoodScan::query('restaurant_food_scans');
+    $select = RestaurantFoodScan::query('restaurant_food_scans')
+      ->where('status', '<>', 'duplicated');
 
     if (isset($pars['restaurant_id']) && (int)$pars['restaurant_id']) {
       $select->where('restaurant_food_scans.restaurant_id', (int)$pars['restaurant_id']);
@@ -170,13 +171,40 @@ class TesterController extends Controller
 
         //find duplicate
         $duplicates = RestaurantFoodScan::where('deleted', 0)
+          ->where('status', '<>', 'duplicated')
           ->where('photo_name', 'LIKE', $keyword)
           ->where('id', '<>', $row->id)
+          ->orderBy('food_id', 'desc')
           ->get();
         var_dump('TOTAL DUPLICATED= ' . count($duplicates));
 
         //check missing
-        $id_main = !empty($row->missing_ids) ? 0 : $row->id;
+        $id_main = 0;
+        if ($row->food_id) {
+
+          if (!empty($row->missing_ids)) {
+
+            $temp1 = RestaurantFoodScan::where('deleted', 0)
+              ->where('status', '<>', 'duplicated')
+              ->where('photo_name', 'LIKE', $keyword)
+              ->where('id', '<>', $row->id)
+              ->where('food_id', $row->food_id)
+              ->where('missing_ids', NULL)
+              ->orderBy('food_id', 'desc')
+              ->orderBy('id', 'asc')
+              ->first();
+
+            if ($temp1) {
+              $id_main = $temp1->id;
+            } else {
+              $id_main = $row->id;
+            }
+
+          } else {
+            $id_main = $row->id;
+          }
+        }
+
         $id_duplicates = [];
         $need_compare = false;
 

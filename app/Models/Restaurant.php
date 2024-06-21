@@ -178,6 +178,9 @@ class Restaurant extends Model
 
     $status_valid = ['checked', 'failed'];
 
+    //group = super-confidence
+    $food_ids = $this->query_foods(1);
+
     switch ($type) {
       case 'total':
 
@@ -185,13 +188,18 @@ class Restaurant extends Model
           ->distinct()
           ->where('restaurant_food_scans.deleted', 0)
           ->where('restaurant_food_scans.restaurant_id', $this->id)
-          ->whereIn('restaurant_food_scans.status', $status_valid);
+          ->whereIn('restaurant_food_scans.status', $status_valid)
+          ->whereIn('restaurant_food_scans.food_id', $food_ids)
+        ;
+
         $today_found = RestaurantFoodScan::query("restaurant_food_scans")
           ->distinct()
           ->where('restaurant_food_scans.deleted', 0)
           ->where('restaurant_food_scans.restaurant_id', $this->id)
           ->whereIn('restaurant_food_scans.status', $status_valid)
-          ->whereDate('restaurant_food_scans.time_photo', date('Y-m-d'));
+          ->whereDate('restaurant_food_scans.time_photo', date('Y-m-d'))
+          ->whereIn('restaurant_food_scans.food_id', $food_ids)
+        ;
 
         //food category
         $error_food_category = RestaurantFoodScan::query("restaurant_food_scans")
@@ -200,7 +208,9 @@ class Restaurant extends Model
           ->where('restaurant_food_scans.restaurant_id', $this->id)
           ->whereIn('restaurant_food_scans.status', $status_valid)
           ->where('restaurant_food_scans.food_category_id', '>', 0)
-          ->where('restaurant_food_scans.missing_ids', '<>', NULL);
+          ->where('restaurant_food_scans.missing_ids', '<>', NULL)
+          ->whereIn('restaurant_food_scans.food_id', $food_ids)
+        ;
 
         //food
         $error_food = RestaurantFoodScan::query("restaurant_food_scans")
@@ -209,7 +219,9 @@ class Restaurant extends Model
           ->where('restaurant_food_scans.restaurant_id', $this->id)
           ->whereIn('restaurant_food_scans.status', $status_valid)
           ->where('restaurant_food_scans.food_id', '>', 0)
-          ->where('restaurant_food_scans.missing_ids', '<>', NULL);
+          ->where('restaurant_food_scans.missing_ids', '<>', NULL)
+          ->whereIn('restaurant_food_scans.food_id', $food_ids)
+        ;
 
         //ingredient missing
         $error_ingredient_missing = RestaurantFoodScanMissing::query("restaurant_food_scan_missings")
@@ -218,7 +230,9 @@ class Restaurant extends Model
           ->where('restaurant_food_scans.restaurant_id', $this->id)
           ->whereIn('restaurant_food_scans.status', $status_valid)
           ->where('restaurant_food_scans.missing_ids', '<>', NULL)
-          ->where('restaurant_food_scans.food_id', '>', 0);
+          ->where('restaurant_food_scans.food_id', '>', 0)
+          ->whereIn('restaurant_food_scans.food_id', $food_ids)
+        ;
 
         //time frames
         $error_time_frame = RestaurantFoodScan::query("restaurant_food_scans")
@@ -226,7 +240,9 @@ class Restaurant extends Model
           ->where('restaurant_food_scans.restaurant_id', $this->id)
           ->whereIn('restaurant_food_scans.status', $status_valid)
           ->where('restaurant_food_scans.food_id', '>', 0)
-          ->where('restaurant_food_scans.missing_ids', '<>', NULL);
+          ->where('restaurant_food_scans.missing_ids', '<>', NULL)
+          ->whereIn('restaurant_food_scans.food_id', $food_ids)
+        ;
 
         //search params
         if (!empty($search_time_from)) {
@@ -330,6 +346,9 @@ class Restaurant extends Model
 
     $status_valid = ['checked', 'failed'];
 
+    //group = super-confidence
+    $food_ids = $this->query_foods(1);
+
     //food category
     $error_food_category = RestaurantFoodScan::query("restaurant_food_scans")
       ->distinct()
@@ -337,7 +356,9 @@ class Restaurant extends Model
       ->where('restaurant_food_scans.restaurant_id', $this->id)
       ->whereIn('restaurant_food_scans.status', $status_valid)
       ->where('restaurant_food_scans.food_category_id', '>', 0)
-      ->where('restaurant_food_scans.missing_ids', '<>', NULL);
+      ->where('restaurant_food_scans.missing_ids', '<>', NULL)
+      ->whereIn('restaurant_food_scans.food_id', $food_ids)
+    ;
 
     //food
     $error_food = RestaurantFoodScan::query("restaurant_food_scans")
@@ -346,7 +367,9 @@ class Restaurant extends Model
       ->where('restaurant_food_scans.restaurant_id', $this->id)
       ->whereIn('restaurant_food_scans.status', $status_valid)
       ->where('restaurant_food_scans.food_id', '>', 0)
-      ->where('restaurant_food_scans.missing_ids', '<>', NULL);
+      ->where('restaurant_food_scans.missing_ids', '<>', NULL)
+      ->whereIn('restaurant_food_scans.food_id', $food_ids)
+    ;
 
     //ingredient missing
     $error_ingredient_missing = RestaurantFoodScanMissing::query("restaurant_food_scan_missings")
@@ -355,7 +378,9 @@ class Restaurant extends Model
       ->where('restaurant_food_scans.restaurant_id', $this->id)
       ->whereIn('restaurant_food_scans.status', $status_valid)
       ->where('restaurant_food_scans.missing_ids', '<>', NULL)
-      ->where('restaurant_food_scans.food_id', '>', 0);
+      ->where('restaurant_food_scans.food_id', '>', 0)
+      ->whereIn('restaurant_food_scans.food_id', $food_ids)
+    ;
 
     //time frames
     $error_time_frame = RestaurantFoodScan::query("restaurant_food_scans")
@@ -363,7 +388,9 @@ class Restaurant extends Model
       ->where('restaurant_food_scans.restaurant_id', $this->id)
       ->whereIn('restaurant_food_scans.status', $status_valid)
       ->where('restaurant_food_scans.food_id', '>', 0)
-      ->where('restaurant_food_scans.missing_ids', '<>', NULL);
+      ->where('restaurant_food_scans.missing_ids', '<>', NULL)
+      ->whereIn('restaurant_food_scans.food_id', $food_ids)
+    ;
 
     //search params
     if (!empty($search_time_from)) {
