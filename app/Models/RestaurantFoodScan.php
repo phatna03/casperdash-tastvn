@@ -327,6 +327,9 @@ class RestaurantFoodScan extends Model
 
     $this->update_ingredients_missing_text();
 
+    $restaurant = $this->get_restaurant();
+    $group = $restaurant->query_food_groups($food);
+
     //notify
     if (count($ingredients) && $notification) {
       $users = $this->get_restaurant()->get_users();
@@ -335,7 +338,7 @@ class RestaurantFoodScan extends Model
 
           //live_group
           $valid_group = true;
-          if ($food->live_group > 1) {
+          if ($group > 1) {
             $valid_group = false;
           }
           if ($user->is_super_admin() || $user->is_dev()) {

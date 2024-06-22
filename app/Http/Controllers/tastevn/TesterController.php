@@ -51,6 +51,13 @@ class TesterController extends Controller
     $sensor = Restaurant::find(5);
     $date = date('Y-m-d');
 
+    $row = RestaurantFoodScan::find(38342);
+
+    $row->predict_food([
+      'notification' => false,
+
+      'debug' => true,
+    ]);
 
 
 //    $arr = $this->photo_duplicate([

@@ -362,9 +362,8 @@ class Food extends Model
 
     $select = FoodIngredient::query($tblFoodIngredient)
       ->distinct()
-      ->select("{$tblFoodIngredient}.id as food_ingredient_id", "{$tblIngredient}.id",
-        "{$tblIngredient}.name", "{$tblIngredient}.name_vi", "{$tblFoodIngredient}.ingredient_color",
-        "{$tblFoodIngredient}.ingredient_quantity", "{$tblFoodIngredient}.ingredient_type"
+      ->select("{$tblIngredient}.id as ingredient_id", "{$tblIngredient}.name as ingredient_name",
+        "{$tblFoodIngredient}.ingredient_quantity", "{$tblFoodIngredient}.confidence as ingredient_confidence"
       )
       ->leftJoin($tblIngredient, "{$tblIngredient}.id", "=", "{$tblFoodIngredient}.ingredient_id")
       ->where("{$tblFoodIngredient}.deleted", 0)
@@ -378,22 +377,7 @@ class Food extends Model
       $select->where("{$tblFoodIngredient}.restaurant_parent_id", (int)$pars['restaurant_parent_id']);
     }
 
-    $rows = $select->get();
-
-    if (isset($pars['ingredient_id_only']) && (int)$pars['ingredient_id_only']) {
-      $items = [];
-
-      if (count($rows)) {
-        foreach ($rows as $row) {
-          $items[] = $row->id;
-        }
-      }
-
-      sort($items);
-      return $items;
-    }
-
-    return $rows;
+    return $select->get();
   }
 
   public function missing_ingredients($pars = [])

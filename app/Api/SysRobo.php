@@ -50,6 +50,11 @@ class SysRobo
         'bucket' => 's3_bucket_poison',
         'folder' => '/58-5b-69-15-cd-2b/',
       ],
+      'deli3' => [
+        'restaurant' => 'deli',
+        'bucket' => 's3_bucket_deli',
+        'folder' => '/58-5b-69-21-f7-cb/',
+      ],
     ];
   }
 
@@ -203,6 +208,9 @@ class SysRobo
       return false;
     }
 
+    $file_log = 'public/logs/cron_get_photos_' . $restaurant->id . '.log';
+    Storage::append($file_log, '===================================================================================');
+
     $restaurant_parent = $restaurant->get_parent();
 
     $cur_date = date('Y-m-d');
@@ -241,14 +249,21 @@ class SysRobo
       $model2 = true;
     }
 
+    Storage::append($file_log, 'MODEL 2 CALL?= ' . $model2);
+
     $files = Storage::disk('sensors')->files($directory);
     if (count($files)) {
       //desc
 //      $files = array_reverse($files);
       $count = 0;
 
+      Storage::append($file_log, 'TOTAL FILES= ' . count($files));
+
       //step 1= photo check
       foreach ($files as $file) {
+
+        Storage::append($file_log, 'FILE CHECK= ' . $file);
+
         $ext = array_filter(explode('.', $file));
         if (!count($ext) || $ext[count($ext) - 1] != 'jpg') {
           continue;
@@ -260,6 +275,8 @@ class SysRobo
         if (substr($photo_name, 0, 5) == '1024_') {
           continue;
         }
+
+        Storage::append($file_log, 'FILE VALID= OK');
 
         //no duplicate
         $keyword = SysRobo::photo_name_query($file);
@@ -361,6 +378,7 @@ class SysRobo
       }
     }
 
+    Storage::append($file_log, '===================================================================================');
   }
 
   public static function ingredients_compact($pars = [])
@@ -467,23 +485,23 @@ class SysRobo
           $valid_core = true;
           $core_ids = $food->get_ingredients_core([
             'restaurant_parent_id' => $restaurant_parent_id,
-            'ingredient_id_only' => 1,
           ]);
           if (count($core_ids)) {
-            $found_ids = array_column($ingredients_found, 'id');
-            $found_count = 0;
-            foreach ($found_ids as $found_id) {
-              if (in_array($found_id, $core_ids)) {
-                $found_count++;
-              }
-            }
-            if ($found_count != count($core_ids)) {
-              $valid_core = false;
-            }
+            //check percent
+            $valid_core = SysRobo::ingredients_core_valid([
+              'predictions' => $predictions,
+              'cores' => $core_ids,
+
+              'debug' => $debug,
+            ]);
           }
           if ($food_only) {
             $valid_core = $food_only;
           }
+
+          //burger
+          //classic <> mini
+          //beef <> chicken
 
           if ($debug) {
             var_dump('***** FOODS VALID? = ' . $valid_core . ' && ' . $valid_food);
@@ -529,6 +547,51 @@ class SysRobo
       'food' => $food_id,
       'confidence' => $food_confidence,
     ];
+  }
+
+  public static function ingredients_core_valid($pars = [])
+  {
+    $debug = isset($pars['debug']) ? (bool)$pars['debug'] : false;
+    $predictions = isset($pars['predictions']) ? (array)$pars['predictions'] : [];
+    $cores = isset($pars['cores']) ? (array)$pars['cores']->toArray() : [];
+
+    $valid = true;
+
+    if (count($predictions) && count($cores)) {
+
+      foreach ($cores as $core) {
+        $count = 0;
+        $str1 = trim(strtolower($core['ingredient_name']));
+
+        foreach ($predictions as $prediction) {
+          $confidence = round($prediction['confidence'] * 100);
+          $str2 = trim(strtolower($prediction['class']));
+
+          if ($confidence >= $core['ingredient_confidence'] && $str1 === $str2) {
+            $count++;
+          }
+        }
+
+        if ($count != $core['ingredient_quantity']) {
+          $valid = false;
+          break;
+        }
+      }
+
+      if ($debug) {
+        var_dump('***** FOODS CORE CHECK');
+        var_dump($cores);
+//        var_dump($predictions);
+      }
+
+
+    }
+
+    if ($debug) {
+      var_dump('***** FOODS CORE VALID? = ' . $valid);
+    }
+
+    return $valid;
   }
 
   public static function photo_name_query($file)
