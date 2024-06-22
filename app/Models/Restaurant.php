@@ -493,6 +493,25 @@ class Restaurant extends Model
     return $select;
   }
 
+  public function query_food_groups($food)
+  {
+    $group = 3;
+
+    if ($food) {
+      $row = RestaurantFood::select('live_group')
+        ->distinct()
+        ->where('deleted', 0)
+        ->where('restaurant_id', $this->id)
+        ->where('food_id', $food->id)
+        ->first();
+      if ($row) {
+        $group = $row->live_group;
+      }
+    }
+
+    return $group;
+  }
+
   //photooo
   public function photo_save($pars = [])
   {

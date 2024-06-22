@@ -422,6 +422,14 @@ class SensorController extends Controller
 
     $restaurant = $row->get_restaurant();
 
+    //admin view
+
+    //moderator view
+
+
+
+
+
     $food_photo = url('custom/img/no_photo.png');
     $food_ingredients = [];
     $food_recipes = [];
@@ -1372,7 +1380,7 @@ class SensorController extends Controller
     $food_photo = '';
     $is_resolved = 0;
     $is_marked = 0;
-    $confidence = 0;
+    $confidence = 3;
 
     if ($food) {
 
@@ -1453,26 +1461,44 @@ class SensorController extends Controller
         }
       }
 
-      if ($kitchen) {
-        //only active super confidence
-        $confidence = RestaurantFood::query('restaurant_foods')
-          ->where('restaurant_foods.restaurant_id', $restaurant->id)
-          ->where('restaurant_foods.food_id', $food->id)
-          ->where('restaurant_foods.live_group', 1)
-          ->first();
+      //uat
+      $confidence = $restaurant->query_food_groups($food);
+      switch ($confidence) {
+        case 1:
 
-        if ($confidence && $confidence->id) {
-          $confidence = 1;
-        } else {
+          break;
+
+        case 2:
+
+          if ($row->confidence < 80 || !count($ingredients_found)) {
+            $food_id = 0;
+            $food_name = '';
+            $food_photo = '';
+            $html_info = '';
+          }
+
+          $is_resolved = 0;
+          $is_marked = 0;
+
+          $ingredients_missing = [];
+          $ingredients_found = [];
+
+          break;
+
+        case 3:
+
           $food_id = 0;
           $food_name = '';
           $food_photo = '';
+          $html_info = '';
+
           $is_resolved = 0;
           $is_marked = 0;
-          $html_info = '';
+
           $ingredients_missing = [];
           $ingredients_found = [];
-        }
+
+          break;
       }
     }
 

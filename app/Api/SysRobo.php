@@ -74,6 +74,7 @@ class SysRobo
     $overlap = isset($pars['overlap']) ? (int)$pars['overlap'] : 50;
     $max_objects = isset($pars['max_objects']) ? (int)$pars['max_objects'] : 100;
     $img_no_resize = isset($pars['img_no_resize']) ? (bool)$pars['img_no_resize'] : false;
+    $img_no_resize = false;
 
     $status = true;
     $error = [];
@@ -206,6 +207,7 @@ class SysRobo
 
     $cur_date = date('Y-m-d');
     $cur_hour = (int)date('H');
+    $cur_minute = (int)date('i');
 
     //old
     $notify = true;
@@ -223,26 +225,13 @@ class SysRobo
 
     $row = NULL;
 
+    //re-call for 59 like 18h59 -> 19h00
+    if (!$cur_minute) {
+      $cur_hour -= 1;
+    }
+
     $folder_setting = $sys_app->parse_s3_bucket_address($restaurant->s3_bucket_address);
     $directory = $folder_setting . '/' . $cur_date . '/' . $cur_hour . '/';
-
-//    if ($old) {
-//      $cur_hour += 11;
-//    }
-
-    //live call every hour
-//    if ($restaurant->rbf_scan) {
-//      if ((int)(date('i')) > 1) {
-//        return false;
-//      } else {
-//        if (!$cur_hour || $cur_hour == 24) {
-//          $cur_hour = 23;
-//          $date = date('Y-m-d', strtotime("-1 days"));
-//        } else {
-//          $cur_hour -= 1;
-//        }
-//      }
-//    }
 
     //model2
     $model2 = false;

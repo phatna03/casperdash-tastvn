@@ -52,12 +52,13 @@ class TesterController extends Controller
     $date = date('Y-m-d');
 
 
+
 //    $arr = $this->photo_duplicate([
 //      //market test
-//      'restaurant_id' => 11,
+//      'restaurant_id' => 5,
 //
-//      'date_from' => '2024-06-17',
-//      'date_to' => '2024-06-21',
+//      'date_from' => '2024-06-21',
+//      'date_to' => '2024-06-22',
 //
 ////      'rfs_id' => 43496,
 //    ]);
