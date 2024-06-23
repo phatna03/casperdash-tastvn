@@ -68,6 +68,12 @@ class Kernel extends ConsoleKernel
       ->dailyAt('02:00')
       ->withoutOverlapping()
       ->runInBackground();
+
+    //status photos
+    $schedule->command('local:check-status-images')
+      ->dailyAt('03:00')
+      ->withoutOverlapping()
+      ->runInBackground();
   }
 
   /**

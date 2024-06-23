@@ -1480,17 +1480,23 @@ class SensorController extends Controller
           $is_resolved = 0;
           $is_marked = 0;
 
-          $ingredients_missing = [];
-          $ingredients_found = [];
+          if ($food_id && !count($ingredients_missing)) {
+
+          } else {
+            $ingredients_missing = [];
+            $ingredients_found = [];
+          }
 
           break;
 
         case 3:
 
-          $food_id = 0;
-          $food_name = '';
-          $food_photo = '';
-          $html_info = '';
+          if ($row->confidence < 90 || !count($ingredients_found)) {
+            $food_id = 0;
+            $food_name = '';
+            $food_photo = '';
+            $html_info = '';
+          }
 
           $is_resolved = 0;
           $is_marked = 0;
