@@ -181,7 +181,7 @@
                 <div class="form-floating form-floating-outline wrap-select-food-category">
                   <div class="form-control acm-wrap-selectize" id="scan-search-food-category">
                     <select name="categories" multiple onchange="sensor_search_food_scan(this)">
-                      <option value="">All</option>
+                      <option value="">All categories</option>
                     </select>
                   </div>
                   <label for="scan-search-food-category">Dish Categories</label>
@@ -191,7 +191,7 @@
                 <div class="form-floating form-floating-outline wrap-select-food">
                   <div class="form-control acm-wrap-selectize" id="scan-search-food">
                     <select name="foods" multiple onchange="sensor_search_food_scan(this)">
-                      <option value="">All</option>
+                      <option value="">All dishes</option>
                     </select>
                   </div>
                   <label for="scan-search-food">Dishes</label>
@@ -216,8 +216,10 @@
               <div class="col-md-6 mb-2">
                 <div class="form-floating form-floating-outline">
                   <div class="form-control acm-wrap-selectize" id="scan-search-status">
-                    <select name="statuses" class="opt_selectize" onchange="sensor_search_food_scan(this)">
-                      <option value="">All</option>
+                    <select name="statuses" class="opt_selectize" onchange="sensor_search_food_scan(this)"
+                      placeholder="All" data-placeholder="All"
+                    >
+                      <option>All dishes</option>
                       <option value="group_1" selected="selected">Super Confidence</option>
                       <option value="group_2">Less Training</option>
                       <option value="group_3">Not Trained Yet</option>
@@ -231,8 +233,8 @@
                 <div class="form-floating form-floating-outline">
                   <div class="form-control acm-wrap-selectize" id="scan-search-marked">
                     <select name="marked" class="opt_selectize" onchange="sensor_search_food_scan(this)">
-                      <option value="">All dishes</option>
-                      <option value="yes">Dish is marked</option>
+                      <option>All dishes</option>
+                      <option value="yes">Dishes are marked</option>
                     </select>
                   </div>
                   <label for="scan-search-marked">Mark?</label>
@@ -242,8 +244,8 @@
                 <div class="form-floating form-floating-outline">
                   <div class="form-control acm-wrap-selectize" id="scan-search-resolved">
                     <select name="resolved" class="opt_selectize" onchange="sensor_search_food_scan(this)">
-                      <option value="">All dishes</option>
-                      <option value="yes">Dish is resolved</option>
+                      <option>All dishes</option>
+                      <option value="yes">Dishes are resolved</option>
                     </select>
                   </div>
                   <label for="scan-search-resolved">Resolve?</label>
@@ -253,9 +255,9 @@
                 <div class="form-floating form-floating-outline">
                   <div class="form-control acm-wrap-selectize" id="scan-search-typed">
                     <select name="missing" class="opt_selectize" onchange="sensor_search_food_scan(this)">
-                      <option value="">All dishes</option>
-                      <option value="yes">Dish with missing ingredients only</option>
-                      <option value="no">Dish has all the ingredients</option>
+                      <option>All dishes</option>
+                      <option value="yes">Dishes with missing ingredients only</option>
+                      <option value="no">Dishes has all the ingredients</option>
                     </select>
                   </div>
                   <label for="scan-search-typed">Type</label>
@@ -265,8 +267,8 @@
                 <div class="form-floating form-floating-outline">
                   <div class="form-control acm-wrap-selectize" id="scan-search-noted">
                     <select name="noted" class="opt_selectize" onchange="sensor_search_food_scan(this)">
-                      <option value="">All photos</option>
-                      <option value="yes">Only photos with comments</option>
+                      <option>All dishes</option>
+                      <option value="yes">Only dishes with comments</option>
                     </select>
                   </div>
                   <label for="scan-search-noted">Note?</label>
@@ -278,7 +280,7 @@
                     <select name="users" multiple onchange="sensor_search_food_scan(this)"
                             data-value="user" class="ajx_selectize multi_selectize"
                     >
-                      <option value="">All</option>
+                      <option value="">All users</option>
                     </select>
                   </div>
                   <label for="scan-search-users">Commentators</label>

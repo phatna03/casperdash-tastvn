@@ -51,21 +51,21 @@ class TesterController extends Controller
     $sensor = Restaurant::find(5);
     $date = date('Y-m-d');
 
-    $row = RestaurantFoodScan::find(38342);
-
-    $row->predict_food([
-      'notification' => false,
-
-      'debug' => true,
-    ]);
+//    $row = RestaurantFoodScan::find(44611);
+//
+//    $row->predict_food([
+//      'notification' => false,
+//
+//      'debug' => true,
+//    ]);
 
 
 //    $arr = $this->photo_duplicate([
 //      //market test
-//      'restaurant_id' => 5,
+//      'restaurant_id' => 11,
 //
-//      'date_from' => '2024-06-21',
-//      'date_to' => '2024-06-22',
+//      'date_from' => '2024-06-22',
+//      'date_to' => '2024-06-23',
 //
 ////      'rfs_id' => 43496,
 //    ]);

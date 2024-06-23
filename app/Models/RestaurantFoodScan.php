@@ -243,7 +243,10 @@ class RestaurantFoodScan extends Model
     }
 
     //food highest confidence
-    $foods = SysRobo::foods_valid($foods);
+    $foods = SysRobo::foods_valid($foods, [
+      'debug' => $debug,
+      'predictions' => $predictions,
+    ]);
 
     if ($debug) {
       var_dump('====== FOODS COMPACT?');
@@ -620,7 +623,10 @@ class RestaurantFoodScan extends Model
       }
 
       //food highest confidence
-      $foods = SysRobo::foods_valid($foods);
+      $foods = SysRobo::foods_valid($foods, [
+        'debug' => $debug,
+        'predictions' => $arr['result']['predictions'],
+      ]);
 
       if ($debug) {
         var_dump('====================================================== FIRST FOOD= ');
@@ -741,7 +747,10 @@ class RestaurantFoodScan extends Model
     }
 
     //food highest confidence
-    $foods = SysRobo::foods_valid($foods);
+    $foods = SysRobo::foods_valid($foods, [
+      'debug' => $debug,
+      'predictions' => $prediction1s,
+    ]);
 
     if ($debug) {
       var_dump('====== FOODS COMPACT?');

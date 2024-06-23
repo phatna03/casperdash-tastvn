@@ -499,10 +499,6 @@ class SysRobo
             $valid_core = $food_only;
           }
 
-          //burger
-          //classic <> mini
-          //beef <> chicken
-
           if ($debug) {
             var_dump('***** FOODS VALID? = ' . $valid_core . ' && ' . $valid_food);
           }
@@ -520,8 +516,30 @@ class SysRobo
     return $arr;
   }
 
-  public static function foods_valid($arr = [])
+  public static function foods_valid($arr, $pars = [])
   {
+    $debug = isset($pars['debug']) ? (bool)$pars['debug'] : false;
+    $predictions = isset($pars['predictions']) ? (array)$pars['predictions'] : [];
+
+    if ($debug) {
+      var_dump('PREDICTIONS=');
+      var_dump($predictions);
+    }
+
+    $burger1s = [72, 33, 71];
+    $burger2s = [34]; //cargo
+
+    $total_hambuger_bread = 0;
+    if (count($predictions)) {
+      foreach ($predictions as $prediction) {
+        $str1 = trim(strtolower($prediction['class']));
+
+        if ($str1 === 'hamburger bread') {
+          $total_hambuger_bread++;
+        }
+      }
+    }
+
     $food_id = 0;
     $food_confidence = 0;
 
@@ -542,6 +560,17 @@ class SysRobo
       $food_id = $arr['food'];
       $food_confidence = $arr['confidence'];
     }
+
+    //burger
+    //classic <> mini
+    if (in_array($food_id, $burger1s)) {
+      if ($total_hambuger_bread > 1) {
+
+      }
+    }
+
+    //beef <> chicken
+
 
     return [
       'food' => $food_id,
@@ -572,7 +601,7 @@ class SysRobo
           }
         }
 
-        if ($count != $core['ingredient_quantity']) {
+        if ($count < $core['ingredient_quantity']) {
           $valid = false;
           break;
         }
