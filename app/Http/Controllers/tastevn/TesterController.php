@@ -39,6 +39,8 @@ use App\Models\Log;
 use App\Models\SysNotification;
 use App\Models\Report;
 use App\Models\KasWebhook;
+use App\Models\ReportPhoto;
+use App\Models\ReportFood;
 
 class TesterController extends Controller
 {
@@ -59,7 +61,12 @@ class TesterController extends Controller
 //      'debug' => true,
 //    ]);
 
+    $count = ReportPhoto::where('report_id', $this->id)
+      ->whereIn('status', ['passed', 'edited'])
+      ->where('food_id', '>', 0)
+      ->count();
 
+    var_dump($count);
 
     //fix live
 

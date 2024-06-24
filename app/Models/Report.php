@@ -212,13 +212,21 @@ class Report extends Model
 
           case 'checked':
 
-            $total_points++;
+            if ($row->food_id) {
+              $total_points++;
+            } else {
+              $point = 0;
+              $reporting = 0;
+              $status = 'failed';
+            }
 
             break;
 
           case 'edited':
 
-            $total_points++;
+            if ($row->food_id) {
+              $total_points++;
+            }
 
             $point = $row->rbf_error ? 0 : 1;
             $status = 'edited';
@@ -287,7 +295,7 @@ class Report extends Model
   public function re_count()
   {
     $count = ReportPhoto::where('report_id', $this->id)
-//      ->whereIn('status', ['passed', 'edited'])
+      ->whereIn('status', ['passed', 'edited'])
       ->where('food_id', '>', 0)
       ->count();
 

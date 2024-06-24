@@ -412,6 +412,7 @@ class ReportController extends Controller
         $photo = ReportPhoto::where('report_id', $row->id)
           ->where('reporting', 0)
           ->where('status', 'failed')
+          ->where('food_id', 0)
           ->orderBy('restaurant_food_scan_id', 'asc')
           ->limit(1)
           ->first();
