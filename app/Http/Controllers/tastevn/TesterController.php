@@ -60,17 +60,6 @@ class TesterController extends Controller
 //    ]);
 
 
-//    $arr = $this->photo_duplicate([
-//      //market test
-//      'restaurant_id' => 11,
-//
-//      'date_from' => '2024-06-22',
-//      'date_to' => '2024-06-23',
-//
-////      'rfs_id' => 43496,
-//    ]);
-
-//    var_dump($arr);
 
     //fix live
 
@@ -303,8 +292,49 @@ class TesterController extends Controller
 
   }
 
-  protected function notify_remove()
+  protected function notify_remove($pars = [])
   {
+    $date_from = date('Y-m-d', strtotime("-5 days"));
+    $date_to = date('Y-m-d');
+
+    $rows = DB::table('notifications')
+      ->distinct()
+      ->where('notifiable_type', 'App\Models\User')
+      ->whereIn('type', ['App\Notifications\IngredientMissing'])
+      ->where('restaurant_food_scan_id', '>', 0)
+      ->whereIn('restaurant_food_scan_id', function ($q) use ($date_from, $date_to) {
+        $q->select('id')
+          ->from('restaurant_food_scans')
+          ->where('missing_ids', NULL)
+          ->whereDate('time_photo', '>=', $date_from)
+          ->whereDate('time_photo', '<=', $date_to)
+          ;
+      })
+      ->whereDate('created_at', '>=', $date_from)
+      ->whereDate('created_at', '<=', $date_to)
+      ->orderBy('id', 'desc')
+      ->get();
+
+    var_dump(count($rows));
+
+    if (count($rows)) {
+      $rows = DB::table('notifications')
+        ->distinct()
+        ->where('notifiable_type', 'App\Models\User')
+        ->whereIn('type', ['App\Notifications\IngredientMissing'])
+        ->where('restaurant_food_scan_id', '>', 0)
+        ->whereIn('restaurant_food_scan_id', function ($q) use ($date_from, $date_to) {
+          $q->select('id')
+            ->from('restaurant_food_scans')
+            ->where('missing_ids', NULL)
+            ->whereDate('time_photo', '>=', $date_from)
+            ->whereDate('time_photo', '<=', $date_to)
+          ;
+        })
+        ->whereDate('created_at', '>=', $date_from)
+        ->whereDate('created_at', '<=', $date_to)
+        ->delete();
+    }
 
   }
 }

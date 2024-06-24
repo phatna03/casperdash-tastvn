@@ -975,6 +975,7 @@ function sensor_food_scan_update(evt, frm) {
     item: view_current,
     note: form.find('textarea[name=update_note]').val(),
     food: form.find('select[name=update_food]').val(),
+    rbf_error: form.find('input[name=rbf_error]').is(':checked') ? 1 : 0,
     missings: missings,
     texts: texts,
   })

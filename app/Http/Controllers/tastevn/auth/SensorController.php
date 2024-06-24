@@ -713,6 +713,7 @@ class SensorController extends Controller
       ], 422);
     }
 
+    $rbf_error = isset($values['rbf_error']) ? (int)$values['rbf_error'] : 0;
     $noted = isset($values['note']) ? $values['note'] : NULL;
     $texts = isset($values['texts']) && count($values['texts']) ? (array)$values['texts'] : [];
     $unknown = true;
@@ -794,6 +795,18 @@ class SensorController extends Controller
       'note' => $noted,
       'usr_edited' => json_encode($edited),
     ]);
+
+    if ($rbf_error) {
+      if ($row->rbf_error != $this->_viewer->id) {
+        $row->update([
+          'rbf_error' => $this->_viewer->id,
+        ]);
+      }
+    } else {
+      $row->update([
+        'rbf_error' => 0,
+      ]);
+    }
 
     RestaurantFoodScanText::where('restaurant_food_scan_id', $row->id)
       ->delete();

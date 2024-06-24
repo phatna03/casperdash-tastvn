@@ -53,14 +53,16 @@ class RestaurantFoodScan extends Model
 
     'rbf_predict',
     'rbf_confidence',
+    'rbf_retrain', //1= need retrain //2= retrain success //3= retrain failed
+    'rbf_error',
+
     'rbf_api',
     'rbf_api_js',
     'rbf_version',
     'rbf_model',
     'rbf_api_1',
     'rbf_api_2',
-    //1= need retrain //2= retrain success //3= retrain failed
-    'rbf_retrain',
+
     'deleted',
   ];
 

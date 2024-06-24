@@ -1,11 +1,20 @@
 <div class="row">
   <div class="col-lg-6 mb-2">
-    <div class="form-floating form-floating-outline">
+    <div class="form-floating form-floating-outline mb-2">
+      <div class="form-control">
+        <input class="form-check-input" type="checkbox" id="user-update-robot-error"
+                name="rbf_error" @if($item->rbf_error) checked @endif />
+        <span class="text-dark">Yes, need to retrain</span>
+      </div>
+      <label for="user-update-robot-error" class="text-danger">Robot Error?</label>
+    </div>
+
+    <div class="form-floating form-floating-outline mb-2">
       <textarea class="form-control @if(count($texts)) h-px-150 @else h-px-400 @endif" id="user-update-note" name="update_note">{{$item->note}}</textarea>
       <label for="user-update-note" class="text-danger">Note</label>
     </div>
 
-    <div class="form-floating form-floating-outline mt-4 mb-2 wrap-texts @if(!count($texts)) d-none @endif">
+    <div class="form-floating form-floating-outline mb-2 wrap-texts @if(!count($texts)) d-none @endif">
       <div class="form-control acm-height-px-auto acm-overflow-y-auto acm-height-300-max p-2" id="user-update-text">
         @if(count($texts))
           @foreach($texts as $k => $text)
