@@ -84,19 +84,30 @@
                       <label for="failed-update-food" class="text-danger">Select Dish Valid</label>
                     </div>
                   </div>
-                  <div class="col-lg-6 mb-3 acm-pr-px-0">
+                  <div class="col-lg-4 mb-3 acm-pr-px-0">
+                    <div class="form-floating form-floating-outline mb-2">
+                      <div class="form-control">
+                        <input class="form-check-input" type="checkbox" id="failed-update-robot-error"
+                               name="rbf_error" />
+                        <span class="text-dark">Yes</span>
+                      </div>
+                      <label for="failed-update-robot-error" class="text-danger">Robot Error?</label>
+                    </div>
+                  </div>
+                  <div class="col-lg-4 mb-3 acm-pr-px-0">
                     <div class="form-floating form-floating-outline">
                       <div class="form-control acm-wrap-selectize" id="failed-update-missing">
                         <div class="form-control text-center pb-0 pt-0 border-0">
                           <input class="form-check-input m-auto" type="checkbox" name="missing"
                                  onchange="report_photo_nf_ingredient_missing();"
                           />
+                          <span class="text-dark">Yes</span>
                         </div>
                       </div>
-                      <label for="failed-update-missing" class="text-danger acm-fs-15">Missing Ingredients?</label>
+                      <label for="failed-update-missing" class="text-danger">Missing?</label>
                     </div>
                   </div>
-                  <div class="col-lg-6 mb-3">
+                  <div class="col-lg-4 mb-3">
                     <div class="form-floating form-floating-outline">
                       <div class="form-control acm-wrap-selectize" id="failed-update-point">
                         <select class="form-control text-center pb-0 pt-0 border-0" name="point"
@@ -116,7 +127,7 @@
                           @endphp
                         </select>
                       </div>
-                      <label for="failed-update-point" class="text-danger">Point</label>
+                      <label for="failed-update-point" class="text-danger">Point?</label>
                     </div>
                   </div>
                   <div class="col-lg-12 mb-3 d-none wrap_ingredients_missing">

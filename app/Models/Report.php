@@ -191,6 +191,7 @@ class Report extends Model
       ->where('restaurant_parent_id', $this->restaurant_parent_id);
 
     $total_points = 0;
+    $report_points = 0;
 
     $rows = RestaurantFoodScan::where('deleted', 0)
       ->whereIn('restaurant_id', $sensors)
@@ -218,7 +219,8 @@ class Report extends Model
           case 'edited':
 
             $total_points++;
-            $point = 0;
+
+            $point = $row->rbf_error ? 0 : 1;
             $status = 'edited';
 
             if (!$row->rbf_predict && !$row->sys_predict) {
@@ -244,6 +246,8 @@ class Report extends Model
           'point' => $point,
           'status' => $status,
         ]);
+
+        $report_points += $point;
       }
     }
 
@@ -276,19 +280,18 @@ class Report extends Model
       'total_foods' => count($foods),
       'total_photos' => count($rows),
       'total_points' => $total_points,
+      'point' => $report_points,
     ]);
   }
 
   public function re_count()
   {
     $count = ReportPhoto::where('report_id', $this->id)
-      ->whereIn('status', ['passed', 'edited'])
+//      ->whereIn('status', ['passed', 'edited'])
       ->where('food_id', '>', 0)
       ->count();
 
-    $this->update([
-      'total_points' => $count,
-    ]);
+    $report_points = 0;
 
     $foods = ReportFood::where('report_id', $this->id)
       ->get();
@@ -309,7 +312,14 @@ class Report extends Model
           'total_points' => $total,
           'point' => $point,
         ]);
+
+        $report_points += $point;
       }
     }
+
+    $this->update([
+      'total_points' => $count,
+      'point' => $report_points,
+    ]);
   }
 }

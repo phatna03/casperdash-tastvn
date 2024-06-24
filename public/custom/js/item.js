@@ -2966,6 +2966,13 @@ function report_photo_nf() {
 
         popup.find('input[name=popup_view_id_itm]').val(response.data.rfs.id);
 
+        form.find('input[name=rbf_error]').prop('checked', false);
+        if (response.data.rfs.rbf_error) {
+          form.find('input[name=rbf_error]').prop('checked', true);
+        }
+        console.log('1111111111');
+        console.log(response.data.rfs.rbf_error);
+
         form.find('input[name=rfs]').val(response.data.rfs.id);
         form.find('select[name=point]').val(response.data.photo.point);
         form.find('textarea[name=note]').val(response.data.rfs.note);
@@ -3122,6 +3129,7 @@ function report_photo_nf_update(ele) {
     ingredients: ingredients,
     note: form.find('textarea[name=note]').val(),
     texts: texts,
+    rbf_error: form.find('input[name=rbf_error]').is(':checked') ? 1 : 0,
   })
     .then(response => {
 
@@ -3335,6 +3343,13 @@ function report_photo_nf_full(food_id, type) {
       if (parseInt(response.data.rfs.id)) {
 
         popup.find('input[name=popup_view_id_itm]').val(response.data.rfs.id);
+
+        form.find('input[name=rbf_error]').prop('checked', false);
+        if (response.data.rfs.rbf_error) {
+          form.find('input[name=rbf_error]').prop('checked', true);
+        }
+        console.log('22222222222');
+        console.log(response.data.rfs.rbf_error);
 
         form.find('input[name=rfs]').val(response.data.rfs.id);
         form.find('select[name=point]').val(response.data.photo.point);

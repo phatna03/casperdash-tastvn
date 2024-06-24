@@ -477,6 +477,7 @@ class ReportController extends Controller
         'note' => $rfs->note,
         'texts' => $texts,
         'ingredients' => $ingredients,
+        'rbf_error' => $rfs->rbf_error,
       ],
       'html' => $html,
     ], 200);
@@ -505,6 +506,7 @@ class ReportController extends Controller
 
     $item_old = $rfs->toArray();
 
+    $rbf_error = isset($values['rbf_error']) ? (int)$values['rbf_error'] : 0;
     $food = isset($values['food']) ? (int)$values['food'] : 0;
     $point = isset($values['point']) ? (float)$values['point'] : 0;
     $noted = isset($values['note']) && !empty($values['note']) ? $values['note'] : NULL;
@@ -574,8 +576,19 @@ class ReportController extends Controller
     $rfs->update([
       'food_id' => $food ? $food->id : 0,
       'note' => $noted,
-//      'usr_edited' => json_encode($edited),
     ]);
+
+    if ($rbf_error) {
+      if ($rfs->rbf_error != $this->_viewer->id) {
+        $rfs->update([
+          'rbf_error' => $this->_viewer->id,
+        ]);
+      }
+    } else {
+      $rfs->update([
+        'rbf_error' => 0,
+      ]);
+    }
 
     //report photo_update
     $photo = ReportPhoto::where('report_id', $row->id)
@@ -743,6 +756,7 @@ class ReportController extends Controller
         'note' => $rfs->note,
         'texts' => $texts,
         'ingredients' => $ingredients,
+        'rbf_error' => $rfs->rbf_error,
       ],
       'html' => $html,
     ], 200);
