@@ -51,8 +51,12 @@ class Kernel extends ConsoleKernel
       ->everyFifteenSeconds()
       ->runInBackground();
 
-    //deli - morning glory lounge
+    //morning glory lounge
     $schedule->command('local:check-images', [1, 7])
+      ->withoutOverlapping()
+      ->everyFiveSeconds()
+      ->runInBackground();
+    $schedule->command('local:check-images', [1, 8])
       ->withoutOverlapping()
       ->everyFiveSeconds()
       ->runInBackground();

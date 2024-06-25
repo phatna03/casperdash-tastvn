@@ -159,8 +159,8 @@ class PhotoController extends Controller
   {
     $values = $request->post();
 
-    $row = RestaurantFoodScan::find((int)$values['item']);
-    if (!$row) {
+    $rfs = RestaurantFoodScan::find((int)$values['item']);
+    if (!$rfs) {
       return response()->json([
         'error' => 'Invalid item'
       ], 404);
@@ -172,7 +172,7 @@ class PhotoController extends Controller
       ->select('users.name as user_name', 'comments.content', 'comments.created_at')
       ->leftJoin('users', 'users.id', '=', 'comments.user_id')
       ->where('comments.deleted', 0)
-      ->where('comments.object_id', $row->id)
+      ->where('comments.object_id', $rfs->id)
       ->where('comments.object_type', 'restaurant_food_scan')
       ->orderBy('comments.id', 'asc');
     $rows = $select->get();
@@ -188,7 +188,8 @@ class PhotoController extends Controller
     }
 
     return response()->json([
-      'note' => $row->note,
+      'note' => $rfs->note,
+      'noter' => $rfs->get_noter(),
       'comments' => $comments,
     ]);
   }

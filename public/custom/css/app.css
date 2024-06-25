@@ -491,6 +491,10 @@
   text-wrap: balance;
 }
 
+.acm-bg-efefef {
+  background-color: #efefef;
+}
+
 #custCarousel .carousel-indicators {
   position: static;
   margin-top: 20px;

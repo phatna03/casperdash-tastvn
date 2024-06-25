@@ -5,6 +5,7 @@
 
   $type1s = ['App\Notifications\PhotoComment'];
   $type2s = ['App\Notifications\IngredientMissing'];
+  $type3s = ['App\Notifications\PhotoNote'];
 
     foreach($notifications as $notification):
     $rfs = $sys_app->get_item($notification->restaurant_food_scan_id, 'restaurant_food_scan');
@@ -58,15 +59,27 @@
           $texts = array_filter(explode('&nbsp', $rfs->missing_texts));
             if(!empty($rfs->missing_texts) && count($texts)):
         @endphp
+          <div class="text-dark">
+            <div>Ingredients Missing:</div>
+            @foreach($texts as $text)
+              @if(!empty(trim($text)))
+                <div>- {{$text}}</div>
+              @endif
+            @endforeach
+          </div>
+        @endif
+      @elseif(in_array($notification->type, $type3s))
+        @php
+          $owner = $sys_app->get_item($notification->data['owner_id'], 'user');
+          $text1 = 'updated the Main note for the photo with ID:';
+        @endphp
         <div class="text-dark">
-          <div>Ingredients Missing:</div>
-          @foreach($texts as $text)
-            @if(!empty(trim($text)))
-              <div>- {{$text}}</div>
-            @endif
-          @endforeach
+          <b><span class="acm-mr-px-5">{{$owner->name}}</span></b> {{$text1}} <b><span
+              class="acm-ml-px-5">{{$rfs->id}}</span></b>
         </div>
-      @endif
+        <div class="text-dark">
+            <?php echo nl2br($notification->data['noted']); ?>
+        </div>
       @endif
     </div>
   </div>

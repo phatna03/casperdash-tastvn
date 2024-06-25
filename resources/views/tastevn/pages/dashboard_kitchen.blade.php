@@ -221,7 +221,7 @@
         if (sys_ready) {
           sensor_checker();
         }
-      }, 1000);
+      }, 500);
 
     });
 

@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Notification;
 //lib
 use App\Notifications\IngredientMissing;
 use App\Notifications\IngredientMissingMail;
+use App\Notifications\PhotoNote;
 use Intervention\Image\ImageManagerStatic as Image;
 use App\Api\SysApp;
 use App\Api\SysRobo;
@@ -33,6 +34,8 @@ class RestaurantFoodScan extends Model
     'found_by',
     'status',
     'note',
+    'noter_id',
+
     'text_ids',
     'text_texts',
     'time_photo',
@@ -151,6 +154,11 @@ class RestaurantFoodScan extends Model
       ->orderBy("{$tblFoodIngredientMissing}.id");
 
     return $select->get();
+  }
+
+  public function get_noter()
+  {
+    return User::find($this->noter_id);
   }
 
   //photooo
@@ -820,6 +828,53 @@ class RestaurantFoodScan extends Model
       }
 
       $this->add_ingredients_missing($food, $ingredients_missing, $notification);
+    }
+  }
+
+  public function update_main_note($owner)
+  {
+    if ($owner) {
+      $this->update([
+        'noter_id' => $owner->id,
+      ]);
+
+      $users = $this->get_restaurant()->get_users();
+      if (count($users)) {
+        foreach ($users as $user) {
+          //notify db
+          Notification::send($user, new PhotoNote([
+            'typed' => 'photo_note_update',
+            'restaurant_food_scan_id' => $this->id,
+            'owner_id' => $owner->id,
+            'noted' => $this->note,
+          ]));
+
+          //notify db update
+          $rows = $user->notifications()
+            ->whereIn('type', ['App\Notifications\PhotoNote'])
+            ->where('data', 'LIKE', '%{"typed":"photo_note_update","restaurant_food_scan_id":' . $this->id . ',%')
+            ->where('restaurant_food_scan_id', 0)
+            ->get();
+          if (count($rows)) {
+            foreach ($rows as $row) {
+              $notify = SysNotification::find($row->id);
+              if ($notify) {
+                $notify->update([
+                  'restaurant_food_scan_id' => $this->id,
+                  'restaurant_id' => $this->get_restaurant()->id,
+                  'food_id' => $this->get_food() ? $this->get_food()->id : 0,
+                  'data' => json_encode([
+                    'status' => 'valid',
+                    'typed' => 'photo_comment_edit',
+                    'owner_id' => $owner->id,
+                    'noted' => $this->note,
+                  ]),
+                ]);
+              }
+            }
+          }
+        }
+      }
     }
   }
 

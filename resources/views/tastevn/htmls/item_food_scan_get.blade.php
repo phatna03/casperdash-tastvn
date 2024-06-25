@@ -11,7 +11,7 @@
 
     <div class="form-floating form-floating-outline mb-2">
       <textarea class="form-control @if(count($texts)) h-px-150 @else h-px-400 @endif" id="user-update-note" name="update_note">{{$item->note}}</textarea>
-      <label for="user-update-note" class="text-danger">Note</label>
+      <label for="user-update-note" class="text-danger">Main Note</label>
     </div>
 
     <div class="form-floating form-floating-outline mb-2 wrap-texts @if(!count($texts)) d-none @endif">

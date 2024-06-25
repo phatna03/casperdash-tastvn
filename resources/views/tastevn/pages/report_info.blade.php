@@ -143,7 +143,7 @@
                       <div class="form-control acm-wrap-selectize" id="failed-update-note">
                         <textarea name="note" class="form-control h-px-100 pb-0 pt-0 border-0" placeholder="take note..."></textarea>
                       </div>
-                      <label for="failed-update-note" class="text-danger">Note</label>
+                      <label for="failed-update-note" class="text-danger">Main Note</label>
                     </div>
                   </div>
                   <div class="col-lg-12 mb-3">

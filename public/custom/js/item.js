@@ -2159,16 +2159,20 @@ function restaurant_food_scan_notes(id) {
       var wrap = $('#lcl_descr');
       var noted = false;
       var html = '';
+      var html_noter = '';
 
       if (response.data.note && response.data.note != '' && response.data.note != 'null') {
         noted = true;
 
-        html += '<div class="acm-clearfix position-relative">' +
-          '<div class="acm-clearfix position-relative">' +
+        if (response.data.noter && response.data.noter.name) {
+          html_noter = '<div class="text-dark acm-text-italic">(last edited by @' + response.data.noter.name + ')</div>';
+        }
+
+        html += '<div class="acm-clearfix position-relative p-2 acm-bg-efefef">' +
           '<div class="acm-float-right"></div>' +
-          '<div class="text-dark fw-bold">System: </div>' +
+          '<div class="text-dark fw-bold">Main Note: </div>' +
           '<div class="text-dark">' + bind_nl2br(response.data.note) + '</div>' +
-          '</div>' +
+          '<div class="acm-text-right">' + html_noter + '</div>' +
           '</div>';
       }
 

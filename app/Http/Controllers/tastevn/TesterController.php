@@ -53,7 +53,7 @@ class TesterController extends Controller
     $sensor = Restaurant::find(5);
     $date = date('Y-m-d');
 
-//    $row = RestaurantFoodScan::find(44611);
+//    $row = RestaurantFoodScan::find(45535);
 //
 //    $row->predict_food([
 //      'notification' => false,
@@ -61,14 +61,23 @@ class TesterController extends Controller
 //      'debug' => true,
 //    ]);
 
-    $count = ReportPhoto::where('report_id', $this->id)
-      ->whereIn('status', ['passed', 'edited'])
-      ->where('food_id', '>', 0)
-      ->count();
+//    $sensors = Restaurant::whereIn('restaurant_parent_id', [2,3,4])
+//      ->where('deleted', 0)
+//      ->get();
+//
+//    foreach ($sensors as $sensor) {
+//      $sensor->import_foods([
+//        [
+//          'food_id' => 66,
+//          'live_group' => 1,
+//        ]
+//      ]);
+//    }
 
-    var_dump($count);
 
     //fix live
+
+//    $this->photo_sync();
 
     //=======================================================================================
 
@@ -343,5 +352,54 @@ class TesterController extends Controller
         ->delete();
     }
 
+  }
+
+  protected function photo_sync($pars = [])
+  {
+    $sys_app = new SysApp();
+    $s3_region = $sys_app->get_setting('s3_region');
+
+    $date_to = date('Y-m-d', strtotime("-3 days"));
+    $date_from = date('Y-m-d', strtotime("-30 days"));
+
+    $photos = RestaurantFoodScan::where('deleted', 0)
+      ->where('local_storage', 1)
+      ->whereDate('time_photo', '>=', $date_from)
+      ->whereDate('time_photo', '<=', $date_to)
+      ->orderBy('time_photo', 'desc')
+      ->orderBy('id', 'desc')
+      ->get();
+
+    var_dump('ERROR= ' . count($photos));
+
+    if (count($photos)) {
+      foreach ($photos as $photo) {
+        var_dump($sys_app::_DEBUG_BREAK);
+        var_dump('ID= ' . $photo->id);
+        var_dump('TIME= ' . $photo->time_photo);
+        var_dump('STATUS= ' . $photo->status);
+
+        $sensor = $photo->get_restaurant();
+        $URL = "https://s3.{$s3_region}.amazonaws.com/{$sensor->s3_bucket_name}/{$photo->photo_name}";
+
+        var_dump('URL= ' . $URL);
+        var_dump('SYNC= ');
+        var_dump(@getimagesize($URL));
+
+        if (@getimagesize($URL)) {
+
+          $photo->update([
+            'local_storage' => 0,
+            'photo_url' => $URL,
+          ]);
+        }
+        else {
+          $photo->update([
+            'deleted' => 1,
+          ]);
+        }
+
+      }
+    }
   }
 }

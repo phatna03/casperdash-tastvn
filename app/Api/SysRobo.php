@@ -50,10 +50,16 @@ class SysRobo
         'bucket' => 's3_bucket_poison',
         'folder' => '/58-5b-69-15-cd-2b/',
       ],
+      //morning glory
       'deli3' => [
         'restaurant' => 'deli',
         'bucket' => 's3_bucket_deli',
         'folder' => '/58-5b-69-21-f7-cb/',
+      ],
+      'deli4' => [
+        'restaurant' => 'deli',
+        'bucket' => 's3_bucket_deli',
+        'folder' => '/58-5b-69-21-f7-ca/',
       ],
     ];
   }
@@ -444,7 +450,7 @@ class SysRobo
       case 9:
       case 10:
       case 11:
-      $food_confidence = 75;
+      $food_confidence = 70;
         break;
     }
 

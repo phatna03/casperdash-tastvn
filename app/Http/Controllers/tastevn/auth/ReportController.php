@@ -574,6 +574,12 @@ class ReportController extends Controller
       'after' => $item_new,
     ];
 
+    //notify main note
+    $notify_note = false;
+    if ($rfs->note !== $noted) {
+      $notify_note = true;
+    }
+
     $rfs->update([
       'food_id' => $food ? $food->id : 0,
       'note' => $noted,
@@ -606,6 +612,10 @@ class ReportController extends Controller
     }
 
     $row->re_count();
+
+    if ($notify_note) {
+      $rfs->update_main_note($this->_viewer);
+    }
 
     return response()->json([
       'status' => true,

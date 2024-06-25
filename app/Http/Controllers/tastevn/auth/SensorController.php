@@ -791,6 +791,12 @@ class SensorController extends Controller
       ];
     }
 
+    //notify main note
+    $notify_note = false;
+    if ($row->note !== $noted) {
+      $notify_note = true;
+    }
+
     $row->update([
       'note' => $noted,
       'usr_edited' => json_encode($edited),
@@ -831,6 +837,10 @@ class SensorController extends Controller
         'item_type' => $row->get_type(),
         'params' => json_encode($diffs),
       ]);
+    }
+
+    if ($notify_note) {
+      $row->update_main_note($this->_viewer);
     }
 
     return response()->json([
