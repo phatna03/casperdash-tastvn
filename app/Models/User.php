@@ -264,6 +264,11 @@ class User extends Authenticatable
     return null;
   }
 
+  public function is_moderator()
+  {
+    return $this->role == 'superadmin' || $this->role == 'admin' || $this->role == 'moderator';
+  }
+
   public function is_admin()
   {
     return $this->role == 'superadmin' || $this->role == 'admin';

@@ -398,6 +398,13 @@ Route::get('/datatable/restaurant', function (Request $request) {
       ->orderBy('restaurant_parents.id', 'desc');
   }
 
+  $sensor_roles = ['user', 'moderator'];
+  if ($user && in_array($user->role, $sensor_roles) && !$user->access_full) {
+    $select->leftJoin('restaurant_access', 'restaurant_access.restaurant_parent_id', '=', 'restaurant_parents.id')
+      ->where('restaurant_parents.deleted', 0)
+      ->where('restaurant_access.user_id', $user->id);
+  }
+
   if (count($values)) {
     if (isset($values['name']) && !empty($values['name'])) {
       $select->where('restaurant_parents.name', 'LIKE', '%' . $values['name'] . '%');
@@ -430,7 +437,6 @@ Route::get('/datatable/sensor', function (Request $request) {
   }
 
   $sensor_roles = ['user', 'moderator'];
-
   if ($user && in_array($user->role, $sensor_roles) && !$user->access_full) {
     $select->leftJoin('restaurant_access', 'restaurant_access.restaurant_parent_id', '=', 'restaurants.restaurant_parent_id')
       ->where('restaurants.deleted', 0)

@@ -21,7 +21,7 @@
     },
     {
       "name": "Modal Testing",
-      "icon": "menu-icon tf-icons mdi mdi-robot no_user no_moderator",
+      "icon": "menu-icon tf-icons mdi mdi-robot no_user",
       "url": "admin/roboflow",
       "slug": "admin-roboflow"
     },

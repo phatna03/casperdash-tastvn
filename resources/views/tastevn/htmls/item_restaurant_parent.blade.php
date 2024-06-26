@@ -85,7 +85,7 @@
               @foreach($ingredients as $ingredient)
                 <div class="acm-clearfix acm-height-30-min">
                   <div class="acm-float-left acm-mr-px-5">
-                    @if($viewer->is_dev() || $viewer->is_admin())
+                    @if($viewer->is_moderator())
                       <select class="form-control p-1 acm-width-50-max"
                               onchange="food_ingredient_confidence_quick(this, {{$ingredient->food_ingredient_id}})"
                       >
@@ -100,7 +100,7 @@
                     @endif
                   </div>
                   <div class="wrap_text_roboflow_ingredient overflow-hidden acm-height-30-min acm-line-height-30 acm-fs-18 @if($viewer->is_dev() || $viewer->is_admin()) cursor-pointer @endif @if($ingredient->ingredient_type == 'core') cored text-danger @else text-dark @endif"
-                       @if($viewer->is_dev() || $viewer->is_admin()) onclick="food_ingredient_core_quick(this, {{$ingredient->food_ingredient_id}})" @endif
+                       @if($viewer->is_dev() || $viewer->is_super_admin()) onclick="food_ingredient_core_quick(this, {{$ingredient->food_ingredient_id}})" @endif
                   >
                     - <b>{{$ingredient->ingredient_quantity}}</b> {{$ingredient->name}}
                   </div>
@@ -119,7 +119,7 @@
             @endif
 
               <div class="form-floating form-floating-outline mb-3 position-relative">
-                @if($viewer->is_dev() || $viewer->is_admin())
+                @if($viewer->is_moderator())
                   <button type="button" class="btn btn-sm btn-info p-1 position-absolute acm-right-0"
                           onclick="restaurant_food_update_prepare(this, 'live_group')">
                     <i class="mdi mdi-pencil"></i>
@@ -131,7 +131,7 @@
               </div>
 
               <div class="form-floating form-floating-outline mb-3 position-relative">
-                @if($viewer->is_dev() || $viewer->is_admin())
+                @if($viewer->is_dev() || $viewer->is_super_admin())
                   <button type="button" class="btn btn-sm btn-info p-1 position-absolute acm-right-0"
                           onclick="restaurant_food_update_prepare(this, 'model_name')">
                     <i class="mdi mdi-pencil"></i>
@@ -143,7 +143,7 @@
               </div>
 
               <div class="form-floating form-floating-outline mb-3 position-relative">
-                @if($viewer->is_dev() || $viewer->is_admin())
+                @if($viewer->is_dev() || $viewer->is_super_admin())
                 <button type="button" class="btn btn-sm btn-info p-1 position-absolute acm-right-0"
                         onclick="restaurant_food_update_prepare(this, 'model_version')">
                   <i class="mdi mdi-pencil"></i>

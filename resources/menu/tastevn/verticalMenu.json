@@ -2,7 +2,7 @@
   "menu": [
     {
       "name": "Dashboard",
-      "icon": "menu-icon tf-icons mdi mdi-home-outline no_user",
+      "icon": "menu-icon tf-icons mdi mdi-home-outline",
       "url": "admin",
       "slug": "admin"
     },
@@ -21,7 +21,7 @@
     },
     {
       "name": "Modal Testing",
-      "icon": "menu-icon tf-icons mdi mdi-robot no_user no_moderator",
+      "icon": "menu-icon tf-icons mdi mdi-robot no_user",
       "url": "admin/roboflow",
       "slug": "admin-roboflow"
     },
