@@ -31,43 +31,11 @@
       "url": "admin/reports",
       "slug": "admin-reports"
     },
-
     {
       "name": "Restaurants",
-      "icon": "menu-icon tf-icons mdi mdi-room-service no_user",
-      "slug": "dashboard",
-      "submenu": [
-        {
-          "url": "admin/restaurants",
-          "name": "Restaurants",
-          "icon": "menu-icon tf-icons mdi mdi-silverware-fork-knife",
-          "slug": "admin-restaurants"
-        },
-        {
-          "url": "admin/sensors",
-          "name": "Sensors",
-          "icon": "menu-icon tf-icons mdi mdi-cctv",
-          "slug": "admin-sensors"
-        },
-        {
-          "url": "admin/foods",
-          "name": "Dishes",
-          "icon": "menu-icon tf-icons mdi mdi-food",
-          "slug": "admin-foods"
-        },
-        {
-          "url": "admin/ingredients",
-          "name": "Ingredients",
-          "icon": "menu-icon tf-icons mdi mdi-food-outline",
-          "slug": "admin-ingredients"
-        },
-        {
-          "url": "admin/food-categories",
-          "name": "Categories",
-          "icon": "menu-icon mdi mdi-list-box",
-          "slug": "admin-food-categories"
-        }
-      ]
+      "icon": "menu-icon tf-icons mdi mdi-room-service",
+      "url": "admin/restaurants",
+      "slug": "admin-restaurants"
     },
 
     {

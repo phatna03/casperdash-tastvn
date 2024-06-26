@@ -49,9 +49,24 @@ class TesterController extends Controller
   {
     echo '<pre>';
 
+    $sys_app = new SysApp();
+
     $restaurant = RestaurantParent::find(1);
     $sensor = Restaurant::find(5);
     $date = date('Y-m-d');
+
+    $deli = RestaurantParent::find(2);
+
+
+
+
+//    foreach ($arr1s as $arr1) {
+//      if (!in_array($arr1->food_id, $id2s)) {
+//        var_dump('============================================');
+//        var_dump();
+//      }
+//    }
+
 
 //    $row = RestaurantFoodScan::find(45535);
 //
@@ -77,7 +92,22 @@ class TesterController extends Controller
 
     //fix live
 
-//    $this->photo_sync();
+    //sync deli food to market + poison + morning
+//    $this->food_remove([
+//      'sensors' => [10, 11, 12, 13],
+//
+//      'restaurants' => [3, 4, 5],
+//    ]);
+//
+//    $this->food_add([
+//      'sensors' => [10, 11, 12, 13],
+//      'sensor_id' => 9,
+//
+//      'restaurants' => [3, 4, 5],
+//      'restaurant_parent_id' => 2,
+//    ]);
+
+
 
     //=======================================================================================
 
@@ -399,6 +429,106 @@ class TesterController extends Controller
           ]);
         }
 
+      }
+    }
+  }
+
+  protected function food_remove($pars = [])
+  {
+    $sensors = isset($pars['sensors']) ? (array)$pars['sensors'] : [];
+    $restaurants = isset($pars['restaurants']) ? (array)$pars['restaurants'] : [];
+
+    if (count($sensors) && count($restaurants)) {
+      RestaurantFood::whereIn('restaurant_id', $sensors)
+        ->delete();
+
+      FoodIngredient::whereIn('restaurant_parent_id', $restaurants)
+        ->delete();
+
+      FoodRecipe::whereIn('restaurant_parent_id', $restaurants)
+        ->delete();
+
+    }
+  }
+
+  protected function food_add($pars = [])
+  {
+    $sensors = isset($pars['sensors']) ? (array)$pars['sensors'] : [];
+    $restaurants = isset($pars['restaurants']) ? (array)$pars['restaurants'] : [];
+
+    $sensor_id = isset($pars['sensor_id']) ? (int)$pars['sensor_id'] : 0;
+    $sensor = Restaurant::find($sensor_id);
+
+    $restaurant_parent_id = isset($pars['restaurant_parent_id']) ? (int)$pars['restaurant_parent_id'] : 0;
+    $restaurant = RestaurantParent::find($restaurant_parent_id);
+
+    if (count($sensors) && $sensor) {
+      $rows = RestaurantFood::where('restaurant_id', $sensor->id)
+        ->where('deleted', 0)
+        ->get()
+        ->toArray();
+      if (count($rows)) {
+        foreach ($rows as $row) {
+          unset($row['id']);
+          unset($row['restaurant_id']);
+          unset($row['created_at']);
+          unset($row['updated_at']);
+
+          foreach ($sensors as $itd) {
+
+            $row['restaurant_id'] = $itd;
+
+            RestaurantFood::create($row);
+          }
+        }
+      }
+    }
+
+    if (count($restaurants) && $restaurant) {
+      $rows = FoodIngredient::where('restaurant_parent_id', $restaurant->id)
+        ->where('deleted', 0)
+        ->get()
+        ->toArray();
+      if (count($rows)) {
+        foreach ($rows as $row) {
+          unset($row['id']);
+          unset($row['restaurant_parent_id']);
+          unset($row['created_at']);
+          unset($row['updated_at']);
+
+          foreach ($restaurants as $itd) {
+
+            $row['restaurant_parent_id'] = $itd;
+
+            FoodIngredient::create($row);
+          }
+        }
+      }
+
+      $rows = FoodRecipe::where('restaurant_parent_id', $restaurant->id)
+        ->where('deleted', 0)
+        ->get()
+        ->toArray();
+      if (count($rows)) {
+        foreach ($rows as $row) {
+          unset($row['id']);
+          unset($row['restaurant_parent_id']);
+          unset($row['created_at']);
+          unset($row['updated_at']);
+
+          foreach ($restaurants as $itd) {
+
+            $row['restaurant_parent_id'] = $itd;
+
+            FoodRecipe::create($row);
+          }
+        }
+      }
+
+      foreach ($restaurants as $itd) {
+        //count
+        $restaurant_parent = RestaurantParent::find($itd);
+        $restaurant_parent->re_count();
       }
     }
   }

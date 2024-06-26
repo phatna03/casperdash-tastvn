@@ -100,7 +100,7 @@ class NotificationController extends Controller
       $select->where('restaurant_id', '<>', 7);
     }
 
-    $notifications = $select->paginate(5, ['*'], 'page', 1);
+    $notifications = $select->paginate(20, ['*'], 'page', 1);
 
     if (count($notifications)) {
       $html = view('tastevn.htmls.item_notification_navbar')

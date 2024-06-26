@@ -70,7 +70,7 @@
             <div class="form-floating form-floating-outline">
               <div class="form-control acm-wrap-selectize" id="scan-search-noted">
                 <select name="noted" class="opt_selectize" onchange="form_photos_filter()">
-                  <option value="">All photos</option>
+                  <option>All photos</option>
                   <option value="yes">Only photos with comments</option>
                 </select>
               </div>

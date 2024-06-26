@@ -77,7 +77,7 @@
                       </div>
 
                       <div class="text-center w-auto">
-                        <img class="w-100 food-photo" loading="lazy" src="{{url('custom/img/no_photo.png')}}"/>
+                        <img class="w-100 food-photo" loading="lazy" src="{{url('custom/img/logo_'. $pageConfigs['item']->restaurant_parent_id . '.png')}}"/>
                       </div>
                     </div>
 
@@ -550,9 +550,17 @@
           $('.result_ingredients_found .data_result').empty().append(html);
           $('.result_ingredients_found').removeClass('d-none');
         }
+
+        if (datas.confidence == 2 && !datas.ingredients_found.length) {
+          $('.result_photo_status .data_result').empty()
+            .append('<div class="badge bg-danger fw-bold acm-ml-px-10 acm-fs-13">Less Training</div>');
+        }
+
       } else {
 
-        wrap.find('.food-photo').attr('src', acmcfs.link_food_no_photo);
+        var no_photo = '{{url('custom/img/logo_'. $pageConfigs['item']->restaurant_parent_id . '.png')}}';
+
+        wrap.find('.food-photo').attr('src', acmcfs.no_photo);
         wrap.find('.wrap-ingredients').empty();
 
         $('.result_photo_status .data_result').empty()

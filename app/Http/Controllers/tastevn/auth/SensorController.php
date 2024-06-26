@@ -426,11 +426,7 @@ class SensorController extends Controller
 
     //moderator view
 
-
-
-
-
-    $food_photo = url('custom/img/no_photo.png');
+    $food_photo = url('custom/img/logo_' . $restaurant->restaurant_parent_id . '.png');
     $food_ingredients = [];
     $food_recipes = [];
     $food_name = NULL;

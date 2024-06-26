@@ -439,6 +439,7 @@ class SysRobo
     $restaurant_parent = RestaurantParent::find($restaurant_parent_id);
 
     $predictions = isset($pars['predictions']) ? (array)$pars['predictions'] : [];
+    $food_temps = [];
 
     switch ($restaurant_id) {
       case 5:
@@ -450,6 +451,8 @@ class SysRobo
       case 9:
       case 10:
       case 11:
+      case 12:
+      case 13:
       $food_confidence = 70;
         break;
     }
@@ -515,8 +518,19 @@ class SysRobo
               'confidence' => $confidence,
             ];
           }
+
+          if ($valid_food) {
+            $food_temps[] = [
+              'food' => $food->id,
+              'confidence' => $confidence,
+            ];
+          }
         }
       }
+    }
+
+    if (!count($arr) && count($food_temps) == 1) {
+      $arr = $food_temps;
     }
 
     return $arr;

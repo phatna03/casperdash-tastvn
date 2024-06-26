@@ -741,7 +741,8 @@
               html = full['time_photo'];
             }
 
-            @if($viewer->is_super_admin() || $viewer->is_dev())
+            @if($pageConfigs['debug'])
+{{--            @if($viewer->is_super_admin() || $viewer->is_dev())--}}
 
             var ts1 = Math.floor(new Date(full['time_photo']).getTime() / 1000);
             var ts2 = Math.floor(new Date(full['time_end']).getTime() / 1000);
@@ -828,7 +829,7 @@
                 html += '<div>+ ' + full['note'] + '</div>';
               }
 
-              return ('<div class="cursor-pointer acm-col-noted acm-width-300-max" onclick="sensor_food_scan_info(' + full['id'] + ')">' + html + '</div>');
+              return ('<div class="cursor-pointer acm-col-noted acm-width-300-max acm-width-300-min" onclick="sensor_food_scan_info(' + full['id'] + ')">' + html + '</div>');
             }
           }
         },
@@ -842,7 +843,8 @@
         },
       ],
       buttons: [
-        @if($viewer->is_super_admin() || $viewer->is_dev())
+        @if($pageConfigs['debug'])
+{{--        @if($viewer->is_super_admin() || $viewer->is_dev())--}}
         {
           text: '<i class="mdi mdi-robot-confused me-0 me-sm-1"></i><span class="d-none d-sm-inline-block">Re-train Roboflow</span>',
           className: 'add-new btn btn-danger waves-effect waves-light acm-mr-px-10',
