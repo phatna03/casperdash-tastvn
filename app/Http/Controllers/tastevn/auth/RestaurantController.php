@@ -40,7 +40,7 @@ class RestaurantController extends Controller
   {
     $invalid_roles = ['user'];
     if (in_array($this->_viewer->role, $invalid_roles)) {
-      return redirect('admin/photos');
+//      return redirect('admin/photos');
     }
 
     $pageConfigs = [

@@ -113,14 +113,16 @@ class User extends Authenticatable
     ];
   }
 
-  public function can_access_restaurant($restaurant)
+  public function can_access_restaurant($sensor)
   {
     $permission = true;
 
-    if ($this->role == 'moderator' && !$this->access_full) {
+    $roles = ['user', 'moderator'];
+
+    if (in_array($this->role, $roles) && !$this->access_full) {
 
       $row = RestaurantAccess::where('user_id', $this->id)
-        ->where('restaurant_id', $restaurant->id)
+        ->where('restaurant_parent_id', $sensor->restaurant_parent_id)
         ->first();
 
       if (!$row) {
@@ -149,12 +151,12 @@ class User extends Authenticatable
 
     } else {
 
-      $tblRestaurant = app(Restaurant::class)->getTable();
+      $tblRestaurantParent = app(RestaurantParent::class)->getTable();
       $tblRestaurantAccess = app(RestaurantAccess::class)->getTable();
 
       $rows = RestaurantAccess::query($tblRestaurantAccess)
-        ->select("$tblRestaurant.id", "{$tblRestaurant}.name", "{$tblRestaurant}.deleted")
-        ->leftJoin($tblRestaurant, "{$tblRestaurant}.id", "=", "{$tblRestaurantAccess}.restaurant_id")
+        ->select("$tblRestaurantParent.id", "{$tblRestaurantParent}.name", "{$tblRestaurantParent}.deleted")
+        ->leftJoin($tblRestaurantParent, "{$tblRestaurantParent}.id", "=", "{$tblRestaurantAccess}.restaurant_parent_id")
         ->where("{$tblRestaurantAccess}.user_id", $this->id)
         ->get();
       if (count($rows)) {

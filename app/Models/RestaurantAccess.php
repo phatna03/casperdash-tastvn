@@ -13,6 +13,6 @@ class RestaurantAccess extends Model
 
   protected $fillable = [
     'user_id',
-    'restaurant_id',
+    'restaurant_parent_id',
   ];
 }

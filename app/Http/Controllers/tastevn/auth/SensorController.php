@@ -48,7 +48,7 @@ class SensorController extends Controller
   {
     $invalid_roles = ['user'];
     if (in_array($this->_viewer->role, $invalid_roles)) {
-      return redirect('admin/photos');
+//      return redirect('admin/photos');
     }
 
     $pageConfigs = [
@@ -285,7 +285,7 @@ class SensorController extends Controller
 
     $invalid_roles = ['user'];
     if (in_array($this->_viewer->role, $invalid_roles)) {
-      return redirect('error/404');
+//      return redirect('error/404');
     }
 
     $row = Restaurant::find((int)$id);

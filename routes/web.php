@@ -429,12 +429,12 @@ Route::get('/datatable/sensor', function (Request $request) {
       ->orderBy('restaurants.id', 'desc');
   }
 
-  if ($user && $user->role == 'moderator' && !$user->access_full) {
-    $select->whereIn('id', function ($q) use ($user) {
-      $q->select('restaurant_id')
-        ->from('restaurant_access')
-        ->where('user_id', $user->id);
-    });
+  $sensor_roles = ['user', 'moderator'];
+
+  if ($user && in_array($user->role, $sensor_roles) && !$user->access_full) {
+    $select->leftJoin('restaurant_access', 'restaurant_access.restaurant_parent_id', '=', 'restaurants.restaurant_parent_id')
+      ->where('restaurants.deleted', 0)
+      ->where('restaurant_access.user_id', $user->id);
   }
 
   if (count($values)) {

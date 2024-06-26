@@ -109,10 +109,10 @@ class UserController extends Controller
     ]);
 
     if (count($values['access_restaurants']) && in_array($values['role'], $this::_assigned_roles)) {
-      foreach ($values['access_restaurants'] as $restaurant_id) {
+      foreach ($values['access_restaurants'] as $restaurant_parent_id) {
         RestaurantAccess::create([
           'user_id' => $row->id,
-          'restaurant_id' => (int)$restaurant_id,
+          'restaurant_parent_id' => (int)$restaurant_parent_id,
         ]);
       }
 
@@ -205,10 +205,10 @@ class UserController extends Controller
       ->delete();
 
     if (count($values['access_restaurants']) && in_array($values['role'], $this::_assigned_roles)) {
-      foreach ($values['access_restaurants'] as $restaurant_id) {
+      foreach ($values['access_restaurants'] as $restaurant_parent_id) {
         RestaurantAccess::create([
           'user_id' => $row->id,
-          'restaurant_id' => (int)$restaurant_id,
+          'restaurant_parent_id' => (int)$restaurant_parent_id,
         ]);
       }
     }

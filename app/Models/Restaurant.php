@@ -157,7 +157,7 @@ class Restaurant extends Model
       ->where("$tblUser.status", "active")
       ->where(function ($q) use ($tblUser, $tblRestaurantAccess) {
         $q->where("$tblUser.access_full", 1)
-          ->orWhere("$tblRestaurantAccess.restaurant_id", $this->id);
+          ->orWhere("$tblRestaurantAccess.restaurant_parent_id", $this->restaurant_parent_id);
       });
 
     return $select->get();

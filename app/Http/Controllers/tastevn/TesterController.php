@@ -107,7 +107,9 @@ class TesterController extends Controller
 //      'restaurant_parent_id' => 2,
 //    ]);
 
+//    ALTER TABLE `restaurant_access` CHANGE COLUMN `restaurant_id` `restaurant_parent_id` BIGINT(20) NOT NULL;
 
+//    food category
 
     //=======================================================================================
 
