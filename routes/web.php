@@ -516,6 +516,22 @@ Route::get('/datatable/sensor-food-scans', function (Request $request) {
       $confidence = 70;
     }
 
+    switch ($restaurant) {
+      case 5:
+      case 6:
+      $confidence = 40;
+        break;
+
+      case 8:
+      case 9:
+      case 10:
+      case 11:
+      case 12:
+      case 13:
+      $confidence = 70;
+        break;
+    }
+
     $select->where('status', '<>', 'duplicated');
 
     if (!empty($statuses)) {
@@ -536,14 +552,18 @@ Route::get('/datatable/sensor-food-scans', function (Request $request) {
 
         case 'group_3':
           if ($sensor) {
-            $select->whereIn("restaurant_food_scans.food_id", $sensor->query_foods(3))
-              ->where('restaurant_food_scans.confidence', '>=', $confidence);
-          }
-          break;
 
-        case 'failed':
-          $select->where('status', 'failed')
-            ->where('food_id', 0);
+            $select->where(function ($q) use ($sensor, $confidence) {
+              $q->where(function ($q1) use ($sensor, $confidence) {
+                $q1->whereIn("restaurant_food_scans.food_id", $sensor->query_foods(3))
+                  ->where('restaurant_food_scans.confidence', '>=', $confidence);
+              })
+                ->orWhere(function ($q2) use ($sensor, $confidence) {
+                  $q2->where('status', 'failed')
+                    ->where('food_id', 0);
+                });
+            });
+          }
           break;
       }
     }

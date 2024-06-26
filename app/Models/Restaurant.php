@@ -410,16 +410,15 @@ class Restaurant extends Model
     if ($item_type == 'food_category') {
       $error_food_category_list = clone $error_food_category;
 
-      $error_food_category = $error_food_category->select('restaurant_food_scans.food_category_id')
-        ->get();
-      $error_food_category_list->select('restaurant_food_scans.food_category_id', 'food_categories.name as food_category_name')
-        ->selectRaw('COUNT(restaurant_food_scans.id) as total_error')
-        ->leftJoin("food_categories", "food_categories.id", "=", "restaurant_food_scans.food_category_id")
-        ->groupBy(['restaurant_food_scans.food_category_id', 'food_categories.name'])
-        ->orderBy('total_error', 'desc');
+      if ($item_id) {
+        $error_food_category_list->select('restaurant_food_scans.id')
+          ->leftJoin("food_categories", "food_categories.id", "=", "restaurant_food_scans.food_category_id")
+          ->where('food_categories.id', $item_id);
+      } else {
+        $error_food_category_list->select('restaurant_food_scans.id');
+      }
 
-
-      $data['category_error_list'] = $error_food_category_list->get();
+      $data = $error_food_category_list->get()->toArray();
     }
 
     //food

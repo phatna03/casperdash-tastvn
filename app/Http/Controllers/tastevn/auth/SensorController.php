@@ -304,12 +304,31 @@ class SensorController extends Controller
     //search
     $debug = isset($values['debug']) ? (int)$values['debug'] : 0;
 
+    $food_datas = [];
+
+    $datas = RestaurantFood::where('restaurant_id', $row->id)
+      ->where('deleted', 0)
+      ->get();
+    if (count($datas)) {
+      foreach ($datas as $dts) {
+
+        $food_category = FoodCategory::find($dts->food_category_id);
+
+        $food_datas[] = [
+          'food_category_id' => $food_category ? $food_category->id : 0,
+          'food_category_name' => $food_category ? $food_category->name : '',
+          'food_id' => $dts->food_id,
+          'live_group' => $dts->live_group,
+        ];
+      }
+    }
 
     $pageConfigs = [
       'myLayout' => 'horizontal',
       'hasCustomizer' => false,
 
       'item' => $row,
+      'food_datas' => $food_datas,
 
       'debug' => $debug,
     ];

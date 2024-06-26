@@ -641,6 +641,12 @@ function sensor_info(itd) {
 function sensor_kitchen(itd) {
   page_url(acmcfs.link_base_url + '/admin/kitchen/' + itd);
 }
+function sensor_stats_view_food_categories() {
+  sensor_stats_view('food_category', 0);
+}
+function sensor_stats_view_food_category(food_category_id) {
+  sensor_stats_view('food_category', food_category_id);
+}
 function sensor_stats_view_foods() {
   sensor_stats_view('food', 0);
 }
@@ -764,10 +770,21 @@ function sensor_stats() {
       if (response.data.stats.category_error_list.length) {
         var html = '';
 
+        html += '<li>' +
+          '<a class="dropdown-item cursor-pointer" href="javascript:void(0);" onclick="sensor_stats_view_food_categories()">' +
+          'View all photos ' +
+          // '<b class="acm-mr-px-5">' + response.data.stats.category_error + '</b>' +
+          '</a>' +
+          '</li>';
+
         response.data.stats.category_error_list.forEach(function (v, k) {
           var title = v.food_category_name && v.food_category_name !== '' && v.food_category_name !== 'null'
             ? v.food_category_name : 'Not group food category yet';
-          html += '<li><a class="dropdown-item" href="javascript:void(0);">' + title + '</a></li>';
+          html += '<li>' +
+            '<a class="dropdown-item" href="javascript:void(0);" onclick="sensor_stats_view_food_category(\'' + v.food_category_id + '\')">' +
+            '<b class="acm-mr-px-5">' + v.total_error + '</b>' +
+            title + '</a>' +
+            '</li>';
         });
 
         wrap.find('.stats-food-category-list').empty()

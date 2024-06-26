@@ -273,8 +273,13 @@ class RestaurantFoodScan extends Model
       $status = 'checked';
       $food = Food::find($foods['food']);
 
+      $food_category = $food->get_category([
+        'restaurant_parent_id' => $restaurant->restaurant_parent_id
+      ]);
+
       $this->update([
         'food_id' => $foods['food'],
+        'food_category_id' => $food_category ? $food_category->id : 0,
         'confidence' => $foods['confidence'],
         'rbf_confidence' => $foods['confidence'],
         'found_by' => 'rbf',
@@ -777,8 +782,13 @@ class RestaurantFoodScan extends Model
       $status = 'checked';
       $food = Food::find($foods['food']);
 
+      $food_category = $food->get_category([
+        'restaurant_parent_id' => $restaurant->restaurant_parent_id
+      ]);
+
       $this->update([
         'food_id' => $foods['food'],
+        'food_category_id' => $food_category ? $food_category->id : 0,
         'confidence' => $foods['confidence'],
         'rbf_confidence' => $foods['confidence'],
         'found_by' => 'rbf',

@@ -223,7 +223,6 @@
                       <option value="group_1" selected="selected">Super Confidence</option>
                       <option value="group_2">Less Training</option>
                       <option value="group_3">Not Trained Yet</option>
-                      <option value="failed">No Data Found</option>
                     </select>
                   </div>
                   <label for="scan-search-status">Group</label>
@@ -295,7 +294,7 @@
             <thead class="table-light">
             <tr>
               <th class="acm-th-first"></th>
-              <th>Status</th>
+              <th>Group</th>
               <th>Dish</th>
               <th class="d-none">Confidence</th>
               <th>Ingredients missing</th>
@@ -450,86 +449,6 @@
     var $ = jQuery.noConflict();
     $(document).ready(function () {
 
-      //stats
-      sensor_stats();
-
-      //selectize
-      var selectize_food_category = $('.wrap-select-food-category select');
-      selectize_food_category.selectize({
-        valueField: 'id',
-        labelField: 'name',
-        searchField: 'name',
-        //multi_selectize
-        plugins: ["remove_button"],
-        preload: true,
-        clearCache: function (template) {
-        },
-        load: function (query, callback) {
-          jQuery.ajax({
-            url: acmcfs.link_base_url + '/admin/food-category/selectize',
-            type: 'post',
-            data: {
-              keyword: query,
-              restaurant_parent_id: '{{$pageConfigs['item']->restaurant_parent_id}}',
-              _token: acmcfs.var_csrf,
-            },
-            complete: function (xhr, textStatus) {
-              var rsp = xhr.responseJSON;
-
-              if (xhr.status == 200) {
-                selectize_food_category.options = rsp.items;
-                callback(rsp.items);
-              }
-            },
-          });
-        },
-        create: function (input, callback) {
-          $.ajax({
-            url: acmcfs.link_base_url + '/admin/food-category/create',
-            type: 'POST',
-            data: {
-              name: input,
-              _token: acmcfs.var_csrf,
-            },
-            success: function (rsp) {
-              selectize_food_category.options = rsp.items;
-              callback(rsp.items);
-            }
-          });
-        },
-      });
-
-      var selectize_food = $('.wrap-select-food select');
-      selectize_food.selectize({
-        valueField: 'id',
-        labelField: 'name',
-        searchField: 'name',
-        //multi_selectize
-        plugins: ["remove_button"],
-        preload: true,
-        clearCache: function (template) {
-        },
-        load: function (query, callback) {
-          jQuery.ajax({
-            url: acmcfs.link_base_url + '/admin/food/selectize',
-            type: 'post',
-            data: {
-              keyword: query,
-              restaurant_parent_id: '{{$pageConfigs['item']->restaurant_parent_id}}',
-              _token: acmcfs.var_csrf,
-            },
-            complete: function (xhr, textStatus) {
-              var rsp = xhr.responseJSON;
-
-              if (xhr.status == 200) {
-                selectize_food.options = rsp.items;
-                callback(rsp.items);
-              }
-            },
-          });
-        },
-      });
-
       //datatable
       datatable_listing_scan = $('#datatable-listing-scan table').DataTable(Object.assign(datatable_listing_scan_cfs, acmcfs.datatable_init));
       datatable_listing_error = $('#datatable-listing-error table').DataTable(Object.assign(datatable_listing_error_cfs, acmcfs.datatable_init));
@@ -546,7 +465,95 @@
         }
       });
 
+      //later call
+      setTimeout(function () {
+        //stats
+        sensor_stats();
+      }, acmcfs.timeout_default);
     });
+
+    //selectize
+    var selectize_food_category = $('.wrap-select-food-category select');
+    selectize_food_category.selectize({
+      valueField: 'id',
+      labelField: 'name',
+      searchField: 'name',
+      //multi_selectize
+      plugins: ["remove_button"],
+      preload: true,
+      clearCache: function (template) {
+      },
+      load: function (query, callback) {
+        jQuery.ajax({
+          url: acmcfs.link_base_url + '/admin/food-category/selectize',
+          type: 'post',
+          data: {
+            keyword: query,
+            restaurant_parent_id: '{{$pageConfigs['item']->restaurant_parent_id}}',
+            _token: acmcfs.var_csrf,
+          },
+          complete: function (xhr, textStatus) {
+            var rsp = xhr.responseJSON;
+
+            if (xhr.status == 200) {
+              selectize_food_category.options = rsp.items;
+              callback(rsp.items);
+            }
+          },
+        });
+      },
+      create: function (input, callback) {
+        $.ajax({
+          url: acmcfs.link_base_url + '/admin/food-category/create',
+          type: 'POST',
+          data: {
+            name: input,
+            _token: acmcfs.var_csrf,
+          },
+          success: function (rsp) {
+            selectize_food_category.options = rsp.items;
+            callback(rsp.items);
+          }
+        });
+      },
+    });
+
+    var selectize_food = $('.wrap-select-food select');
+    selectize_food.selectize({
+      valueField: 'id',
+      labelField: 'name',
+      searchField: 'name',
+      //multi_selectize
+      plugins: ["remove_button"],
+      preload: true,
+      clearCache: function (template) {
+      },
+      load: function (query, callback) {
+        jQuery.ajax({
+          url: acmcfs.link_base_url + '/admin/food/selectize',
+          type: 'post',
+          data: {
+            keyword: query,
+            restaurant_parent_id: '{{$pageConfigs['item']->restaurant_parent_id}}',
+            _token: acmcfs.var_csrf,
+          },
+          complete: function (xhr, textStatus) {
+            var rsp = xhr.responseJSON;
+
+            if (xhr.status == 200) {
+              selectize_food.options = rsp.items;
+              callback(rsp.items);
+            }
+          },
+        });
+      },
+    });
+
+    <?php
+    $php_array = $pageConfigs['food_datas'];
+    $js_array = json_encode($php_array);
+    echo "var food_datas = ". $js_array . ";\n";
+    ?>
 
     var datatable_listing_scan;
     var datatable_listing_scan_cfs = {
@@ -619,18 +626,7 @@
         {
           targets: 1,
           render: function (data, type, full, meta) {
-            var html = '';
-
-            if (full['status'] == 'failed') {
-              html = '<div><span class="badge bg-secondary">no data</span></div>';
-            } else if (full['status'] == 'checked') {
-              html = '<div><span class="badge bg-success">' + full['status'] + '</span></div>';
-            } else if (full['status'] == 'edited') {
-              html = '<div><span class="badge bg-info">' + full['status'] + '</span></div>';
-            } else {
-              html = '<div><span class="badge bg-warning">' + full['status'] + '</span></div>';
-            }
-
+            var html = func_food_group(full['food_id']);
             var debug = $('input[name=debug]').val();
             var html_admin = '<div></div>';
             if (parseInt(debug)) {
@@ -668,7 +664,7 @@
               '</div>' +
               '<div class="overflow-hidden acm-max-line-3 acm-width-150-min">' +
               '<div>ID: ' + full['id'] + '</div>' +
-              '<div>' + full['confidence'] + '% ' + food_name + '</div>' +
+              '<div>' + full['confidence'] + '% <b>' + food_name + '</b></div>' +
               '<div class="acm-text-italic">' + food_category + '</div>' +
               '</div>' +
               '</div>'
@@ -940,6 +936,24 @@
 
     function datatable_listing_error_refresh() {
       datatable_listing_error.ajax.reload();
+    }
+
+    function func_food_group(food_id) {
+      var html = '<div><span class="badge bg-secondary">Not Trained<br/>Yet</span></div>';
+
+      if (parseInt(food_id)) {
+        food_datas.forEach(function (v, k) {
+          if (parseInt(food_id) == parseInt(v.food_id)) {
+            if (parseInt(v.live_group) == 1) {
+              html = '<div><span class="badge bg-success">Super<br/>Confidence</span></div>';
+            } else if (parseInt(v.live_group) == 2) {
+              html = '<div><span class="badge bg-info">Less<br/>Training</span></div>';
+            }
+          }
+        });
+      }
+
+      return html;
     }
   </script>
 @endsection
