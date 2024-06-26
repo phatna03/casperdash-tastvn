@@ -55,17 +55,6 @@ class TesterController extends Controller
     $sensor = Restaurant::find(5);
     $date = date('Y-m-d');
 
-    $deli = RestaurantParent::find(2);
-
-
-
-
-//    foreach ($arr1s as $arr1) {
-//      if (!in_array($arr1->food_id, $id2s)) {
-//        var_dump('============================================');
-//        var_dump();
-//      }
-//    }
 
 
 //    $row = RestaurantFoodScan::find(45535);
@@ -75,19 +64,6 @@ class TesterController extends Controller
 //
 //      'debug' => true,
 //    ]);
-
-//    $sensors = Restaurant::whereIn('restaurant_parent_id', [2,3,4])
-//      ->where('deleted', 0)
-//      ->get();
-//
-//    foreach ($sensors as $sensor) {
-//      $sensor->import_foods([
-//        [
-//          'food_id' => 66,
-//          'live_group' => 1,
-//        ]
-//      ]);
-//    }
 
 
     //fix live
@@ -107,9 +83,9 @@ class TesterController extends Controller
 //      'restaurant_parent_id' => 2,
 //    ]);
 
-//    ALTER TABLE `restaurant_access` CHANGE COLUMN `restaurant_id` `restaurant_parent_id` BIGINT(20) NOT NULL;
-
 //    food category
+
+//    $this->food_category_update();
 
     //=======================================================================================
 
@@ -533,5 +509,40 @@ class TesterController extends Controller
         $restaurant_parent->re_count();
       }
     }
+  }
+
+  protected function food_category_update()
+  {
+    $rows = RestaurantFoodScan::where('deleted', 0)
+      ->where('food_id', '>', 0)
+      ->where('food_category_id', 0)
+      ->where('sys_confidence', '<>', 102)
+      ->orderBy('id', 'desc')
+      ->limit(500)
+      ->get();
+
+    var_dump(count($rows));
+
+    if (count($rows)) {
+      foreach ($rows as $row) {
+
+        $sensor = $row->get_restaurant();
+        $food_category = $row->get_food()->get_category([
+          'restaurant_parent_id' => $sensor->restaurant_parent_id
+        ]);
+
+        $row->update([
+          'food_category_id' => $food_category ? $food_category->id : 0,
+          'sys_confidence' => 102,
+        ]);
+      }
+    }
+
+    $rows = RestaurantFoodScan::where('deleted', 0)
+      ->where('food_id', '>', 0)
+      ->where('sys_confidence', 102)
+      ->get();
+
+    var_dump(count($rows));
   }
 }
