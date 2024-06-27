@@ -519,7 +519,7 @@ class SysRobo
             ];
           }
 
-          if ($valid_food) {
+          if ($valid_food && $confidence >= 80) {
             $food_temps[] = [
               'food' => $food->id,
               'confidence' => $confidence,

@@ -356,7 +356,7 @@ class RestaurantFoodScan extends Model
 
           //live_group
           $valid_group = true;
-          if ($group > 1) {
+          if ($group > 1 || $this->confidence < 90) {
             $valid_group = false;
           }
           if ($user->is_super_admin() || $user->is_dev()) {
