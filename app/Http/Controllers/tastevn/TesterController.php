@@ -55,6 +55,7 @@ class TesterController extends Controller
     $sensor = Restaurant::find(5);
     $date = date('Y-m-d');
 
+    var_dump(phpinfo());
 
 
 //    $row = RestaurantFoodScan::find(45535);

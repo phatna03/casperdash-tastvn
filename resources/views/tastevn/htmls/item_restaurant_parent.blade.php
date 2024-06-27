@@ -66,7 +66,7 @@
                 <i class="mdi mdi-upload"></i> Upload Photo
               </button>
               <img class="w-100 food_photo_standard" id="food_photo_standard_{{$restaurant_parent->id}}_{{$food->id}}"
-                   title="{{$food_photo}}" loading="lazy" src="{{$food_photo}}"/>
+                   title="{{$food_photo}}" loading="lazy" src="{{$food_photo}}?v={{time()}}"/>
             </div>
           </div>
           <div class="col-lg-3 mb-1">
