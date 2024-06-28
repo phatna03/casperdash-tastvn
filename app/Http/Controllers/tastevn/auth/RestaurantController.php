@@ -741,9 +741,28 @@ class RestaurantController extends Controller
       ], 404);
     }
 
-    $type = isset($values['type']) ? $values['type'] : 'recipe';
-
     $html = '';
+
+    $type = isset($values['type']) ? $values['type'] : 'recipe';
+    switch ($type) {
+      case 'recipe':
+
+        $html = view('tastevn.htmls.item_ingredient_recipe_input')
+          ->with('ingredients', $food->get_recipes([
+            'restaurant_parent_id' => $restaurant_parent->id
+          ]))
+          ->render();
+
+        break;
+
+      case 'robot':
+
+
+
+        break;
+    }
+
+
 
     return response()->json([
       'status' => true,

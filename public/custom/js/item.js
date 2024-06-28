@@ -524,6 +524,7 @@ function restaurant_food_recipe_prepare(ele) {
   var food_item = $(ele).closest('.data_food_item');
   var popup1 = $(ele).closest('.modal');
   var popup2 = $('#modal_food_ingredient_recipe');
+  var form = popup2.find('form');
 
   var restaurant_parent_id = popup1.find('input[name=restaurant_parent_id]').val();
   var food_id = food_item.attr('data-food_id');
@@ -531,7 +532,7 @@ function restaurant_food_recipe_prepare(ele) {
   popup2.find('input[name=restaurant_parent_id]').val(restaurant_parent_id);
   popup2.find('input[name=food_id]').val(food_id);
 
-  form_loading(popup2);
+  form_loading(form);
 
   axios.post('/admin/restaurant/food/ingredient/get', {
     restaurant_parent_id: restaurant_parent_id,
@@ -540,7 +541,11 @@ function restaurant_food_recipe_prepare(ele) {
   })
     .then(response => {
 
-
+      if (response.data.html && response.data.html != '') {
+        form.find('.wrap-edit-ingredients').removeClass('d-none');
+        form.find('.wrap-add-item-ingredients .wrap-fetch').append(response.data.html);
+        bind_datad(form);
+      }
 
       popup2.modal('show');
 
@@ -553,7 +558,7 @@ function restaurant_food_recipe_prepare(ele) {
       }
     })
     .then(() => {
-      form_loading(popup2, false);
+      form_loading(form, false);
     });
 }
 function restaurant_food_recipe(evt, frm) {
@@ -2492,7 +2497,7 @@ function ingredient_item_add(ele) {
   axios.post('/admin/food/ingredient/html', {})
     .then(response => {
 
-      form.find('.wrap-add-item-ingredients .wrap-fetch').append(response.data.html);
+      form.find('.wrap-add-item-ingredients .wrap-fetch').prepend(response.data.html);
       bind_datad(form);
 
     })
@@ -2512,7 +2517,7 @@ function recipe_item_add(ele) {
   axios.post('/admin/food/recipe/html', {})
     .then(response => {
 
-      form.find('.wrap-add-item-ingredients .wrap-fetch').append(response.data.html);
+      form.find('.wrap-add-item-ingredients .wrap-fetch').prepend(response.data.html);
       bind_datad(form);
 
     })
