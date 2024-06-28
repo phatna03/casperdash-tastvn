@@ -24,19 +24,15 @@
           <tbody>
           <tr>
             <td class="p-1 text-dark">Super Confidence</td>
-            <td class="p-1 text-dark text-center"></td>
+            <td class="p-1 text-dark text-center">{{count($foods_group_1)}}</td>
           </tr>
           <tr>
             <td class="p-1 text-dark">Less Training</td>
-            <td class="p-1 text-dark text-center"></td>
+            <td class="p-1 text-dark text-center">{{count($foods_group_2)}}</td>
           </tr>
           <tr>
             <td class="p-1 text-dark">Not Trained Yet</td>
-            <td class="p-1 text-dark text-center"></td>
-          </tr>
-          <tr>
-            <td class="p-1 text-dark">Total Dishes</td>
-            <td class="p-1 text-dark text-center fw-bold">{{count($foods)}}</td>
+            <td class="p-1 text-dark text-center">{{count($foods_group_3)}}</td>
           </tr>
           </tbody>
         </table>

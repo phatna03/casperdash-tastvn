@@ -1405,6 +1405,7 @@ class SensorController extends Controller
     }
 
     $restaurant = $row->get_restaurant();
+    $restaurant_parent = $row->get_restaurant()->get_parent();
     $food = $row->get_food() ? $row->get_food() : NULL;
 
     $kitchen = isset($pars['kitchen']) ? (bool)$pars['kitchen'] : false;
@@ -1418,7 +1419,7 @@ class SensorController extends Controller
     $food_photo = '';
     $is_resolved = 0;
     $is_marked = 0;
-    $confidence = 3;
+    $live_group = 3;
 
     if ($food) {
 
@@ -1500,8 +1501,8 @@ class SensorController extends Controller
       }
 
       //uat
-      $confidence = $restaurant->query_food_groups($food);
-      switch ($confidence) {
+      $live_group = $restaurant_parent->get_food_live_group($food);
+      switch ($live_group) {
         case 1:
 
           break;
@@ -1553,7 +1554,7 @@ class SensorController extends Controller
       'is_resolved' => $is_resolved,
       'is_marked' => $is_marked,
 
-      'confidence' => $confidence,
+      'confidence' => $live_group,
 
       'html_info' => $html_info,
 

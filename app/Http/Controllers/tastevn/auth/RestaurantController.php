@@ -297,9 +297,24 @@ class RestaurantController extends Controller
 
     $foods = $row->get_foods();
 
+    $foods_group_1 = $row->get_foods([
+      'live_group' => 1,
+    ]);
+
+    $foods_group_2 = $row->get_foods([
+      'live_group' => 2,
+    ]);
+
+    $foods_group_3 = $row->get_foods([
+      'live_group' => 3,
+    ]);
+
     $html = view('tastevn.htmls.item_restaurant_parent')
       ->with('restaurant_parent', $row)
       ->with('foods', $foods)
+      ->with('foods_group_1', $foods_group_1)
+      ->with('foods_group_2', $foods_group_2)
+      ->with('foods_group_3', $foods_group_3)
       ->render();
 
     return response()->json([

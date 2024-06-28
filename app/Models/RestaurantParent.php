@@ -66,10 +66,11 @@ class RestaurantParent extends Model
   {
     $keyword = isset($pars['keyword']) && !empty($pars['keyword']) ? $pars['keyword'] : NULL;
     $select_data = isset($pars['select_data']) && !empty($pars['select_data']) ? $pars['select_data'] : NULL;
+    $live_group = isset($pars['live_group']) && !empty($pars['live_group']) ? (int)$pars['live_group'] : 0;
 
     $select = RestaurantFood::query('restaurant_foods')
       ->distinct()
-      ->where('restaurant_foods.restaurant_parent_id', $sensor->id)
+      ->where('restaurant_foods.restaurant_parent_id', $this->id)
       ->where('restaurant_foods.deleted', 0)
       ->where('foods.deleted', 0)
       ->leftJoin('foods', 'foods.id', '=', 'restaurant_foods.food_id')
@@ -78,6 +79,10 @@ class RestaurantParent extends Model
 
     if (!empty($keyword)) {
       $select->where('foods.name', 'LIKE', "%{$keyword}%");
+    }
+
+    if ($live_group) {
+      $select->where('restaurant_foods.live_group', $live_group);
     }
 
     switch ($select_data) {
