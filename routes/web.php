@@ -228,7 +228,6 @@ Route::post('/admin/restaurant/restore', [RestaurantController::class, 'restore'
 Route::post('/admin/restaurant/selectize', [RestaurantController::class, 'selectize']);
 Route::post('/admin/restaurant/info', [RestaurantController::class, 'info']);
 Route::post('/admin/restaurant/food/get', [RestaurantController::class, 'food_get']);
-Route::post('/admin/restaurant/food/import', [RestaurantController::class, 'food_import']);
 Route::post('/admin/restaurant/food/remove', [RestaurantController::class, 'food_remove']);
 Route::post('/admin/restaurant/food/core', [RestaurantController::class, 'food_core']);
 Route::post('/admin/restaurant/food/confidence', [RestaurantController::class, 'food_confidence']);

@@ -55,7 +55,8 @@ class TesterController extends Controller
     $sensor = Restaurant::find(5);
     $date = date('Y-m-d');
 
-    var_dump(phpinfo());
+//    var_dump(phpinfo());
+
 
 
 //    $row = RestaurantFoodScan::find(45535);
@@ -87,6 +88,8 @@ class TesterController extends Controller
 //    food category
 
 //    $this->food_category_update();
+
+    $this->food_restaurant_sync();
 
     //=======================================================================================
 
@@ -545,5 +548,27 @@ class TesterController extends Controller
       ->get();
 
     var_dump(count($rows));
+  }
+
+  protected function food_restaurant_sync()
+  {
+    $rows = RestaurantFood::where('deleted', 0)
+      ->where('restaurant_parent_id', 0)
+      ->get();
+    if (count($rows)) {
+      foreach ($rows as $row) {
+        $row->update([
+          'restaurant_parent_id' => $row->get_restaurant()->restaurant_parent_id,
+        ]);
+      }
+    }
+
+    RestaurantFood::whereIn('restaurant_id', [6, 8, 13])
+      ->delete();
+
+    RestaurantFood::where('deleted', 0)
+      ->update([
+        'restaurant_id' => 0,
+      ]);
   }
 }

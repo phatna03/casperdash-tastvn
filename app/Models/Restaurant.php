@@ -52,54 +52,6 @@ class Restaurant extends Model
     return $this->belongsTo('App\Models\User', 'creator_id');
   }
 
-  public function import_foods($datas = [])
-  {
-    $user = Auth::user();
-
-    if (count($datas)) {
-
-      //import only
-      foreach ($datas as $data) {
-
-        $row = RestaurantFood::where('restaurant_id', $this->id)
-          ->where('food_id', (int)$data['food_id'])
-          ->first();
-        if (!$row) {
-          $row = RestaurantFood::create([
-            'restaurant_id' => $this->id,
-            'food_id' => (int)$data['food_id'],
-            'creator_id' => $user->id,
-          ]);
-        }
-
-        $row->update([
-          'food_category_id' => isset($data['food_category_id']) ? (int)$data['food_category_id'] : 0,
-          'photo' => isset($data['photo']) ? $data['photo'] : $row->photo,
-          'local_storage' => isset($data['photo']) ? 0 : $row->local_storage,
-          'live_group' => isset($data['live_group']) ? (int)$data['live_group'] : 3,
-          'deleted' => 0,
-        ]);
-
-      }
-    }
-
-  }
-
-  public function count_foods()
-  {
-    $count = RestaurantFood::distinct()
-      ->select('food_id')
-      ->where('restaurant_id', $this->id)
-      ->where('deleted', 0)
-      ->count();
-
-    $this->update([
-      'count_foods' => $count,
-    ]);
-
-    return $count;
-  }
-
   public function on_create_after($pars = [])
   {
 
@@ -466,49 +418,6 @@ class Restaurant extends Model
     }
 
     return $data;
-  }
-
-  public function serve_food($food)
-  {
-    $rows = [];
-
-    if ($food) {
-      $rows = RestaurantFood::where('restaurant_id', $this->id)
-        ->where('deleted', 0)
-        ->where('food_id', $food->id)
-        ->get();
-    }
-
-    return count($rows) ? true : false;
-  }
-
-  public function query_foods($group = 1)
-  {
-    $select = RestaurantFood::select('food_id as id')
-      ->where('deleted', 0)
-      ->where('restaurant_id', $this->id)
-      ->where('live_group', $group);
-
-    return $select;
-  }
-
-  public function query_food_groups($food)
-  {
-    $group = 3;
-
-    if ($food) {
-      $row = RestaurantFood::select('live_group')
-        ->distinct()
-        ->where('deleted', 0)
-        ->where('restaurant_id', $this->id)
-        ->where('food_id', $food->id)
-        ->first();
-      if ($row) {
-        $group = $row->live_group;
-      }
-    }
-
-    return $group;
   }
 
   //photooo

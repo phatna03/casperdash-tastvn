@@ -11,7 +11,6 @@ use App\Api\SysApp;
 use App\Excel\ImportData;
 //model
 use App\Models\Food;
-use App\Models\RestaurantFood;
 use App\Models\RestaurantParent;
 use App\Models\Ingredient;
 use App\Models\Restaurant;
@@ -317,14 +316,6 @@ class FoodController extends Controller
         'food_id' => $row->id,
       ];
 
-//      $sensors = $restaurant_parent->get_sensors();
-//      foreach ($sensors as $sensor) {
-//        $sensor->import_foods($items);
-//      }
-
-      //re-count
-//      $this->_sys_app->sys_stats_count();
-
       $this->_viewer->add_log([
         'type' => 'edit_' . $row->get_type() . '_ingredient',
         'item_id' => (int)$row->id,
@@ -435,38 +426,20 @@ class FoodController extends Controller
   protected function selectize_items($pars = [])
   {
     $keyword = isset($pars['keyword']) && !empty($pars['keyword']) ? $pars['keyword'] : NULL;
+
     $restaurant_parent_id = isset($pars['restaurant_parent_id']) ? (int)$pars['restaurant_parent_id'] : 0;
     $restaurant_parent = RestaurantParent::find($restaurant_parent_id);
 
     $items = [];
 
     if ($restaurant_parent) {
-
-      $sensor = $restaurant_parent->get_sensors([
-        'one_sensor' => 1,
+      $items = $restaurant_parent->get_foods([
+        'keyword' => $keyword,
+        'select_data' => 'food_only',
       ]);
-
-      if ($sensor) {
-
-        $select = RestaurantFood::query('restaurant_foods')
-          ->where('restaurant_foods.restaurant_id', $sensor->id)
-          ->distinct()
-          ->select('foods.id', 'foods.name',)
-          ->where('restaurant_foods.deleted', 0)
-          ->where('foods.deleted', 0)
-          ->leftJoin('foods', 'foods.id', '=', 'restaurant_foods.food_id')
-          ->leftJoin('food_categories', 'food_categories.id', '=', 'restaurant_foods.food_category_id')
-          ->orderByRaw('TRIM(LOWER(foods.name))');
-
-        if (!empty($keyword)) {
-          $select->where('foods.name', 'LIKE', "%{$keyword}%");
-        }
-
-        $items = $select->get()->toArray();
-      }
     }
 
-    return $items;
+    return count($items) ? $items->toArray() : [];
   }
 
   public function ingredient_html(Request $request)

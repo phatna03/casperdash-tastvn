@@ -25,6 +25,21 @@ class RestaurantFood extends Model
     'deleted',
   ];
 
+  public function get_restaurant()
+  {
+    return Restaurant::find($this->restaurant_id);
+  }
+
+  public function get_food()
+  {
+    return Food::find($this->food_id);
+  }
+
+  public function get_food_category()
+  {
+    return FoodCategory::find($this->food_category_id);
+  }
+
   public function count_restaurants()
   {
     //food

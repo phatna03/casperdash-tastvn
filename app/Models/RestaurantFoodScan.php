@@ -655,17 +655,17 @@ class RestaurantFoodScan extends Model
         ]);
 
         $food = Food::find($foods['food']);
-        $models = $food->get_model();
+        $model2_name = $food->get_model_name();
+        $model2_version = $food->get_model_version();
 
         if ($debug) {
           var_dump('====================================================== FOOD NAME= ' . $food->name);
           var_dump('====================================================== FOOD CONFIDENCE= ' . $foods['confidence']);
-          var_dump('====================================================== FOOD MODEL= ');
-          var_dump($models);
+          var_dump('====================================================== FOOD MODEL= ' . $model2_name . ' / ' . $model2_version);
         }
 
-        $dataset = count($models) ? $models['model_name'] : $sys_app->get_setting('rbf_dataset_scan');
-        $version = count($models) ? $models['model_version'] : $sys_app->get_setting('rbf_dataset_ver');
+        $dataset = !empty($model2_name) ? $model2_name : $sys_app->get_setting('rbf_dataset_scan');
+        $version = !empty($model2_version) ? $model2_version : $sys_app->get_setting('rbf_dataset_ver');
 
         $rbf_version[] = [
           'dataset' => $dataset,

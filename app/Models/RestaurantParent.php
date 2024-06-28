@@ -64,33 +64,38 @@ class RestaurantParent extends Model
 
   public function get_foods($pars = [])
   {
-    $items = [];
+    $keyword = isset($pars['keyword']) && !empty($pars['keyword']) ? $pars['keyword'] : NULL;
+    $select_data = isset($pars['select_data']) && !empty($pars['select_data']) ? $pars['select_data'] : NULL;
 
-    $sensor = $this->get_sensors([
-      'one_sensor' => 1,
-    ]);
+    $select = RestaurantFood::query('restaurant_foods')
+      ->distinct()
+      ->where('restaurant_foods.restaurant_parent_id', $sensor->id)
+      ->where('restaurant_foods.deleted', 0)
+      ->where('foods.deleted', 0)
+      ->leftJoin('foods', 'foods.id', '=', 'restaurant_foods.food_id')
+      ->leftJoin('food_categories', 'food_categories.id', '=', 'restaurant_foods.food_category_id')
+      ->orderByRaw('TRIM(LOWER(foods.name))');
 
-    if ($sensor) {
+    if (!empty($keyword)) {
+      $select->where('foods.name', 'LIKE', "%{$keyword}%");
+    }
 
-      $select = RestaurantFood::query('restaurant_foods')
-        ->where('restaurant_foods.restaurant_id', $sensor->id)
-        ->distinct()
-        ->select(
+    switch ($select_data) {
+      case 'food_only':
+        $select->select('foods.id', 'foods.name');
+        break;
+
+      default:
+        $select->select(
           'restaurant_foods.food_id', 'foods.name as food_name',
           'restaurant_foods.live_group as food_live_group',
           'restaurant_foods.model_name as food_model_name', 'restaurant_foods.model_version as food_model_version',
           'restaurant_foods.photo as food_photo', 'restaurant_foods.local_storage',
           'restaurant_foods.food_category_id', 'food_categories.name as food_category_name'
-        )
-        ->where('restaurant_foods.deleted', 0)
-        ->leftJoin('foods', 'foods.id', '=', 'restaurant_foods.food_id')
-        ->leftJoin('food_categories', 'food_categories.id', '=', 'restaurant_foods.food_category_id')
-        ->orderByRaw('TRIM(LOWER(foods.name))');
-
-      $items = $select->get();
+        );
     }
 
-    return $items;
+    return $select->get();
   }
 
   public function get_sensors($pars = [])
@@ -118,22 +123,12 @@ class RestaurantParent extends Model
 
   public function food_serve(Food $food)
   {
-    $sensor = $this->get_sensors([
-      'one_sensor' => 1,
-    ]);
+    $row = RestaurantFood::where('deleted', 0)
+      ->where('restaurant_parent_id', $this->id)
+      ->where('food_id', $food->id)
+      ->first();
 
-    if ($sensor) {
-
-      $items = RestaurantFood::where('deleted', 0)
-        ->where('restaurant_id', $sensor->id)
-        ->where('food_id', $food->id)
-        ->get();
-      if (count($items)) {
-        return true;
-      }
-    }
-
-    return false;
+    return $row ? true : false;
   }
 
   public function re_count($pars = [])
@@ -176,4 +171,69 @@ class RestaurantParent extends Model
     ]);
   }
 
+  public function get_food_photo(Food $food)
+  {
+    $photo = url('custom/img/logo_' . $this->id . '.png');
+
+    $row = RestaurantFood::where('deleted', 0)
+      ->where('restaurant_parent_id', $this->id)
+      ->where('food_id', $food->id)
+      ->first();
+
+    if ($row) {
+      $photo = $row->photo;
+
+      if ($row->local_storage) {
+        $photo = url('photos/foods') . '/' . $row->photo;
+      }
+    }
+
+    return $photo;
+  }
+
+  public function get_food_category(Food $food)
+  {
+    $food_category = NULL;
+
+    $row = RestaurantFood::where('deleted', 0)
+      ->where('restaurant_parent_id', $this->id)
+      ->where('food_id', $food->id)
+      ->first();
+
+    if ($row) {
+      $food_category = FoodCategory::find($row->food_category_id);
+    }
+
+    return $food_category;
+  }
+
+  public function get_food_live_group(Food $food)
+  {
+    $row = RestaurantFood::where('deleted', 0)
+      ->where('restaurant_parent_id', $this->id)
+      ->where('food_id', $food->id)
+      ->first();
+
+    return $row ? $row->live_group : 3;
+  }
+
+  public function get_food_model_name(Food $food)
+  {
+    $row = RestaurantFood::where('deleted', 0)
+      ->where('restaurant_parent_id', $this->id)
+      ->where('food_id', $food->id)
+      ->first();
+
+    return $row ? $row->model_name : NULL;
+  }
+
+  public function get_food_model_version(Food $food)
+  {
+    $row = RestaurantFood::where('deleted', 0)
+      ->where('restaurant_parent_id', $this->id)
+      ->where('food_id', $food->id)
+      ->first();
+
+    return $row ? $row->model_version : NULL;
+  }
 }

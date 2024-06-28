@@ -447,20 +447,6 @@ class Food extends Model
     return $arr;
   }
 
-  public function get_restaurants()
-  {
-    $tblRestaurant = app(Restaurant::class)->getTable();
-    $tblRestaurantFood = app(RestaurantFood::class)->getTable();
-
-    $select = Restaurant::query($tblRestaurant)
-      ->select("{$tblRestaurant}.name")
-      ->leftJoin($tblRestaurantFood, "{$tblRestaurantFood}.restaurant_id", "=", "{$tblRestaurant}.id")
-      ->where("{$tblRestaurantFood}.food_id", $this->id)
-      ->orderBy("{$tblRestaurantFood}.id", "desc");
-
-    return $select->get();
-  }
-
   public function get_ingredients_info($pars)
   {
     $debug = isset($pars['debug']) ? (bool)$pars['debug'] : false;
@@ -535,131 +521,76 @@ class Food extends Model
 
   public function get_photo($pars = [])
   {
-    $text = url('custom/img/no_photo.png');
+    $photo = url('custom/img/no_photo.png');
 
-//    if (!empty($this->photo)) {
-//      $text = url('') . $this->photo;
-//    }
-
-    if (count($pars)) {
-      if (isset($pars['restaurant_parent_id']) && !empty($pars['restaurant_parent_id'])) {
-        $restaurant_parent = RestaurantParent::find((int)$pars['restaurant_parent_id']);
-        if ($restaurant_parent) {
-          $sensor = $restaurant_parent->get_sensors([
-            'one_sensor' => 1,
-          ]);
-          if ($sensor) {
-            $row = RestaurantFood::where('deleted', 0)
-              ->where('restaurant_id', $sensor->id)
-              ->where('food_id', $this->id)
-              ->where('photo', '<>', NULL)
-              ->orderBy('id', 'desc')
-              ->limit(1)
-              ->first();
-            if ($row) {
-
-              $text = $row->photo;
-              if ($row->local_storage) {
-                $text = url('photos/foods') . '/' . $row->photo;
-              }
-            }
-          }
-        }
+    if (isset($pars['restaurant_parent_id']) && !empty($pars['restaurant_parent_id'])) {
+      $restaurant_parent_id = (int)$pars['restaurant_parent_id'];
+      $restaurant_parent = RestaurantParent::find($restaurant_parent_id);
+      if ($restaurant_parent) {
+        $photo = $restaurant_parent->get_food_photo($this);
       }
     }
 
-    return $text;
+    return $photo;
   }
 
   public function get_category($pars = [])
   {
-    $category = NULL;
+    $food_category = NULL;
 
-    if (count($pars)) {
-      if (isset($pars['restaurant_parent_id']) && !empty($pars['restaurant_parent_id'])) {
-        $restaurant_parent = RestaurantParent::find((int)$pars['restaurant_parent_id']);
-        if ($restaurant_parent) {
-          $sensor = $restaurant_parent->get_sensors([
-            'one_sensor' => 1,
-          ]);
-          if ($sensor) {
-            $row = RestaurantFood::where('deleted', 0)
-              ->where('restaurant_id', $sensor->id)
-              ->where('food_id', $this->id)
-              ->where('food_category_id', '>', 0)
-              ->orderBy('id', 'desc')
-              ->limit(1)
-              ->first();
-            if ($row) {
-              $category = FoodCategory::find($row->food_category_id);
-            }
-          }
-        }
+    if (isset($pars['restaurant_parent_id']) && !empty($pars['restaurant_parent_id'])) {
+      $restaurant_parent_id = (int)$pars['restaurant_parent_id'];
+      $restaurant_parent = RestaurantParent::find($restaurant_parent_id);
+      if ($restaurant_parent) {
+        $food_category = $restaurant_parent->get_food_category($this);
       }
     }
 
-    return $category;
+    return $food_category;
   }
 
   public function get_live_group($pars = [])
   {
-    $live_group = 0;
+    $live_group = 3;
 
-    if (count($pars)) {
-      if (isset($pars['restaurant_parent_id']) && !empty($pars['restaurant_parent_id'])) {
-        $restaurant_parent = RestaurantParent::find((int)$pars['restaurant_parent_id']);
-        if ($restaurant_parent) {
-          $sensor = $restaurant_parent->get_sensors([
-            'one_sensor' => 1,
-          ]);
-          if ($sensor) {
-            $row = RestaurantFood::where('deleted', 0)
-              ->where('restaurant_id', $sensor->id)
-              ->where('food_id', $this->id)
-              ->orderBy('id', 'desc')
-              ->limit(1)
-              ->first();
-            if ($row) {
-              $live_group = $row->live_group;
-            }
-          }
-        }
+    if (isset($pars['restaurant_parent_id']) && !empty($pars['restaurant_parent_id'])) {
+      $restaurant_parent_id = (int)$pars['restaurant_parent_id'];
+      $restaurant_parent = RestaurantParent::find($restaurant_parent_id);
+      if ($restaurant_parent) {
+        $live_group = $restaurant_parent->get_food_live_group($this);
       }
     }
 
     return $live_group;
   }
 
-  public function get_model($pars = [])
+  public function get_model_name($pars = [])
   {
-    $arr = [];
+    $model_name = NULL;
 
-    if (count($pars)) {
-      if (isset($pars['restaurant_parent_id']) && !empty($pars['restaurant_parent_id'])) {
-        $restaurant_parent = RestaurantParent::find((int)$pars['restaurant_parent_id']);
-        if ($restaurant_parent) {
-          $sensor = $restaurant_parent->get_sensors([
-            'one_sensor' => 1,
-          ]);
-          if ($sensor) {
-            $row = RestaurantFood::select('model_name', 'model_version')
-              ->where('deleted', 0)
-              ->where('restaurant_id', $sensor->id)
-              ->where('food_id', $this->id)
-              ->orderBy('id', 'desc')
-              ->limit(1)
-              ->first();
-            if ($row) {
-              $arr = [
-                'model_name' => $row->model_name,
-                'model_version' => $row->model_version,
-              ];
-            }
-          }
-        }
+    if (isset($pars['restaurant_parent_id']) && !empty($pars['restaurant_parent_id'])) {
+      $restaurant_parent_id = (int)$pars['restaurant_parent_id'];
+      $restaurant_parent = RestaurantParent::find($restaurant_parent_id);
+      if ($restaurant_parent) {
+        $model_name = $restaurant_parent->get_food_model_name($this);
       }
     }
 
-    return $arr;
+    return $model_name;
+  }
+
+  public function get_model_version($pars = [])
+  {
+    $model_version = NULL;
+
+    if (isset($pars['restaurant_parent_id']) && !empty($pars['restaurant_parent_id'])) {
+      $restaurant_parent_id = (int)$pars['restaurant_parent_id'];
+      $restaurant_parent = RestaurantParent::find($restaurant_parent_id);
+      if ($restaurant_parent) {
+        $model_version = $restaurant_parent->get_food_model_version($this);
+      }
+    }
+
+    return $model_version;
   }
 }

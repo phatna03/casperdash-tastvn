@@ -306,7 +306,7 @@ class SensorController extends Controller
 
     $food_datas = [];
 
-    $datas = RestaurantFood::where('restaurant_id', $row->id)
+    $datas = RestaurantFood::where('restaurant_parent_id', $row->restaurant_parent_id)
       ->where('deleted', 0)
       ->get();
     if (count($datas)) {

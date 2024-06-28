@@ -312,157 +312,22 @@ class RestaurantController extends Controller
   {
     $values = $request->post();
     $keyword = isset($values['keyword']) && !empty($values['keyword']) ? $values['keyword'] : NULL;
+
     $restaurant_parent_id = isset($values['restaurant_parent_id']) ? (int)$values['restaurant_parent_id'] : 0;
     $restaurant_parent = RestaurantParent::find($restaurant_parent_id);
 
     $items = [];
 
     if ($restaurant_parent) {
-
-      $sensor = $restaurant_parent->get_sensors([
-        'one_sensor' => 1,
+      $items = $restaurant_parent->get_foods([
+        'keyword' => $keyword,
+        'select_data' => 'food_only',
       ]);
-
-      if ($sensor) {
-
-        $select = RestaurantFood::query('restaurant_foods')
-          ->where('restaurant_foods.restaurant_id', $sensor->id)
-          ->distinct()
-          ->select('foods.id', 'foods.name',)
-          ->where('restaurant_foods.deleted', 0)
-          ->where('foods.deleted', 0)
-          ->leftJoin('foods', 'foods.id', '=', 'restaurant_foods.food_id')
-          ->leftJoin('food_categories', 'food_categories.id', '=', 'restaurant_foods.food_category_id')
-          ->orderByRaw('TRIM(LOWER(foods.name))');
-
-        if (!empty($keyword)) {
-          $select->where('foods.name', 'LIKE', "%{$keyword}%");
-        }
-
-        $items = $select->get()->toArray();
-      }
     }
 
     return response()->json([
-      'items' => $items,
+      'items' => count($items) ? $items->toArray() : [],
     ]);
-  }
-
-  public function food_import(Request $request)
-  {
-    $values = $request->post();
-
-    $restaurant_parent_id = isset($values['restaurant_parent_id']) ? (int)$values['restaurant_parent_id'] : 0;
-    $restaurant_parent = RestaurantParent::find($restaurant_parent_id);
-
-    $datas = (new ImportData())->toArray($request->file('excel'));
-    if (!count($datas) || !count($datas[0]) || !$restaurant_parent) {
-      return response()->json([
-        'error' => 'Invalid data'
-      ], 404);
-    }
-
-    $sensors = $restaurant_parent->get_sensors();
-    if (!count($sensors)) {
-      return response()->json([
-        'error' => 'Invalid sensor'
-      ], 404);
-    }
-
-    $items = [];
-    $temps = [];
-
-    DB::beginTransaction();
-    try {
-
-      //excel data
-      foreach ($datas[0] as $k => $data) {
-
-        $col1 = trim($data[0]);
-        $col2 = isset($data[1]) && !empty(trim($data[1])) ? trim($data[1]) : NULL;
-        $col3 = isset($data[2]) && !empty(trim($data[2])) ? trim($data[2]) : NULL;
-
-        if (empty($col1)) {
-          continue;
-        }
-
-        $col1 = str_replace('&', '-', $col1);
-
-        $temps[] = [
-          'food' => $col1,
-          'category' => $col2,
-          'photo' => $col3,
-        ];
-      }
-
-      //init item
-      if (count($temps)) {
-        foreach ($temps as $temp) {
-
-          $food = Food::whereRaw('LOWER(name) LIKE ?', strtolower($temp['food']))
-            ->first();
-          if (!$food) {
-            continue;
-          }
-
-          $food_category = NULL;
-          if (!empty($temp['category'])) {
-            $food_category = FoodCategory::whereRaw('LOWER(name) LIKE ?', strtolower($temp['category']))
-              ->first();
-            if (!$food_category) {
-              $food_category = FoodCategory::create([
-                'name' => ucwords($temp['category']),
-                'creator_id' => $this->_viewer->id,
-              ]);
-            }
-          }
-
-          $items[] = [
-            'food_id' => $food->id,
-            'live_group' => $food->live_group,
-            'food_category_id' => $food_category ? $food_category->id : 0,
-            'photo' => !empty($temp['photo']) && @getimagesize($temp['photo']) ? $temp['photo'] : NULL,
-          ];
-
-        }
-      }
-
-      //import
-      if (count($items)) {
-        foreach ($sensors as $sensor) {
-          $sensor->import_foods($items);
-        }
-
-        //re-count
-        $this->_sys_app->sys_stats_count();
-
-//      $this->_viewer->add_log([
-//        'type' => 'import_food_to_' . $restaurant_parent->get_type(),
-//        'item_id' => (int)$restaurant_parent->id,
-//        'item_type' => $restaurant_parent->get_type(),
-//      ]);
-      }
-
-      DB::commit();
-
-    } catch (\Exception $e) {
-      DB::rollback();
-
-      return response()->json([
-        'error' => 'Error transaction! Please try again later.', //$e->getMessage()
-      ], 422);
-    }
-
-    if (count($items)) {
-      return response()->json([
-        'status' => true,
-        'message' => 'import food= ' . count($items),
-      ], 200);
-    }
-
-    return response()->json([
-      'error' => 'Invalid data or dishes existed',
-    ], 422);
   }
 
   public function food_remove(Request $request)
@@ -482,11 +347,8 @@ class RestaurantController extends Controller
     }
 
     RestaurantFood::where('food_id', $food->id)
-      ->whereIn('restaurant_id', function ($q) use ($restaurant_parent) {
-        $q->select('id')
-          ->from('restaurants')
-          ->where('restaurant_parent_id', $restaurant_parent->id);
-      })->update([
+      ->where('restaurant_parent_id', $restaurant_parent->id)
+      ->update([
         'deleted' => $this->_viewer->id,
       ]);
 
@@ -523,33 +385,24 @@ class RestaurantController extends Controller
     switch ($type) {
       case 'live_group':
         RestaurantFood::where('food_id', $food->id)
-          ->whereIn('restaurant_id', function ($q) use ($restaurant_parent) {
-            $q->select('id')
-              ->from('restaurants')
-              ->where('restaurant_parent_id', $restaurant_parent->id);
-          })->update([
+          ->where('restaurant_parent_id', $restaurant_parent->id)
+          ->update([
             'live_group' => $live_group,
           ]);
         break;
 
       case 'model_name':
         RestaurantFood::where('food_id', $food->id)
-          ->whereIn('restaurant_id', function ($q) use ($restaurant_parent) {
-            $q->select('id')
-              ->from('restaurants')
-              ->where('restaurant_parent_id', $restaurant_parent->id);
-          })->update([
+          ->where('restaurant_parent_id', $restaurant_parent->id)
+          ->update([
             'model_name' => $model_name,
           ]);
         break;
 
       case 'model_version':
         RestaurantFood::where('food_id', $food->id)
-          ->whereIn('restaurant_id', function ($q) use ($restaurant_parent) {
-            $q->select('id')
-              ->from('restaurants')
-              ->where('restaurant_parent_id', $restaurant_parent->id);
-          })->update([
+          ->where('restaurant_parent_id', $restaurant_parent->id)
+          ->update([
             'model_version' => $model_version,
           ]);
         break;
@@ -654,26 +507,21 @@ class RestaurantController extends Controller
         $file_name = 'food_' . $restaurant_parent->id . '_' . $food->id . '.' . $file->getClientOriginalExtension();
         $file->move(public_path($file_path), $file_name);
 
-        $sensors = $restaurant_parent->get_sensors();
-        if (count($sensors)) {
-          foreach ($sensors as $sensor) {
-            $row = RestaurantFood::where('restaurant_id', $sensor->id)
-              ->where('food_id', $food->id)
-              ->first();
-            if (!$row) {
-              $row = RestaurantFood::create([
-                'restaurant_id' => $sensor->id,
-                'food_id' => $food->id,
-                'creator_id' => $this->_viewer->id,
-              ]);
-            }
-            $row->update([
-              'photo' => $file_name,
-              'local_storage' => 1,
-              'deleted' => 0,
-            ]);
-          }
+        $row = RestaurantFood::where('restaurant_parent_id', $restaurant_parent->id)
+          ->where('food_id', $food->id)
+          ->first();
+        if (!$row) {
+          $row = RestaurantFood::create([
+            'restaurant_parent_id' => $restaurant_parent->id,
+            'food_id' => $food->id,
+            'creator_id' => $this->_viewer->id,
+          ]);
         }
+        $row->update([
+          'photo' => $file_name,
+          'local_storage' => 1,
+          'deleted' => 0,
+        ]);
       }
     }
 

@@ -19,7 +19,6 @@ use App\Models\RestaurantFoodScan;
 use App\Models\Food;
 use App\Models\FoodIngredient;
 use App\Models\Ingredient;
-use App\Models\RestaurantFood;
 use App\Models\RestaurantParent;
 
 class RoboflowController extends Controller
@@ -272,39 +271,20 @@ class RoboflowController extends Controller
     }
 
     $restaurant_parent_id = isset($values['item']) ? (int)$values['item'] : 0;
-
-    $restaurant_ids = Restaurant::select('id')
-      ->where('deleted', 0)
-      ->where('restaurant_parent_id', $restaurant_parent_id);
-
-    $rows = RestaurantFood::query("restaurant_foods")
-      ->distinct()
-      ->select('foods.id', 'foods.name')
-      ->leftJoin('foods', 'foods.id', '=', 'restaurant_foods.food_id')
-      ->whereIn('restaurant_foods.restaurant_id', $restaurant_ids)
-      ->where('foods.deleted', 0)
-      ->where('restaurant_foods.deleted', 0)
-      ->orderByRaw('TRIM(LOWER(foods.name))')
-      ->get();
-
-    $items = [];
-    $count = 0;
-
-    if (count($rows)) {
-      foreach ($rows as $row) {
-
-        $count++;
-
-        $items[] = [
-          'id' => $row->id,
-          'name' => $count . '. ' . $row->name,
-        ];
-      }
+    $restaurant_parent = RestaurantParent::find($restaurant_parent_id);
+    if (!$restaurant_parent) {
+      return response()->json([
+        'error' => 'Invalid data'
+      ], 404);
     }
+
+    $items = $restaurant_parent->get_foods([
+      'select_data' => 'food_only',
+    ]);
 
     return response()->json([
       'status' => true,
-      'items' => $items,
+      'items' => count($items) ? $items->toArray() : [],
     ]);
   }
 
