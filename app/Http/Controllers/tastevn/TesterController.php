@@ -57,6 +57,7 @@ class TesterController extends Controller
 
 //    var_dump(phpinfo());
 
+//    $restaurant->count_foods();
 
 
 //    $row = RestaurantFoodScan::find(45535);
@@ -89,7 +90,7 @@ class TesterController extends Controller
 
 //    $this->food_category_update();
 
-    $this->food_restaurant_sync();
+//    $this->food_restaurant_sync();
 
     //=======================================================================================
 

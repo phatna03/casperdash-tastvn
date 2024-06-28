@@ -394,7 +394,16 @@
           <div class="modal-body">
             <div class="row">
               <div class="col mb-12 mt-2">
+                <div class="wrap-add-item-ingredients">
+                  <div class="wrap-ingredients wrap-custom p-1">
+                    <div class="ingredient-item-add mb-1 acm-text-right">
+                      <button class="btn btn-sm btn-info me-sm-3 me-1" type="button" onclick="ingredient_item_add(this)"><i class="mdi mdi-plus me-0 me-sm-1"></i> Add Ingredient</button>
+                    </div>
+                  </div>
+                  <div class="wrap-ingredients wrap-fetch p-1">
 
+                  </div>
+                </div>
               </div>
             </div>
           </div>

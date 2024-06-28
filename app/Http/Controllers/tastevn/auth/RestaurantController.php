@@ -442,6 +442,9 @@ class RestaurantController extends Controller
       ])
       ->render();
 
+    //re-count
+    $this->_sys_app->sys_stats_count();
+
     //table stats + total foods
     $foods = $restaurant_parent->get_foods();
 
@@ -779,12 +782,14 @@ class RestaurantController extends Controller
 
       case 'robot':
 
-
+        $html = view('tastevn.htmls.item_ingredient_input')
+          ->with('ingredients', $food->get_ingredients([
+            'restaurant_parent_id' => $restaurant_parent->id
+          ]))
+          ->render();
 
         break;
     }
-
-
 
     return response()->json([
       'status' => true,
@@ -837,7 +842,16 @@ class RestaurantController extends Controller
 
       case 'robot':
 
+        $food->update_ingredients([
+          'ingredients' => $ingredients,
+          'restaurant_parent_id' => $restaurant_parent_id,
+        ]);
 
+        $html = view('tastevn.htmls.item_restaurant_parent_food_robot')
+          ->with('items', $food->get_ingredients([
+            'restaurant_parent_id' => $restaurant_parent->id
+          ]))
+          ->render();
 
         break;
     }
