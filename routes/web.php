@@ -234,6 +234,7 @@ Route::post('/admin/restaurant/food/core', [RestaurantController::class, 'food_c
 Route::post('/admin/restaurant/food/confidence', [RestaurantController::class, 'food_confidence']);
 Route::post('/admin/restaurant/food/photo', [RestaurantController::class, 'food_photo']);
 Route::post('/admin/restaurant/food/update', [RestaurantController::class, 'food_update']);
+Route::post('/admin/restaurant/food/ingredient/get', [RestaurantController::class, 'food_ingredient_get']);
 //sensor (restaurant)
 Route::get('/admin/sensors', [SensorController::class, 'index']);
 Route::post('/admin/sensor/store', [SensorController::class, 'store']);

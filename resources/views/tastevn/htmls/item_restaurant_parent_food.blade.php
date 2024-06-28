@@ -56,7 +56,7 @@
     <div class="col-lg-3 mb-1">
       <div class="acm-clearfix">
         @if($viewer->is_moderator())
-        <button type="button" class="btn btn-sm btn-info p-1 d-inline-block">
+        <button type="button" class="btn btn-sm btn-info p-1 d-inline-block" onclick="restaurant_food_recipe_prepare(this)">
           <i class="mdi mdi-pencil"></i>
         </button>
         @endif
@@ -73,7 +73,7 @@
     <div class="col-lg-3 mb-1">
       <div class="acm-clearfix">
         @if($viewer->is_moderator())
-          <button type="button" class="btn btn-sm btn-info p-1 d-inline-block">
+          <button type="button" class="btn btn-sm btn-info p-1 d-inline-block" onclick="restaurant_food_robot_prepare(this)">
             <i class="mdi mdi-pencil"></i>
           </button>
         @endif

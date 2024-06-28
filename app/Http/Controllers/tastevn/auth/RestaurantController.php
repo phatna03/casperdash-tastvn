@@ -724,4 +724,30 @@ class RestaurantController extends Controller
       'status' => true,
     ], 200);
   }
+
+  public function food_ingredient_get(Request $request)
+  {
+    $values = $request->post();
+
+    $restaurant_parent_id = isset($values['restaurant_parent_id']) ? (int)$values['restaurant_parent_id'] : 0;
+    $restaurant_parent = RestaurantParent::find($restaurant_parent_id);
+
+    $food_id = isset($values['food_id']) ? (int)$values['food_id'] : 0;
+    $food = Food::find($food_id);
+
+    if (!$restaurant_parent || !$food) {
+      return response()->json([
+        'error' => 'Invalid data'
+      ], 404);
+    }
+
+    $type = isset($values['type']) ? $values['type'] : 'recipe';
+
+    $html = '';
+
+    return response()->json([
+      'status' => true,
+      'html' => $html,
+    ], 200);
+  }
 }

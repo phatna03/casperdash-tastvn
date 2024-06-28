@@ -520,6 +520,70 @@ function restaurant_food_add(evt, frm) {
 
   return false;
 }
+function restaurant_food_recipe_prepare(ele) {
+  var food_item = $(ele).closest('.data_food_item');
+  var popup1 = $(ele).closest('.modal');
+  var popup2 = $('#modal_food_ingredient_recipe');
+
+  var restaurant_parent_id = popup1.find('input[name=restaurant_parent_id]').val();
+  var food_id = food_item.attr('data-food_id');
+
+  popup2.find('input[name=restaurant_parent_id]').val(restaurant_parent_id);
+  popup2.find('input[name=food_id]').val(food_id);
+
+  form_loading(popup2);
+
+  axios.post('/admin/restaurant/food/ingredient/get', {
+    restaurant_parent_id: restaurant_parent_id,
+    food_id: food_id,
+    type: 'recipe',
+  })
+    .then(response => {
+
+
+
+      popup2.modal('show');
+
+    })
+    .catch(error => {
+      if (error.response.data && Object.values(error.response.data).length) {
+        Object.values(error.response.data).forEach(function (v, k) {
+          message_from_toast('error', acmcfs.message_title_error, v);
+        });
+      }
+    })
+    .then(() => {
+      form_loading(popup2, false);
+    });
+}
+function restaurant_food_recipe(evt, frm) {
+  evt.preventDefault();
+  var form = $(frm);
+  form_loading(form);
+
+
+
+  return false;
+}
+function restaurant_food_robot_prepare(itd) {
+  var popup = $('#modal_food_ingredient_robot');
+  var restaurant_parent_id = itd;
+
+  popup.find('input[name=restaurant_parent_id]').val(restaurant_parent_id);
+
+
+
+  popup.modal('show');
+}
+function restaurant_food_robot(evt, frm) {
+  evt.preventDefault();
+  var form = $(frm);
+  form_loading(form);
+
+
+
+  return false;
+}
 //sensor
 function sensor_add(evt, frm) {
   evt.preventDefault();

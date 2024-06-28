@@ -343,6 +343,67 @@
       </div>
     </div>
   </div>
+  <!-- modal food recipe -->
+  <div class="modal fade modal-second" id="modal_food_ingredient_recipe" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title">Edit Recipe Ingredients</h4>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form class="pt-0" onsubmit="return restaurant_food_recipe(event, this);">
+          <div class="modal-body">
+            <div class="row">
+              <div class="col mb-12 mt-2">
+
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <div class="wrap-btns">
+              @include('tastevn.htmls.form_button_loading')
+              <button type="submit" class="btn btn-primary btn-ok btn-submit acm-float-right">Submit</button>
+              <button type="button" class="btn btn-outline-secondary btn-ok btn-cancel" data-bs-dismiss="modal">Cancel</button>
+            </div>
+
+            <input type="hidden" name="restaurant_parent_id" />
+            <input type="hidden" name="food_id" />
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <!-- modal food robot -->
+  <div class="modal fade modal-second" id="modal_food_ingredient_robot" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title">Edit Roboflow Ingredients</h4>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form class="pt-0" onsubmit="return restaurant_food_robot(event, this);">
+          <div class="modal-body">
+            <div class="row">
+              <div class="col mb-12 mt-2">
+
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <div class="wrap-btns">
+              @include('tastevn.htmls.form_button_loading')
+              <button type="submit" class="btn btn-primary btn-ok btn-submit acm-float-right">Submit</button>
+              <button type="button" class="btn btn-outline-secondary btn-ok btn-cancel" data-bs-dismiss="modal">Cancel</button>
+            </div>
+
+            <input type="hidden" name="restaurant_parent_id" />
+            <input type="hidden" name="food_id" />
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
 @endsection
 
 @section('js_end')
