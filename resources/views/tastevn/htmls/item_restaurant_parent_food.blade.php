@@ -28,6 +28,7 @@
      data-live_group="{{$item['food_live_group']}}"
      data-model_name="{{$item['food_model_name']}}"
      data-model_version="{{$item['food_model_version']}}"
+     data-category_name="{{$item['food_category_name']}}"
 >
   <div class="row">
     <div class="col-lg-4 mb-1">
@@ -35,11 +36,11 @@
 
       <div class="acm-clearfix mb-2">
         @if($viewer->is_moderator())
-          <button type="button" class="btn btn-sm btn-info p-1 d-inline-block">
+          <button type="button" class="btn btn-sm btn-info p-1 d-inline-block" onclick="restaurant_food_update_prepare(this, 'category_name')">
             <i class="mdi mdi-pencil"></i>
           </button>
         @endif
-        <div class="text-dark acm-fs-18 acm-text-italic d-inline-block">{{$item['food_category_id'] ? '(' . $item['food_category_name'] . ')' : ''}}</div>
+        <div class="text-dark acm-fs-18 acm-text-italic d-inline-block food_category_name">{{$item['food_category_id'] ? '(' . $item['food_category_name'] . ')' : ''}}</div>
       </div>
 
       <div class="text-center w-100 wrap_food_photo_standard">

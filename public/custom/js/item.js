@@ -376,6 +376,7 @@ function restaurant_food_update_prepare(ele, type) {
 
   popup2.find('input[name=model_name]').val(food_item.attr('data-model_name'));
   popup2.find('input[name=model_version]').val(food_item.attr('data-model_version'));
+  popup2.find('input[name=category_name]').val(food_item.attr('data-category_name'));
 
   var live_group = parseInt(food_item.attr('data-live_group'));
   popup2.find('.wrap_live_group .live_group_' + live_group).prop('checked', true);
@@ -390,6 +391,10 @@ function restaurant_food_update_prepare(ele, type) {
     setTimeout(function () {
       popup2.find('input[name=model_version]').focus();
     }, acmcfs.timeout_quick);
+  } else if (type == 'category_name') {
+    setTimeout(function () {
+      popup2.find('input[name=category_name]').focus();
+    }, acmcfs.timeout_quick);
   }
 }
 function restaurant_food_update() {
@@ -403,6 +408,7 @@ function restaurant_food_update() {
   var live_group = popup2.find('input[name=live_group]:checked').val();
   var model_name = popup2.find('input[name=model_name]').val();
   var model_version = popup2.find('input[name=model_version]').val();
+  var category_name = popup2.find('input[name=category_name]').val();
 
   axios.post('/admin/restaurant/food/update', {
     restaurant_parent_id: restaurant_parent_id,
@@ -411,6 +417,7 @@ function restaurant_food_update() {
     live_group: live_group,
     model_name: model_name,
     model_version: model_version,
+    category_name: category_name,
   })
     .then(response => {
 
@@ -436,6 +443,10 @@ function restaurant_food_update() {
         case 'model_version':
           food_item.attr('data-model_version', model_version);
           food_item.find('.btn_inputs input[name=model_version]').val(model_version);
+          break;
+        case 'category_name':
+          food_item.attr('data-category_name', category_name);
+          food_item.find('.food_category_name').text('(' + category_name + ')');
           break;
       }
 

@@ -537,6 +537,7 @@ class RestaurantController extends Controller
     }
 
     $type = isset($values['type']) ? $values['type'] : 'live_group';
+    $food_category_name = isset($values['category_name']) ? $values['category_name'] : NULL;
     $model_name = isset($values['model_name']) ? $values['model_name'] : NULL;
     $model_version = isset($values['model_version']) ? $values['model_version'] : NULL;
     $live_group = isset($values['live_group']) && (int)$values['live_group'] && (int)$values['live_group'] < 4
@@ -566,10 +567,44 @@ class RestaurantController extends Controller
             'model_version' => $model_version,
           ]);
         break;
+
+      case 'category_name':
+        //food_category
+        $food_category = NULL;
+        if (!empty($food_category_name)) {
+          $food_category = FoodCategory::whereRaw('LOWER(name) LIKE ?', strtolower(trim($food_category_name)))
+            ->first();
+          if (!$food_category) {
+            $food_category = FoodCategory::create([
+              'name' => ucwords(strtolower(trim($food_category_name)))
+            ]);
+
+            $this->_viewer->add_log([
+              'type' => 'add_' . $food_category->get_type(),
+              'item_id' => (int)$food_category->id,
+              'item_type' => $food_category->get_type(),
+            ]);
+          } else {
+            if ($food_category->deleted) {
+              $food_category->update([
+                'deleted' => 0,
+              ]);
+            }
+          }
+        }
+
+        RestaurantFood::where('food_id', $food->id)
+          ->where('restaurant_parent_id', $restaurant_parent->id)
+          ->update([
+            'food_category_id' => $food_category ? $food_category->id : 0,
+          ]);
+
+        break;
     }
 
     return response()->json([
       'status' => true,
+      'type' => $type,
     ], 200);
   }
 
