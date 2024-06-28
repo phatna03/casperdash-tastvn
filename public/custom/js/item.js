@@ -447,9 +447,60 @@ function restaurant_food_update() {
 
   return false;
 }
-function restaurant_food_add_prepare() {
+function restaurant_food_add_prepare(itd) {
   var popup = $('#modal_food_add');
 
+  popup.find('input[name=restaurant_parent_id]').val(itd);
+  popup.find('input[name=name]').val('');
+  popup.find('input[name=category_name]').val('');
+
+  popup.modal('show');
+
+  setTimeout(function () {
+    popup.find('input[name=name]').focus();
+  }, acmcfs.timeout_quick);
+}
+function restaurant_food_add(evt, frm) {
+  evt.preventDefault();
+  var form = $(frm);
+  form_loading(form);
+
+  var popup1 = $('#modal_info_item');
+  var popup2 = $('#modal_food_add');
+
+  axios.post('/admin/restaurant/food/add', {
+    name: form.find('input[name=name]').val(),
+    category_name: form.find('input[name=category_name]').val(),
+    restaurant_parent_id: form.find('input[name=restaurant_parent_id]').val(),
+  })
+    .then(response => {
+
+      message_from_toast('success', acmcfs.message_title_success, acmcfs.message_description_success_add, true);
+
+      var wrap_foods = popup1.find('.frm_restaurant_foods');
+      wrap_foods.find('.frm_restaurant_foods_data .foods_empty').remove();
+      wrap_foods.find('.frm_restaurant_foods_data').prepend(response.data.html);
+
+      wrap_foods.find('.frm_restaurant_foods .counf_foods').text(response.data.count_foods);
+      wrap_foods.find('.frm_restaurant_foods .count_foods_1').text(response.data.count_foods_1);
+      wrap_foods.find('.frm_restaurant_foods .count_foods_2').text(response.data.count_foods_2);
+      wrap_foods.find('.frm_restaurant_foods .count_foods_3').text(response.data.count_foods_3);
+
+      popup2.modal('hide');
+
+    })
+    .catch(error => {
+      if (error.response.data && Object.values(error.response.data).length) {
+        Object.values(error.response.data).forEach(function (v, k) {
+          message_from_toast('error', acmcfs.message_title_error, v);
+        });
+      }
+    })
+    .then(() => {
+      form_loading(form, false);
+    });
+
+  return false;
 }
 //sensor
 function sensor_add(evt, frm) {

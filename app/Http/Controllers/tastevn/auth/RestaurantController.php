@@ -311,7 +311,7 @@ class RestaurantController extends Controller
 
     $html = view('tastevn.htmls.item_restaurant_parent')
       ->with('restaurant_parent', $row)
-      ->with('foods', $foods)
+      ->with('foods', count($foods) ? $foods->toArray() : [])
       ->with('foods_group_1', $foods_group_1)
       ->with('foods_group_2', $foods_group_2)
       ->with('foods_group_3', $foods_group_3)
@@ -343,6 +343,131 @@ class RestaurantController extends Controller
     return response()->json([
       'items' => count($items) ? $items->toArray() : [],
     ]);
+  }
+
+  public function food_add(Request $request)
+  {
+    $values = $request->post();
+
+    $restaurant_parent_id = isset($values['restaurant_parent_id']) ? (int)$values['restaurant_parent_id'] : 0;
+    $restaurant_parent = RestaurantParent::find($restaurant_parent_id);
+    if (!$restaurant_parent) {
+      return response()->json([
+        'error' => 'Invalid data'
+      ], 404);
+    }
+
+    $food_name = isset($values['name']) && !empty($values['name']) ? $values['name'] : NULL;
+    $food_category_name = isset($values['category_name']) && !empty($values['category_name']) ? $values['category_name'] : NULL;
+    $row = NULL;
+
+    $food = Food::where('deleted', 0)
+      ->whereRaw('LOWER(name) LIKE ?', strtolower(trim($food_name)))
+      ->first();
+    if ($food) {
+      $row = RestaurantFood::where('restaurant_parent_id', $restaurant_parent->id)
+        ->where('food_id', $food->id)
+        ->first();
+      if ($row) {
+        if (!$row->deleted) {
+          return response()->json([
+            'error' => 'Dish existed'
+          ], 404);
+        }
+
+        $row->update([
+          'deleted' => 0,
+        ]);
+      }
+    }
+
+    if (!$food) {
+      $food = Food::create([
+        'name' => ucwords(strtolower(trim($food_name))),
+        'creator_id' => $this->_viewer->id,
+      ]);
+
+      $this->_viewer->add_log([
+        'type' => 'add_' . $food->get_type(),
+        'item_id' => (int)$food->id,
+        'item_type' => $food->get_type(),
+      ]);
+    }
+
+    if (!$row) {
+      $row = RestaurantFood::create([
+        'restaurant_parent_id' => $restaurant_parent->id,
+        'food_id' => $food->id,
+      ]);
+    }
+
+    //food_category
+    $food_category = NULL;
+    if (!empty($food_category_name)) {
+      $food_category = FoodCategory::whereRaw('LOWER(name) LIKE ?', strtolower(trim($food_category_name)))
+        ->first();
+      if (!$food_category) {
+        $food_category = FoodCategory::create([
+          'name' => ucwords(strtolower(trim($food_category_name)))
+        ]);
+
+        $this->_viewer->add_log([
+          'type' => 'add_' . $food_category->get_type(),
+          'item_id' => (int)$food_category->id,
+          'item_type' => $food_category->get_type(),
+        ]);
+      } else {
+        if ($food_category->deleted) {
+          $food_category->update([
+            'deleted' => 0,
+          ]);
+        }
+      }
+    }
+
+    $row->update([
+      'food_category_id' => $food_category ? $food_category->id : 0,
+    ]);
+
+    //html
+    $html = view('tastevn.htmls.item_restaurant_parent_food')
+      ->with('restaurant_parent', $restaurant_parent)
+      ->with('item', [
+        'food_id' => $food->id,
+        'food_category_id' => $food_category ? $food_category->id : 0,
+        'food_category_name' => $food_category ? $food_category->name : '',
+        'food_live_group' => 3,
+        'food_model_name' => '',
+        'food_model_version' => '',
+      ])
+      ->render();
+
+    //table stats + total foods
+    $foods = $restaurant_parent->get_foods();
+
+    $foods_group_1 = $restaurant_parent->get_foods([
+      'live_group' => 1,
+    ]);
+
+    $foods_group_2 = $restaurant_parent->get_foods([
+      'live_group' => 2,
+    ]);
+
+    $foods_group_3 = $restaurant_parent->get_foods([
+      'live_group' => 3,
+    ]);
+
+    return response()->json([
+      'status' => true,
+
+      'html' => $html,
+
+      'count_foods' => count($foods),
+      'count_foods_1' => count($foods_group_1),
+      'count_foods_2' => count($foods_group_2),
+      'count_foods_3' => count($foods_group_3),
+
+    ], 200);
   }
 
   public function food_remove(Request $request)
