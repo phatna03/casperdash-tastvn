@@ -738,7 +738,6 @@
             }
 
             @if($pageConfigs['debug'])
-{{--            @if($viewer->is_super_admin() || $viewer->is_dev())--}}
 
             var ts1 = Math.floor(new Date(full['time_photo']).getTime() / 1000);
             var ts2 = Math.floor(new Date(full['time_end']).getTime() / 1000);
@@ -840,7 +839,6 @@
       ],
       buttons: [
         @if($pageConfigs['debug'])
-{{--        @if($viewer->is_super_admin() || $viewer->is_dev())--}}
         {
           text: '<i class="mdi mdi-robot-confused me-0 me-sm-1"></i><span class="d-none d-sm-inline-block">Re-train Roboflow</span>',
           className: 'add-new btn btn-danger waves-effect waves-light acm-mr-px-10',

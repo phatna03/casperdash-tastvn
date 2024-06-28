@@ -447,6 +447,10 @@ function restaurant_food_update() {
 
   return false;
 }
+function restaurant_food_add_prepare() {
+  var popup = $('#modal_food_add');
+
+}
 //sensor
 function sensor_add(evt, frm) {
   evt.preventDefault();

@@ -12,6 +12,7 @@ class RestaurantFood extends Model
   public $table = 'restaurant_foods';
 
   protected $fillable = [
+    'restaurant_parent_id',
     'restaurant_id',
     'food_id',
     'food_category_id',

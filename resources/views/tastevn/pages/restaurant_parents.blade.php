@@ -302,6 +302,34 @@
       </div>
     </div>
   </div>
+  <!-- modal food add -->
+  <div class="modal fade modal-second" id="modal_food_add" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title">Add Dish</h4>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="row">
+            <div class="col mb-12 mt-2">
+              <div class="alert alert-danger">Are you sure you want to remove this dish from the restaurant?</div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <div class="wrap-btns">
+            @include('tastevn.htmls.form_button_loading')
+            <button type="button" class="btn btn-primary btn-ok btn-submit acm-float-right" onclick="restaurant_food_remove()">Submit</button>
+            <button type="button" class="btn btn-outline-secondary btn-ok btn-cancel" data-bs-dismiss="modal">Cancel</button>
+          </div>
+
+          <input type="hidden" name="restaurant_parent_id" />
+          <input type="hidden" name="food_id" />
+        </div>
+      </div>
+    </div>
+  </div>
 @endsection
 
 @section('js_end')

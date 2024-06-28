@@ -193,7 +193,7 @@
     </div>
   </div>
 
-  @if($viewer->is_super_admin() || $viewer->is_dev())
+  @if($viewer->is_super_admin())
     <div class="acm-toast-wrapper toast-bottom-left d-none result_time_check">
       <div class="toast toast-error @if(!$isMobi) acm-width-500-min @endif bg-danger-subtle" aria-live="assertive"
            style="display: block;">
@@ -567,7 +567,7 @@
           .append('<div class="badge bg-danger fw-bold acm-ml-px-10 acm-fs-13">Not Trained Yet</div>');
       }
 
-      @if($viewer->is_super_admin() || $viewer->is_dev())
+      @if($viewer->is_super_admin())
       var html_times = '';
       var time_photo = datas.time_photo;
       var time_scan = datas.time_scan;

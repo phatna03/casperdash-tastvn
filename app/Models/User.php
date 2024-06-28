@@ -271,12 +271,12 @@ class User extends Authenticatable
 
   public function is_admin()
   {
-    return $this->role == 'superadmin' || $this->role == 'admin';
+    return $this->role == 'admin' || $this->is_dev() || $this->is_super_admin();
   }
 
   public function is_super_admin()
   {
-    return $this->role == 'superadmin';
+    return $this->role == 'superadmin' || $this->is_dev();
   }
 
   public function is_dev()
