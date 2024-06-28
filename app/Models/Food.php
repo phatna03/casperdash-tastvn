@@ -527,7 +527,10 @@ class Food extends Model
       $restaurant_parent_id = (int)$pars['restaurant_parent_id'];
       $restaurant_parent = RestaurantParent::find($restaurant_parent_id);
       if ($restaurant_parent) {
-        $photo = $restaurant_parent->get_food_photo($this);
+        $food_photo = $restaurant_parent->get_food_photo($this);
+        if (!empty($food_photo)) {
+          $photo = $food_photo;
+        }
       }
     }
 

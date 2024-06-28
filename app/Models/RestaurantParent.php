@@ -157,28 +157,14 @@ class RestaurantParent extends Model
 
   public function count_foods()
   {
-    //all sensors use same food list
-    $count = 0;
-
-    $sensors = Restaurant::where('restaurant_parent_id', $this->id)
-      ->get();
-    if (count($sensors)) {
-      foreach ($sensors as $sensor) {
-        $count_foods = $sensor->count_foods();
-        if (!$count) {
-          $count = $count_foods;
-        }
-      }
-    }
-
     $this->update([
-      'count_foods' => $count,
+      'count_foods' => count($this->get_foods()),
     ]);
   }
 
   public function get_food_photo(Food $food)
   {
-    $photo = url('custom/img/logo_' . $this->id . '.png');
+    $photo = url('custom/img/no_photo.png');
 
     $row = RestaurantFood::where('deleted', 0)
       ->where('restaurant_parent_id', $this->id)

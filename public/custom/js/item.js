@@ -277,6 +277,13 @@ function restaurant_food_remove() {
 
       popup1.find('.data_food_item_' + popup2.find('input[name=food_id]').val()).remove();
 
+      var wrap_foods = popup1.find('.frm_restaurant_foods');
+
+      wrap_foods.find('.count_foods').text('(' + response.data.count_foods + ')');
+      wrap_foods.find('.count_foods_1').text(response.data.count_foods_1);
+      wrap_foods.find('.count_foods_2').text(response.data.count_foods_2);
+      wrap_foods.find('.count_foods_3').text(response.data.count_foods_3);
+
     })
     .catch(error => {
       if (error.response.data && Object.values(error.response.data).length) {
@@ -481,12 +488,12 @@ function restaurant_food_add(evt, frm) {
       wrap_foods.find('.frm_restaurant_foods_data .foods_empty').remove();
       wrap_foods.find('.frm_restaurant_foods_data').prepend(response.data.html);
 
-      wrap_foods.find('.frm_restaurant_foods .counf_foods').text(response.data.count_foods);
-      wrap_foods.find('.frm_restaurant_foods .count_foods_1').text(response.data.count_foods_1);
-      wrap_foods.find('.frm_restaurant_foods .count_foods_2').text(response.data.count_foods_2);
-      wrap_foods.find('.frm_restaurant_foods .count_foods_3').text(response.data.count_foods_3);
+      wrap_foods.find('.count_foods').text('(' + response.data.count_foods + ')');
+      wrap_foods.find('.count_foods_1').text(response.data.count_foods_1);
+      wrap_foods.find('.count_foods_2').text(response.data.count_foods_2);
+      wrap_foods.find('.count_foods_3').text(response.data.count_foods_3);
 
-      popup2.modal('hide');
+      form_close(popup2);
 
     })
     .catch(error => {

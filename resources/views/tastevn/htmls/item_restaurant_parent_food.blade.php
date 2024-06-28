@@ -31,8 +31,17 @@
 >
   <div class="row">
     <div class="col-lg-4 mb-1">
-      <div class="text-dark fw-bold fs-4">{{$food->name}}</div>
-      <div class="text-dark acm-fs-18 acm-text-italic mb-2">{{$item['food_category_id'] ? '(' . $item['food_category_name'] . ')' : ''}}</div>
+      <div class="text-dark fw-bold fs-4 mb-2">{{$food->name}}</div>
+
+      <div class="acm-clearfix mb-2">
+        @if($viewer->is_moderator())
+          <button type="button" class="btn btn-sm btn-info p-1 d-inline-block">
+            <i class="mdi mdi-pencil"></i>
+          </button>
+        @endif
+        <div class="text-dark acm-fs-18 acm-text-italic d-inline-block">{{$item['food_category_id'] ? '(' . $item['food_category_name'] . ')' : ''}}</div>
+      </div>
+
       <div class="text-center w-100 wrap_food_photo_standard">
         <button type="button" class="btn btn-danger p-1 position-absolute acm-right-5px @if($isMobi) d-block @endif"
                 onclick="restaurant_food_photo_prepare(this)"

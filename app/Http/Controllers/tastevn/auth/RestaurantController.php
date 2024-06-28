@@ -495,8 +495,28 @@ class RestaurantController extends Controller
     //re-count
     $this->_sys_app->sys_stats_count();
 
+    //table stats + total foods
+    $foods = $restaurant_parent->get_foods();
+
+    $foods_group_1 = $restaurant_parent->get_foods([
+      'live_group' => 1,
+    ]);
+
+    $foods_group_2 = $restaurant_parent->get_foods([
+      'live_group' => 2,
+    ]);
+
+    $foods_group_3 = $restaurant_parent->get_foods([
+      'live_group' => 3,
+    ]);
+
     return response()->json([
       'status' => true,
+
+      'count_foods' => count($foods),
+      'count_foods_1' => count($foods_group_1),
+      'count_foods_2' => count($foods_group_2),
+      'count_foods_3' => count($foods_group_3),
     ], 200);
   }
 
