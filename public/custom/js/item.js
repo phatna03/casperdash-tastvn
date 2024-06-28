@@ -450,6 +450,12 @@ function restaurant_food_update() {
           break;
       }
 
+      var wrap_foods = popup1.find('.frm_restaurant_foods');
+
+      wrap_foods.find('.count_foods').text('(' + response.data.count_foods + ')');
+      wrap_foods.find('.count_foods_1').text(response.data.count_foods_1);
+      wrap_foods.find('.count_foods_2').text(response.data.count_foods_2);
+      wrap_foods.find('.count_foods_3').text(response.data.count_foods_3);
     })
     .catch(error => {
       if (error.response.data && Object.values(error.response.data).length) {
@@ -543,7 +549,7 @@ function restaurant_food_recipe_prepare(ele) {
 
       if (response.data.html && response.data.html != '') {
         form.find('.wrap-edit-ingredients').removeClass('d-none');
-        form.find('.wrap-add-item-ingredients .wrap-fetch').append(response.data.html);
+        form.find('.wrap-add-item-ingredients .wrap-fetch').empty().append(response.data.html);
         bind_datad(form);
       }
 
@@ -560,13 +566,69 @@ function restaurant_food_recipe_prepare(ele) {
     .then(() => {
       form_loading(form, false);
     });
+
+  return false;
 }
 function restaurant_food_recipe(evt, frm) {
   evt.preventDefault();
   var form = $(frm);
+  var popup1 = $('#modal_info_item');
+  var popup2 = $('#modal_food_ingredient_recipe');
+
+  var ingredients = [];
+  if (form.find('.wrap-add-item-ingredients .wrap-fetch .food-ingredient-item').length) {
+    form.find('.wrap-add-item-ingredients .wrap-fetch .food-ingredient-item').each(function (k, v) {
+      var tr = $(v);
+      var ing_name = parseInt(tr.find('select[name=ing_name]').val());
+      if (ing_name && ing_name > 0) {
+        ingredients.push({
+          id: ing_name,
+          quantity: input_number_only(tr.find('input[name=ing_quantity]').val())
+            ? input_number_only(tr.find('input[name=ing_quantity]').val()) : 1,
+
+          color: tr.find('input[name=ing_color]').length ? tr.find('input[name=ing_color]').val() : '',
+          core: tr.find('input[name=ing_core]').length && tr.find('input[name=ing_core]').is(':checked') ? 1 : 0,
+
+          old: tr.find('input[name=old]').length ? tr.find('input[name=old]').val() : 0,
+        });
+      }
+    });
+  }
+  if (!ingredients.length) {
+    message_from_toast('error', acmcfs.message_title_error, "Ingredients required", true);
+    return false;
+  }
+
   form_loading(form);
 
+  var restaurant_parent_id = form.find('input[name=restaurant_parent_id]').val();
+  var food_id = form.find('input[name=food_id]').val();
 
+  axios.post('/admin/restaurant/food/ingredient/update', {
+    restaurant_parent_id: restaurant_parent_id,
+    food_id: food_id,
+    type: 'recipe',
+    ingredients: ingredients,
+
+  })
+    .then(response => {
+
+      message_from_toast('success', acmcfs.message_title_success, acmcfs.message_description_success_update, true);
+
+      popup1.find('.data_food_item_' + food_id + ' .food_ingredient_recipe').empty().append(response.data.html);
+
+    })
+    .catch(error => {
+      if (error.response.data && Object.values(error.response.data).length) {
+        Object.values(error.response.data).forEach(function (v, k) {
+          message_from_toast('error', acmcfs.message_title_error, v);
+        });
+      }
+    })
+    .then(() => {
+      form_loading(form, false);
+      form_close(popup2);
+    });
 
   return false;
 }

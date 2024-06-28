@@ -62,13 +62,10 @@
         @endif
         <div class="text-primary fw-bold acm-fs-18 d-inline-block">Recipe Ingredients</div>
       </div>
-      @if(count($recipes))
-        @foreach($recipes as $recipe)
-          <div class="text-dark acm-fs-18">- {{$recipe->name}}</div>
-        @endforeach
-      @else
-        <div>---</div>
-      @endif
+
+      <div class="acm-clearfix food_ingredient_recipe">
+        @include('tastevn.htmls.item_restaurant_parent_food_recipe', ['items' => $recipes])
+      </div>
     </div>
     <div class="col-lg-3 mb-1">
       <div class="acm-clearfix">
@@ -79,34 +76,10 @@
         @endif
         <div class="text-primary fw-bold acm-fs-18 d-inline-block">Roboflow Ingredients</div>
       </div>
-      @if(count($ingredients))
-        @foreach($ingredients as $ingredient)
-          <div class="acm-clearfix acm-height-30-min">
-            <div class="acm-float-left acm-mr-px-5">
-              @if($viewer->is_admin())
-                <select class="form-control p-1 acm-width-50-max"
-                        onchange="food_ingredient_confidence_quick(this, {{$ingredient->food_ingredient_id}})"
-                >
-                  @for($i=95; $i>=30; $i--)
-                    @if($i%5 == 0)
-                      <option value="{{$i}}" @if($i == $ingredient->confidence) selected="selected" @endif>{{$i . '%'}}</option>
-                    @endif
-                  @endfor
-                </select>
-              @else
-                <div class="badge bg-secondary p-1">{{$ingredient->confidence . '%'}}</div>
-              @endif
-            </div>
-            <div class="wrap_text_roboflow_ingredient overflow-hidden acm-height-30-min acm-line-height-30 acm-fs-18 @if($viewer->is_super_admin()) cursor-pointer @endif @if($ingredient->ingredient_type == 'core') cored text-danger @else text-dark @endif"
-                 @if($viewer->is_super_admin()) onclick="food_ingredient_core_quick(this, {{$ingredient->food_ingredient_id}})" @endif
-            >
-              - <b>{{$ingredient->ingredient_quantity}}</b> {{$ingredient->name}}
-            </div>
-          </div>
-        @endforeach
-      @else
-        <div>---</div>
-      @endif
+
+      <div class="acm-clearfix food_ingredient_robot">
+        @include('tastevn.htmls.item_restaurant_parent_food_robot', ['items' => $ingredients, 'viewer' => $viewer])
+      </div>
     </div>
     <div class="col-lg-2 mb-1 btn_inputs">
       @if($viewer->is_admin())

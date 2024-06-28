@@ -602,9 +602,31 @@ class RestaurantController extends Controller
         break;
     }
 
+    //table stats + total foods
+    $foods = $restaurant_parent->get_foods();
+
+    $foods_group_1 = $restaurant_parent->get_foods([
+      'live_group' => 1,
+    ]);
+
+    $foods_group_2 = $restaurant_parent->get_foods([
+      'live_group' => 2,
+    ]);
+
+    $foods_group_3 = $restaurant_parent->get_foods([
+      'live_group' => 3,
+    ]);
+
+
     return response()->json([
       'status' => true,
+
       'type' => $type,
+
+      'count_foods' => count($foods),
+      'count_foods_1' => count($foods_group_1),
+      'count_foods_2' => count($foods_group_2),
+      'count_foods_3' => count($foods_group_3),
     ], 200);
   }
 
@@ -749,6 +771,64 @@ class RestaurantController extends Controller
 
         $html = view('tastevn.htmls.item_ingredient_recipe_input')
           ->with('ingredients', $food->get_recipes([
+            'restaurant_parent_id' => $restaurant_parent->id
+          ]))
+          ->render();
+
+        break;
+
+      case 'robot':
+
+
+
+        break;
+    }
+
+
+
+    return response()->json([
+      'status' => true,
+      'html' => $html,
+    ], 200);
+  }
+
+  public function food_ingredient_update(Request $request)
+  {
+    $values = $request->post();
+
+    $restaurant_parent_id = isset($values['restaurant_parent_id']) ? (int)$values['restaurant_parent_id'] : 0;
+    $restaurant_parent = RestaurantParent::find($restaurant_parent_id);
+
+    $food_id = isset($values['food_id']) ? (int)$values['food_id'] : 0;
+    $food = Food::find($food_id);
+
+    if (!$restaurant_parent || !$food) {
+      return response()->json([
+        'error' => 'Invalid data'
+      ], 404);
+    }
+
+    //ingredients
+    $ingredients = isset($values['ingredients']) && !empty($values['ingredients']) ? (array)$values['ingredients'] : [];
+    if (!count($ingredients)) {
+      return response()->json([
+        'error' => 'Ingredients required'
+      ], 422);
+    }
+
+    $html = '';
+
+    $type = isset($values['type']) ? $values['type'] : 'recipe';
+    switch ($type) {
+      case 'recipe':
+
+        $food->update_ingredients_recipe([
+          'ingredients' => $ingredients,
+          'restaurant_parent_id' => $restaurant_parent_id,
+        ]);
+
+        $html = view('tastevn.htmls.item_restaurant_parent_food_recipe')
+          ->with('items', $food->get_recipes([
             'restaurant_parent_id' => $restaurant_parent->id
           ]))
           ->render();
