@@ -204,8 +204,8 @@
     </div>
   @endif
 
-  {{--  <script src="https://cdn.roboflow.com/0.2.26/roboflow.js"></script>--}}
-  <script src="{{url('custom/library/roboflow/roboflow.js')}}"></script>
+{{--  <script src="https://cdn.roboflow.com/0.2.26/roboflow.js"></script>--}}
+{{--  <script src="{{url('custom/library/roboflow/roboflow.js')}}"></script>--}}
 
   <script type="text/javascript">
     $(document).ready(function () {

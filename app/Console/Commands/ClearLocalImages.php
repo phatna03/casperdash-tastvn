@@ -35,7 +35,7 @@ class ClearLocalImages extends Command
       $localDisk = Storage::disk('sensors');
       $s3Disk = Storage::disk($directory['bucket']);
 
-      $date = date('Y-m-d', strtotime("-3 days"));
+      $date = date('Y-m-d', strtotime("-1 days"));
       $dir = "{$directory['folder']}SENSOR/1/{$date}/";
 
       $files = $localDisk->allFiles($dir);

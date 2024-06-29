@@ -55,21 +55,6 @@ class TesterController extends Controller
     $sensor = Restaurant::find(5);
     $date = date('Y-m-d');
 
-    $row = KasWebhook::find(10);
-    $pars = (array)json_decode($row->params, true);
-    var_dump($pars);
-
-    var_dump($sys_app::_DEBUG_BREAK);
-
-    $row = KasWebhook::find(15);
-    $pars = (array)json_decode($row->params, true);
-    var_dump($pars);
-
-    var_dump($sys_app::_DEBUG_BREAK);
-
-    $row = KasWebhook::find(19);
-    $pars = (array)json_decode($row->params, true);
-    var_dump($pars);
 
 //    $row = RestaurantFoodScan::find(45535);
 //
@@ -82,7 +67,7 @@ class TesterController extends Controller
 
     //fix live
 
-
+    $this->photo_sync();
 
     //=======================================================================================
 
@@ -364,8 +349,8 @@ class TesterController extends Controller
     $sys_app = new SysApp();
     $s3_region = $sys_app->get_setting('s3_region');
 
-    $date_to = date('Y-m-d', strtotime("-3 days"));
-    $date_from = date('Y-m-d', strtotime("-30 days"));
+    $date_to = date('Y-m-d', strtotime("-1 days"));
+    $date_from = date('Y-m-d', strtotime("-10 days"));
 
     $photos = RestaurantFoodScan::where('deleted', 0)
       ->where('local_storage', 1)
@@ -543,25 +528,4 @@ class TesterController extends Controller
     var_dump(count($rows));
   }
 
-  protected function food_restaurant_sync()
-  {
-    $rows = RestaurantFood::where('deleted', 0)
-      ->where('restaurant_parent_id', 0)
-      ->get();
-    if (count($rows)) {
-      foreach ($rows as $row) {
-        $row->update([
-          'restaurant_parent_id' => $row->get_restaurant()->restaurant_parent_id,
-        ]);
-      }
-    }
-
-    RestaurantFood::whereIn('restaurant_id', [6, 8, 13])
-      ->delete();
-
-    RestaurantFood::where('deleted', 0)
-      ->update([
-        'restaurant_id' => 0,
-      ]);
-  }
 }
