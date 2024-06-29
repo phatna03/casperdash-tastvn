@@ -3720,11 +3720,96 @@ function mobi_photo_view(itd) {
   popup.find('input[name=item]').val(itd);
   popup.find('textarea[name=note]').val('');
 
-  popup.modal('show');
+  popup.find('.wrap_notes').addClass('d-none');
+
+  axios.post('/admin/photo/note/get', {
+    item: itd,
+  })
+    .then(response => {
+
+      var noted = false;
+      var html = '';
+      var html_noter = '';
+
+      if (response.data.user_comment && response.data.user_comment != '' && response.data.user_comment != 'null') {
+        popup.find('textarea[name=note]').val(response.data.user_comment);
+      }
+
+      if (response.data.note && response.data.note != '' && response.data.note != 'null') {
+        noted = true;
+
+        if (response.data.noter && response.data.noter.name) {
+          html_noter = '<div class="text-dark acm-text-italic">(last edited by @' + response.data.noter.name + ')</div>';
+        }
+
+        html += '<div class="acm-clearfix position-relative p-2 acm-bg-efefef">' +
+          '<div class="acm-float-right"></div>' +
+          '<div class="text-dark fw-bold">Main Note: </div>' +
+          '<div class="text-dark">' + bind_nl2br(response.data.note) + '</div>' +
+          '<div class="acm-text-right">' + html_noter + '</div>' +
+          '</div>';
+      }
+
+      if (response.data.comments && response.data.comments.length) {
+        noted = true;
+
+        response.data.comments.forEach(function (v, k) {
+          html += '<div class="acm-clearfix position-relative acm-col-noted p-2">' +
+            '<div class="acm-float-right acm-fs-12 acm-text-right">' +
+            '<div class="text-dark">' + v.created_at_1 + '</div>' +
+            '<div class="text-dark">' + v.created_at_2 + '</div>' +
+            '</div>' +
+            '<div class="text-dark fw-bold">@' + v.user_name + ': </div>' +
+            '<div class="text-dark">' + bind_nl2br(v.user_noted) + '</div>' +
+            '</div>';
+        });
+      }
+
+      popup.find('.wrap_notes').empty();
+      if (noted) {
+        popup.find('.wrap_notes').removeClass('d-none');
+        popup.find('.wrap_notes').append(html);
+      }
+
+      popup.modal('show');
+
+    })
+    .catch(error => {
+      if (error.response.data && Object.values(error.response.data).length) {
+        Object.values(error.response.data).forEach(function (v, k) {
+          message_from_toast('error', acmcfs.message_title_error, v);
+        });
+      }
+    });
+
+  return false;
 }
 function mobi_photo_cmt(evt, frm) {
   evt.preventDefault();
   var form = $(frm);
+  var popup = $('#modal_photo_cmt');
+
+  form_loading(form);
+
+  axios.post('/admin/comment/note', {
+    object_id: form.find('input[name=item]').val(),
+    object_type: 'restaurant_food_scan',
+    content: form.find('textarea[name=note]').val(),
+  })
+    .then(response => {
+
+      message_from_toast('success', acmcfs.message_title_success, acmcfs.message_description_success_add, true);
+
+      form_loading(form, false);
+      form_close(popup);
+    })
+    .catch(error => {
+      if (error.response.data && Object.values(error.response.data).length) {
+        Object.values(error.response.data).forEach(function (v, k) {
+          message_from_toast('error', acmcfs.message_title_error, v);
+        });
+      }
+    });
 
   return false;
 }

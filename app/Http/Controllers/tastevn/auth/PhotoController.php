@@ -188,10 +188,11 @@ class PhotoController extends Controller
       ], 404);
     }
 
+    $user_comment = '';
     $comments = [];
 
     $select = Comment::query('comments')
-      ->select('users.name as user_name', 'comments.content', 'comments.created_at')
+      ->select('users.name as user_name', 'users.id as user_id', 'comments.content', 'comments.created_at')
       ->leftJoin('users', 'users.id', '=', 'comments.user_id')
       ->where('comments.deleted', 0)
       ->where('comments.object_id', $rfs->id)
@@ -200,6 +201,11 @@ class PhotoController extends Controller
     $rows = $select->get();
     if (count($rows)) {
       foreach ($rows as $row) {
+
+        if ($row->user_id == $this->_viewer->id) {
+          $user_comment = $row->content;
+        }
+
         $comments[] = [
           'user_name' => $row->user_name,
           'user_noted' => $row->content,
@@ -213,6 +219,7 @@ class PhotoController extends Controller
       'note' => $rfs->note,
       'noter' => $rfs->get_noter(),
       'comments' => $comments,
+      'user_comment' => $user_comment,
     ]);
   }
 }

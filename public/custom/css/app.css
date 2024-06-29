@@ -492,7 +492,7 @@
 }
 
 .acm-bg-efefef {
-  background-color: #efefef;
+  background-color: #efefef !important;
 }
 
 #custCarousel .carousel-indicators {

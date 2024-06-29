@@ -106,17 +106,21 @@
 
   <!-- modal photo cmt -->
   <div class="modal animate__animated animate__rollIn" id="modal_photo_cmt" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
+    <div class="modal-dialog modal-dialog-centered modal-xl m-0" role="document">
       <div class="modal-content">
         <div class="modal-header">
-          <h4 class="modal-title text-danger fw-bold">Photo Comment</h4>
+          <h4 class="modal-title text-danger fw-bold">Photo Note</h4>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <form class="pt-0" onsubmit="return mobi_photo_cmt(event, this);">
           <div class="modal-body">
-            <div class="form-floating form-floating-outline">
+            <div class="form-floating form-floating-outline d-none wrap_notes border border-1 border-dark mb-3 acm-bg-efefef">
+
+            </div>
+
+            <div class="form-floating form-floating-outline border border-1 border-dark">
               <div class="form-control acm-wrap-selectize" id="photo-update-note">
-                <textarea name="note" class="form-control h-px-100 pb-0 pt-0 border-0"></textarea>
+                <textarea name="note" class="form-control h-px-100 p-0 border-0"></textarea>
               </div>
               <label for="photo-update-note" class="text-danger">Note</label>
             </div>
