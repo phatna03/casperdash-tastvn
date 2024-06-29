@@ -560,7 +560,7 @@
 
         var no_photo = '{{url('custom/img/logo_'. $pageConfigs['item']->restaurant_parent_id . '.png')}}';
 
-        wrap.find('.food-photo').attr('src', acmcfs.no_photo);
+        wrap.find('.food-photo').attr('src', no_photo);
         wrap.find('.wrap-ingredients').empty();
 
         $('.result_photo_status .data_result').empty()

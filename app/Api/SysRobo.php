@@ -115,7 +115,7 @@ class SysRobo
 
     //localhost
     if (App::environment() == 'local') {
-      $img_url = "https://s3.ap-southeast-1.amazonaws.com/cargo.tastevietnam.asia/58-5b-69-19-ad-83/SENSOR/1/2024-06-06/21/SENSOR_2024-06-06-21-21-34-723_176.jpg";
+      $img_url = "https://ai.block8910.com/sensors/58-5b-69-19-ad-83/SENSOR/1/2024-06-29/17/SENSOR_2024-06-29-17-37-18-043_170.jpg";
     }
 
     if (empty($img_url) || !@getimagesize($img_url)) {

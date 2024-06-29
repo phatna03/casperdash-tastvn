@@ -55,8 +55,21 @@ class TesterController extends Controller
     $sensor = Restaurant::find(5);
     $date = date('Y-m-d');
 
+    $row = KasWebhook::find(10);
+    $pars = (array)json_decode($row->params, true);
+    var_dump($pars);
 
+    var_dump($sys_app::_DEBUG_BREAK);
 
+    $row = KasWebhook::find(15);
+    $pars = (array)json_decode($row->params, true);
+    var_dump($pars);
+
+    var_dump($sys_app::_DEBUG_BREAK);
+
+    $row = KasWebhook::find(19);
+    $pars = (array)json_decode($row->params, true);
+    var_dump($pars);
 
 //    $row = RestaurantFoodScan::find(45535);
 //
