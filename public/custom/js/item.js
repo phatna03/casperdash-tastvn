@@ -3713,3 +3713,18 @@ function report_photo_nf_full(food_id, type) {
 
   return false;
 }
+//mobi
+function mobi_photo_view(itd) {
+  var popup = $('#modal_photo_cmt');
+
+  popup.find('input[name=item]').val(itd);
+  popup.find('textarea[name=note]').val('');
+
+  popup.modal('show');
+}
+function mobi_photo_cmt(evt, frm) {
+  evt.preventDefault();
+  var form = $(frm);
+
+  return false;
+}

@@ -221,18 +221,18 @@ class ApiController extends Controller
 //      ->where('created_at', '>=', Carbon::now()->subMinutes(1)->toDateTimeString())
       ->where('params', json_encode($values))
       ->get();
-    if (count($rows) > 1) {
-      return response()->json([
-        'error' => 'No spam request.',
-      ], 404);
-    }
+//    if (count($rows) > 1) {
+//      return response()->json([
+//        'error' => 'No spam request.',
+//      ], 404);
+//    }
 
     KasWebhook::create([
       'type' => 'cart_info',
       'params' => json_encode($values),
     ]);
 
-    $restaurant_id = isset($values['restaurant_id']) && !empty($values['restaurant_id']) ? (int)$values['restaurant_id'] : 0;
+    $restaurant_id = isset($values['restaurant_id']) && !empty($values['restaurant_id']) ? $values['restaurant_id'] : NULL;
     if (!$restaurant_id) {
       return response()->json([
         'error' => 'No restaurant ID found.',
@@ -248,7 +248,7 @@ class ApiController extends Controller
 
     $valid_cart = true;
     foreach ($items as $item) {
-      $item_id = isset($item['item_id']) && !empty($item['item_id']) ? (int)$item['item_id'] : 0;
+      $item_id = isset($item['item_id']) && !empty($item['item_id']) ? $item['item_id'] : NULL;
       $item_quantity = isset($item['quantity']) && !empty($item['quantity']) ? (int)$item['quantity'] : 1;
       $item_code = isset($item['item_code']) && !empty($item['item_code']) ? trim($item['item_code']) : NULL;
       $item_name = isset($item['item_name']) && !empty($item['item_name']) ? trim($item['item_name']) : NULL;

@@ -104,6 +104,37 @@
     </div>
   </div>
 
+  <!-- modal photo cmt -->
+  <div class="modal animate__animated animate__rollIn" id="modal_photo_cmt" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title text-danger fw-bold">Photo Comment</h4>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form class="pt-0" onsubmit="return mobi_photo_cmt(event, this);">
+          <div class="modal-body">
+            <div class="form-floating form-floating-outline">
+              <div class="form-control acm-wrap-selectize" id="photo-update-note">
+                <textarea name="note" class="form-control h-px-100 pb-0 pt-0 border-0"></textarea>
+              </div>
+              <label for="photo-update-note" class="text-danger">Note</label>
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <div class="wrap-btns">
+              @include('tastevn.htmls.form_button_loading')
+              <button type="submit" class="btn btn-primary btn-ok btn-submit acm-float-right">Submit</button>
+              <button type="button" class="btn btn-outline-secondary btn-ok btn-cancel" data-bs-dismiss="modal">Cancel</button>
+            </div>
+
+            <input type="hidden" name="item" />
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
 @endsection
 
 @section('js_end')
@@ -151,10 +182,12 @@
 
             datas.find('.load_more').removeClass('d-none');
 
-            lc_lightbox('.acm-lightbox-photo', {
-              wrap_class: 'lcl_fade_oc',
-              thumb_attr: 'data-lcl-thumb',
-            });
+            if (!acmcfs.is_mobi) {
+              lc_lightbox('.acm-lightbox-photo', {
+                wrap_class: 'lcl_fade_oc',
+                thumb_attr: 'data-lcl-thumb',
+              });
+            }
 
           } else {
 

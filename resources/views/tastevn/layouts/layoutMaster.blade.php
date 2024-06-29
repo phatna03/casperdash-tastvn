@@ -39,6 +39,7 @@ $version = '109';
     link_base_url: '{{url('')}}',
     var_csrf: '{{csrf_token()}}',
     dev_mode: '{{$devMode}}',
+    is_mobi: '{{$isMobi}}',
 
     message_title_info: '{{config('tastevn.message_title_info')}}',
     message_title_success: '{{config('tastevn.message_title_success')}}',

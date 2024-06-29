@@ -85,6 +85,8 @@ class SysRobo
     $overlap = isset($pars['overlap']) ? (int)$pars['overlap'] : 50;
     $max_objects = isset($pars['max_objects']) ? (int)$pars['max_objects'] : 100;
     $img_no_resize = isset($pars['img_no_resize']) ? (bool)$pars['img_no_resize'] : false;
+
+    //stable with resize 1024
     $img_no_resize = false;
 
     $status = true;

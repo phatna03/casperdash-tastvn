@@ -40,7 +40,7 @@ class ErrorController extends Controller
 
   public function photo_check()
   {
-    if (!$this->_viewer->is_dev()) {
+    if (!$this->_viewer->is_super_admin()) {
       return redirect('error/404');
     }
 
@@ -60,36 +60,48 @@ class ErrorController extends Controller
     $count = 0;
 
 
-    die;
-
-    $rows = RestaurantFoodScan::whereIn('restaurant_id', [5,6,8,9,10,11])
+    $rows = RestaurantFoodScan::whereIn('restaurant_id', [5,6])
       ->where('rbf_api', '<>', NULL)
-      ->whereDate('time_photo', '>=', '2024-06-10')
+      ->whereDate('time_photo', '>=', '2024-06-24')
 //      ->whereDate('time_photo', '<', '2024-06-10')
       ->where('sys_confidence', 0)
-      ->limit(24)
+      ->where('deleted', 0)
+      ->whereIn('status', ['checked', 'failed', 'edited'])
+      ->orderBy('id', 'desc')
+      ->limit(6)
       ->get();
 
     if (count($rows)) {
       foreach ($rows as $row) {
 
+        $row->model_api_1([
+          'confidence' => SysRobo::_SCAN_CONFIDENCE,
+          'overlap' => SysRobo::_SCAN_OVERLAP,
+
+          'api_recall' => true,
+        ]);
+
+        //step 3= photo predict
         $row->predict_food([
           'notification' => false,
+
           'api_recall' => true,
         ]);
 
         $row->update([
-          'sys_confidence' => 101
+          'sys_confidence' => 201
         ]);
 
         $ids[] = $row->id;
       }
     }
 
-    $count = RestaurantFoodScan::whereIn('restaurant_id', [5,6,8,9,10,11])
+    $count = RestaurantFoodScan::whereIn('restaurant_id', [5,6])
       ->where('rbf_api', '<>', NULL)
-      ->whereDate('time_photo', '>=', '2024-06-10')
-      ->where('sys_confidence', 0)
+      ->whereDate('time_photo', '>=', '2024-06-24')
+      ->where('sys_confidence', 201)
+      ->where('deleted', 0)
+      ->whereIn('status', ['checked', 'failed', 'edited'])
       ->count();
 
     //temp off

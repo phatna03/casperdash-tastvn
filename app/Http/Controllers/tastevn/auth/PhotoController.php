@@ -62,9 +62,7 @@ class PhotoController extends Controller
         'restaurant_food_scans.time_photo', 'restaurants.name as restaurant_name')
       ->leftJoin('restaurants', 'restaurant_food_scans.restaurant_id', '=', 'restaurants.id')
       ->orderBy('restaurant_food_scans.time_photo', 'desc')
-      ->orderBy('restaurant_food_scans.id', 'desc')
-      ->limit(24)
-    ;
+      ->orderBy('restaurant_food_scans.id', 'desc');
 
     //dev
     if ($this->_viewer->is_dev()) {
@@ -78,56 +76,80 @@ class PhotoController extends Controller
       ;
     }
 
+    //one_case
+    $one_case = false;
+    $rows = NULL;
+    $query = NULL;
+
     if (!empty($keyword)) {
-      $select->where('restaurant_food_scans.id', 'LIKE', "%{$keyword}%");
-    }
-    if (count($existed)) {
-      $select->whereNotIn("restaurant_food_scans.id", $existed);
-    }
-    if (count($restaurants)) {
-      $select->whereIn("restaurant_food_scans.restaurant_id", $restaurants);
-    }
-    if (!empty($time_upload)) {
-      $times = $this->_sys_app->parse_date_range($time_upload);
-      if (!empty($times['time_from'])) {
-        $select->where('restaurant_food_scans.time_photo', '>=', $times['time_from']);
+
+      $select1 = clone $select;
+      $select1->where('restaurant_food_scans.id', $keyword);
+      $rows = $select1->get();
+      if (count($rows) == 1) {
+        $one_case = true;
+
+        $query = $this->_sys_app->parse_to_query($select1);
       }
-      if (!empty($times['time_to'])) {
-        $select->where('restaurant_food_scans.time_photo', '<=', $times['time_to']);
+      else {
+        $select->where('restaurant_food_scans.id', 'LIKE', "%{$keyword}%");
       }
     }
 
-    if (count($users)) {
-      $select->whereIn("restaurant_food_scans.id", function ($q) use ($users) {
-        $q->select('object_id')
-          ->distinct()
-          ->from('comments')
-          ->where('object_type', 'restaurant_food_scan')
-          ->whereIn('user_id', $users);
-      });
-    }
+    if (!$one_case) {
 
-    if (!empty($noted)) {
-      switch ($noted) {
-        case 'yes':
-          $select->where(function ($q) {
-            $q->where('restaurant_food_scans.note', '<>', NULL)
-              ->orWhereIn("restaurant_food_scans.id", function ($q1) {
-                $q1->select('object_id')
-                  ->distinct()
-                  ->from('comments')
-                  ->where('object_type', 'restaurant_food_scan')
-                  ->where('user_id', '>', 0);
-              });
-          });
-          break;
+      if (count($existed)) {
+        $select->whereNotIn("restaurant_food_scans.id", $existed);
       }
-    }
+      if (count($restaurants)) {
+        $select->whereIn("restaurant_food_scans.restaurant_id", $restaurants);
+      }
+      if (!empty($time_upload)) {
+        $times = $this->_sys_app->parse_date_range($time_upload);
+        if (!empty($times['time_from'])) {
+          $select->where('restaurant_food_scans.time_photo', '>=', $times['time_from']);
+        }
+        if (!empty($times['time_to'])) {
+          $select->where('restaurant_food_scans.time_photo', '<=', $times['time_to']);
+        }
+      }
 
-    $query = $this->_sys_app->parse_to_query($select);
+      if (count($users)) {
+        $select->whereIn("restaurant_food_scans.id", function ($q) use ($users) {
+          $q->select('object_id')
+            ->distinct()
+            ->from('comments')
+            ->where('object_type', 'restaurant_food_scan')
+            ->whereIn('user_id', $users);
+        });
+      }
+
+      if (!empty($noted)) {
+        switch ($noted) {
+          case 'yes':
+            $select->where(function ($q) {
+              $q->where('restaurant_food_scans.note', '<>', NULL)
+                ->orWhereIn("restaurant_food_scans.id", function ($q1) {
+                  $q1->select('object_id')
+                    ->distinct()
+                    ->from('comments')
+                    ->where('object_type', 'restaurant_food_scan')
+                    ->where('user_id', '>', 0);
+                });
+            });
+            break;
+        }
+      }
+
+      $select->limit(24);
+
+      $query = $this->_sys_app->parse_to_query($select);
+
+      $rows = $select->get();
+    }
 
     $html = view('tastevn.htmls.item_photo')
-      ->with('items', $select->get())
+      ->with('items', $rows)
       ->render();
 
     return response()->json([
