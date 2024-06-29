@@ -118,7 +118,7 @@
 
             </div>
 
-            <div class="form-floating form-floating-outline border border-1 border-dark">
+            <div class="form-floating form-floating-outline">
               <div class="form-control acm-wrap-selectize" id="photo-update-note">
                 <textarea name="note" class="form-control h-px-100 p-0 border-0"></textarea>
               </div>

@@ -3722,6 +3722,8 @@ function mobi_photo_view(itd) {
 
   popup.find('.wrap_notes').addClass('d-none');
 
+  popup.find('.modal-title').text('Photo Note ID: ' + itd);
+
   axios.post('/admin/photo/note/get', {
     item: itd,
   })
