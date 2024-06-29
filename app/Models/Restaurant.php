@@ -129,9 +129,13 @@ class Restaurant extends Model
     }
 
     $status_valid = ['checked', 'failed'];
+    $restaurant_parent = $this->get_parent();
 
     //group = super-confidence
-    $food_ids = $this->query_foods(1);
+    $food_ids = $restaurant_parent->get_foods([
+      'live_group' => 1,
+      'select_data' => 'food_ids',
+    ]);
 
     switch ($type) {
       case 'total':
@@ -297,9 +301,13 @@ class Restaurant extends Model
     }
 
     $status_valid = ['checked', 'failed'];
+    $restaurant_parent = $this->get_parent();
 
     //group = super-confidence
-    $food_ids = $this->query_foods(1);
+    $food_ids = $restaurant_parent->get_foods([
+      'live_group' => 1,
+      'select_data' => 'food_ids',
+    ]);
 
     //food category
     $error_food_category = RestaurantFoodScan::query("restaurant_food_scans")

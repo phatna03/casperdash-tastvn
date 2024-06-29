@@ -90,6 +90,10 @@ class RestaurantParent extends Model
         $select->select('foods.id', 'foods.name');
         break;
 
+      case 'food_ids':
+        $select->select('foods.id');
+        break;
+
       default:
         $select->select(
           'restaurant_foods.food_id', 'foods.name as food_name',
@@ -98,6 +102,11 @@ class RestaurantParent extends Model
           'restaurant_foods.photo as food_photo', 'restaurant_foods.local_storage',
           'restaurant_foods.food_category_id', 'food_categories.name as food_category_name'
         );
+    }
+
+    if ($select_data == 'food_ids') {
+      $temps = $select->get();
+      return count($temps) ? array_column($temps->toArray(), 'id') : [];
     }
 
     return $select->get();

@@ -55,9 +55,7 @@ class TesterController extends Controller
     $sensor = Restaurant::find(5);
     $date = date('Y-m-d');
 
-//    var_dump(phpinfo());
 
-//    $restaurant->count_foods();
 
 
 //    $row = RestaurantFoodScan::find(45535);
@@ -71,26 +69,7 @@ class TesterController extends Controller
 
     //fix live
 
-    //sync deli food to market + poison + morning
-//    $this->food_remove([
-//      'sensors' => [10, 11, 12, 13],
-//
-//      'restaurants' => [3, 4, 5],
-//    ]);
-//
-//    $this->food_add([
-//      'sensors' => [10, 11, 12, 13],
-//      'sensor_id' => 9,
-//
-//      'restaurants' => [3, 4, 5],
-//      'restaurant_parent_id' => 2,
-//    ]);
 
-//    food category
-
-//    $this->food_category_update();
-
-//    $this->food_restaurant_sync();
 
     //=======================================================================================
 

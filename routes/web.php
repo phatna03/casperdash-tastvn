@@ -401,8 +401,8 @@ Route::get('/datatable/restaurant', function (Request $request) {
       ->orderBy('restaurant_parents.id', 'desc');
   }
 
-  $sensor_roles = ['user', 'moderator'];
-  if ($user && in_array($user->role, $sensor_roles) && !$user->access_full) {
+  $user_roles = ['user', 'moderator'];
+  if ($user && in_array($user->role, $user_roles) && !$user->access_full) {
     $select->leftJoin('restaurant_access', 'restaurant_access.restaurant_parent_id', '=', 'restaurant_parents.id')
       ->where('restaurant_parents.deleted', 0)
       ->where('restaurant_access.user_id', $user->id);
@@ -439,8 +439,8 @@ Route::get('/datatable/sensor', function (Request $request) {
       ->orderBy('restaurants.id', 'desc');
   }
 
-  $sensor_roles = ['user', 'moderator'];
-  if ($user && in_array($user->role, $sensor_roles) && !$user->access_full) {
+  $user_roles = ['user', 'moderator'];
+  if ($user && in_array($user->role, $user_roles) && !$user->access_full) {
     $select->leftJoin('restaurant_access', 'restaurant_access.restaurant_parent_id', '=', 'restaurants.restaurant_parent_id')
       ->where('restaurants.deleted', 0)
       ->where('restaurant_access.user_id', $user->id);
@@ -512,61 +512,38 @@ Route::get('/datatable/sensor-food-scans', function (Request $request) {
 
     //super-confidence only
     $sensor = App\Models\Restaurant::find($restaurant);
-
-    //settings
-    $confidence = (int)$sys_app->get_setting('rbf_food_confidence');
-    if (!$confidence) {
-      $confidence = 70;
-    }
-
-    switch ($restaurant) {
-      case 5:
-      case 6:
-      $confidence = 40;
-        break;
-
-      case 8:
-      case 9:
-      case 10:
-      case 11:
-      case 12:
-      case 13:
-      $confidence = 70;
-        break;
-    }
+    $restaurant_parent = $sensor->get_parent();
 
     $select->where('status', '<>', 'duplicated');
 
     if (!empty($statuses)) {
       switch ($statuses) {
         case 'group_1':
-          if ($sensor) {
-            $select->whereIn("restaurant_food_scans.food_id", $sensor->query_foods(1))
-              ->where('restaurant_food_scans.confidence', '>=', $confidence);
-          }
+          $select->whereIn("restaurant_food_scans.food_id", $restaurant_parent->get_foods([
+            'live_group' => 1,
+            'select_data' => 'food_ids',
+          ]));
           break;
 
         case 'group_2':
-          if ($sensor) {
-            $select->whereIn("restaurant_food_scans.food_id", $sensor->query_foods(2))
-              ->where('restaurant_food_scans.confidence', '>=', $confidence);
-          }
+          $select->whereIn("restaurant_food_scans.food_id", $restaurant_parent->get_foods([
+            'live_group' => 2,
+            'select_data' => 'food_ids',
+          ]));
           break;
 
         case 'group_3':
-          if ($sensor) {
 
-            $select->where(function ($q) use ($sensor, $confidence) {
-              $q->where(function ($q1) use ($sensor, $confidence) {
-                $q1->whereIn("restaurant_food_scans.food_id", $sensor->query_foods(3))
-                  ->where('restaurant_food_scans.confidence', '>=', $confidence);
-              })
-                ->orWhere(function ($q2) use ($sensor, $confidence) {
-                  $q2->where('status', 'failed')
-                    ->where('food_id', 0);
-                });
-            });
-          }
+          $select->where(function ($q) use ($restaurant_parent) {
+            $q->whereIn("restaurant_food_scans.food_id", $restaurant_parent->get_foods([
+              'live_group' => 3,
+              'select_data' => 'food_ids',
+            ]))
+              ->orWhere(function ($q2) {
+                $q2->whereIn('status', ['failed', 'checked'])
+                  ->where('food_id', 0);
+              });
+          });
           break;
       }
     }
