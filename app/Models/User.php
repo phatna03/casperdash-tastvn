@@ -65,7 +65,7 @@ class User extends Authenticatable
 
   public function get_photo()
   {
-    $photo = asset('assets/img/avatars/2.png');
+    $photo = asset('assets/img/avatars/1.png');
 
     $row = ZaloUser::where('user_id', $this->id)
       ->first();

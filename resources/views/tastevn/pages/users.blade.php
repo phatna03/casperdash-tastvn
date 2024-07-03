@@ -25,14 +25,12 @@
       <table class="table table-hover" id="datatable-listing">
         <thead class="table-light">
         <tr>
-          <th></th>
+          <th class="acm-th-first"></th>
           <th>Name</th>
-          <th>Email / Phone</th>
-          <th>Role / Status</th>
-          <th>Sensors</th>
+          <th>Email / Phone / Zalo ID</th>
+          <th>Access Restaurants</th>
           <th>Note</th>
-          <th>Latest updated</th>
-          <th></th>
+          <th class="d-none"></th>
         </tr>
         </thead>
       </table>
@@ -343,69 +341,13 @@
         {data: 'DT_RowIndex', name: 'DT_RowIndex' , orderable: false, searchable: false},
         {data: 'name', name: 'name'},
         {data: 'email'},
-        {data: 'status', name: 'status'},
         {data: 'access_texts', name: 'access_texts'},
         {data: 'note', name: 'note'},
-        {data: 'updated_at', name: 'updated_at'}
+        {data: 'status', name: 'status'},
       ],
       columnDefs: [
         {
-          targets: 2,
-          render: function (data, type, full, meta) {
-            if (full['phone'] && full['phone'] != 'null') {
-              return (
-                '<div>' +
-                '<div>' + full['email'] + '</div><div>' + full['phone'] + '</div>' +
-                '</div>'
-              );
-            } else {
-              return (
-                '<div>' +
-                '<div>' + full['email'] + '</div>' +
-                '</div>'
-              );
-            }
-          }
-        },
-        {
-          targets: 3,
-          render: function (data, type, full, meta) {
-
-            var html = '';
-
-            if (full['role'] == 'admin') {
-              html = '<div>' +
-                '<span class="badge bg-danger">' + full['role'] + '</span>' +
-                '</div>';
-            } else {
-              html = '<div>' +
-                '<span class="badge bg-secondary">' + full['role'] + '</span>' +
-                '</div>';
-            }
-
-            if (full['status'] == 'active') {
-              html += '<div class="mt-1">' +
-                '<span class="badge bg-success">' + full['status'] + '</span>' +
-                '</div>';
-            } else {
-              html += '<div class="mt-1">' +
-                '<span class="badge bg-warning">' + full['status'] + '</span>' +
-                '</div>';
-            }
-
-            return (html);
-          }
-        },
-        {
-          targets: 6,
-          render: $.fn.dataTable.render.moment('YYYY-MM-DDTHH:mm:ss.SSSSZ', 'DD/MM/YY HH:mm:ss' )
-        },
-        {
-          // Actions
-          targets: 7,
-          title: '',
-          searchable: false,
-          orderable: false,
+          targets: 0,
           render: function (data, type, full, meta) {
 
             var user_id = parseInt($('#acmcfs_user_id').val());
@@ -423,6 +365,9 @@
                 todo = true;
               }
             }
+            @if($viewer->is_super_admin())
+              todo = true;
+            @endif
 
             if (full['role'] == 'moderator' || full['role'] == 'user') {
               todo = true;
@@ -436,7 +381,7 @@
                 html_delete = '';
               }
 
-              html = '<div class="dropdown">' +
+              html = '<div class="d-inline-block dropdown acm-mr-px-5">' +
                 '<button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown"><i class="mdi mdi-dots-vertical"></i></button>' +
                 '<div class="dropdown-menu">' +
                 html_edit +
@@ -445,9 +390,80 @@
                 '</div>';
             }
 
-            return (html);
+            html += '<div class="d-inline-block">' +
+              '<span class="badge bg-secondary">' + full['DT_RowIndex'] + '</span>' +
+              '</div>';
+
+            return ('<div>' + html + '</div>');
           }
-        }
+        },
+        {
+          targets: 1,
+          render: function (data, type, full, meta) {
+            var html = '';
+            var html_name = '';
+            var html_role = '';
+            var html_status = '';
+            var color = 'bg-secondary';
+
+            html_name = '<span>' + full['name'] + '</span>';
+
+            if (full['role'] == 'superadmin') {
+              color = 'bg-primary';
+            } else if (full['role'] == 'admin') {
+              color = 'bg-warning';
+            } else if (full['role'] == 'moderator') {
+              color = 'bg-info';
+            }
+
+            html_role = '<span class="badge ' + color + '">' + full['role'] + '</span>';
+
+            if (full['status'] != 'active') {
+              html_status = '<span class="badge bg-danger">' + full['status'] + '</span>';
+            }
+
+            html = '<div>' + html_name +
+              '</div>' +
+              '<div>' + html_role + html_status +
+              '</div>';
+
+            return ('<div>' + html + '</div>');
+          }
+        },
+        {
+          targets: 2,
+          render: function (data, type, full, meta) {
+            var html = '';
+            var html_email = '';
+            var html_phone = '';
+            var html_zalo = '';
+
+            html_email = '<span>' + full['email'] + '</span>';
+
+            if (full['phone'] && full['phone'] !== '' && full['phone'] !== 'null') {
+              html_phone = '<span>' + full['phone'] + '</span>';
+            }
+
+            if (full['zalo_user_id'] && full['zalo_user_id'] !== '' && full['zalo_user_id'] !== 'null') {
+              html_zalo = '<span>ZaloID: ' + full['zalo_user_id'] + '</span>';
+            } else {
+              html_zalo = '<button type="button" class="btn btn-primary btn-sm p-1">Sync Zalo User</button>';
+            }
+
+            html = '<div>' + html_email +
+              '</div>' +
+              '<div>' + html_phone +
+              '</div>' +
+              '<div>' + html_zalo +
+              '</div>';
+
+            return ('<div>' + html + '</div>');
+          }
+        },
+        {
+          targets: 5,
+          className: 'd-none',
+        },
       ],
       buttons: [
         {

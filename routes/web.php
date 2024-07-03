@@ -816,20 +816,25 @@ Route::get('/datatable/user', function (Request $request) {
     }
   }
 
-  $select = App\Models\User::query()
-    ->select('id', 'name', 'email', 'phone', 'status', 'role', 'note', 'updated_at', 'access_full', 'access_ids', 'access_texts')
-    ->where('deleted', 0)
-    ->where('role', '<>', 'superadmin') //superadmin
+  $select = App\Models\User::query('users')
+    ->select('users.id', 'users.name', 'users.email', 'users.phone', 'users.status',
+      'users.role', 'users.note', 'users.updated_at',
+      'users.access_full', 'users.access_ids', 'users.access_texts',
+      'zalo_users.zalo_user_id'
+    )
+    ->leftJoin('zalo_users', 'zalo_users.user_id', '=', 'users.id')
+    ->where('users.deleted', 0)
+    ->where('users.role', '<>', 'superadmin') //superadmin
   ;
 
   if ($order_default) {
-    $select->orderBy('updated_at', 'desc')
-      ->orderBy('id', 'desc');
+    $select->orderBy('users.updated_at', 'desc')
+      ->orderBy('users.id', 'desc');
   }
 
   if (count($values)) {
     if (isset($values['name']) && !empty($values['name'])) {
-      $select->where('name', 'LIKE', '%' . $values['name'] . '%');
+      $select->where('users.name', 'LIKE', '%' . $values['name'] . '%');
     }
   }
 

@@ -104,11 +104,11 @@
           <label for="edit-item-name">Name <b class="text-danger">*</b></label>
         </div>
         <div class="form-floating form-floating-outline mb-4">
-          <input type="text" class="form-control" id="edit-item-s3-bucket" name="s3_bucket_name" />
+          <input type="text" class="form-control" id="edit-item-s3-bucket" name="s3_bucket_name" @if(!$viewer->is_admin()) disabled @endif />
           <label for="edit-item-s3-bucket">S3 bucket name</label>
         </div>
         <div class="form-floating form-floating-outline mb-4">
-          <input type="text" class="form-control" id="edit-item-s3-address" name="s3_bucket_address" />
+          <input type="text" class="form-control" id="edit-item-s3-address" name="s3_bucket_address" @if(!$viewer->is_admin()) disabled @endif />
           <label for="edit-item-s3-address">S3 bucket address</label>
         </div>
         <div class="form-floating form-floating-outline mb-4 d-none">
