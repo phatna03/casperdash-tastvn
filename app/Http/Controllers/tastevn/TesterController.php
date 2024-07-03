@@ -72,6 +72,8 @@ class TesterController extends Controller
 
     //fix live
 
+
+
     //=======================================================================================
 
 
@@ -533,6 +535,8 @@ class TesterController extends Controller
 
   protected function zalo_user_list_detail()
   {
+    $sys_app = new SysApp();
+
     $datas = SysZalo::user_list([
       'offset' => 0, //stt 50
     ]);

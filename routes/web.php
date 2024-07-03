@@ -290,6 +290,7 @@ Route::post('/admin/user/update', [UserController::class, 'update']);
 Route::post('/admin/user/delete', [UserController::class, 'delete']);
 Route::post('/admin/user/restore', [UserController::class, 'restore']);
 Route::post('/admin/user/selectize', [UserController::class, 'selectize']);
+Route::post('/admin/user/zalo/user/update', [UserController::class, 'zalo_user_update']);
 //ingredient
 Route::get('/admin/ingredients', [IngredientController::class, 'index']);
 Route::post('/admin/ingredient/store', [IngredientController::class, 'store']);
@@ -820,7 +821,7 @@ Route::get('/datatable/user', function (Request $request) {
     ->select('users.id', 'users.name', 'users.email', 'users.phone', 'users.status',
       'users.role', 'users.note', 'users.updated_at',
       'users.access_full', 'users.access_ids', 'users.access_texts',
-      'zalo_users.zalo_user_id'
+      'zalo_users.id as zalo_id', 'zalo_users.zalo_user_id',
     )
     ->leftJoin('zalo_users', 'zalo_users.user_id', '=', 'users.id')
     ->where('users.deleted', 0)

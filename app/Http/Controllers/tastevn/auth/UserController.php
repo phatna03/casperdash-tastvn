@@ -14,6 +14,7 @@ use App\Api\SysApp;
 use App\Models\User;
 use App\Models\RestaurantAccess;
 use App\Models\PasswordResetToken;
+use App\Models\ZaloUser;
 
 class UserController extends Controller
 {
@@ -45,9 +46,17 @@ class UserController extends Controller
       return redirect('error/404');
     }
 
+    //zalo
+    $zalos = ZaloUser::select('id', 'display_name', 'user_alias', 'user_phone', 'avatar')
+      ->where('display_name', '<>', NULL)
+      ->orderByRaw('TRIM(LOWER(display_name))')
+      ->get();
+
     $pageConfigs = [
       'myLayout' => 'horizontal',
       'hasCustomizer' => false,
+
+      'zalos' => $zalos,
     ];
 
     $this->_viewer->add_log([
@@ -557,6 +566,44 @@ class UserController extends Controller
     return response()->json([
       'status' => true,
       'item' => $this->_viewer->name,
+    ], 200);
+  }
+
+  //zalo
+  public function zalo_user_update(Request $request)
+  {
+    $values = $request->post();
+    //required
+    $validator = Validator::make($values, [
+      'item' => 'required',
+    ]);
+    if ($validator->fails()) {
+      return response()->json($validator->errors(), 422);
+    }
+
+    $row = User::find((int)$values['item']);
+    if (!$row) {
+      return response()->json([
+        'error' => 'Invalid item'
+      ], 422);
+    }
+
+    $zalo = isset($values['zalo']) ? (int)$values['zalo'] : 0;
+    $zalo_user = ZaloUser::find($zalo);
+
+    ZaloUser::where('user_id', $row->id)
+      ->update([
+        'user_id' => 0,
+      ]);
+
+    if ($zalo_user) {
+      $zalo_user->update([
+        'user_id' => $row->id,
+      ]);
+    }
+
+    return response()->json([
+      'status' => true,
     ], 200);
   }
 }

@@ -31,6 +31,7 @@
           <th>Access Restaurants</th>
           <th>Note</th>
           <th class="d-none"></th>
+          <th class="d-none"></th>
         </tr>
         </thead>
       </table>
@@ -279,6 +280,55 @@
       </div>
     </div>
   </div>
+  <!-- modal confirm to sync zalo -->
+  <div class="modal animate__animated animate__rollIn" id="modal_sync_zalo" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title">Sync Zalo User</h4>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form onsubmit="return user_zalo(event, this);">
+          <div class="modal-body">
+            <div class="row">
+              <div class="col mb-12 mt-2">
+                <div class="form-floating form-floating-outline mb-1">
+                  <div class="form-control acm-wrap-selectize" id="select-item-zalo-user">
+                    <select name="zalo" class="opt_selectize"
+                            data-placeholder="Please choose Zalo user..."
+                    >
+                      <option>Please choose Zalo user...</option>
+                      @if(count($pageConfigs['zalos']))
+                        @php
+                          foreach($pageConfigs['zalos'] as  $zalo):
+                        $zalo_name = empty($zalo->user_alias) ? $zalo->display_name : $zalo->display_name . ' (' . $zalo->user_alias . ')';
+                          if (!empty($zalo->user_phone)) {
+                              $zalo_name .= ' - ' . $zalo->user_phone;
+                          }
+                        @endphp
+                          <option value="{{$zalo->id}}">{{$zalo_name}}</option>
+                        @endforeach
+                      @endif
+                    </select>
+                  </div>
+                  <label for="select-item-zalo-user" class="text-danger">Zalo Users</label>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <div class="wrap-btns">
+              @include('tastevn.htmls.form_button_loading')
+              <button type="submit" class="btn btn-primary btn-ok btn-submit acm-float-right">Submit</button>
+              <button type="button" class="btn btn-outline-secondary btn-ok btn-cancel" data-bs-dismiss="modal">Cancel</button>
+            </div>
+
+            <input type="hidden" name="item" />
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
 @endsection
 
 @section('js_end')
@@ -335,6 +385,7 @@
         $(row).attr('data-access-full', data.access_full);
         $(row).attr('data-access-ids', data.access_ids);
         $(row).attr('data-access-texts', data.access_texts);
+        $(row).attr('data-zalo_id', data.zalo_id);
       },
       "columns": [
         //stt
@@ -344,19 +395,20 @@
         {data: 'access_texts', name: 'access_texts'},
         {data: 'note', name: 'note'},
         {data: 'status', name: 'status'},
+        {data: 'role', name: 'role'},
       ],
       columnDefs: [
         {
           targets: 0,
           render: function (data, type, full, meta) {
-
-            var user_id = parseInt($('#acmcfs_user_id').val());
-            var user_role = $('#acmcfs_user_role').val();
-
             var html = '';
             var html_edit = '';
             var html_delete = '';
+            var html_zalo = '';
+
             var todo = false;
+            var user_id = parseInt($('#acmcfs_user_id').val());
+            var user_role = $('#acmcfs_user_role').val();
 
             if (user_role == 'superadmin') {
               todo = true;
@@ -375,6 +427,7 @@
 
             if (todo) {
               html_edit = '<a class="dropdown-item" href="javascript:void(0);" data-bs-toggle="offcanvas" data-bs-target="#offcanvas_edit_item" onclick="user_edit_prepare(this)"><i class="mdi mdi-pencil-outline me-1"></i> Edit</a>';
+              html_zalo = '<a class="dropdown-item" href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#modal_sync_zalo" onclick="user_zalo_prepare(this)"><i class="mdi mdi-pencil-outline me-1"></i> Sync Zalo User</a>';
               html_delete = '<a class="dropdown-item" href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#modal_delete_item" onclick="user_delete_confirm(this)"><i class="mdi mdi-trash-can-outline me-1"></i> Delete</a>';
 
               if (user_id == parseInt(full['id'])) {
@@ -385,6 +438,7 @@
                 '<button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown"><i class="mdi mdi-dots-vertical"></i></button>' +
                 '<div class="dropdown-menu">' +
                 html_edit +
+                html_zalo +
                 html_delete +
                 '</div>' +
                 '</div>';
@@ -445,9 +499,7 @@
             }
 
             if (full['zalo_user_id'] && full['zalo_user_id'] !== '' && full['zalo_user_id'] !== 'null') {
-              html_zalo = '<span>ZaloID: ' + full['zalo_user_id'] + '</span>';
-            } else {
-              html_zalo = '<button type="button" class="btn btn-primary btn-sm p-1">Sync Zalo User</button>';
+              html_zalo = '<span>Zalo ID: ' + full['zalo_user_id'] + '</span>';
             }
 
             html = '<div>' + html_email +
@@ -462,6 +514,10 @@
         },
         {
           targets: 5,
+          className: 'd-none',
+        },
+        {
+          targets: 6,
           className: 'd-none',
         },
       ],

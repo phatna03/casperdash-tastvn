@@ -2440,6 +2440,50 @@ function user_setting_notify() {
 
   return false;
 }
+function user_zalo_prepare(ele) {
+  var tr = $(ele).closest('tr');
+  var popup = $('#modal_sync_zalo');
+  var selected = parseInt(tr.attr('data-zalo_id')) ? tr.attr('data-zalo_id') : '';
+
+  popup.find('input[name=item]').val(tr.attr('data-id'));
+  popup.find('select[name=zalo]').selectize()[0].selectize.setValue(selected);
+
+}
+function user_zalo(evt, frm) {
+  evt.preventDefault();
+  var form = $(frm);
+  var popup = form.closest('.modal');
+
+  form_loading(form);
+
+  axios.post('/admin/user/zalo/user/update', {
+    item: form.find('input[name=item]').val(),
+    zalo: form.find('select[name=zalo]').val(),
+  })
+    .then(response => {
+
+      message_from_toast('success', acmcfs.message_title_success, acmcfs.message_description_success_update, true);
+
+      datatable_refresh();
+
+    })
+    .catch(error => {
+
+      if (error.response.data && Object.values(error.response.data).length) {
+        Object.values(error.response.data).forEach(function (v, k) {
+          message_from_toast('error', acmcfs.message_title_error, v);
+        });
+      }
+
+    })
+    .then(() => {
+
+      form_loading(form, false);
+      form_close(popup);
+    });
+
+  return false;
+}
 //rfs
 function restaurant_food_scan_view(id) {
   axios.post('/admin/photo/view', {
