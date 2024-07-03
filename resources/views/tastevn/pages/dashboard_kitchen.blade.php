@@ -31,6 +31,8 @@
 
         <input type="hidden" name="restaurant_id" value="{{$pageConfigs['item']->id}}"/>
         <input type="hidden" name="restaurant_parent_id" value="{{$pageConfigs['item']->restaurant_parent_id}}"/>
+        <input type="hidden" name="current_itd"/>
+
       </h4>
     </div>
 
@@ -96,27 +98,6 @@
                 </div>
                 <div>
                   <div class="row">
-                    <div class="col-lg-12 mb-1 d-none">
-                      <div class="form-floating form-floating-outline mb-1">
-                        <div class="form-control acm-wrap-selectize" id="restaurant-sensor-select">
-                          <select name="sensor" class="opt_selectize d-none" onchange="sensor_selected(this)"
-                                  data-placeholder="Please choose restaurant sensor..."
-                          >
-                            @foreach($viewer->get_sensors() as $sensor)
-                              <option value="{{$sensor->id}}"
-                                      @if(count($viewer->get_sensors()) == 1) selected="selected" @endif>{{$sensor->name}}</option>
-                            @endforeach
-                          </select>
-
-                          Sensor Tester Optimize Performance
-
-                        </div>
-                        <label for="restaurant-sensor-select" class="text-danger">Restaurant Sensor</label>
-                      </div>
-                    </div>
-
-                    <input type="hidden" name="current_itd"/>
-
                     <div class="col-lg-6 mb-1 wrap_notify_result d-none result_photo_standard">
                       <div class="text-center w-100">
                         <img class="w-100" loading="lazy" src=""/>

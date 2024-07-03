@@ -21,6 +21,7 @@ use Validator;
 use Aws\S3\S3Client;
 use App\Api\SysApp;
 use App\Api\SysRobo;
+use App\Api\SysZalo;
 
 use App\Models\User;
 use App\Models\Restaurant;
@@ -41,6 +42,7 @@ use App\Models\Report;
 use App\Models\KasWebhook;
 use App\Models\ReportPhoto;
 use App\Models\ReportFood;
+use App\Models\ZaloUser;
 
 class TesterController extends Controller
 {
@@ -56,6 +58,9 @@ class TesterController extends Controller
     $date = date('Y-m-d');
 
 
+
+//    var_dump($temps);
+
 //    $row = RestaurantFoodScan::find(45535);
 //
 //    $row->predict_food([
@@ -66,8 +71,6 @@ class TesterController extends Controller
 
 
     //fix live
-
-    $this->photo_sync();
 
     //=======================================================================================
 
@@ -528,4 +531,36 @@ class TesterController extends Controller
     var_dump(count($rows));
   }
 
+  protected function zalo_user_list_detail()
+  {
+    $datas = SysZalo::user_list([
+      'offset' => 0, //stt 50
+    ]);
+
+    var_dump($datas);
+
+    if (count($datas)) {
+      $temps = (array)$datas['data'];
+
+      if (count($temps) && isset($temps['users']) && count($temps['users'])) {
+        foreach ($temps['users'] as $temp) {
+          $temp = (array)$temp;
+
+          var_dump($sys_app::_DEBUG_BREAK);
+
+          var_dump($temp['user_id']);
+
+          $row = ZaloUser::where('zalo_user_id', $temp['user_id'])
+            ->first();
+          if (!$row) {
+            $row = ZaloUser::create([
+              'zalo_user_id' => $temp['user_id'],
+            ]);
+          }
+
+          $row->get_detail();
+        }
+      }
+    }
+  }
 }

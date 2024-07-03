@@ -78,51 +78,6 @@ return new class extends Migration {
         $table->timestamps();
       });
     }
-
-    if (!Schema::hasTable('kas_sites')) {
-      Schema::create('kas_sites', function (Blueprint $table) {
-        $table->id();
-        $table->string('site_code');
-        $table->string('site_name');
-        $table->string('site_address')->nullable();
-        $table->string('site_tel')->nullable();
-        $table->string('site_email')->nullable();
-        $table->text('site_latitude')->nullable();
-        $table->text('site_longitude')->nullable();
-        $table->text('site_image')->nullable();
-        $table->timestamps();
-      });
-    }
-
-    if (!Schema::hasTable('kas_shifts')) {
-      Schema::create('kas_shifts', function (Blueprint $table) {
-        $table->id();
-        $table->string('shift_code');
-        $table->string('shift_name');
-        $table->text('shift_note')->nullable();
-        $table->timestamps();
-      });
-    }
-
-    if (!Schema::hasTable('kas_shift_sites')) {
-      Schema::create('kas_shift_sites', function (Blueprint $table) {
-        $table->id();
-        $table->bigInteger('kas_shift_id');
-        $table->bigInteger('kas_site_id');
-        $table->timestamps();
-      });
-    }
-
-    if (!Schema::hasTable('kas_shift_times')) {
-      Schema::create('kas_shift_times', function (Blueprint $table) {
-        $table->id();
-        $table->bigInteger('kas_shift_id');
-        $table->string('site_code');
-
-        $table->text('site_image')->nullable();
-        $table->timestamps();
-      });
-    }
   }
 
   /**

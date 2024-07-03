@@ -63,6 +63,19 @@ class User extends Authenticatable
     ];
   }
 
+  public function get_photo()
+  {
+    $photo = asset('assets/img/avatars/2.png');
+
+    $row = ZaloUser::where('user_id', $this->id)
+      ->first();
+    if ($row && !empty($row->avatar)) {
+      $photo = $row->avatar;
+    }
+
+    return $photo;
+  }
+
   public function row_setting($key)
   {
     $row = UserSetting::where('user_id', $this->id)
@@ -190,6 +203,31 @@ class User extends Authenticatable
     }
   }
 
+  public function get_restaurants()
+  {
+    $roles = ['superadmin', 'admin'];
+
+    if ($this->access_full || in_array($this->role, $roles)) {
+      $rows = RestaurantParent::distinct()
+        ->select('id', 'name')
+        ->where('deleted', 0)
+        ->get();
+    }
+    else {
+
+      $rows = RestaurantParent::distinct()
+        ->select('id', 'name')
+        ->whereIn('id', function ($q) {
+          $q->select('restaurant_parent_id')
+            ->from('restaurant_access')
+            ->where('user_id', $this->id);
+        })
+        ->where('deleted', 0)
+        ->get();
+    }
+    return $rows;
+  }
+
   public function add_log($pars = [])
   {
     if (count($pars)) {
@@ -284,29 +322,6 @@ class User extends Authenticatable
     return $this->id == 5;
   }
 
-  public function get_sensors()
-  {
-    $roles = ['superadmin', 'admin'];
 
-    if ($this->access_full || in_array($this->role, $roles)) {
-      $rows = Restaurant::distinct()
-        ->select('id', 'name')
-        ->where('deleted', 0)
-        ->get();
-    }
-    else {
-
-      $rows = Restaurant::distinct()
-        ->select('id', 'name')
-        ->whereIn('id', function ($q) {
-          $q->select('restaurant_id')
-            ->from('restaurant_access')
-            ->where('user_id', $this->id);
-        })
-        ->where('deleted', 0)
-        ->get();
-    }
-    return $rows;
-  }
 
 }
