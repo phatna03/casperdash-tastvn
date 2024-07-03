@@ -280,8 +280,8 @@
       </div>
     </div>
   </div>
-  <!-- modal confirm to sync zalo -->
-  <div class="modal animate__animated animate__rollIn" id="modal_sync_zalo" tabindex="-1" aria-hidden="true">
+  <!-- modal confirm to zalo sync -->
+  <div class="modal animate__animated animate__rollIn" id="modal_zalo_sync" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
       <div class="modal-content">
         <div class="modal-header">
@@ -312,6 +312,53 @@
                     </select>
                   </div>
                   <label for="select-item-zalo-user" class="text-danger">Zalo Users</label>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <div class="wrap-btns">
+              @include('tastevn.htmls.form_button_loading')
+              <button type="submit" class="btn btn-primary btn-ok btn-submit acm-float-right">Submit</button>
+              <button type="button" class="btn btn-outline-secondary btn-ok btn-cancel" data-bs-dismiss="modal">Cancel</button>
+            </div>
+
+            <input type="hidden" name="item" />
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <!-- modal confirm to zalo message -->
+  <div class="modal animate__animated animate__rollIn" id="modal_zalo_message" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title">Send Zalo Message</h4>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form onsubmit="return user_zalo_message(event, this);">
+          <div class="modal-body">
+            <div class="row">
+              <div class="col mb-12 mt-2">
+                <div class="form-control">
+                  <span class="form-check d-inline-block acm-mr-px-10">
+                    <input name="type" class="form-check-input"
+                           type="radio" value="request" id="zalo-message-send-request" checked="checked" />
+                    <label class="form-check-label" for="zalo-message-send-request">
+                      Gửi tin nhắn yêu cầu thông tin người dùng
+                    </label>
+                  </span>
+                  <span class="form-check d-inline-block">
+                    <input name="type" class="form-check-input"
+                           type="radio" value="custom" id="zalo-message-send-request" />
+                    <label class="form-check-label" for="zalo-message-send-request">
+                      Gửi tin nhắn với nội dung bên dưới
+                    </label>
+                  </span>
+                </div>
+                <div class="mt-2">
+                  <textarea name="message" class="form-control h-px-100" placeholder="Nội dung tin nhắn..."></textarea>
                 </div>
               </div>
             </div>
@@ -427,7 +474,7 @@
 
             if (todo) {
               html_edit = '<a class="dropdown-item" href="javascript:void(0);" data-bs-toggle="offcanvas" data-bs-target="#offcanvas_edit_item" onclick="user_edit_prepare(this)"><i class="mdi mdi-pencil-outline me-1"></i> Edit</a>';
-              html_zalo = '<a class="dropdown-item" href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#modal_sync_zalo" onclick="user_zalo_prepare(this)"><i class="mdi mdi-pencil-outline me-1"></i> Sync Zalo User</a>';
+              html_zalo = '<a class="dropdown-item" href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#modal_zalo_sync" onclick="user_zalo_prepare(this)"><i class="mdi mdi-pencil-outline me-1"></i> Sync Zalo User</a>';
               html_delete = '<a class="dropdown-item" href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#modal_delete_item" onclick="user_delete_confirm(this)"><i class="mdi mdi-trash-can-outline me-1"></i> Delete</a>';
 
               if (user_id == parseInt(full['id'])) {
@@ -499,7 +546,8 @@
             }
 
             if (full['zalo_user_id'] && full['zalo_user_id'] !== '' && full['zalo_user_id'] !== 'null') {
-              html_zalo = '<span>Zalo ID: ' + full['zalo_user_id'] + '</span>';
+              html_zalo = '<button type="button" class="btn btn-sm btn-primary p-1 acm-mr-px-5" onclick="user_zalo_message_prepare(this)"><i class="mdi mdi-message fs-6"></i></button>' +
+                '<span>Zalo ID: ' + full['zalo_user_id'] + '</span>';
             }
 
             html = '<div>' + html_email +

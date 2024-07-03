@@ -2442,7 +2442,7 @@ function user_setting_notify() {
 }
 function user_zalo_prepare(ele) {
   var tr = $(ele).closest('tr');
-  var popup = $('#modal_sync_zalo');
+  var popup = $('#modal_zalo_sync');
   var selected = parseInt(tr.attr('data-zalo_id')) ? tr.attr('data-zalo_id') : '';
 
   popup.find('input[name=item]').val(tr.attr('data-id'));
@@ -2465,6 +2465,49 @@ function user_zalo(evt, frm) {
       message_from_toast('success', acmcfs.message_title_success, acmcfs.message_description_success_update, true);
 
       datatable_refresh();
+
+    })
+    .catch(error => {
+
+      if (error.response.data && Object.values(error.response.data).length) {
+        Object.values(error.response.data).forEach(function (v, k) {
+          message_from_toast('error', acmcfs.message_title_error, v);
+        });
+      }
+
+    })
+    .then(() => {
+
+      form_loading(form, false);
+      form_close(popup);
+    });
+
+  return false;
+}
+function user_zalo_message_prepare(ele) {
+  var tr = $(ele).closest('tr');
+  var popup = $('#modal_zalo_message');
+  var selected = parseInt(tr.attr('data-zalo_id')) ? tr.attr('data-zalo_id') : '';
+
+  popup.find('input[name=item]').val(tr.attr('data-id'));
+
+  popup.modal('show');
+}
+function user_zalo_message(evt, frm) {
+  evt.preventDefault();
+  var form = $(frm);
+  var popup = form.closest('.modal');
+
+  form_loading(form);
+
+  axios.post('/admin/user/zalo/message/send', {
+    item: form.find('input[name=item]').val(),
+    type: form.find('input[name=type]:checked').val(),
+    message: form.find('textarea[name=message]').val(),
+  })
+    .then(response => {
+
+      message_from_toast('success', acmcfs.message_title_success, acmcfs.message_description_success_update, true);
 
     })
     .catch(error => {
@@ -3326,8 +3369,8 @@ function report_photo_nf() {
         if (response.data.rfs.rbf_error) {
           form.find('input[name=rbf_error]').prop('checked', true);
         }
-        console.log('1111111111');
-        console.log(response.data.rfs.rbf_error);
+        // console.log('1111111111');
+        // console.log(response.data.rfs.rbf_error);
 
         form.find('input[name=rfs]').val(response.data.rfs.id);
         form.find('select[name=point]').val(response.data.photo.point);
@@ -3704,8 +3747,8 @@ function report_photo_nf_full(food_id, type) {
         if (response.data.rfs.rbf_error) {
           form.find('input[name=rbf_error]').prop('checked', true);
         }
-        console.log('22222222222');
-        console.log(response.data.rfs.rbf_error);
+        // console.log('22222222222');
+        // console.log(response.data.rfs.rbf_error);
 
         form.find('input[name=rfs]').val(response.data.rfs.id);
         form.find('select[name=point]').val(response.data.photo.point);

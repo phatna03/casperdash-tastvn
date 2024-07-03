@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Notification;
 use Validator;
 use App\Notifications\ForgotPassword;
 use App\Api\SysApp;
+use App\Api\SysZalo;
 //model
 use App\Models\User;
 use App\Models\RestaurantAccess;
@@ -606,4 +607,55 @@ class UserController extends Controller
       'status' => true,
     ], 200);
   }
+
+  public function zalo_message_send(Request $request)
+  {
+    $values = $request->post();
+    //required
+    $validator = Validator::make($values, [
+      'item' => 'required',
+    ]);
+    if ($validator->fails()) {
+      return response()->json($validator->errors(), 422);
+    }
+
+    $row = User::find((int)$values['item']);
+    if (!$row) {
+      return response()->json([
+        'error' => 'Invalid item'
+      ], 422);
+    }
+
+    $type = isset($values['type']) ? $values['type'] : 'request';
+    $message = isset($values['message']) ? trim($values['message']) : NULL;
+
+    $zalo = $row->get_zalo();
+    if (!$zalo) {
+      return response()->json([
+        'error' => 'Invalid zalo'
+      ], 422);
+    }
+
+    $datas = NULL;
+
+    switch ($type) {
+      case 'request':
+
+        $datas = SysZalo::send_request_info($zalo->zalo_user_id);
+
+        break;
+
+      case 'custom':
+
+        $datas = SysZalo::send_text_only($zalo->zalo_user_id, $message);
+
+        break;
+    }
+
+    return response()->json([
+      'status' => true,
+      'datas' => $datas,
+    ], 200);
+  }
+
 }

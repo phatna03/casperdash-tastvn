@@ -76,6 +76,13 @@ class User extends Authenticatable
     return $photo;
   }
 
+  public function get_zalo()
+  {
+    $select = ZaloUser::where('user_id', $this->id);
+
+    return $select->first();
+  }
+
   public function row_setting($key)
   {
     $row = UserSetting::where('user_id', $this->id)

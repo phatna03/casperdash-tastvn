@@ -59,7 +59,6 @@ class TesterController extends Controller
 
 
 
-//    var_dump($temps);
 
 //    $row = RestaurantFoodScan::find(45535);
 //

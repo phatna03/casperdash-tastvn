@@ -291,6 +291,7 @@ Route::post('/admin/user/delete', [UserController::class, 'delete']);
 Route::post('/admin/user/restore', [UserController::class, 'restore']);
 Route::post('/admin/user/selectize', [UserController::class, 'selectize']);
 Route::post('/admin/user/zalo/user/update', [UserController::class, 'zalo_user_update']);
+Route::post('/admin/user/zalo/message/send', [UserController::class, 'zalo_message_send']);
 //ingredient
 Route::get('/admin/ingredients', [IngredientController::class, 'index']);
 Route::post('/admin/ingredient/store', [IngredientController::class, 'store']);
