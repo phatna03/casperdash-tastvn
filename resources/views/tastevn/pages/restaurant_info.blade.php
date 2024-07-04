@@ -228,7 +228,7 @@
                   <label for="scan-search-status">Group</label>
                 </div>
               </div>
-              <div class="col-md-3 mb-2">
+              <div class="col-md-3 mb-2 d-none">
                 <div class="form-floating form-floating-outline">
                   <div class="form-control acm-wrap-selectize" id="scan-search-marked">
                     <select name="marked" class="opt_selectize" onchange="sensor_search_food_scan(this)">
@@ -239,7 +239,7 @@
                   <label for="scan-search-marked">Mark?</label>
                 </div>
               </div>
-              <div class="col-md-3 mb-2">
+              <div class="col-md-3 mb-2 d-none">
                 <div class="form-floating form-floating-outline">
                   <div class="form-control acm-wrap-selectize" id="scan-search-resolved">
                     <select name="resolved" class="opt_selectize" onchange="sensor_search_food_scan(this)">
@@ -248,6 +248,28 @@
                     </select>
                   </div>
                   <label for="scan-search-resolved">Resolve?</label>
+                </div>
+              </div>
+              <div class="col-md-3 mb-2">
+                <div class="form-floating form-floating-outline">
+                  <div class="form-control acm-wrap-selectize" id="scan-search-customer-requested">
+                    <select name="customer_requested" class="opt_selectize" onchange="sensor_search_food_scan(this)">
+                      <option>All dishes</option>
+                      <option value="yes">Yes</option>
+                    </select>
+                  </div>
+                  <label for="scan-search-customer-requested">Customer requested?</label>
+                </div>
+              </div>
+              <div class="col-md-3 mb-2">
+                <div class="form-floating form-floating-outline">
+                  <div class="form-control acm-wrap-selectize" id="scan-search-food-multi">
+                    <select name="food_multi" class="opt_selectize" onchange="sensor_search_food_scan(this)">
+                      <option>All dishes</option>
+                      <option value="yes">Yes</option>
+                    </select>
+                  </div>
+                  <label for="scan-search-food-multi">Multiple dishes?</label>
                 </div>
               </div>
               <div class="col-md-3 mb-2">
@@ -570,6 +592,8 @@
           d.time_scan = $('#datatable-listing-scan .wrap-search-form form input[name=time_scan]').val();
           d.resolved = $('#datatable-listing-scan .wrap-search-form form select[name=resolved]').val();
           d.marked = $('#datatable-listing-scan .wrap-search-form form select[name=marked]').val();
+          d.customer_requested = $('#datatable-listing-scan .wrap-search-form form select[name=customer_requested]').val();
+          d.food_multi = $('#datatable-listing-scan .wrap-search-form form select[name=food_multi]').val();
           d.noted = $('#datatable-listing-scan .wrap-search-form form select[name=noted]').val();
         },
       },

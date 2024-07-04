@@ -475,6 +475,8 @@ Route::get('/datatable/sensor-food-scans', function (Request $request) {
   $missing = isset($values['missing']) && !empty($values['missing']) ? $values['missing'] : NULL;
   $resolved = isset($values['resolved']) && !empty($values['resolved']) ? $values['resolved'] : NULL;
   $marked = isset($values['marked']) && !empty($values['marked']) ? $values['marked'] : NULL;
+  $customer_requested = isset($values['customer_requested']) && !empty($values['customer_requested']) ? $values['customer_requested'] : NULL;
+  $food_multi = isset($values['food_multi']) && !empty($values['food_multi']) ? $values['food_multi'] : NULL;
   $noted = isset($values['noted']) && !empty($values['noted']) ? $values['noted'] : NULL;
   $food_catetories = isset($values['categories']) ? (array)$values['categories'] : [];
   $foods = isset($values['foods']) ? (array)$values['foods'] : [];
@@ -489,7 +491,8 @@ Route::get('/datatable/sensor-food-scans', function (Request $request) {
       "restaurant_food_scans.status", "restaurant_food_scans.found_by", "restaurant_food_scans.note", "restaurant_food_scans.confidence",
       "restaurant_food_scans.food_id", "restaurant_food_scans.food_category_id", "restaurant_food_scans.rbf_retrain",
       "foods.name as food_name", "food_categories.name as category_name",
-      "restaurant_food_scans.is_resolved", "restaurant_food_scans.is_marked"
+      "restaurant_food_scans.is_resolved", "restaurant_food_scans.is_marked",
+      "restaurant_food_scans.customer_requested", "restaurant_food_scans.count_foods",
     )
     ->leftJoin("foods", "restaurant_food_scans.food_id", "=", "foods.id")
     ->leftJoin("food_categories", "restaurant_food_scans.food_category_id", "=", "food_categories.id")
@@ -549,8 +552,6 @@ Route::get('/datatable/sensor-food-scans', function (Request $request) {
           break;
       }
     }
-
-
   }
   if (count($food_catetories)) {
     $select->whereIn("restaurant_food_scans.food_category_id", $food_catetories);
@@ -598,6 +599,20 @@ Route::get('/datatable/sensor-food-scans', function (Request $request) {
     switch ($marked) {
       case 'yes':
         $select->where("restaurant_food_scans.is_marked", '>', 0);
+        break;
+    }
+  }
+  if (!empty($customer_requested)) {
+    switch ($customer_requested) {
+      case 'yes':
+        $select->where("restaurant_food_scans.customer_requested", '>', 0);
+        break;
+    }
+  }
+  if (!empty($food_multi)) {
+    switch ($food_multi) {
+      case 'yes':
+        $select->where("restaurant_food_scans.count_foods", '>', 0);
         break;
     }
   }
