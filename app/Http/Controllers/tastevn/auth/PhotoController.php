@@ -32,10 +32,14 @@ class PhotoController extends Controller
 
   public function index(Request $request)
   {
+    $values = $request->all();
+    $photo = isset($values['photo']) && !empty($values['photo']) ? trim($values['photo']) : '';
+
     $pageConfigs = [
       'myLayout' => 'horizontal',
       'hasCustomizer' => false,
 
+      'photo' => $photo,
     ];
 
     $this->_viewer->add_log([

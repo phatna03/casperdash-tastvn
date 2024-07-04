@@ -54,19 +54,25 @@ class TesterController extends Controller
     $sys_app = new SysApp();
 
     $restaurant = RestaurantParent::find(1);
-    $sensor = Restaurant::find(5);
+    $sensor = Restaurant::find(11);
+    $rfs = RestaurantFoodScan::find(52375);
     $date = date('Y-m-d');
 
+    $zalo5 = '4889535897686365921';
+
+    SysZalo::send_rfs_note($zalo5, 'photo_comment', $rfs, [
+
+    ]);
 
 
 
 //    $row = RestaurantFoodScan::find(45535);
-//
 //    $row->predict_food([
 //      'notification' => false,
 //
 //      'debug' => true,
 //    ]);
+
 
 
     //fix live

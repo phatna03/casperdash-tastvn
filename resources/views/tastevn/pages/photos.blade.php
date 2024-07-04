@@ -62,7 +62,7 @@
           </div>
           <div class="col-md-6 mb-2">
             <div class="form-floating form-floating-outline">
-              <input class="form-control" name="keyword" onkeyup="form_photos_filter()" />
+              <input class="form-control" name="keyword" onkeyup="form_photos_filter()" value="{{$pageConfigs['photo']}}" />
               <label for="scan-search-noted">ID?</label>
             </div>
           </div>
