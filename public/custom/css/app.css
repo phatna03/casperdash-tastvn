@@ -151,7 +151,7 @@
 }
 
 .acm-top-px--10 {
-  top: -10px;
+  top: -10px !important;
 }
 
 .acm-top-0 {
@@ -168,6 +168,14 @@
 
 .acm-left-0 {
   left: 0;
+}
+
+.acm-right--5px {
+  right: -5px;
+}
+
+.acm-right--10px {
+  right: -10px;
 }
 
 .acm-right-5px {

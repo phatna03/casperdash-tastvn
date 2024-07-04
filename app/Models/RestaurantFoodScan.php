@@ -923,6 +923,17 @@ class RestaurantFoodScan extends Model
     return $select->get();
   }
 
+  public function count_comments()
+  {
+    $count = count($this->get_comments());
+
+    if (!empty($this->note)) {
+      $count++;
+    }
+
+    return $count;
+  }
+
   public function get_texts($pars = [])
   {
     $select = RestaurantFoodScanText::query('restaurant_food_scan_texts')
