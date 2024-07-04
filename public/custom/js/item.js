@@ -2591,6 +2591,20 @@ function restaurant_food_scan_notes(id) {
         wrap.find('.wrap_notes').append(html);
       }
 
+      wrap.find('input[name=customer_requested]').prop('checked', false);
+      if (response.data.customer_requested) {
+        wrap.find('input[name=customer_requested]').prop('checked', true);
+      }
+
+      wrap.find('input[name=food_multi]').prop('checked', false);
+      wrap.find('.food_count').addClass('d-none');
+      wrap.find('input[name=food_count]').val('');
+      if (response.data.count_foods) {
+        wrap.find('input[name=food_multi]').prop('checked', true);
+        wrap.find('.food_count').removeClass('d-none');
+        wrap.find('input[name=food_count]').val(response.data.count_foods);
+      }
+
     })
     .catch(error => {
       if (error.response.data && Object.values(error.response.data).length) {
@@ -2603,14 +2617,20 @@ function restaurant_food_scan_notes(id) {
   return false;
 }
 function restaurant_food_scan_cmt(ele) {
-  var parent = $(ele).closest('#lcl_wrap');
+  var parent = $('#lcl_descr');
   var content = parent.find('textarea[name=note]').val();
   var object_id = parent.find('input[name=object_id]').val();
+  var customer_requested = parent.find('input[name=customer_requested]').is(':checked') ? 1 : 0;
+  var food_multi = parent.find('input[name=food_multi]').is(':checked') ? 1 : 0;
+  var food_count = parent.find('input[name=food_count]').val();
 
   axios.post('/admin/comment/note', {
     object_id: object_id,
     object_type: 'restaurant_food_scan',
     content: content,
+    customer_requested: customer_requested,
+    food_multi: food_multi,
+    food_count: food_count,
   })
     .then(response => {
 
@@ -2630,6 +2650,16 @@ function restaurant_food_scan_cmt(ele) {
     });
 
   return false;
+}
+function restaurant_food_scan_cmt_food(ele) {
+  var parent = $('#lcl_descr');
+  var bind = $(ele);
+
+  parent.find('.food_count').addClass('d-none');
+  if (bind.is(':checked')) {
+    parent.find('.food_count').removeClass('d-none');
+    parent.find('input[name=food_count]').val('');
+  }
 }
 //food
 function food_clear(frm) {

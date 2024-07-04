@@ -1078,10 +1078,16 @@
         //custome
         var acm_note = '<div class="form-floating form-floating-outline"><textarea class="form-control h-px-100 acm-text-black" name="note">' + el.txt + '</textarea><label class="acm-lbl-highlight">Note</label></div>';
         var acm_button = '<button type="button" class="btn btn-primary waves-effect waves-light w-100" onclick="restaurant_food_scan_cmt(this)">Submit</button>';
+        var acm_check_1 = '<input type="checkbox" name="customer_requested" class="form-check-input p-2" /> Customer Requested';
+        var acm_check_2 = '<input type="checkbox" name="food_multi" class="form-check-input p-2" onchange="restaurant_food_scan_cmt_food(this)" /> Multiple Dishes';
+        var acm_hidden_2 = '<input type="text" name="food_count" class="form-control text-center text-dark fw-bold" placeholder="Number of dishes" />';
         var acm_html = '<div class="mt-4">' + acm_note + '</div>'
+          + '<div class="mt-2">' + acm_check_1 + '</div>'
+          + '<div class="mt-2">' + acm_check_2 + '</div>'
+          + '<div class="mt-2 food_count d-none">' + acm_hidden_2 + '</div>'
           + '<div class="mt-1">' + acm_button + '</div>'
-          + '<div class="mt-1"><input type="hidden" name="object_id" value="' + acm_obj_id + '" /></div>'
-          + '<div class="mt-1 wrap_notes"></div>'
+          + '<div><input type="hidden" name="object_id" value="' + acm_obj_id + '" /></div>'
+          + '<div class="mt-2 wrap_notes"></div>'
         ;
         $('#lcl_txt').append('<section id="lcl_descr">' + acm_html + '</section>');
 

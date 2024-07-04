@@ -220,6 +220,10 @@ class PhotoController extends Controller
       'noter' => $rfs->get_noter(),
       'comments' => $comments,
       'user_comment' => $user_comment,
+
+      'customer_requested' => $rfs->customer_requested,
+      'count_foods' => $rfs->count_foods,
+
     ]);
   }
 }

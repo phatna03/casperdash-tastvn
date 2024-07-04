@@ -37,6 +37,9 @@ class CommentController extends Controller
     $content = isset($values['content']) && !empty($values['content']) ? trim($values['content']) : NULL;
     $object_type = isset($values['object_type']) && !empty($values['object_type']) ? trim($values['object_type']) : NULL;
     $object_id = isset($values['object_id']) && !empty($values['object_id']) ? (int)$values['object_id'] : 0;
+    $customer_requested = isset($values['customer_requested']) && !empty($values['customer_requested']) ? (int)$values['customer_requested'] : 0;
+    $food_multi = isset($values['food_multi']) && !empty($values['food_multi']) ? (int)$values['food_multi'] : 0;
+    $food_count = isset($values['food_count']) && !empty($values['food_count']) ? (int)$values['food_count'] : 0;
     if (empty($object_type) || !$object_id) {
       return response()->json([
         'error' => 'Invalid data'
@@ -44,6 +47,41 @@ class CommentController extends Controller
     }
 
     $item = $this->_sys_app->get_item($object_id, $object_type);
+    if (!$item) {
+      return response()->json([
+        'error' => 'Invalid data'
+      ], 422);
+    }
+
+    switch ($object_type) {
+      case 'restaurant_food_scan':
+
+        //customer_requested
+        if (!$customer_requested) {
+          $item->update([
+            'customer_requested' => 0,
+          ]);
+        }
+        if (!$item->customer_requested && $customer_requested) {
+          $item->update([
+            'customer_requested' => $this->_viewer->id,
+          ]);
+        }
+
+        //count_foods
+        if (!$food_multi) {
+          $item->update([
+            'count_foods' => 0,
+          ]);
+        }
+        if (!$item->count_foods && $food_multi && $food_count) {
+          $item->update([
+            'count_foods' => $food_count,
+          ]);
+        }
+
+        break;
+    }
 
     $row = Comment::where('user_id', $this->_viewer->id)
       ->where('object_type', $object_type)
@@ -98,15 +136,8 @@ class CommentController extends Controller
       }
     }
 
-    if (!$row) {
-      return response()->json([
-        'error' => 'Invalid data'
-      ], 422);
-    }
-
     return response()->json([
       'status' => true,
-      'item' => $row->id,
     ], 200);
   }
 }
