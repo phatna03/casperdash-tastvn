@@ -118,11 +118,26 @@
 
             </div>
 
-            <div class="form-floating form-floating-outline">
+            <div class="form-floating form-floating-outline mb-2">
               <div class="form-control acm-wrap-selectize" id="photo-update-note">
                 <textarea name="note" class="form-control h-px-100 p-0 border-0"></textarea>
               </div>
               <label for="photo-update-note" class="text-danger">Note</label>
+            </div>
+
+            <div class="form-floating form-floating-outline mb-2">
+              <input class="form-check-input" type="checkbox" name="customer_requested" />
+              <span class="text-dark">Customer Requested</span>
+            </div>
+
+            <div class="form-floating form-floating-outline mb-2">
+              <input class="form-check-input" type="checkbox" name="food_multi" onchange="mobi_photo_multi_food(this)" />
+              <span class="text-dark">Multiple Dishes</span>
+            </div>
+
+            <div class="form-floating form-floating-outline mb-2 food_count d-none">
+              <input class="form-control text-dark text-center fw-bold fnumber" type="text"
+                     name="food_count" placeholder="Number of dishes" autocomplete="off" />
             </div>
           </div>
 

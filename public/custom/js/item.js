@@ -2605,6 +2605,8 @@ function restaurant_food_scan_notes(id) {
         wrap.find('input[name=food_count]').val(response.data.count_foods);
       }
 
+      bind_datad(wrap);
+
     })
     .catch(error => {
       if (error.response.data && Object.values(error.response.data).length) {
@@ -2630,7 +2632,7 @@ function restaurant_food_scan_cmt(ele) {
     content: content,
     customer_requested: customer_requested,
     food_multi: food_multi,
-    food_count: food_count,
+    food_count: input_number_only(food_count),
   })
     .then(response => {
 
@@ -3831,6 +3833,16 @@ function report_photo_nf_full(food_id, type) {
   return false;
 }
 //mobi
+function mobi_photo_multi_food(ele) {
+  var popup = $('#modal_photo_cmt');
+  var bind = $(ele);
+
+  popup.find('.food_count').addClass('d-none');
+  if (bind.is(':checked')) {
+    popup.find('.food_count').removeClass('d-none');
+    popup.find('input[name=food_count]').val('');
+  }
+}
 function mobi_photo_view(itd) {
   var popup = $('#modal_photo_cmt');
 
@@ -3890,7 +3902,23 @@ function mobi_photo_view(itd) {
         popup.find('.wrap_notes').append(html);
       }
 
+      popup.find('input[name=customer_requested]').prop('checked', false);
+      if (response.data.customer_requested) {
+        popup.find('input[name=customer_requested]').prop('checked', true);
+      }
+
+      popup.find('input[name=food_multi]').prop('checked', false);
+      popup.find('.food_count').addClass('d-none');
+      popup.find('input[name=food_count]').val('');
+      if (response.data.count_foods) {
+        popup.find('input[name=food_multi]').prop('checked', true);
+        popup.find('.food_count').removeClass('d-none');
+        popup.find('input[name=food_count]').val(response.data.count_foods);
+      }
+
       popup.modal('show');
+
+      bind_datad(popup);
 
     })
     .catch(error => {
@@ -3908,12 +3936,19 @@ function mobi_photo_cmt(evt, frm) {
   var form = $(frm);
   var popup = $('#modal_photo_cmt');
 
+  var customer_requested = form.find('input[name=customer_requested]').is(':checked') ? 1 : 0;
+  var food_multi = form.find('input[name=food_multi]').is(':checked') ? 1 : 0;
+  var food_count = form.find('input[name=food_count]').val();
+
   form_loading(form);
 
   axios.post('/admin/comment/note', {
     object_id: form.find('input[name=item]').val(),
     object_type: 'restaurant_food_scan',
     content: form.find('textarea[name=note]').val(),
+    customer_requested: customer_requested,
+    food_multi: food_multi,
+    food_count: input_number_only(food_count),
   })
     .then(response => {
 

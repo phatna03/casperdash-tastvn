@@ -1080,7 +1080,7 @@
         var acm_button = '<button type="button" class="btn btn-primary waves-effect waves-light w-100" onclick="restaurant_food_scan_cmt(this)">Submit</button>';
         var acm_check_1 = '<input type="checkbox" name="customer_requested" class="form-check-input p-2" /> Customer Requested';
         var acm_check_2 = '<input type="checkbox" name="food_multi" class="form-check-input p-2" onchange="restaurant_food_scan_cmt_food(this)" /> Multiple Dishes';
-        var acm_hidden_2 = '<input type="text" name="food_count" class="form-control text-center text-dark fw-bold" placeholder="Number of dishes" />';
+        var acm_hidden_2 = '<input type="text" name="food_count" class="form-control text-center text-dark fw-bold fnumber" placeholder="Number of dishes" autocomplete="off" />';
         var acm_html = '<div class="mt-4">' + acm_note + '</div>'
           + '<div class="mt-2">' + acm_check_1 + '</div>'
           + '<div class="mt-2">' + acm_check_2 + '</div>'
