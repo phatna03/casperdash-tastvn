@@ -11,7 +11,9 @@ class Kernel extends ConsoleKernel
     //custome
     'App\Console\Commands\SyncImagesToS3',
     'App\Console\Commands\ClearLocalImages',
+    'App\Console\Commands\CheckPhotos',
     'App\Console\Commands\GetPhotos',
+    'App\Console\Commands\ZaloToken',
   ];
 
   /**
@@ -20,6 +22,23 @@ class Kernel extends ConsoleKernel
   protected function schedule(Schedule $schedule): void
   {
     //custome
+
+    //optimize & check cron
+    //shortcut if new sensor add
+//    local:check-images
+
+    //every 10min
+//    sync:images-to-s3
+
+    //every 15min
+//    local:check-status-images
+
+    //daily at 1am
+//    local:clear-images
+
+    //daily at 2am
+//    thirdparty:zalo-token-access
+
     //cargo
     $schedule->command('local:check-images', [1, 1])
       ->withoutOverlapping()
@@ -76,6 +95,12 @@ class Kernel extends ConsoleKernel
     //status photos
     $schedule->command('local:check-status-images')
       ->dailyAt('03:00')
+      ->withoutOverlapping()
+      ->runInBackground();
+
+    //zalo token
+    $schedule->command('thirdparty:zalo-token-access')
+      ->dailyAt('04:00')
       ->withoutOverlapping()
       ->runInBackground();
   }
