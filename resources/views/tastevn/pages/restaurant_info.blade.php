@@ -317,11 +317,10 @@
             <tr>
               <th class="acm-th-first"></th>
               <th>Group</th>
+              <th>Photo</th>
               <th>Dish</th>
-              <th class="d-none">Confidence</th>
               <th>Ingredients missing</th>
               <th>Time upload</th>
-{{--              <th>Time scanned</th>--}}
               <th>Note</th>
               <th class="d-none"></th>
               <th class="d-none"></th>
@@ -671,11 +670,6 @@
         {
           targets: 2,
           render: function (data, type, full, meta) {
-
-            var food_name = !full['food_name'] || full['food_name'] === 'null'
-              ? 'Unknown...' : full['food_name'];
-            var food_category = !full['category_name'] || full['category_name'] === 'null'
-              ? '' : '(' + full['category_name'] + ')';
             var photo_url = full['photo_url'];
             if (parseInt(full['local_storage'])) {
               photo_url = acmcfs.link_base_url + '/sensors/' + full['photo_name'];
@@ -684,12 +678,7 @@
             return (
               '<div class="clearfix cursor-pointer" onclick="sensor_food_scan_info(' + full['id'] + ')">' +
               '<div class="acm-float-left acm-mr-px-5">' +
-              '<img class="acm-border-css" loading="lazy" width="100" height="70px" src="' + photo_url + '" />' +
-              '</div>' +
-              '<div class="overflow-hidden acm-max-line-3 acm-width-150-min">' +
-              '<div>ID: ' + full['id'] + '</div>' +
-              '<div>' + full['confidence'] + '% <b>' + food_name + '</b></div>' +
-              '<div class="acm-text-italic">' + food_category + '</div>' +
+              '<img class="acm-border-css" loading="lazy" width="140" height="100px" src="' + photo_url + '" />' +
               '</div>' +
               '</div>'
             );
@@ -697,24 +686,26 @@
         },
         {
           targets: 3,
-          className: 'd-none',
           render: function (data, type, full, meta) {
             var html = '';
-            var retrain = parseInt(full['rbf_retrain']);
 
-            if (full['confidence'] && parseInt(full['confidence'])) {
-              html = full['confidence'] + '%';
+            var food_name = !full['food_name'] || full['food_name'] === 'null'
+              ? 'Unknown...' : full['food_name'];
+            var food_category = !full['category_name'] || full['category_name'] === 'null'
+              ? '' : '(' + full['category_name'] + ')';
+
+            html += '<div class="overflow-hidden acm-max-line-3 acm-width-150-min">' +
+              '<div>ID: <b class="text-dark">' + full['id'] + '</b></div>' +
+              '<div>' + full['confidence'] + '% <b class="text-dark">' + food_name + '</b></div>' +
+              '<div class="acm-text-italic text-dark">' + food_category + '</div>' +
+              '</div>';
+
+            if (full['count_foods']) {
+              html += '<div>' + '<span class="badge bg-primary p-1">Multiple Dishes: <b>' + full['count_foods'] + '</b></span>' +
+                '</div>';
             }
 
-            if (retrain) {
-              switch (retrain) {
-                case 1:
-                  html += '<div class="mt-1"><span class="badge bg-info">re-training</span></div>';
-                  break;
-              }
-            }
-
-            return ('<div class="cursor-pointer" onclick="sensor_food_scan_info(' + full['id'] + ')">' + html + '</div>');
+            return ('<div class="cursor-pointer acm-width-200-min" onclick="sensor_food_scan_info(' + full['id'] + ')">' + html + '</div>');
           }
         },
         {
@@ -733,17 +724,29 @@
             }
             else {
               var html = '';
+
+              if (full['rbf_error']) {
+                html += '<div>' + '<span class="badge bg-danger p-1">Robot Error</span>' +
+                  '</div>';
+              }
+
+              if (full['customer_requested']) {
+                html += '<div>' + '<span class="badge bg-secondary p-1">Customer Requested</span>' +
+                  '</div>';
+              }
+
               if (full['missing_texts'] && full['missing_texts'] !== '' && full['missing_texts'] !== 'NULL') {
                 var texts = full['missing_texts'].split('&amp;nbsp');
                 if (texts.length) {
                   texts.forEach(function (v, k) {
 
                     if (v && v.trim() !== '') {
-                      html += '<div>' + v + '</div>';
+                      html += '<div class="fw-bold text-danger">' + v + '</div>';
                     }
                   });
                 }
               }
+
               return ('<div class="cursor-pointer" onclick="sensor_food_scan_info(' + full['id'] + ')">' + html + '</div>');
             }
           }
@@ -802,20 +805,6 @@
             return ('<div class="cursor-pointer" onclick="sensor_food_scan_info(' + full['id'] + ')">' + html + '</div>');
           }
         },
-        // {
-        //   targets: 6,
-        //   render: function (data, type, full, meta) {
-        //     var html = '';
-        //     var arr = full['time_scan'].split(' ');
-        //     if (arr.length) {
-        //       html = '<div>' + arr[0] + '</div>' +
-        //         '<div>' + arr[1] + '</div>';
-        //     } else {
-        //       html = full['time_scan'];
-        //     }
-        //     return ('<div class="cursor-pointer" onclick="sensor_food_scan_info(' + full['id'] + ')">' + html + '</div>');
-        //   }
-        // },
         {
           targets: 6,
           sType: "priority",
@@ -848,7 +837,7 @@
                 html += '<div>+ ' + full['note'] + '</div>';
               }
 
-              return ('<div class="cursor-pointer acm-col-noted acm-width-300-max acm-width-300-min" onclick="sensor_food_scan_info(' + full['id'] + ')">' + html + '</div>');
+              return ('<div class="cursor-pointer acm-col-noted acm-width-300-max acm-width-200-min" onclick="sensor_food_scan_info(' + full['id'] + ')">' + html + '</div>');
             }
           }
         },

@@ -491,7 +491,7 @@ Route::get('/datatable/sensor-food-scans', function (Request $request) {
       "restaurant_food_scans.status", "restaurant_food_scans.found_by", "restaurant_food_scans.note", "restaurant_food_scans.confidence",
       "restaurant_food_scans.food_id", "restaurant_food_scans.food_category_id", "restaurant_food_scans.rbf_retrain",
       "foods.name as food_name", "food_categories.name as category_name",
-      "restaurant_food_scans.is_resolved", "restaurant_food_scans.is_marked",
+      "restaurant_food_scans.is_resolved", "restaurant_food_scans.is_marked", "restaurant_food_scans.rbf_error",
       "restaurant_food_scans.customer_requested", "restaurant_food_scans.count_foods",
     )
     ->leftJoin("foods", "restaurant_food_scans.food_id", "=", "foods.id")

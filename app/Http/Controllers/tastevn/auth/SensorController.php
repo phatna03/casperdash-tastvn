@@ -731,7 +731,35 @@ class SensorController extends Controller
     $rbf_error = isset($values['rbf_error']) ? (int)$values['rbf_error'] : 0;
     $noted = isset($values['note']) ? $values['note'] : NULL;
     $texts = isset($values['texts']) && count($values['texts']) ? (array)$values['texts'] : [];
+    $customer_requested = isset($values['customer_requested']) && !empty($values['customer_requested']) ? (int)$values['customer_requested'] : 0;
+    $food_multi = isset($values['food_multi']) && !empty($values['food_multi']) ? (int)$values['food_multi'] : 0;
+    $food_count = isset($values['food_count']) && !empty($values['food_count']) ? (int)$values['food_count'] : 0;
+
     $unknown = true;
+
+    //customer_requested
+    if (!$customer_requested) {
+      $row->update([
+        'customer_requested' => 0,
+      ]);
+    }
+    if (!$row->customer_requested && $customer_requested) {
+      $row->update([
+        'customer_requested' => $this->_viewer->id,
+      ]);
+    }
+
+    //count_foods
+    if (!$food_multi) {
+      $row->update([
+        'count_foods' => 0,
+      ]);
+    }
+    if ($food_multi && $food_count) {
+      $row->update([
+        'count_foods' => $food_count,
+      ]);
+    }
 
     $diffs['before'] = $row->get_log();
 

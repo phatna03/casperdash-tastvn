@@ -451,6 +451,14 @@ function input_number_min_one(ele) {
     bind.val(1);
   }
 }
+function input_number_min_two(ele) {
+  var bind = $(ele);
+  var val = bind.val().trim();
+
+  if (!val || val === '' || parseInt(val) <= 0) {
+    bind.val(2);
+  }
+}
 function input_date_time(date) {
   var d = new Date(date),
     month = '' + (d.getMonth() + 1),

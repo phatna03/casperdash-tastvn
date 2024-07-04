@@ -137,7 +137,7 @@
 
             <div class="form-floating form-floating-outline mb-2 food_count d-none">
               <input class="form-control text-dark text-center fw-bold fnumber" type="text"
-                     name="food_count" placeholder="Number of dishes" autocomplete="off" />
+                     name="food_count" placeholder="Number of dishes" autocomplete="off" onblur="input_number_min_two(this);" />
             </div>
           </div>
 

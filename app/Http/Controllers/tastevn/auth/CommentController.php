@@ -74,7 +74,7 @@ class CommentController extends Controller
             'count_foods' => 0,
           ]);
         }
-        if (!$item->count_foods && $food_multi && $food_count) {
+        if ($food_multi && $food_count) {
           $item->update([
             'count_foods' => $food_count,
           ]);

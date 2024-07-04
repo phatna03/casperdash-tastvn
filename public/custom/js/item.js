@@ -1254,6 +1254,9 @@ function sensor_food_scan_update(evt, frm) {
   evt.preventDefault();
   var form = $(frm);
   var view_current = parseInt($('body input[name=popup_view_id_itm]').val());
+  var customer_requested = form.find('input[name=customer_requested]').is(':checked') ? 1 : 0;
+  var food_multi = form.find('input[name=food_multi]').is(':checked') ? 1 : 0;
+  var food_count = form.find('input[name=food_count]').val();
 
   form_loading(form);
 
@@ -1286,6 +1289,9 @@ function sensor_food_scan_update(evt, frm) {
     rbf_error: form.find('input[name=rbf_error]').is(':checked') ? 1 : 0,
     missings: missings,
     texts: texts,
+    customer_requested: customer_requested,
+    food_multi: food_multi,
+    food_count: input_number_only(food_count),
   })
     .then(response => {
 
@@ -1305,6 +1311,16 @@ function sensor_food_scan_update(evt, frm) {
     });
 
   return false;
+}
+function sensor_food_scan_update_food_multi(ele) {
+  var parent = $(ele).closest('form');
+  var bind = $(ele);
+
+  parent.find('.food_count').addClass('d-none');
+  if (bind.is(':checked')) {
+    parent.find('.food_count').removeClass('d-none');
+    parent.find('input[name=food_count]').val('');
+  }
 }
 function sensor_food_scan_update_select(ele) {
   var bind = $(ele);
