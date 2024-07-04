@@ -316,6 +316,24 @@ class SysApp
     return $row ? $row->value : NULL;
   }
 
+  public function set_setting($key, $val)
+  {
+    $row = SysSetting::where('key', $key)
+      ->first();
+
+    if (!$row) {
+      $row = SysSetting::create([
+        'key' => $key,
+      ]);
+    }
+
+    $row->update([
+      'value' => $val,
+    ]);
+
+    return $row;
+  }
+
   public function get_notifications()
   {
     return [

@@ -10,10 +10,45 @@ use App\Models\RestaurantFoodScan;
 
 class SysZalo
 {
-  public const _TOKEN_ACCESS = 'TGw8GlHHWIj_3Ob5-rQ4AtmAZ4VuJlif84Y5Dg1hx2jHH-57grM3NYqFycMk2_bbRokRKOqgvMzU6EfJlGQ7FNuazogKVACAI7JRD8zAeIbqHFWhZbINHr4BxNUG9kHqOJMKJR4pobXb8BvchdhJT59_ccMt9vLTIIBzRfWWbdqR7U9i_GQ3PXid_G_R0_KSA0Yg9AefmYOfBhG5rGMw4H5Sppd16uqY1HY58VyWZ4vx4z0adYtIINirh5M7QQDi06glMyTb-5GwNfK_wMBl21bOaXpTOVj_Nsxn781YydLJRBuScpFXSnqZunxs1gmf203J9SWhlo0i4lrCymwPVnXHzKxyQvjE1qd5LkTracGUNUDytmEnPHedtLla7eTc8JdPUjuye6eR1lC5o0-DBJurvm_ZR9adHx9gErhpIe8l';
-  public const _TOKEN_REFRESH = 'tFMVT1bxXrpMzfvp5do2NDNnct4LPFK-eR2ASY4_aoEFx-vk62AKBRhEwdzx4AG0zz70VpHRhKcrrzHW6r_66DM5cdfMS-CecBt_P5XDjZB8ez0SN7d8Ak-phsOeITSFvxk4KaKjvGNIm_r92JEWFxo_tqOyGhubXwdSQI8beZorwD9H4mIr4DpWp4OO5hnitkl0FH0IerwMnyWqM32s6FxTx41BD9ClnE3xVGLhjY6IjTDO0cc_ABwbh7uRVCezeRUwOXDSnXUcfACy6cZGQeAOi2ay4jPPcDE_22a7f2U7ZVeE47EHOjUSy4zoGeqcvf_ZM7vF-olXbeHU9bh59gAjW4yz8Erd_V7nApq3Y0QXZUze15dn5SgexaHxQxDjmOBZEq4By1BPWfDh5dFq0tdskoeR7c24M0';
-
   public const _URL_API = 'https://openapi.zalo.me';
+  public const _APP_SECRET_KEY = '5N9dmSO007UHfm8415gI';
+  public const _APP_ID = '1735239634616456366';
+
+  public static function daily_access_token()
+  {
+    $sys_app = new SysApp();
+
+    $ch = curl_init();
+    $url_header = [
+      'Accept: application/json',
+      'Content-Type: application/x-www-form-urlencoded',
+      'secret_key: ' . SysZalo::_APP_SECRET_KEY,
+    ];
+    $url_api = 'https://oauth.zaloapp.com/v4/oa/access_token';
+
+    $url_params = 'app_id=' . SysZalo::_APP_ID . '&grant_type=refresh_token&refresh_token=' . $sys_app->get_setting('zalo_token_refresh');
+
+    curl_setopt($ch, CURLOPT_URL, $url_api);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, $url_header);
+
+    curl_setopt($ch, CURLOPT_POST, 1);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $url_params);
+
+    $result = curl_exec($ch);
+    $statusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+    curl_close($ch);
+
+    return (array)json_decode($result);
+  }
+
+  public static function access_token()
+  {
+    $sys_app = new SysApp();
+
+    return $sys_app->get_setting('zalo_token_access');
+  }
 
   public static function user_list($pars = [])
   {
@@ -33,7 +68,7 @@ class SysZalo
     $ch = curl_init();
     $url_header = [
       'Accept: application/json',
-      'access_token: ' . SysZalo::_TOKEN_ACCESS,
+      'access_token: ' . SysZalo::access_token(),
     ];
     $url_api = SysZalo::_URL_API . '/v3.0/oa/user/getlist?data=' . $url_params;
 
@@ -58,7 +93,7 @@ class SysZalo
     $ch = curl_init();
     $url_header = [
       'Accept: application/json',
-      'access_token: ' . SysZalo::_TOKEN_ACCESS,
+      'access_token: ' . SysZalo::access_token(),
     ];
     $url_api = SysZalo::_URL_API . '/v3.0/oa/user/detail?data=' . $url_params;
 
@@ -102,7 +137,7 @@ class SysZalo
     $url_header = [
       'Accept: application/json',
       'Content-Type: application/json',
-      'access_token: ' . SysZalo::_TOKEN_ACCESS,
+      'access_token: ' . SysZalo::access_token(),
     ];
     $url_api = SysZalo::_URL_API . '/v3.0/oa/message/cs';
 
@@ -143,7 +178,7 @@ class SysZalo
     $url_header = [
       'Accept: application/json',
       'Content-Type: application/json',
-      'access_token: ' . SysZalo::_TOKEN_ACCESS,
+      'access_token: ' . SysZalo::access_token(),
     ];
     $url_api = SysZalo::_URL_API . '/v3.0/oa/message/cs';
 
@@ -194,7 +229,7 @@ class SysZalo
             $text_content = preg_replace("/[\n\r]/","", $cmt->content);
 
             $message .= '\n\n+ ' . $time . ' - ' .
-              '@' . $cmt->owner->name . ': ' .
+              '@' . $cmt->owner->name . ': \n' .
               $text_content
             ;
           }
@@ -303,7 +338,7 @@ class SysZalo
     $url_header = [
       'Accept: application/json',
       'Content-Type: application/json',
-      'access_token: ' . SysZalo::_TOKEN_ACCESS,
+      'access_token: ' . SysZalo::access_token(),
     ];
     $url_api = SysZalo::_URL_API . '/v3.0/oa/message/cs';
 

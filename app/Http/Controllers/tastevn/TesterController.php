@@ -58,11 +58,19 @@ class TesterController extends Controller
     $rfs = RestaurantFoodScan::find(52375);
     $date = date('Y-m-d');
 
-    $zalo5 = '4889535897686365921';
+//    $zalo5 = '4889535897686365921';
+//
+//    SysZalo::send_rfs_note($zalo5, 'photo_comment', $rfs, [
+//
+//    ]);
 
-    SysZalo::send_rfs_note($zalo5, 'photo_comment', $rfs, [
+//    $datas = SysZalo::daily_access_token();
+//    if (count($datas) && isset($datas['access_token'])) {
+//      $sys_app->set_setting('zalo_token_refresh', $datas['refresh_token']);
+//      $sys_app->set_setting('zalo_token_access', $datas['access_token']);
+//    }
 
-    ]);
+//    var_dump($datas);
 
 
 
