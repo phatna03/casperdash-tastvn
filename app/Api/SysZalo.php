@@ -173,14 +173,30 @@ class SysZalo
 
         if (!empty($rfs->note)) {
           $note = $rfs->note;
+          $text_note = preg_replace("/[\n\r]/","", $note);
 
-          $message .= '@MAIN NOTE: ' . $note;
+          $text_noter = '';
+          $noter = $rfs->get_noter();
+
+          $message .= '\n+ MAIN NOTE: \n' . $text_note;
+
+          if ($noter) {
+            $text_noter = '(last edited by @ ' . $noter->name . ')';
+
+            $message .= '\n' . $text_noter;
+          }
         }
 
         $cmts = $rfs->get_comments();
         if (count($cmts)) {
           foreach ($cmts as $cmt) {
+            $time = date('d/m/Y H:i:s', strtotime($cmt->created_at));
+            $text_content = preg_replace("/[\n\r]/","", $cmt->content);
 
+            $message .= '\n\n+ ' . $time . ' - ' .
+              '@' . $cmt->owner->name . ': ' .
+              $text_content
+            ;
           }
         }
 
@@ -235,7 +251,7 @@ class SysZalo
       }
 
       $message = '+ Photo ID: ' . $rfs->id . ' \n' .
-        '+ Ingredients Missing: \n' .
+        '\n+ Ingredients Missing: \n' .
         $ingredients_missing_text
       ;
 
@@ -276,7 +292,9 @@ class SysZalo
         $url_params = '';
     }
 
+//    var_dump($url_params);
 //    var_dump((array)json_decode($url_params, true));die;
+
     if (empty($url_params)) {
       die('no data...');
     }
