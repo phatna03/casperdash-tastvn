@@ -76,7 +76,7 @@ class TesterController extends Controller
 //    55480 - 2 món
 //    56122 - bogo
 
-    $row = RestaurantFoodScan::find(55480);
+    $row = RestaurantFoodScan::find(56122);
 
     $datas = SysRobo::photo_check([
       'debug' => true,

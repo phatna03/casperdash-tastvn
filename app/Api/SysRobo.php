@@ -320,6 +320,11 @@ class SysRobo
   public const _RBF_OVERLAP = 60;
   public const _RBF_MAX_OBJECTS = 70;
 
+  public const _SYS_BURGER_GROUP_1 = [32, 33, 71, 72];
+  public const _SYS_BURGER_GROUP_2 = [34];
+  public const _SYS_BURGER_GROUP_VEGAN = [32];
+  public const _SYS_BURGER_INGREDIENTS = [45, 114];
+
   public static function photo_1024($img_url)
   {
     $img_1024 = 'https://resize.sardo.work/?imageUrl=' . $img_url . '&width=1024';
@@ -506,8 +511,9 @@ class SysRobo
 
     //find ingredients missing
     $ingredients_missing = SysRobo::ingredients_missing($food, [
+      'predictions' => isset($rbf_result['predictions']) ? $rbf_result['predictions'] : [],
       'restaurant_parent_id' => $restaurant_parent_id,
-      'predictions' => $ingredients_found,
+      'ingredients_found' => $ingredients_found,
 
       'debug' => $debug
     ]);
@@ -784,8 +790,8 @@ class SysRobo
     }
 
     //group burger
-    $burger1s = [72, 33, 71];
-    $burger2s = [34];
+    $burger1s = SysRobo::_SYS_BURGER_GROUP_1;
+    $burger2s = SysRobo::_SYS_BURGER_GROUP_2;
 
     if ($food_id && (in_array($food_id, $burger1s)) || in_array($food_id, $burger2s)) {
       if ($debug) {
@@ -878,66 +884,177 @@ class SysRobo
 
     $predictions = isset($pars['predictions']) ? (array)$pars['predictions'] : [];
     $restaurant_parent_id = isset($pars['restaurant_parent_id']) ? (int)$pars['restaurant_parent_id'] : 0;
+    $ingredients_found = isset($pars['ingredients_found']) ? (array)$pars['ingredients_found'] : [];
 
-    $arr = [];
+    $ingredients = [];
     $ids = [];
 
-    $ingredients = $food->get_ingredients([
+    $food_ingredients = $food->get_ingredients([
       'restaurant_parent_id' => $restaurant_parent_id,
     ]);
-    if (count($ingredients) && count($predictions)) {
-      foreach ($ingredients as $ingredient) {
+    if (count($food_ingredients) && count($ingredients_found)) {
+      foreach ($food_ingredients as $food_ingredient) {
         $found = false;
 
-        foreach ($predictions as $prediction) {
-          if ($prediction['id'] == $ingredient['id']) {
+        foreach ($ingredients_found as $ing_found) {
+          if ($ing_found['id'] == $food_ingredient->id) {
             $found = true;
 
-            if ($prediction['quantity'] < $ingredient['ingredient_quantity']) {
-              if (!in_array($prediction['id'], $ids)) {
-                $prediction['quantity'] = $ingredient['ingredient_quantity'] - $prediction['quantity'];
+            if ($ing_found['quantity'] < $food_ingredient->ingredient_quantity) {
+              if (!in_array($ing_found['id'], $ids)) {
+                $ing_found['quantity'] = $food_ingredient->ingredient_quantity - $ing_found['quantity'];
 
-                $ing = Ingredient::find($prediction['id']);
-                $arr[] = [
+                $ing = Ingredient::find($ing_found['id']);
+                $ingredients[] = [
                   'id' => $ing->id,
-                  'quantity' => $prediction['quantity'],
+                  'quantity' => $ing_found['quantity'],
                   'name' => $ing->name,
                   'name_vi' => $ing->name_vi,
                   'type' => $ing->ingredient_type,
                 ];
 
-                $ids[] = $prediction['id'];
+                $ids[] = $ing_found['id'];
               }
             }
           }
         }
 
         if (!$found) {
-          $arr[] = [
-            'id' => $ingredient->id,
-            'quantity' => $ingredient->ingredient_quantity,
-            'name' => $ingredient->name,
-            'name_vi' => $ingredient->name_vi,
-            'type' => $ingredient->ingredient_type,
+          $ingredients[] = [
+            'id' => $food_ingredient->id,
+            'quantity' => $food_ingredient->ingredient_quantity,
+            'name' => $food_ingredient->name,
+            'name_vi' => $food_ingredient->name_vi,
+            'type' => $food_ingredient->ingredient_type,
           ];
         }
       }
 
     } else {
 
-      if (count($ingredients)) {
-        foreach ($ingredients as $ingredient) {
-          $arr[] = [
-            'id' => $ingredient->id,
-            'quantity' => $ingredient->ingredient_quantity,
-            'name' => $ingredient->name,
-            'name_vi' => $ingredient->name_vi,
-            'type' => $ingredient->ingredient_type,
+      if (count($food_ingredients)) {
+        foreach ($food_ingredients as $food_ingredient) {
+          $ingredients[] = [
+            'id' => $food_ingredient->id,
+            'quantity' => $food_ingredient->ingredient_quantity,
+            'name' => $food_ingredient->name,
+            'name_vi' => $food_ingredient->name_vi,
+            'type' => $food_ingredient->ingredient_type,
           ];
         }
       }
     }
 
-    return $arr;
+    //group burger
+    $burger1s = SysRobo::_SYS_BURGER_GROUP_1;
+    $burger2s = SysRobo::_SYS_BURGER_GROUP_2;
+    $burger3s = SysRobo::_SYS_BURGER_GROUP_VEGAN;
+    $burger_ingredients = SysRobo::_SYS_BURGER_INGREDIENTS;
+    $burger_check = false;
+
+    if (count($ingredients)) {
+
+      $temps = [];
+      $burger_needed = false;
+
+      foreach ($ingredients as $ingredient) {
+        if (in_array($ingredient['id'], $burger_ingredients)) {
+          $burger_check = true;
+        }
+
+        $temps[$ingredient['id']] = $ingredient;
+      }
+
+      if ($burger_check) {
+        if ($debug) {
+          var_dump('<br />');
+          var_dump('burger ingredients check...');
+        }
+
+        if (in_array($food->id, $burger3s)) {
+          if ($debug) {
+            var_dump('<br />');
+            var_dump('burger VEGAN...');
+          }
+        } else {
+
+          $burger_founds_quantity = SysRobo::burger_ingredients_quantity($predictions);
+          if ($debug) {
+            var_dump('<br />');
+            var_dump('burger ingredients quantity= ' . $burger_founds_quantity);
+          }
+
+          if ($burger_founds_quantity) {
+            if (in_array($food->id, $burger1s)) {
+              $burger_needed = true;
+            } elseif (in_array($food->id, $burger2s)) {
+              if ($burger_founds_quantity >= 2) {
+                $burger_needed = true;
+              } else {
+
+                if ($debug) {
+                  var_dump('<br />');
+                  var_dump('burger ingredients change...');
+                }
+
+                //missing 1
+                $food_ingredient = Ingredient::find(45); //grilled chicken
+
+                foreach ($burger_ingredients as $burger_ingredient) {
+                  if (isset($temps[$burger_ingredient])) {
+                    unset($temps[$burger_ingredient]);
+                  }
+                }
+
+                $temps[] = [
+                  'id' => $food_ingredient->id,
+                  'quantity' => 1,
+                  'name' => $food_ingredient->name,
+                  'name_vi' => $food_ingredient->name_vi,
+                  'type' => $food_ingredient->ingredient_type,
+                ];
+
+                $ingredients = $temps;
+              }
+            }
+          }
+        }
+      }
+
+      if ($burger_needed) {
+        if ($debug) {
+          var_dump('<br />');
+          var_dump('burger ingredients change...');
+        }
+
+        foreach ($burger_ingredients as $burger_ingredient) {
+          if (isset($temps[$burger_ingredient])) {
+            unset($temps[$burger_ingredient]);
+          }
+        }
+
+        $ingredients = $temps;
+      }
+    }
+
+    return $ingredients;
+  }
+
+  public static function burger_ingredients_quantity($predictions)
+  {
+    $quantity = 0;
+
+    if (count($predictions)) {
+      foreach ($predictions as $prediction) {
+        $prediction = (array)$prediction;
+
+        if (strtolower(trim($prediction['class'])) == 'beef buger'
+          || strtolower(trim($prediction['class'])) == 'grilled chicken') {
+          $quantity++;
+        }
+      }
+    }
+
+    return $quantity;
   }
 }
