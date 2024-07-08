@@ -28,7 +28,7 @@
         </div>
 
         <div class="acm-float-left w-50 position-relative food_count @if(!$item->count_foods) d-none @endif" style="top: -8px;">
-          <input type="text" class="form-control text-dark text-center fw-bold" name="food_count"
+          <input type="text" class="form-control text-dark text-center fw-bold fnumber" name="food_count"
                  placeholder="Number of dishes" onblur="input_number_min_two(this);" value="{{$item->count_foods ? $item->count_foods : ''}}" />
         </div>
       </div>

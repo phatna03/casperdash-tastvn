@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Api;
+use App\Models\RestaurantFood;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Storage;
 //lib
@@ -64,136 +65,7 @@ class SysRobo
     ];
   }
 
-  public static function photo_scan($rfs, $pars = [])
-  {
-    $sys_app = new SysApp();
 
-    //setting web
-    $dataset = $sys_app->parse_s3_bucket_address($sys_app->get_setting('rbf_dataset_scan'));
-    $version = $sys_app->get_setting('rbf_dataset_ver');
-    $api_key = $sys_app->get_setting('rbf_api_key');
-
-    if (isset($pars['version'])) {
-      $version = (int)$pars['version'];
-    }
-    if (isset($pars['dataset'])) {
-      $dataset = $pars['dataset'];
-    }
-
-    //pars
-    $confidence = isset($pars['confidence']) ? (int)$pars['confidence'] : 50;
-    $overlap = isset($pars['overlap']) ? (int)$pars['overlap'] : 50;
-    $max_objects = isset($pars['max_objects']) ? (int)$pars['max_objects'] : 100;
-    $img_no_resize = isset($pars['img_no_resize']) ? (bool)$pars['img_no_resize'] : false;
-
-    //stable with resize 1024
-    $img_no_resize = false;
-
-    $status = true;
-    $error = [];
-
-    //img
-    $img_url = $rfs ? $rfs->img_1024() : null;
-    if ($img_no_resize) {
-      $img_url = $rfs ? $rfs->get_photo() : null;
-    }
-
-    $server_url = 'https://detect.roboflow.com';
-    $server_url = 'http://47.128.217.148:9001';
-
-    //api_testing
-    if (isset($pars['img_url']) && !empty($pars['img_url'])) {
-
-      $img_url = $pars['img_url'];
-
-      if (isset($pars['api_testing']) && !empty($pars['api_testing'])) {
-        if (!$img_no_resize) {
-          $img_url = SysRobo::photo_1024($pars['img_url']);
-        }
-      }
-    }
-
-    //localhost
-    if (App::environment() == 'local') {
-      $img_url = "https://ai.block8910.com/sensors/58-5b-69-19-ad-83/SENSOR/1/2024-06-29/17/SENSOR_2024-06-29-17-37-18-043_170.jpg";
-    }
-
-    if (empty($img_url) || !@getimagesize($img_url)) {
-
-      //s3 before 13/6/2024
-      if ($rfs) {
-        $img_url = SysRobo::photo_1024($rfs->get_photo());
-
-        if ($img_no_resize) {
-          $img_url = $rfs ? $rfs->get_photo() : $img_url;
-        }
-      }
-
-      if (empty($img_url) || !@getimagesize($img_url)) {
-        return [
-          'status' => false,
-          'error' => 'invalid image URL',
-          'pars' => $pars,
-          'rfs' => $rfs,
-        ];
-      }
-    }
-
-    // URL for Http Request
-    $api_url = $server_url . "/" . $dataset . "/" . $version
-      . "?api_key=" . $api_key
-      . "&confidence=" . $confidence
-      . "&overlap=" . $overlap
-      . "&max_objects=" . $max_objects
-      . "&image=" . urlencode($img_url);
-
-    // Setup + Send Http request
-    $options = array(
-      'http' => array (
-        'header' => "Content-type: application/x-www-form-urlencoded\r\n",
-        'method'  => 'POST'
-      ));
-
-    $result = [];
-
-    try {
-
-      $context = stream_context_create($options);
-      $result = file_get_contents($api_url, false, $context);
-      if (!empty($result)) {
-        $result = (array)json_decode($result);
-      }
-
-    } catch (\Exception $e) {
-
-      $status = false;
-      $error = [
-        'line' => $e->getLine(),
-        'file' => $e->getFile(),
-        'message' => $e->getMessage(),
-      ];
-    }
-
-    return [
-      'status' => $status,
-      'error' => $error,
-      'pars' => $pars,
-
-      'api_url' => $api_url,
-      'img_url' => $img_url,
-      'result' => $result,
-    ];
-  }
-
-  public static function photo_1024($img_url)
-  {
-    $img_1024 = 'https://resize.sardo.work/?imageUrl=' . $img_url . '&width=1024';
-    if (@getimagesize($img_1024)) {
-      $img_url = $img_1024;
-    }
-
-    return $img_url;
-  }
 
   public static function photo_get($pars = [])
   {
@@ -423,120 +295,7 @@ class SysRobo
     return $arr;
   }
 
-  public static function foods_find($pars = [])
-  {
-    $sys_app = new SysApp();
 
-    $arr = [];
-
-    $food_confidence = (int)$sys_app->get_setting('rbf_food_confidence');
-    if (!$food_confidence || $food_confidence >= 100) {
-      $food_confidence = SysRobo::_FOOD_CONFIDENCE;
-    }
-
-    $debug = isset($pars['debug']) ? (bool)$pars['debug'] : false;
-    $food_only = isset($pars['food_only']) ? (bool)$pars['food_only'] : false;
-    $restaurant_id = isset($pars['restaurant_id']) ? (int)$pars['restaurant_id'] : 0;
-    $restaurant_parent_id = isset($pars['restaurant_parent_id']) ? (int)$pars['restaurant_parent_id'] : 0;
-    $restaurant_parent = RestaurantParent::find($restaurant_parent_id);
-
-    $predictions = isset($pars['predictions']) ? (array)$pars['predictions'] : [];
-    $food_temps = [];
-
-    switch ($restaurant_id) {
-      case 5:
-      case 6:
-      $food_confidence = 40;
-        break;
-
-      case 8:
-      case 9:
-      case 10:
-      case 11:
-      case 12:
-      case 13:
-      $food_confidence = 70;
-        break;
-    }
-
-    if (count($predictions) && $restaurant_parent) {
-
-      $ingredients_found = SysRobo::ingredients_compact($predictions);
-
-      foreach ($predictions as $prediction) {
-        $prediction = (array)$prediction;
-
-        $confidence = (int)($prediction['confidence'] * 100);
-        $class = strtolower(trim($prediction['class']));
-
-        $food = Food::where('deleted', 0)
-          ->whereRaw('LOWER(name) LIKE ?', $class)
-          ->first();
-
-        if ($debug) {
-          var_dump('***** FOOD? = ' . ($food ? $food->id . ' - ' . $food->name : 0));
-        }
-
-        if ($debug && $food) {
-          var_dump('***** FOOD SERVE? = ' . $restaurant_parent->food_serve($food));
-        }
-
-        if ($food && $restaurant_parent->food_serve($food) && $confidence >= $food_confidence) {
-
-          //check valid ingredient
-          $valid_food = true;
-          $food_ingredients = $food->get_ingredients([
-            'restaurant_parent_id' => $restaurant_parent_id,
-          ]);
-          if (!count($food_ingredients)) {
-            $valid_food = false;
-          }
-
-          //check core ingredient
-          $valid_core = true;
-          $core_ids = $food->get_ingredients_core([
-            'restaurant_parent_id' => $restaurant_parent_id,
-          ]);
-          if (count($core_ids)) {
-            //check percent
-            $valid_core = SysRobo::ingredients_core_valid([
-              'predictions' => $predictions,
-              'cores' => $core_ids,
-
-              'debug' => $debug,
-            ]);
-          }
-          if ($food_only) {
-            $valid_core = $food_only;
-          }
-
-          if ($debug) {
-            var_dump('***** FOODS VALID? = ' . $valid_core . ' && ' . $valid_food);
-          }
-
-          if ($valid_core && $valid_food) {
-            $arr[] = [
-              'food' => $food->id,
-              'confidence' => $confidence,
-            ];
-          }
-
-          if ($valid_food && $confidence >= 91) {
-            $food_temps[] = [
-              'food' => $food->id,
-              'confidence' => $confidence,
-            ];
-          }
-        }
-      }
-    }
-
-    if (!count($arr) && count($food_temps) == 1) {
-      $arr = $food_temps;
-    }
-
-    return $arr;
-  }
 
   public static function foods_valid($arr, $pars = [])
   {
@@ -600,50 +359,6 @@ class SysRobo
     ];
   }
 
-  public static function ingredients_core_valid($pars = [])
-  {
-    $debug = isset($pars['debug']) ? (bool)$pars['debug'] : false;
-    $predictions = isset($pars['predictions']) ? (array)$pars['predictions'] : [];
-    $cores = isset($pars['cores']) ? (array)$pars['cores']->toArray() : [];
-
-    $valid = true;
-
-    if (count($predictions) && count($cores)) {
-
-      foreach ($cores as $core) {
-        $count = 0;
-        $str1 = trim(strtolower($core['ingredient_name']));
-
-        foreach ($predictions as $prediction) {
-          $confidence = round($prediction['confidence'] * 100);
-          $str2 = trim(strtolower($prediction['class']));
-
-          if ($confidence >= $core['ingredient_confidence'] && $str1 === $str2) {
-            $count++;
-          }
-        }
-
-        if ($count < $core['ingredient_quantity']) {
-          $valid = false;
-          break;
-        }
-      }
-
-      if ($debug) {
-        var_dump('***** FOODS CORE CHECK');
-        var_dump($cores);
-//        var_dump($predictions);
-      }
-
-
-    }
-
-    if ($debug) {
-      var_dump('***** FOODS CORE VALID? = ' . $valid);
-    }
-
-    return $valid;
-  }
 
   public static function photo_name_query($file)
   {
@@ -666,4 +381,373 @@ class SysRobo
 
     return $keyword;
   }
+
+  //v3
+  public const _RBF_CONFIDENCE = 30;
+  public const _RBF_OVERLAP = 60;
+  public const _RBF_MAX_OBJECTS = 70;
+
+  public static function photo_1024($img_url)
+  {
+    $img_1024 = 'https://resize.sardo.work/?imageUrl=' . $img_url . '&width=1024';
+    if (@getimagesize($img_1024)) {
+      $img_url = $img_1024;
+    }
+
+    return $img_url;
+  }
+
+  public static function photo_check($pars = [])
+  {
+    $sys_app = new SysApp();
+
+    //pars
+    $debug = isset($pars['debug']) ? (bool)$pars['debug'] : false;
+    if ($debug) {
+      var_dump($sys_app::_DEBUG_BREAK);
+      var_dump('photo check...');
+    }
+
+    //img_url
+    $img_url = isset($pars['check_url']) && !empty($pars['check_url']) ? $pars['check_url'] : NULL;
+    //localhost
+    if (App::environment() == 'local') {
+      $img_url = "https://s3.ap-southeast-1.amazonaws.com/cargo.tastevietnam.asia/58-5b-69-19-ad-83/SENSOR/1/2024-07-06/18/SENSOR_2024-07-06-18-08-53-536_693.jpg";
+    }
+
+    $rfs = isset($pars['rfs']) && !empty($pars['rfs']) ? $pars['rfs'] : NULL;
+    if ($rfs) {
+      $pars['rfs'] = $rfs->id;
+
+      $img_url = $rfs->get_photo();
+    }
+
+    $img_1024 = isset($pars['img_1024']) ? (bool)$pars['img_1024'] : false;
+    $img_url_1024 = SysRobo::photo_1024($img_url);
+    if ($img_1024 && !empty($img_url_1024)) {
+      $img_url = $img_url_1024;
+    }
+
+    if ($debug) {
+      var_dump('img_url= ' . $img_url);
+    }
+
+    //scan
+    //setting
+    $api_key = $sys_app->get_setting('rbf_api_key');
+    $dataset = $sys_app->parse_s3_bucket_address($sys_app->get_setting('rbf_dataset_scan'));
+    $version = $sys_app->get_setting('rbf_dataset_ver');
+    //pars
+    $dataset = isset($pars['sys_dataset']) && !empty($pars['sys_dataset']) ? $pars['sys_dataset'] : $dataset;
+    $version = isset($pars['sys_version']) && !empty($pars['sys_version']) ? $pars['sys_version'] : $version;
+
+    $confidence = isset($pars['rbf_confidence']) && !empty($pars['rbf_confidence']) ? $pars['rbf_confidence'] : SysRobo::_RBF_CONFIDENCE;
+    $overlap = isset($pars['rbf_overlap']) && !empty($pars['rbf_overlap']) ? $pars['rbf_overlap'] : SysRobo::_RBF_OVERLAP;
+    $max_objects = isset($pars['rbf_max_objects']) && !empty($pars['rbf_max_objects']) ? $pars['rbf_max_objects'] : SysRobo::_RBF_MAX_OBJECTS;
+
+    $datas = SysRobo::photo_scan([
+      'img_url' => $img_url,
+
+      'api_key' => $api_key,
+      'dataset' => $dataset,
+      'version' => $version,
+
+      'confidence' => $confidence,
+      'overlap' => $overlap,
+      'max_objects' => $max_objects,
+
+      'debug' => $debug,
+    ]);
+
+    if ($debug) {
+      var_dump($sys_app::_DEBUG_BREAK);
+      var_dump('photo scan datas...');
+      var_dump($datas);
+    }
+
+    if (!$datas['status']) {
+
+      $sys_app->bug_add([
+        'type' => 'photo_check',
+        'file' => isset($datas['error']['file']) ? $datas['error']['file'] : NULL,
+        'line' => isset($datas['error']['line']) ? $datas['error']['line'] : NULL,
+        'message' => isset($datas['error']['message']) ? $datas['error']['message'] : NULL,
+        'params' => json_encode(array_merge($pars, $datas['result']))
+      ]);
+
+      if ($debug) {
+        var_dump($sys_app::_DEBUG_BREAK);
+        var_dump('photo scan error...');
+      }
+
+      return false;
+    }
+
+    $rbf_result = $datas['result'];
+    $restaurant_parent_id = isset($pars['restaurant_parent_id']) ? (int)$pars['restaurant_parent_id'] : 0;
+
+    //find foods
+    $foods = SysRobo::foods_find([
+      'predictions' => isset($rbf_result['predictions']) ? $rbf_result['predictions'] : [],
+      'restaurant_parent_id' => $restaurant_parent_id,
+
+      'debug' => $debug,
+    ]);
+
+    if ($debug) {
+      var_dump($sys_app::_DEBUG_BREAK);
+      var_dump('find foods...');
+      var_dump($foods);
+    }
+
+    if (!count($foods)) {
+
+      if ($debug) {
+        var_dump($sys_app::_DEBUG_BREAK);
+        var_dump('no foods found...');
+      }
+
+      return false;
+    }
+
+
+  }
+
+  public static function photo_scan($pars = [])
+  {
+    //pars
+    $debug = isset($pars['debug']) ? (bool)$pars['debug'] : false;
+    if ($debug) {
+      var_dump('<br />');
+      var_dump('photo scan...');
+    }
+
+    $server_url = 'https://detect.roboflow.com'; //robot
+    $server_url = 'http://47.128.217.148:9001'; //ec2 clone
+
+    //datas
+    $datas = [
+      'server_url' => $server_url,
+
+      'img_url' => isset($pars['img_url']) ? $pars['img_url'] : NULL,
+
+      'api_key' => isset($pars['api_key']) ? $pars['api_key'] : NULL,
+      'dataset' => isset($pars['dataset']) ? $pars['dataset'] : NULL,
+      'version' => isset($pars['version']) ? $pars['version'] : NULL,
+
+      'confidence' => isset($pars['confidence']) ? $pars['confidence'] : NULL,
+      'overlap' => isset($pars['overlap']) ? $pars['overlap'] : NULL,
+      'max_objects' => isset($pars['max_objects']) ? $pars['max_objects'] : NULL,
+    ];
+
+    if ($debug) {
+      var_dump('rbf prepare...');
+      var_dump($datas);
+    }
+
+    //rbf
+    $status = true;
+    $error = [];
+
+    // URL for Http Request
+    $api_url = $datas['server_url'] . "/" . $datas['dataset'] . "/" . $datas['version']
+      . "?api_key=" . $datas['api_key']
+      . "&confidence=" . $datas['confidence']
+      . "&overlap=" . $datas['overlap']
+      . "&max_objects=" . $datas['max_objects']
+      . "&image=" . urlencode($datas['img_url']);
+
+    if ($debug) {
+      var_dump('rbf api url= ' . $api_url);
+    }
+
+    // Setup + Send Http request
+    $options = array(
+      'http' => array (
+        'header' => "Content-type: application/x-www-form-urlencoded\r\n",
+        'method'  => 'POST'
+      ));
+
+    $result = [];
+
+    try {
+
+      $context = stream_context_create($options);
+      $result = file_get_contents($api_url, false, $context);
+      if (!empty($result)) {
+        $result = (array)json_decode($result);
+      }
+
+    } catch (\Exception $e) {
+      $status = false;
+
+      $error = [
+        'line' => $e->getLine(),
+        'file' => $e->getFile(),
+        'message' => $e->getMessage(),
+      ];
+    }
+
+    return [
+      'status' => $status,
+      'error' => $error,
+
+      'result' => array_merge($datas, $result),
+    ];
+  }
+
+  public static function foods_find($pars = [])
+  {
+    //pars
+    $debug = isset($pars['debug']) ? (bool)$pars['debug'] : false;
+    if ($debug) {
+      var_dump('<br />');
+      var_dump('foods find...');
+    }
+
+    $foods = [];
+
+    $restaurant_parent_id = isset($pars['restaurant_parent_id']) ? (int)$pars['restaurant_parent_id'] : 0;
+    $restaurant_parent = RestaurantParent::find($restaurant_parent_id);
+    if (!$restaurant_parent) {
+
+      if ($debug) {
+        var_dump('invalid restaurant...');
+      }
+
+      return $foods;
+    }
+
+    $predictions = isset($pars['predictions']) ? (array)$pars['predictions'] : [];
+    if (!count($predictions)) {
+
+      if ($debug) {
+        var_dump('no predictions found...');
+      }
+
+      return $foods;
+    }
+
+    $food_temps = [];
+    $food_only = isset($pars['food_only']) ? (bool)$pars['food_only'] : false;
+
+    foreach ($predictions as $prediction) {
+      $prediction = (array)$prediction;
+
+      $confidence = (int)($prediction['confidence'] * 100);
+      $class = strtolower(trim($prediction['class']));
+
+      $item = RestaurantFood::query('restaurant_foods')
+        ->select('foods.id')
+        ->leftJoin('foods', 'foods.id', '=', 'restaurant_foods.food_id') //serve
+        ->where('foods.deleted', 0)
+        ->where('restaurant_foods.deleted', 0)
+        ->where('restaurant_foods.confidence', '<=', $confidence) //confidence
+        ->whereRaw('LOWER(foods.name) LIKE ?', $class)
+        ->first();
+
+      if ($item && $item->id) {
+        $food = Food::find($item->id);
+
+        if ($debug) {
+          var_dump('food found = ' . $food->name . ' - ID= ' . $food->id);
+          var_dump('food confidence = ' . $confidence);
+        }
+
+        //check ingredient valid
+        $valid_food = true;
+        $food_ingredients = $food->get_ingredients([
+          'restaurant_parent_id' => $restaurant_parent_id,
+        ]);
+        if (!count($food_ingredients)) {
+          $valid_food = false;
+        }
+
+        //check ingredient core
+        $valid_core = true;
+        $core_ids = $food->get_ingredients_core([
+          'restaurant_parent_id' => $restaurant_parent_id,
+        ]);
+        if (count($core_ids)) {
+          //percent
+          $valid_core = SysRobo::ingredients_core_valid([
+            'predictions' => $predictions,
+            'cores' => $core_ids,
+
+            'debug' => $debug,
+          ]);
+        }
+        if ($food_only) {
+          $valid_core = $food_only;
+        }
+
+        if ($debug) {
+          var_dump('ingredient valid = ' . $valid_food);
+          var_dump('ingredient core = ' . $valid_core);
+        }
+
+        if ($valid_core && $valid_food) {
+          $foods[] = [
+            'food' => $food->id,
+            'confidence' => $confidence,
+          ];
+        }
+
+        if ($valid_food && $confidence >= 90) {
+          $food_temps[] = [
+            'food' => $food->id,
+            'confidence' => $confidence,
+          ];
+        }
+      }
+
+    }
+
+
+    if ($debug) {
+      var_dump('foods temps...');
+      var_dump($food_temps);
+    }
+
+    if (!count($foods) && count($food_temps) == 1) {
+      $foods = $food_temps;
+    }
+
+    return $foods;
+  }
+
+  public static function ingredients_core_valid($pars = [])
+  {
+    $predictions = isset($pars['predictions']) ? (array)$pars['predictions'] : [];
+    $cores = isset($pars['cores']) ? (array)$pars['cores']->toArray() : [];
+
+    $valid = true;
+
+    if (count($predictions) && count($cores)) {
+
+      foreach ($cores as $core) {
+        $count = 0;
+        $str1 = trim(strtolower($core['ingredient_name']));
+
+        foreach ($predictions as $prediction) {
+          $prediction = (array)$prediction;
+
+          $confidence = round($prediction['confidence'] * 100);
+          $str2 = trim(strtolower($prediction['class']));
+
+          if ($confidence >= $core['ingredient_confidence'] && $str1 === $str2) {
+            $count++;
+          }
+        }
+
+        if ($count < $core['ingredient_quantity']) {
+          $valid = false;
+          break;
+        }
+      }
+    }
+
+    return $valid;
+  }
+
 }

@@ -981,4 +981,36 @@ class RestaurantFoodScan extends Model
       'text_texts' => $texts,
     ]);
   }
+
+  //v3
+  public function photo_rbf_scan_before()
+  {
+
+  }
+
+  public function photo_rbf_scan()
+  {
+
+  }
+
+  public function photo_rbf_scan_after()
+  {
+
+  }
+
+  public function photo_sys_predict_before()
+  {
+
+  }
+
+  public function photo_sys_predict()
+  {
+
+  }
+
+  public function photo_sys_predict_after()
+  {
+
+  }
+
 }

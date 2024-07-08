@@ -16,6 +16,7 @@ class RestaurantFood extends Model
     'restaurant_id',
     'food_id',
     'food_category_id',
+    'confidence',
     'photo',
     'local_storage',
     'live_group',

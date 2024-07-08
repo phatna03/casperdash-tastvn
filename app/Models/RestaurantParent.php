@@ -97,7 +97,7 @@ class RestaurantParent extends Model
       default:
         $select->select(
           'restaurant_foods.food_id', 'foods.name as food_name',
-          'restaurant_foods.live_group as food_live_group',
+          'restaurant_foods.live_group as food_live_group', 'restaurant_foods.confidence as food_confidence',
           'restaurant_foods.model_name as food_model_name', 'restaurant_foods.model_version as food_model_version',
           'restaurant_foods.photo as food_photo', 'restaurant_foods.local_storage',
           'restaurant_foods.food_category_id', 'food_categories.name as food_category_name'

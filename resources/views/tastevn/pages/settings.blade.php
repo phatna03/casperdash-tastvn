@@ -83,7 +83,7 @@
             <label for="rbf-dataset-ver">Version</label>
           </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-3 d-none">
           <div class="form-floating form-floating-outline">
             <input type="text" name="rbf_food_confidence" id="rbf-food-confidence" class="form-control text-center fnumber"
                    value="{{isset($pageConfigs['settings']['rbf_food_confidence']) ? (int)$pageConfigs['settings']['rbf_food_confidence'] : '70'}}"

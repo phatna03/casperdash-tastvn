@@ -455,8 +455,16 @@ function input_number_min_two(ele) {
   var bind = $(ele);
   var val = bind.val().trim();
 
-  if (!val || val === '' || parseInt(val) <= 0) {
+  if (!val || val === '' || parseInt(val) <= 2) {
     bind.val(2);
+  }
+}
+function input_number_min_30(ele) {
+  var bind = $(ele);
+  var val = bind.val().trim();
+
+  if (!val || val === '' || parseInt(val) <= 30) {
+    bind.val(30);
   }
 }
 function input_date_time(date) {

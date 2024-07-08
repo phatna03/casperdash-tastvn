@@ -29,6 +29,7 @@
      data-model_name="{{$item['food_model_name']}}"
      data-model_version="{{$item['food_model_version']}}"
      data-category_name="{{$item['food_category_name']}}"
+     data-confidence="{{$item['food_confidence']}}"
 >
   <div class="row">
     <div class="col-lg-4 mb-1">
@@ -96,7 +97,7 @@
             <i class="mdi mdi-pencil"></i>
           </button>
         @endif
-        <input type="text" class="form-control" id="robo-group-{{$food->id}}" name="live_group"
+        <input type="text" class="form-control text-center" id="robo-group-{{$food->id}}" name="live_group"
                disabled value="{{$food_group}}" />
         <label class="text-dark fw-bold" for="robo-group-{{$food->id}}">Roboflow Confidence</label>
       </div>
@@ -108,7 +109,7 @@
             <i class="mdi mdi-pencil"></i>
           </button>
         @endif
-        <input type="text" class="form-control" id="robo-model-{{$food->id}}" name="model_name"
+        <input type="text" class="form-control text-center" id="robo-model-{{$food->id}}" name="model_name"
                disabled value="{{$item['food_model_name']}}" />
         <label class="text-dark fw-bold" for="robo-model-{{$food->id}}">Roboflow Model Name</label>
       </div>
@@ -120,10 +121,22 @@
             <i class="mdi mdi-pencil"></i>
           </button>
         @endif
-        <input type="text" class="form-control" id="robo-version-{{$food->id}}" name="model_version"
+        <input type="text" class="form-control text-center" id="robo-version-{{$food->id}}" name="model_version"
                disabled value="{{$item['food_model_version']}}" />
         <label class="text-dark fw-bold" for="robo-version-{{$food->id}}">Roboflow Model Version</label>
       </div>
+
+        <div class="form-floating form-floating-outline mb-3 position-relative">
+          @if($viewer->is_super_admin())
+            <button type="button" class="btn btn-sm btn-info p-1 position-absolute acm-right-0"
+                    onclick="restaurant_food_update_prepare(this, 'confidence')">
+              <i class="mdi mdi-pencil"></i>
+            </button>
+          @endif
+          <input type="text" class="form-control text-center" id="robo-confidence-{{$food->id}}" name="confidence"
+                 disabled value="{{$item['food_confidence']}}" />
+          <label class="text-dark fw-bold" for="robo-confidence-{{$food->id}}">Roboflow Food Confidence</label>
+        </div>
     </div>
 
   </div>

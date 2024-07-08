@@ -439,6 +439,7 @@ class RestaurantController extends Controller
         'food_live_group' => 3,
         'food_model_name' => '',
         'food_model_version' => '',
+        'food_confidence' => 70,
       ])
       ->render();
 
@@ -541,6 +542,8 @@ class RestaurantController extends Controller
 
     $type = isset($values['type']) ? $values['type'] : 'live_group';
     $food_category_name = isset($values['category_name']) ? $values['category_name'] : NULL;
+    $confidence = isset($values['confidence']) && (int)$values['confidence'] && (int)$values['confidence'] > 30
+      ? (int)$values['confidence'] : 30;
     $model_name = isset($values['model_name']) ? $values['model_name'] : NULL;
     $model_version = isset($values['model_version']) ? $values['model_version'] : NULL;
     $live_group = isset($values['live_group']) && (int)$values['live_group'] && (int)$values['live_group'] < 4
@@ -603,6 +606,14 @@ class RestaurantController extends Controller
           ]);
 
         break;
+
+      case 'confidence':
+        RestaurantFood::where('food_id', $food->id)
+          ->where('restaurant_parent_id', $restaurant_parent->id)
+          ->update([
+            'confidence' => $confidence,
+          ]);
+        break;
     }
 
     //table stats + total foods
@@ -619,7 +630,6 @@ class RestaurantController extends Controller
     $foods_group_3 = $restaurant_parent->get_foods([
       'live_group' => 3,
     ]);
-
 
     return response()->json([
       'status' => true,

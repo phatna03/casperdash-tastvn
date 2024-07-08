@@ -270,6 +270,10 @@
               <label class="text-dark fw-bold">Roboflow Model Version</label>
               <input type="text" class="form-control text-center" name="model_version" />
             </div>
+            <div class="col-lg-12 mt-2 mb-2 d-none wrap_updated wrap_confidence">
+              <label class="text-dark fw-bold">Roboflow Food Confidence</label>
+              <input type="text" class="form-control text-center fnumber" onblur="input_number_min_30(this);" name="confidence" />
+            </div>
             <div class="col-lg-12 mt-2 mb-2 d-none wrap_updated wrap_category_name">
               <label class="text-dark fw-bold">Category Name</label>
               <input type="text" class="form-control text-center" name="category_name" />
