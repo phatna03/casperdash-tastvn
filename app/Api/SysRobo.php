@@ -65,8 +65,6 @@ class SysRobo
     ];
   }
 
-
-
   public static function photo_get($pars = [])
   {
     $sys_app = new SysApp();
@@ -295,71 +293,6 @@ class SysRobo
     return $arr;
   }
 
-
-
-  public static function foods_valid($arr, $pars = [])
-  {
-    $debug = isset($pars['debug']) ? (bool)$pars['debug'] : false;
-    $predictions = isset($pars['predictions']) ? (array)$pars['predictions'] : [];
-
-    if ($debug) {
-      var_dump('PREDICTIONS=');
-      var_dump($predictions);
-    }
-
-    $burger1s = [72, 33, 71];
-    $burger2s = [34]; //cargo
-
-    $total_hambuger_bread = 0;
-    if (count($predictions)) {
-      foreach ($predictions as $prediction) {
-        $str1 = trim(strtolower($prediction['class']));
-
-        if ($str1 === 'hamburger bread') {
-          $total_hambuger_bread++;
-        }
-      }
-    }
-
-    $food_id = 0;
-    $food_confidence = 0;
-
-    if (count($arr)) {
-
-      if (count($arr) > 1) {
-        $a1 = [];
-        $a2 = [];
-        foreach ($arr as $key => $val) {
-          $a1[$key] = $val['confidence'];
-          $a2[$key] = $val['food'];
-        }
-        array_multisort($a1, SORT_DESC, $a2, SORT_DESC, $arr);
-      }
-
-      $arr = $arr[0];
-
-      $food_id = $arr['food'];
-      $food_confidence = $arr['confidence'];
-    }
-
-    //burger
-    //classic <> mini
-    if (in_array($food_id, $burger1s)) {
-      if ($total_hambuger_bread > 1) {
-
-      }
-    }
-
-    //beef <> chicken
-
-
-    return [
-      'food' => $food_id,
-      'confidence' => $food_confidence,
-    ];
-  }
-
-
   public static function photo_name_query($file)
   {
     $temps = explode('/', $file);
@@ -508,6 +441,28 @@ class SysRobo
       }
 
       return false;
+    }
+
+    //find food 1
+    $foods = SysRobo::foods_valid($foods, [
+      'predictions' => $rbf_result['predictions'],
+
+      'debug' => $debug,
+    ]);
+
+    if (!count($foods)) {
+
+      if ($debug) {
+        var_dump($sys_app::_DEBUG_BREAK);
+        var_dump('no food 1 found...');
+      }
+
+      return false;
+    }
+
+    if ($debug) {
+      var_dump($sys_app::_DEBUG_BREAK);
+      var_dump('food 1 final= ' . $foods['food'] . ' - confidence= ' . $foods['confidence']);
     }
 
 
@@ -749,5 +704,105 @@ class SysRobo
 
     return $valid;
   }
+
+  public static function foods_valid($temps, $pars = [])
+  {
+    //pars
+    $debug = isset($pars['debug']) ? (bool)$pars['debug'] : false;
+    if ($debug) {
+      var_dump('<br />');
+      var_dump('food find 1 valid...');
+    }
+
+    $predictions = isset($pars['predictions']) ? (array)$pars['predictions'] : [];
+
+    //confidence highest
+    $food_id = 0;
+    $food_confidence = 0;
+
+    if (count($temps)) {
+
+      if (count($temps) > 1) {
+        $a1 = [];
+        $a2 = [];
+        foreach ($temps as $key => $val) {
+          $a1[$key] = $val['confidence'];
+          $a2[$key] = $val['food'];
+        }
+        array_multisort($a1, SORT_DESC, $a2, SORT_DESC, $temps);
+      }
+
+      $temp = $temps[0];
+
+      $food_id = $temp['food'];
+      $food_confidence = $temp['confidence'];
+    }
+
+    if ($debug) {
+      var_dump('food 1 found= ' . $food_id . ' - confidence= ' . $food_confidence);
+    }
+
+    //group burger
+    $burger1s = [72, 33, 71];
+    $burger2s = [34];
+
+    if ($food_id && (in_array($food_id, $burger1s)) || in_array($food_id, $burger2s)) {
+      if ($debug) {
+        var_dump('<br />');
+        var_dump('food in group burger...');
+      }
+
+      $total_hambuger_bread = 0;
+      if (count($predictions)) {
+        foreach ($predictions as $prediction) {
+          $prediction = (array)$prediction;
+
+          $class = trim(strtolower($prediction['class']));
+
+          if ($class === 'hamburger bread') {
+            $total_hambuger_bread++;
+          }
+        }
+      }
+
+      if ($debug) {
+        var_dump('total hamburger bread = ' . $total_hambuger_bread);
+      }
+
+      if (in_array($food_id, $burger1s)) {
+        if ($total_hambuger_bread > 1) {
+          foreach ($temps as $temp) {
+            if (in_array($temp['food'], $burger2s)) {
+              $food_id = $temp['food'];
+              $food_confidence = $temp['confidence'];
+            }
+          }
+
+          if ($debug) {
+            var_dump('food 1 change= ' . $food_id . ' - confidence=' . $food_confidence);
+          }
+        }
+      } elseif (in_array($food_id, $burger2s)) {
+        if ($total_hambuger_bread == 1) {
+          foreach ($temps as $temp) {
+            if (in_array($temp['food'], $burger1s)) {
+              $food_id = $temp['food'];
+              $food_confidence = $temp['confidence'];
+            }
+          }
+
+          if ($debug) {
+            var_dump('food 1 change= ' . $food_id . ' - confidence=' . $food_confidence);
+          }
+        }
+      }
+    }
+
+    return [
+      'food' => $food_id,
+      'confidence' => $food_confidence,
+    ];
+  }
+
 
 }
