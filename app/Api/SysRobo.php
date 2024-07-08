@@ -418,6 +418,15 @@ class SysRobo
 
     $rbf_result = $datas['result'];
     $restaurant_parent_id = isset($pars['restaurant_parent_id']) ? (int)$pars['restaurant_parent_id'] : 0;
+    $restaurant_parent = RestaurantParent::find($restaurant_parent_id);
+    if (!$restaurant_parent) {
+
+      if ($debug) {
+        var_dump('invalid restaurant...');
+      }
+
+      return false;
+    }
 
     //find foods
     $foods = SysRobo::foods_find([
@@ -445,7 +454,7 @@ class SysRobo
 
     //find food 1
     $foods = SysRobo::foods_valid($foods, [
-      'predictions' => $rbf_result['predictions'],
+      'predictions' => isset($rbf_result['predictions']) ? $rbf_result['predictions'] : [],
 
       'debug' => $debug,
     ]);
@@ -465,7 +474,49 @@ class SysRobo
       var_dump('food 1 final= ' . $foods['food'] . ' - confidence= ' . $foods['confidence']);
     }
 
+    //find category
+    $food = Food::find($foods['food']);
 
+    $food_category = $food->get_category([
+      'restaurant_parent_id' => $restaurant_parent_id
+    ]);
+
+    if ($debug) {
+      var_dump($sys_app::_DEBUG_BREAK);
+      if ($food_category) {
+        var_dump('category= ' . $food_category->name . ' - ID= ' . $food_category->id);
+      } else {
+        var_dump('no category found...');
+      }
+    }
+
+    //find ingredients found
+    $ingredients_found = SysRobo::ingredients_found($food, [
+      'predictions' => isset($rbf_result['predictions']) ? $rbf_result['predictions'] : [],
+      'restaurant_parent_id' => $restaurant_parent_id,
+
+      'debug' => $debug
+    ]);
+
+    if ($debug) {
+      var_dump($sys_app::_DEBUG_BREAK);
+      var_dump('food ingredients found...');
+      var_dump($ingredients_found);
+    }
+
+    //find ingredients missing
+    $ingredients_missing = SysRobo::ingredients_missing($food, [
+      'restaurant_parent_id' => $restaurant_parent_id,
+      'predictions' => $ingredients_found,
+
+      'debug' => $debug
+    ]);
+
+    if ($debug) {
+      var_dump($sys_app::_DEBUG_BREAK);
+      var_dump('food ingredients missing...');
+      var_dump($ingredients_missing);
+    }
   }
 
   public static function photo_scan($pars = [])
@@ -561,17 +612,7 @@ class SysRobo
     }
 
     $foods = [];
-
     $restaurant_parent_id = isset($pars['restaurant_parent_id']) ? (int)$pars['restaurant_parent_id'] : 0;
-    $restaurant_parent = RestaurantParent::find($restaurant_parent_id);
-    if (!$restaurant_parent) {
-
-      if ($debug) {
-        var_dump('invalid restaurant...');
-      }
-
-      return $foods;
-    }
 
     $predictions = isset($pars['predictions']) ? (array)$pars['predictions'] : [];
     if (!count($predictions)) {
@@ -804,5 +845,99 @@ class SysRobo
     ];
   }
 
+  public static function ingredients_found(Food $food, $pars = [])
+  {
+    //pars
+    $debug = isset($pars['debug']) ? (bool)$pars['debug'] : false;
+    if ($debug) {
+      var_dump('<br />');
+      var_dump('food find ingredients compact...');
+    }
 
+    $predictions = isset($pars['predictions']) ? (array)$pars['predictions'] : [];
+    $restaurant_parent_id = isset($pars['restaurant_parent_id']) ? (int)$pars['restaurant_parent_id'] : 0;
+
+    $ingredients = $food->get_ingredients_info([
+      'restaurant_parent_id' => $restaurant_parent_id,
+      'predictions' => $predictions,
+
+      'debug' => $debug,
+    ]);
+
+    return $ingredients;
+  }
+
+  public static function ingredients_missing(Food $food, $pars = [])
+  {
+    //pars
+    $debug = isset($pars['debug']) ? (bool)$pars['debug'] : false;
+    if ($debug) {
+      var_dump('<br />');
+      var_dump('food find ingredients missing...');
+    }
+
+    $predictions = isset($pars['predictions']) ? (array)$pars['predictions'] : [];
+    $restaurant_parent_id = isset($pars['restaurant_parent_id']) ? (int)$pars['restaurant_parent_id'] : 0;
+
+    $arr = [];
+    $ids = [];
+
+    $ingredients = $food->get_ingredients([
+      'restaurant_parent_id' => $restaurant_parent_id,
+    ]);
+    if (count($ingredients) && count($predictions)) {
+      foreach ($ingredients as $ingredient) {
+        $found = false;
+
+        foreach ($predictions as $prediction) {
+          if ($prediction['id'] == $ingredient['id']) {
+            $found = true;
+
+            if ($prediction['quantity'] < $ingredient['ingredient_quantity']) {
+              if (!in_array($prediction['id'], $ids)) {
+                $prediction['quantity'] = $ingredient['ingredient_quantity'] - $prediction['quantity'];
+
+                $ing = Ingredient::find($prediction['id']);
+                $arr[] = [
+                  'id' => $ing->id,
+                  'quantity' => $prediction['quantity'],
+                  'name' => $ing->name,
+                  'name_vi' => $ing->name_vi,
+                  'type' => $ing->ingredient_type,
+                ];
+
+                $ids[] = $prediction['id'];
+              }
+            }
+          }
+        }
+
+        if (!$found) {
+          $arr[] = [
+            'id' => $ingredient->id,
+            'quantity' => $ingredient->ingredient_quantity,
+            'name' => $ingredient->name,
+            'name_vi' => $ingredient->name_vi,
+            'type' => $ingredient->ingredient_type,
+          ];
+        }
+      }
+
+    } else {
+
+      if (count($ingredients)) {
+        foreach ($ingredients as $ingredient) {
+          $arr[] = [
+            'id' => $ingredient->id,
+            'quantity' => $ingredient->ingredient_quantity,
+            'name' => $ingredient->name,
+            'name_vi' => $ingredient->name_vi,
+            'type' => $ingredient->ingredient_type,
+          ];
+        }
+      }
+    }
+
+    return $arr;
+  }
 }

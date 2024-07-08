@@ -461,6 +461,8 @@ class Food extends Model
 
       $temps = [];
       foreach ($predictions as $prediction) {
+        $prediction = (array)$prediction;
+
         $temps[] = [
           'ingredient' => strtolower(trim($prediction['class'])),
           'confidence' => round($prediction['confidence'] * 100),
