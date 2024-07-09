@@ -56,9 +56,14 @@ class TesterController extends Controller
 
     $restaurant = RestaurantParent::find(1);
     $sensor = Restaurant::find(11);
-    $rfs = RestaurantFoodScan::find(52375);
+    $rfs = RestaurantFoodScan::find(57028);
     $date = date('Y-m-d');
 
+    var_dump($sys_app::_DEBUG_BREAK);
+
+
+
+    //zalo testing
 //    $zalo5 = '4889535897686365921';
 //
 //    SysZalo::send_rfs_note($zalo5, 'photo_comment', $rfs, [
@@ -73,41 +78,25 @@ class TesterController extends Controller
 
 //    var_dump($datas);
 
-//    55480 - 2 món
-//    56122 - bogo
 
-    $row = RestaurantFoodScan::find(56122);
-
-    $datas = SysRobo::photo_check([
-      'debug' => true,
-
-      'rfs' => $row,
-      'restaurant_parent_id' => 1,
-
-      'img_1024' => true,
-//      'check_url' => 'https://s3.ap-southeast-1.amazonaws.com/cargo.tastevietnam.asia/58-5b-69-19-ad-83/SENSOR/1/2024-07-06/18/SENSOR_2024-07-06-18-08-53-536_693.jpg',
-
-//      'sys_version' => '107',
-//      'sys_dataset' => '',
-
-//      'rbf_confidence' => '50',
-//      'rbf_overlap' => '50',
-//      'rbf_max_objects' => '50',
-
-    ]);
-    var_dump($datas);
-
-//    $row->predict_food([
-//      'notification' => false,
-//
-//      'debug' => true,
-//    ]);
-
-
-
+    //=======================================================================================
     //fix live
 
 
+
+    //=======================================================================================
+
+    //v3
+//    $rfs = RestaurantFoodScan::find(56122);
+//
+//    $this->photo_check([
+//      'debug' => true,
+//
+//      'rfs' => $rfs,
+//      'restaurant_parent_id' => 1,
+//
+//      'img_1024' => true,
+//    ]);
 
     //=======================================================================================
 
@@ -132,6 +121,28 @@ class TesterController extends Controller
     return response()->json([
       'status' => true,
     ]);
+  }
+
+  protected function photo_check($pars = [])
+  {
+    $datas = SysRobo::photo_check($pars);
+
+//      'debug' => true,
+//
+//      'rfs' => $row,
+//      'restaurant_parent_id' => 1,
+//
+//      'img_1024' => true,
+//      'check_url' => 'https://s3.ap-southeast-1.amazonaws.com/cargo.tastevietnam.asia/58-5b-69-19-ad-83/SENSOR/1/2024-07-06/18/SENSOR_2024-07-06-18-08-53-536_693.jpg',
+
+//      'sys_version' => '107',
+//      'sys_dataset' => '',
+
+//      'rbf_confidence' => '50',
+//      'rbf_overlap' => '50',
+//      'rbf_max_objects' => '50',
+
+    return $datas;
   }
 
   protected function photo_duplicate($pars = [])
@@ -602,180 +613,5 @@ class TesterController extends Controller
       }
     }
   }
-
-  protected function kitchen_food_datas(RestaurantFoodScan $row, $pars = [])
-  {
-    if (!$row) {
-      return [];
-    }
-
-    $restaurant = $row->get_restaurant();
-    $restaurant_parent = $row->get_restaurant()->get_parent();
-    $food = $row->get_food() ? $row->get_food() : NULL;
-
-    $kitchen = isset($pars['kitchen']) ? (bool)$pars['kitchen'] : false;
-
-    $ingredients_found = [];
-    $ingredients_missing = [];
-
-    $html_info = '';
-    $food_id = 0;
-    $food_name = '';
-    $food_photo = '';
-    $is_resolved = 0;
-    $is_marked = 0;
-    $live_group = 3;
-
-    if ($food) {
-
-      $food_id = $food->id;
-      $food_name = $food->name;
-      $food_photo = $food->get_photo([
-        'restaurant_parent_id' => $restaurant->restaurant_parent_id
-      ]);
-
-      $is_resolved = $row->is_resolved;
-      $is_marked = $row->is_marked;
-
-      //info recipe
-      $html_info = view('tastevn.htmls.item_food_dashboard')
-        ->with('recipes', $food->get_recipes([
-          'restaurant_parent_id' => $restaurant->restaurant_parent_id,
-        ]))
-        ->render();
-
-      //ingredient missing
-      $ids = [];
-      $temps = $row->get_ingredients_missing();
-      if (count($temps)) {
-        foreach ($temps as $ing) {
-          $ingredients_missing[] = [
-            'id' => $ing->id,
-            'quantity' => $ing->ingredient_quantity,
-            'name' => $ing->name,
-            'name_vi' => $ing->name_vi,
-            'type' => $ing->ingredient_type,
-          ];
-
-          $ids[] = $ing->id;
-        }
-      }
-
-      //ingredient found
-      $temps = $food->get_ingredients([
-        'restaurant_parent_id' => $restaurant->restaurant_parent_id,
-      ]);
-      if (count($temps)) {
-        foreach ($temps as $ing) {
-          if (count($ids) && in_array($ing->id, $ids)) {
-
-            if ($ing->ingredient_quantity > 1) {
-
-              $quantity = 0;
-              if (count($ingredients_missing)) {
-                foreach ($ingredients_missing as $missing) {
-                  if ($missing['id'] == $ing->id) {
-                    $quantity = $missing['quantity'];
-                    break;
-                  }
-                }
-              }
-
-              if ($ing->ingredient_quantity - $quantity) {
-                $ingredients_found[] = [
-                  'id' => $ing->id,
-                  'quantity' => $ing->ingredient_quantity - $quantity,
-                  'name' => $ing->name,
-                  'name_vi' => $ing->name_vi,
-                  'type' => $ing->ingredient_type,
-                ];
-              }
-            }
-
-            continue;
-          }
-
-          $ingredients_found[] = [
-            'id' => $ing->id,
-            'quantity' => $ing->ingredient_quantity,
-            'name' => $ing->name,
-            'name_vi' => $ing->name_vi,
-            'type' => $ing->ingredient_type,
-          ];
-        }
-      }
-
-      //uat
-      $live_group = $restaurant_parent->get_food_live_group($food);
-      switch ($live_group) {
-        case 1:
-
-          break;
-
-        case 2:
-
-          if ($row->confidence < 80 || !count($ingredients_found)) {
-            $food_id = 0;
-            $food_name = '';
-            $food_photo = '';
-            $html_info = '';
-          }
-
-          $is_resolved = 0;
-          $is_marked = 0;
-
-          if ($food_id && !count($ingredients_missing)) {
-
-          } else {
-            $ingredients_missing = [];
-            $ingredients_found = [];
-          }
-
-          break;
-
-        case 3:
-
-          if ($row->confidence < 90 || !count($ingredients_found)) {
-            $food_id = 0;
-            $food_name = '';
-            $food_photo = '';
-            $html_info = '';
-          }
-
-          $is_resolved = 0;
-          $is_marked = 0;
-
-          $ingredients_missing = [];
-          $ingredients_found = [];
-
-          break;
-      }
-    }
-
-    return [
-      'food_id' => $food_id,
-      'food_photo' => $food_photo,
-      'food_name' => $food_name,
-      'is_resolved' => $is_resolved,
-      'is_marked' => $is_marked,
-
-      'confidence' => $live_group,
-
-      'html_info' => $html_info,
-
-      'time_photo' => $row->time_photo,
-      'time_scan' => $row->time_scan,
-      'time_end' => $row->time_end,
-      'total_times' => !empty($row->time_end)
-        ? (int)date('s', strtotime($row->time_end) - strtotime($row->time_photo)) : 0,
-      'total_robos' => $row->total_seconds,
-
-      'localhost' => App::environment() == 'local' ? 1 : 0,
-
-      'ingredients_missing' => $ingredients_missing,
-      'ingredients_found' => $ingredients_found,
-    ];
-  }
-
 
 }

@@ -140,25 +140,6 @@ class RestaurantFoodScan extends Model
     return Restaurant::find($this->restaurant_id);
   }
 
-  public function get_ingredients_missing()
-  {
-    $tblFoodIngredientMissing = app(RestaurantFoodScanMissing::class)->getTable();
-    $tblIngredient = app(Ingredient::class)->getTable();
-
-    $select = RestaurantFoodScanMissing::query($tblFoodIngredientMissing)
-      ->distinct()
-      ->select("{$tblIngredient}.id", "{$tblIngredient}.name", "{$tblIngredient}.name_vi",
-        "{$tblFoodIngredientMissing}.ingredient_quantity", "{$tblFoodIngredientMissing}.ingredient_type"
-      )
-      ->leftJoin($tblIngredient, "{$tblIngredient}.id", "=", "{$tblFoodIngredientMissing}.ingredient_id")
-      ->where("$tblFoodIngredientMissing.restaurant_food_scan_id", $this->id)
-      ->orderBy("{$tblFoodIngredientMissing}.ingredient_type", "asc")
-      ->orderBy("{$tblFoodIngredientMissing}.ingredient_quantity", "desc")
-      ->orderBy("{$tblFoodIngredientMissing}.id");
-
-    return $select->get();
-  }
-
   public function get_noter()
   {
     return User::find($this->noter_id);
@@ -983,6 +964,227 @@ class RestaurantFoodScan extends Model
   }
 
   //v3
+  public function photo_sensor()
+  {
+    //s3 origin
+    return $this->photo_url;
+  }
+
+  public function photo_1024_create()
+  {
+    $sys_app = new SysApp();
+    $photo_url = url('sensors') . '/' . $this->photo_name;
+
+    $file_photo = public_path('sensors') . '/' . $this->photo_name;
+    $file_photo = $sys_app->os_slash_file($file_photo);
+    if (is_file($file_photo)) {
+
+      //create 1024 from sensor photo
+      $thumb_1024 = Image::make($file_photo);
+      $thumb_1024->resize(1024, 1024, function ($constraint) {
+        $constraint->aspectRatio();
+      });
+
+      $temps = array_filter(explode('/', $this->photo_name));
+      $photo_name = $temps[count($temps) - 1];
+      $photo_path = str_replace($photo_name, '', $this->photo_name);
+      $photo_name_1024 = '1024_' . $photo_name;
+      $path_1024 = $photo_path . $photo_name_1024;
+
+      $file_1024 = public_path('sensors') . '/' . $path_1024;
+      $file_1024 = $sys_app->os_slash_file($file_1024);
+      $thumb_1024->save($file_1024, 100);
+
+      $photo_url = url('sensors') . '/' . $path_1024;
+    }
+
+    return $photo_url;
+  }
+
+  public function photo_1024()
+  {
+    $sys_app = new SysApp();
+    $sensor = $this->get_restaurant();
+    $photo_url = NULL;
+
+    $temps = array_filter(explode('/', $this->photo_name));
+    $photo_name = $temps[count($temps) - 1];
+    $photo_path = str_replace($photo_name, '', $this->photo_name);
+    $photo_name_1024 = '1024_' . $photo_name;
+    $path_1024 = $photo_path . $photo_name_1024;
+
+    if ($this->local_storage) {
+      $file_1024 = public_path('sensors') . '/' . $path_1024;
+      $file_1024 = $sys_app->os_slash_file($file_1024);
+
+      if (is_file($file_1024)) {
+        $photo_url = url('sensors') . '/' . $path_1024;
+      }
+      else {
+        $photo_url = $this->photo_1024_create();
+      }
+    }
+    else {
+
+      $photo_url = $this->photo_sensor();
+
+      $photo_path = str_replace($photo_name, '', $photo_url);
+      $url_1024 = $photo_path . $photo_name_1024;
+
+      if (@getimagesize($url_1024)) {
+        $photo_url = $url_1024;
+      }
+    }
+
+    return $photo_url;
+  }
+
+  public function rfs_photo_reset()
+  {
+    //keep
+    //time_photo
+    //time_scan
+    //time_end
+
+    $this->update([
+      'food_category_id' => 0,
+      'food_id' => 0,
+      'confidence' => 0,
+      'found_by' => NULL,
+      'total_seconds' => 0,
+      'missing_ids' => NULL,
+      'missing_texts' => NULL,
+
+      'sys_predict' => 0,
+      'sys_confidence' => 0,
+      'usr_predict' => 0,
+      'rbf_predict' => 0,
+      'rbf_confidence' => 0,
+      'usr_edited' => NULL,
+
+      'status' => 'new',
+      'rbf_api' => NULL,
+      'rbf_api_js' => NULL,
+      'rbf_version' => NULL,
+      'rbf_model' => 0,
+      'rbf_api_1' => NULL,
+      'rbf_api_2' => NULL,
+    ]);
+  }
+
+  public function rfs_photo_scan()
+  {
+    //model 1
+    //img_1024
+    $img_url = $this->photo_1024();
+
+    $datas = SysRobo::photo_scan([
+      'img_url' => $img_url,
+
+      'api_key' => $api_key,
+      'dataset' => $dataset,
+      'version' => $version,
+
+      'confidence' => $confidence,
+      'overlap' => $overlap,
+      'max_objects' => $max_objects,
+
+      'debug' => true,
+    ]);
+
+
+  }
+
+  public function rfs_photo_predict()
+  {
+
+  }
+
+  public function get_ingredients_missing()
+  {
+    $table_1 = app(RestaurantFoodScanMissing::class)->getTable();
+    $table_2 = app(Ingredient::class)->getTable();
+
+    $select = RestaurantFoodScanMissing::query($table_1)
+      ->distinct()
+      ->select("{$table_2}.id", "{$table_2}.name", "{$table_2}.name_vi",
+        "{$table_1}.ingredient_quantity", "{$table_1}.ingredient_type"
+      )
+      ->leftJoin($table_2, "{$table_2}.id", "=", "{$table_1}.ingredient_id")
+      ->where("$table_1.restaurant_food_scan_id", $this->id)
+      ->orderBy("{$table_1}.ingredient_type", "asc")
+      ->orderBy("{$table_1}.ingredient_quantity", "desc")
+      ->orderBy("{$table_1}.id");
+
+    return $select->get();
+  }
+
+  public function get_ingredients_found()
+  {
+    $ingredients_missing = $this->get_ingredients_missing();
+    $food = $this->get_food();
+    $sensor = $this->get_restaurant();
+
+    $ingredients = [];
+    if ($food) {
+      $ingredients = $food->get_ingredients([
+        'restaurant_parent_id' => $sensor->restaurant_parent_id
+      ]);
+    }
+
+    if (count($ingredients_missing)) {
+
+      $ids = [];
+      $temp1s = [];
+      $temp2s = [];
+
+      foreach ($ingredients_missing as $ing) {
+        $temp1s[$ing->id] = [
+          'id' => $ing->id,
+          'name' => $ing->name,
+          'name_vi' => $ing->name_vi,
+          'ingredient_quantity' => $ing->ingredient_quantity,
+          'ingredient_type' => $ing->ingredient_type,
+        ];
+
+        $ids[] = $ing->id;
+      }
+
+      if (count($ingredients)) {
+        foreach ($ingredients as $ing) {
+          if (in_array($ing->id, $ids)) {
+
+            $quantity = $ing->ingredient_quantity - $temp1s[$ing->id]['ingredient_quantity'];
+
+            if ($quantity) {
+              $temp2s[$ing->id] = [
+                'id' => $ing->id,
+                'name' => $ing->name,
+                'name_vi' => $ing->name_vi,
+                'ingredient_quantity' => $ing->ingredient_quantity,
+                'ingredient_type' => $ing->ingredient_type,
+              ];
+            }
+
+          } else {
+
+            $temp2s[$ing->id] = [
+              'id' => $ing->id,
+              'name' => $ing->name,
+              'name_vi' => $ing->name_vi,
+              'ingredient_quantity' => $ing->ingredient_quantity,
+              'ingredient_type' => $ing->ingredient_type,
+            ];
+          }
+        }
+      }
+
+      $ingredients = $temp2s;
+    }
+
+    return $ingredients;
+  }
+
   public function photo_rbf_scan_before()
   {
 

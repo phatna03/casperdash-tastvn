@@ -171,6 +171,26 @@ class RestaurantParent extends Model
     ]);
   }
 
+  public function get_photo_standard(Food $food = null)
+  {
+    $photo = url('custom/img/logo_' . $this->id . '.png');
+    if ($food) {
+      $row = RestaurantFood::where('deleted', 0)
+        ->where('restaurant_parent_id', $this->id)
+        ->where('food_id', $food->id)
+        ->first();
+
+      if ($row) {
+        $photo = $row->photo;
+
+        if ($row->local_storage) {
+          $photo = url('photos/foods') . '/' . $row->photo;
+        }
+      }
+    }
+    return $photo;
+  }
+
   public function get_food_photo(Food $food)
   {
     $photo = url('custom/img/no_photo.png');

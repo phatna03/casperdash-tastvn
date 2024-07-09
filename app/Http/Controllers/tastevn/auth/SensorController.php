@@ -615,12 +615,40 @@ class SensorController extends Controller
       ],
     ];
 
+    //food
+    $food_rbf = $row->get_food_rbf();
+    $ingredients_missing = $row->get_ingredients_missing();
+    $ingredients_found = $row->get_ingredients_found();
+
+    $sensor = $row->get_restaurant();
+    $restaurant = $row->get_restaurant()->get_parent();
+    $food = $row->get_food();
+
+    $comments = $row->get_comments();
+    $texts = $row->get_texts([
+      'text_name_only' => 1
+    ]);
+
     //info
     $html_info = view('tastevn.htmls.item_food_scan_info')
       ->with('item', $row)
       ->with('data', $data)
-      ->with('comments', $row->get_comments())
-      ->with('texts', $row->get_texts(['text_name_only' => 1]))
+
+
+      ->with('rfs', $row)
+
+      ->with('restaurant', $restaurant)
+      ->with('sensor', $sensor)
+      ->with('food', $food)
+
+      ->with('food_rbf', $food_rbf)
+      ->with('food_rbf_confidence', $row->rbf_confidence)
+
+      ->with('ingredients_missing', $ingredients_missing)
+      ->with('ingredients_found', $ingredients_found)
+
+      ->with('comments', $comments)
+      ->with('texts', $texts)
       ->render();
 
     $this->_viewer->add_log([
