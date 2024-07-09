@@ -432,236 +432,67 @@ class SensorController extends Controller
       return response()->json($validator->errors(), 422);
     }
     //invalid
-    $row = RestaurantFoodScan::find((int)$values['item']);
-    if (!$row) {
+    $rfs = RestaurantFoodScan::find((int)$values['item']);
+    if (!$rfs) {
       return response()->json([
         'error' => 'Invalid item'
       ], 422);
     }
 
-    $restaurant = $row->get_restaurant();
+    //model 1
+    $api_result = (array)json_decode($rfs->rbf_api, true);
+    $predictions = isset($api_result['result']) && isset($api_result['result']['predictions'])
+      ? (array)$api_result['result']['predictions'] : [];
 
-    //admin view
-
-    //moderator view
-
-    $food_photo = url('custom/img/logo_' . $restaurant->restaurant_parent_id . '.png');
-    $food_ingredients = [];
-    $food_recipes = [];
-    $food_name = NULL;
-
-    $rbf_food_id = 0;
-    $rbf_food_name = NULL;
-    $rbf_food_confidence = 0;
-    $rbf_ingredients_found = [];
-    $rbf_ingredients_missing = [];
-    $rbf_predictions = [];
-    $rbf_versions = !empty($row->rbf_version) ? (array)json_decode($row->rbf_version, true) : [];
-
-    $sys_food_id = 0;
-    $sys_food_name = NULL;
-    $sys_food_confidence = 0;
-    $sys_ingredients_missing = [];
-    $sys_food_predict = [];
-    $sys_food_predicts = [];
-
-    $usr_food_id = 0;
-    $usr_ingredients_missing = [];
-
-    //data
-    $apid = (array)json_decode($row->rbf_api, true);
-    if (count($apid)) {
-
-      $rbf_predictions = $apid['predictions'];
-
-      $founds = SysRobo::ingredients_compact($apid['predictions']);
-      if (count($founds)) {
-        foreach ($founds as $temp) {
-          $ing = Ingredient::find((int)$temp['id']);
-          if ($ing) {
-            $rbf_ingredients_found[] = [
-              'quantity' => $temp['quantity'],
-              'title' => !empty($ing['name_vi']) ? $ing['name'] . ' - ' . $ing['name_vi'] : $ing['name'],
-            ];
-          }
-        }
-      }
-
-      if ($row->get_food()) {
-
-        $food_name = $row->get_food()->name;
-        $food_ingredients = $row->get_food()->get_ingredients([
-          'restaurant_parent_id' => $restaurant->restaurant_parent_id,
-        ]);
-        $food_recipes = $row->get_food()->get_recipes([
-          'restaurant_parent_id' => $restaurant->restaurant_parent_id,
-        ]);
-
-        $food_photo = $row->get_food()->get_photo([
-          'restaurant_parent_id' => $restaurant->restaurant_parent_id,
-        ]);
-
-        $rbf_food = Food::find($row->rbf_predict);
-        if ($rbf_food) {
-          $rbf_food_id = $rbf_food->id;
-          $rbf_food_name = $rbf_food->name;
-          $rbf_food_confidence = $row->rbf_confidence;
-
-          $rbf_ingredients_missing = $rbf_food->missing_ingredients([
-            'restaurant_parent_id' => $restaurant->restaurant_parent_id,
-            'ingredients' => $founds,
-          ]);
-        }
-
-        $sys_food = Food::find($row->sys_predict);
-        if ($sys_food) {
-          $sys_food_id = $sys_food->id;
-          $sys_food_name = $sys_food->name;
-          $sys_food_confidence = $row->sys_confidence;
-
-          $sys_ingredients_missing = $sys_food->missing_ingredients([
-            'restaurant_parent_id' => $restaurant->restaurant_parent_id,
-            'ingredients' => $founds,
-          ]);
-        }
-
-        $usr_food = Food::find($row->usr_predict);
-        if ($usr_food) {
-          $usr_food_id = $usr_food->id;
-
-          $usr_ingredients_missing = $row->get_ingredients_missing();
-        }
-      }
-    }
-
-    //model2
-    if ($row->rbf_model) {
-      $api2 = (array)json_decode($row->rbf_api_2, true);
-      $rbf_predictions = count($api2) ? $api2['predictions'] : [];
-    }
-
-    //v2
-    $data2s = $this->kitchen_food_datas($row);
-    if (count($data2s) && count($data2s['ingredients_found'])) {
-
-      //rbf
-      if ($data2s['food_id']) {
-        $rbf_food_id = $data2s['food_id'];
-        $food_photo = $data2s['food_photo'];
-
-        $rbf_food_name = $row->get_food_rbf() ? $row->get_food_rbf()->name : $row->get_food()->name;
-        $rbf_food_confidence = $row->rbf_confidence;
-      }
-
-      $rbf_ingredients_found = [];
-      foreach ($data2s['ingredients_found'] as $ing) {
-        $rbf_ingredients_found[] = [
-          'quantity' => $ing['quantity'],
-          'title' => $ing['name'],
-        ];
-      }
-
-      if (count($data2s['ingredients_missing'])) {
-        $rbf_ingredients_missing = $data2s['ingredients_missing'];
-      }
-
-      //usr
-      $usr_food = Food::find($row->usr_predict);
-      if ($usr_food) {
-        $usr_food_id = $usr_food->id;
-
-        $usr_ingredients_missing = $row->get_ingredients_missing();
-      }
-    }
-
-    //resolved
-    if ($row->is_resolved) {
-      $rbf_ingredients_missing = [];
-    }
-
-    $data = [
-      'food' => [
-        'name' => $food_name,
-        'photo' => $food_photo,
-        'ingredients' => $food_ingredients,
-        'recipes' => $food_recipes,
-      ],
-
-      'rbf' => [
-        'food_id' => $rbf_food_id,
-        'food_name' => $rbf_food_name,
-        'food_confidence' => $rbf_food_confidence,
-
-        'ingredients_found' => $rbf_ingredients_found,
-        'ingredients_missing' => $rbf_ingredients_missing,
-
-        'predictions' => $rbf_predictions,
-        'versions' => $rbf_versions,
-        'model' => $row->rbf_model,
-      ],
-      'sys' => [
-        'food_id' => $sys_food_id,
-        'food_name' => $sys_food_name,
-        'food_confidence' => $sys_food_confidence,
-
-        'foods' => $sys_food_predicts,
-        'predict' => $sys_food_predict,
-        'ingredients_missing' => $sys_ingredients_missing,
-      ],
-      'usr' => [
-        'food_id' => $usr_food_id,
-
-        'ingredients_missing' => $usr_ingredients_missing,
-      ],
-    ];
+    $versions = (array)json_decode($rfs->rbf_version, true);
 
     //food
-    $food_rbf = $row->get_food_rbf();
-    $ingredients_missing = $row->get_ingredients_missing();
-    $ingredients_found = $row->get_ingredients_found();
+    $food_rbf = $rfs->get_food_rbf();
+    $ingredients_missing = $rfs->get_ingredients_missing();
+    $ingredients_found = $rfs->get_ingredients_found();
+    $ingredients_recipe = $rfs->get_ingredients_recipe();
 
-    $sensor = $row->get_restaurant();
-    $restaurant = $row->get_restaurant()->get_parent();
-    $food = $row->get_food();
+    $sensor = $rfs->get_restaurant();
+    $restaurant = $rfs->get_restaurant()->get_parent();
+    $food = $rfs->get_food();
 
-    $comments = $row->get_comments();
-    $texts = $row->get_texts([
+    $comments = $rfs->get_comments();
+    $texts = $rfs->get_texts([
       'text_name_only' => 1
     ]);
 
     //info
     $html_info = view('tastevn.htmls.item_food_scan_info')
-      ->with('item', $row)
-      ->with('data', $data)
-
-
-      ->with('rfs', $row)
+      ->with('rfs', $rfs)
 
       ->with('restaurant', $restaurant)
       ->with('sensor', $sensor)
       ->with('food', $food)
 
       ->with('food_rbf', $food_rbf)
-      ->with('food_rbf_confidence', $row->rbf_confidence)
+      ->with('food_rbf_confidence', $rfs->rbf_confidence)
 
+      ->with('versions', $versions)
+      ->with('predictions', $predictions)
       ->with('ingredients_missing', $ingredients_missing)
       ->with('ingredients_found', $ingredients_found)
+      ->with('ingredients_recipe', $ingredients_recipe)
 
       ->with('comments', $comments)
       ->with('texts', $texts)
       ->render();
 
     $this->_viewer->add_log([
-      'type' => 'view_item_' . $row->get_type(),
-      'restaurant_id' => (int)$row->restaurant_id,
-      'item_id' => (int)$row->id,
-      'item_type' => $row->get_type(),
+      'type' => 'view_item_' . $rfs->get_type(),
+      'restaurant_id' => (int)$rfs->restaurant_id,
+      'item_id' => (int)$rfs->id,
+      'item_type' => $rfs->get_type(),
     ]);
 
     return response()->json([
-      'item' => $row,
+      'item' => $rfs,
       'restaurant' => $restaurant,
-      'data' => $data,
+//      'data' => $data,
       'html_info' => $html_info,
 
       'status' => true,

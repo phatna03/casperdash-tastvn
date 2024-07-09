@@ -1405,6 +1405,21 @@ class RestaurantFoodScan extends Model
     ]);
   }
 
+  public function get_ingredients_recipe()
+  {
+    $items = [];
+
+    $sensor = $this->get_restaurant();
+    $food = $this->get_food();
+    if ($food) {
+      $items = $food->get_recipes([
+        'restaurant_parent_id' => $sensor->restaurant_parent_id,
+      ]);
+    }
+
+    return $items;
+  }
+
   public function get_ingredients_missing()
   {
     $table_1 = app(RestaurantFoodScanMissing::class)->getTable();
