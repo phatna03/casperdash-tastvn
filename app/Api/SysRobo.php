@@ -260,40 +260,6 @@ class SysRobo
     Storage::append($file_log, '===================================================================================');
   }
 
-  public static function ingredients_compact($pars = [])
-  {
-    $arr = [];
-    $existed = [];
-
-    if (count($pars)) {
-      foreach ($pars as $prediction) {
-        $prediction = (array)$prediction;
-
-        $ingredient = Ingredient::whereRaw('LOWER(name) LIKE ?', strtolower(trim($prediction['class'])))
-          ->first();
-        if ($ingredient) {
-
-          if (in_array($ingredient->id, $existed)) {
-            foreach ($arr as $k => $v) {
-              if ($v['id'] == $ingredient->id) {
-                $arr[$k]['quantity'] += 1;
-              }
-            }
-          } else {
-            $arr[] = [
-              'id' => $ingredient->id,
-              'quantity' => 1,
-            ];
-          }
-
-          $existed[] = $ingredient->id;
-        }
-      }
-    }
-
-    return $arr;
-  }
-
   public static function photo_name_query($file)
   {
     $temps = explode('/', $file);
@@ -1056,5 +1022,39 @@ class SysRobo
     }
 
     return $quantity;
+  }
+
+  public static function ingredients_compact($pars = [])
+  {
+    $arr = [];
+    $existed = [];
+
+    if (count($pars)) {
+      foreach ($pars as $prediction) {
+        $prediction = (array)$prediction;
+
+        $ingredient = Ingredient::whereRaw('LOWER(name) LIKE ?', strtolower(trim($prediction['class'])))
+          ->first();
+        if ($ingredient) {
+
+          if (in_array($ingredient->id, $existed)) {
+            foreach ($arr as $k => $v) {
+              if ($v['id'] == $ingredient->id) {
+                $arr[$k]['quantity'] += 1;
+              }
+            }
+          } else {
+            $arr[] = [
+              'id' => $ingredient->id,
+              'quantity' => 1,
+            ];
+          }
+
+          $existed[] = $ingredient->id;
+        }
+      }
+    }
+
+    return $arr;
   }
 }

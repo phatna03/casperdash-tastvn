@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 //lib
 use Validator;
-use App\Api\SysApp;
+use App\Api\SysCore;
 use App\Api\SysRobo;
 use App\Jobs\PhotoUpload;
 //model
@@ -24,12 +24,9 @@ use App\Models\RestaurantParent;
 class RoboflowController extends Controller
 {
   protected $_viewer = null;
-  protected $_sys_app = null;
 
   public function __construct()
   {
-    $this->_sys_app = new SysApp();
-
     $this->middleware(function ($request, $next) {
 
       $this->_viewer = Auth::user();
@@ -72,89 +69,83 @@ class RoboflowController extends Controller
 
   public function detect(Request $request)
   {
-    $status = false;
     $values = $request->all();
 
-    $rbf_dataset = $this->_sys_app->get_setting('rbf_dataset_scan');
-    $rbf_api_key = $this->_sys_app->get_setting('rbf_api_key');
+    //model 1
+    $api_key = SysCore::get_sys_setting('rbf_api_key');
+    $dataset = SysCore::str_trim_slash(SysCore::get_sys_setting('rbf_dataset_scan'));
+    $version = SysCore::get_sys_setting('rbf_dataset_ver');
 
-    if (empty($rbf_dataset) || empty($rbf_dataset)) {
+    $dataset = isset($values['dataset']) ? $values['dataset'] : $dataset;
+    $version = isset($values['version']) ? $values['version'] : $version;
+
+    if (empty($api_key) || empty($dataset) || empty($version)) {
       return response()->json([
         'status' => false,
-        'error' => "Please contact admin for config valid settings!",
+        'error' => "Invalid config...",
       ], 400);
     }
 
-    $food = null;
-    $food_predict = null;
-    $food_photo = url('custom/img/no_photo.png');
-    $ingredients_found = [];
-    $sys_food_predicts = [];
-    $sys_food_predict = [];
+//    echo '<pre>';
+    $confidence = isset($values['confidence']) ? $values['confidence'] : SysRobo::_RBF_CONFIDENCE;
+    $overlap = isset($values['overlap']) ? $values['overlap'] : SysRobo::_RBF_OVERLAP;
+    $max_objects = isset($values['max_objects']) ? $values['max_objects'] : SysRobo::_RBF_MAX_OBJECTS;
+    $debug = isset($values['debug']) ? (bool)$values['debug'] : false;
 
-    $rbf_food = null;
-    $rbf_food_id = 0;
-    $rbf_food_name = NULL;
-    $rbf_food_confidence = 0;
-    $rbf_ingredients_found = [];
-    $rbf_ingredients_missing = [];
-    $rbf_food_found = [];
-
-    $sys_food = NULL;
-    $sys_food_id = 0;
-    $sys_food_name = NULL;
-    $sys_food_confidence = 0;
-    $sys_ingredients_found = [];
-    $sys_ingredients_missing = [];
+    $status = false;
+    $datas = [];
+    $img_url = NULL;
+    $ingredients = [];
+    $foods = [];
+    $predictions = [];
 
     //img upload
-    $img = 'roboflow_detect';
-    $imgFILE = $request->file('image');
+    $img_name = 'img_' . time();
+    $img_file = $request->file('image');
+    if (!empty($img_file)) {
+      foreach ($img_file as $file) {
 
-    $datas = [];
-    $result = [];
-    $img_url = '';
-
-    if (!empty($imgFILE)) {
-
-      foreach ($imgFILE as $file) {
-
-        $folder = time();
-
-        $pathStr = "/roboflow/test/{$folder}/";
-        $path = public_path($pathStr);
-        //os
-        if (strtoupper(substr(PHP_OS, 0, 3)) == 'WIN') {
-          $path = str_replace('/', '\\', $path);
-        }
-        if (!file_exists($path)) {
-          mkdir($path, 0777, true);
+        $img_path = "/roboflow/modal_testing/user_{$this->_viewer->id}/";
+        $file_path = public_path($img_path);
+        $file_path = SysCore::os_slash_file($file_path);
+        if (!file_exists($file_path)) {
+          mkdir($file_path, 0777, true);
         }
 
-        $fileName = $file->getClientOriginalName();
-        $fileExt = $file->getClientOriginalExtension();
+        $file_name = $file->getClientOriginalName();
+        $file_ext = $file->getClientOriginalExtension();
 
-        $photoName = $img . '.' . $fileExt;
-        $photoPath = $pathStr . $photoName;
-        $file->move(public_path($pathStr), $photoName);
-
-        //rotate image mobile upload
-        $storagePath = public_path($photoPath);
+        $photo_name = $img_name . '.' . $file_ext;
+        $file->move(public_path($img_path), $photo_name);
 
         //roboflow
-        $img_url = url("roboflow/test") . "/{$folder}/" . $photoName;
+        $img_url = "https://s3.ap-southeast-1.amazonaws.com/cargo.tastevietnam.asia/58-5b-69-19-ad-83/SENSOR/1/2024-07-08/19/SENSOR_2024-07-08-19-47-41-791_847.jpg";
+        if (App::environment() == 'production') {
+          $img_url = url($img_path) . '/' . $photo_name;
+        }
 
-        //step 2= photo scan
-        $datas = SysRobo::photo_scan(null, [
-          'confidence' => SysRobo::_SCAN_CONFIDENCE,
-          'overlap' => SysRobo::_SCAN_OVERLAP,
-
+        $datas = SysRobo::photo_scan([
           'img_url' => $img_url,
-          'api_testing' => 1,
+
+          'api_key' => $api_key,
+          'dataset' => $dataset,
+          'version' => $version,
+
+          'confidence' => $confidence,
+          'overlap' => $overlap,
+          'max_objects' => $max_objects,
+
+          'debug' => $debug,
         ]);
       }
 
-      if ($datas['status']) {
+      $no_data = false;
+      if (!count($datas) || !$datas['status']
+        || ($datas['status'] && (!isset($datas['result']['predictions'])) || !count($datas['result']['predictions']))) {
+        $no_data = true;
+      }
+
+      if (!$no_data) {
 
         $status = true;
         $predictions = $datas['result']['predictions'];
@@ -166,7 +157,7 @@ class RoboflowController extends Controller
             foreach ($ingredients_found as $temp) {
               $ing = Ingredient::find((int)$temp['id']);
               if ($ing) {
-                $rbf_ingredients_found[] = [
+                $ingredients[] = [
                   'quantity' => $temp['quantity'],
                   'title' => !empty($ing['name_vi']) ? $ing['name'] . ' - ' . $ing['name_vi'] : $ing['name'],
                 ];
@@ -182,7 +173,7 @@ class RoboflowController extends Controller
             $food = Food::whereRaw('LOWER(name) LIKE ?', strtolower(trim($prediction['class'])))
               ->first();
             if ($food) {
-              $rbf_food_found[] = [
+              $foods[] = [
                 'confidence' => $confidence,
                 'title' => $food->name,
               ];
@@ -193,44 +184,16 @@ class RoboflowController extends Controller
       }
     }
 
-
-    $data = [
-      'food' => [
-        'photo' => $food_photo,
-
-        'predictions' => $predictions,
-      ],
-      'rbf' => [
-        'food_id' => $rbf_food_id,
-        'food_name' => $rbf_food_name,
-        'food_confidence' => $rbf_food_confidence,
-
-        'foods_found' => $rbf_food_found,
-        'ingredients_found' => $rbf_ingredients_found,
-        'ingredients_missing' => $rbf_ingredients_missing,
-      ],
-      'sys' => [
-        'food_id' => $sys_food_id,
-        'food_name' => $sys_food_name,
-        'food_confidence' => $sys_food_confidence,
-
-        'foods_predict' => $sys_food_predicts,
-
-        'ingredients_missing' => $sys_ingredients_missing,
-      ],
-
-      'api' => [
-        'result' => $datas['result'],
-      ]
-    ];
-
     return response()->json([
       'status' => $status,
 
       'img_url' => $img_url,
+      'datas' => $datas,
 
-      'data' => $data,
-      'food' => $food ? $food->id : 0,
+      'predictions' => $predictions,
+      'ingredients' => $ingredients,
+      'foods' => $foods,
+
     ], 200);
   }
 

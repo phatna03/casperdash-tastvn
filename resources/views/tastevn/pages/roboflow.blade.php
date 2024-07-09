@@ -11,14 +11,14 @@
     <!-- Basic  -->
     <div class="col-12">
       <div class="card mb-4">
-        <h5 class="card-header">Testing</h5>
+        <h5 class="card-header">Modal Testing</h5>
         <div class="card-body">
           <div class="row">
             <div class="col-lg-6">
               <div class="p-2 acm-border-css border-2 border-dark wrap-selected-food">
 
                 <div class="row">
-                  <div class="col-lg-6">
+                  <div class="col-lg-12">
                     <div class="position-relative w-100 mt-2">
                       <div class="form-floating form-floating-outline mb-4">
                         <div class="form-control acm-wrap-selectize" id="select-item-restaurant">
@@ -43,7 +43,7 @@
                     </div>
                   </div>
 
-                  <div class="col-lg-6">
+                  <div class="col-lg-12">
                     <div class="position-relative w-100">
                       <div class="text-center w-auto d-none">
                         <h3 class="food-name"></h3>
@@ -89,15 +89,9 @@
               </div>
 
               <div class="row">
-                <div class="@if($pageConfigs['debug']) col-lg-6 @else col-lg-12 @endif">
+                <div class="col-lg-12">
                   <div class="mt-2" id="wrap_return"></div>
                 </div>
-
-                @if($pageConfigs['debug'])
-                <div class="col-lg-6">
-                  <div class="mt-2 d-none" id="wrap_return_js"></div>
-                </div>
-                @endif
               </div>
             </div>
           </div>
@@ -109,11 +103,6 @@
 @endsection
 
 @section('js_end')
-
-  @if($pageConfigs['debug'])
-    <script src="{{url('custom/library/roboflow/roboflow.js')}}"></script>
-  @endif
-
   <script type="text/javascript">
     $(document).ready(function() {
 
@@ -241,45 +230,12 @@
           var html = '';
           var htmlReturn = '';
 
-          $('#wrap_return_js').addClass('d-none');
-
-          @if($pageConfigs['debug'])
-          var photo_img = new Image();
-          photo_img.crossOrigin = "anonymous";
-          photo_img.src = acmcfs.link_base_url + '/roboflow/test/roboflow_detect.jpg';
-
-          setTimeout(function () {
-            acmcfs.rbf_model.detect(photo_img).then(function (predictions) {
-              console.log("Predictions: ", predictions);
-
-              var htmlJS = '';
-
-              htmlJS = '<div class="text-primary fw-bold mb-1 mt-1">+ Roboflow JS</div>';
-              if (predictions.length) {
-                predictions.forEach(function (v, k) {
-                  htmlJS += '<div>- <b class="text-danger fw-bold">' + parseInt(v.confidence * 100) + '%</b> - ' + v.class + '</div>';
-                  // htmlJS += '<div><span class="acm-mr-px-10">[x = ' + v.x + ']</span>';
-                  // htmlJS += '<span>[y = ' + v.y + '</span>]</div>';
-                  // htmlJS += '<div><span class="acm-mr-px-10">[width = ' + v.width + ']</span>';
-                  // htmlJS += '<span>[height = ' + v.height + ']</span></div>'
-                  ;
-                });
-              } else {
-                htmlJS += '<div>---</div>';
-              }
-
-              $('#wrap_return_js').removeClass('d-none');
-              $('#wrap_return_js').empty().append(htmlJS);
-            });
-          }, 888);
-          @endif
-
           if (xhr.responseJSON.status) {
 
             //foods
             html += '<div class="text-primary fw-bold mb-1 mt-1">+ Roboflow found dishes</div>';
-            if (xhr.responseJSON.data.rbf.foods_found && xhr.responseJSON.data.rbf.foods_found.length) {
-              xhr.responseJSON.data.rbf.foods_found.forEach(function (v, k) {
+            if (xhr.responseJSON.foods && xhr.responseJSON.foods.length) {
+              xhr.responseJSON.foods.forEach(function (v, k) {
                 html += '<div>'
                   + '- <b class="text-dark fw-bold">' + v.confidence + '</b>% '
                   + v.title
@@ -291,8 +247,8 @@
 
             //ingredients
             html += '<div class="text-primary fw-bold mb-1 mt-1">+ Roboflow found ingredients</div>';
-            if (xhr.responseJSON.data.rbf.ingredients_found && xhr.responseJSON.data.rbf.ingredients_found.length) {
-              xhr.responseJSON.data.rbf.ingredients_found.forEach(function (v, k) {
+            if (xhr.responseJSON.ingredients && xhr.responseJSON.ingredients.length) {
+              xhr.responseJSON.ingredients.forEach(function (v, k) {
                 html += '<div>'
                   + '- <b class="text-dark fw-bold">' + v.quantity + '</b> '
                   + v.title
@@ -302,9 +258,9 @@
               html += '<div>---</div>';
             }
 
-            htmlReturn += '<div class="text-primary fw-bold mb-1 mt-1">+ Roboflow API</div>';
-            if (xhr.responseJSON.data.food.predictions && xhr.responseJSON.data.food.predictions.length) {
-              xhr.responseJSON.data.food.predictions.forEach(function (v, k) {
+            htmlReturn += '<div class="text-primary fw-bold mb-1 mt-1">+ Roboflow API return</div>';
+            if (xhr.responseJSON.predictions && xhr.responseJSON.predictions.length) {
+              xhr.responseJSON.predictions.forEach(function (v, k) {
                 htmlReturn += '<div>- <b class="text-danger fw-bold">' + parseInt(v.confidence * 100) + '%</b> - ' + v.class + '</div>';
                 // htmlReturn += '<div><span class="acm-mr-px-10">[x = ' + v.x + ']</span>';
                 // htmlReturn += '<span>[y = ' + v.y + '</span>]</div>';
@@ -325,7 +281,7 @@
             // console.log(xhr.responseJSON);
 
             $('#wrap_results').empty()
-              .append('<div class="alert alert-danger">Dish not found</div>');
+              .append('<div class="alert alert-danger">No data found.</div>');
 
             message_from_toast('error', acmcfs.message_title_error, xhr.responseJSON.error, true);
           }
@@ -335,43 +291,5 @@
       return false;
     }
 
-    @if($pageConfigs['debug'])
-    //roboflow init
-    roboflow.auth({
-      publishable_key: "rf_3DtUFXV7oiSXMh2VkXK8d0EHcRD2"
-    });
-    async function rbf_load_model() {
-      var model = await roboflow.load({
-        model: "missing-dish-ingredients",
-        version: 29
-      });
-
-      model.configure({
-        threshold: 0.3,
-        overlap: 0.6,
-        max_objects: 100
-      });
-
-      acmcfs.rbf_model = model;
-
-      return model;
-    }
-    //roboflow check ready
-    rbf_load_model().then(model => {
-      console.log("==============================================");
-      console.log("RBF load success......");
-
-      // Do something with the model
-      console.log(model.getMetadata());
-      console.log(model.getConfiguration());
-      console.log('ok...');
-
-      sys_ready = 1;
-
-    }).catch(error => {
-      console.log("==============================================");
-      console.error('Error loading model:', error);
-    });
-    @endif
   </script>
 @endsection
