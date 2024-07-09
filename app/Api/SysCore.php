@@ -28,6 +28,37 @@ class SysCore
     return $text;
   }
 
+  public static function arr_date_range($times = NULL)
+  {
+    $time_from = NULL;
+    $time_to = NULL;
+
+    $times = array_filter(explode('-', $times));
+
+    if (count($times) && !empty($times[0])) {
+      $date_from = trim(substr(trim($times[0]), 0, 10));
+      $time_from = trim(substr(trim($times[0]), 10));
+      $hour_from = trim(substr(trim($time_from), 0, 2));
+      $minute_from = trim(substr(trim($time_from), 3, 2));
+
+      $time_from = date('Y-m-d', strtotime(str_replace('/', '-', $date_from))) . ' ' . $hour_from . ':' . $minute_from . ':00';
+    }
+
+    if (count($times) && !empty($times[1])) {
+      $date_to = trim(substr(trim($times[1]), 0, 10));
+      $time_to = trim(substr(trim($times[1]), 10));
+      $hour_to = trim(substr(trim($time_to), 0, 2));
+      $minute_to = trim(substr(trim($time_to), 3, 2));
+
+      $time_to = date('Y-m-d', strtotime(str_replace('/', '-', $date_to))) . ' ' . $hour_to . ':' . $minute_to . ':00';
+    }
+
+    return [
+      'time_from' => $time_from,
+      'time_to' => $time_to,
+    ];
+  }
+
   public static function os_slash_file($path)
   {
     if (strtoupper(substr(PHP_OS, 0, 3)) == 'WIN') {
@@ -35,6 +66,21 @@ class SysCore
     }
 
     return $path;
+  }
+
+  public static function file_url_existed($url)
+  {
+    $ch = curl_init($url);
+    curl_setopt($ch, CURLOPT_NOBODY, true);
+    curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    if ($httpCode == 200) {
+      return true;
+    }
+
+    return false;
   }
 
   public static function set_sys_setting($key, $val)
@@ -70,5 +116,8 @@ class SysCore
     }
   }
 
+  public static function log_sys_failed()
+  {
 
+  }
 }

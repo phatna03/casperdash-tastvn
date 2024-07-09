@@ -10,7 +10,8 @@ use Illuminate\Support\Facades\Storage;
 //lib
 use SebastianBergmann\Type\Exception;
 use Validator;
-use App\Api\SysApp;
+use App\Api\SysAws;
+use App\Api\SysCore;
 use App\Api\SysRobo;
 use App\Excel\ImportData;
 //model
@@ -28,12 +29,9 @@ use App\Models\RestaurantFoodScanMissing;
 class SensorController extends Controller
 {
   protected $_viewer = null;
-  protected $_sys_app = null;
 
   public function __construct()
   {
-    $this->_sys_app = new SysApp();
-
     $this->middleware(function ($request, $next) {
 
       $this->_viewer = Auth::user();
@@ -383,37 +381,30 @@ class SensorController extends Controller
       return response()->json($validator->errors(), 422);
     }
     //invalid
-    $row = RestaurantFoodScan::find((int)$values['item']);
-    if (!$row) {
+    $rfs = RestaurantFoodScan::find((int)$values['item']);
+    if (!$rfs) {
       return response()->json([
         'error' => 'Invalid item'
       ], 422);
     }
 
     $type = isset($values['type']) ? (int)$values['type'] : 1;
+    switch ($type) {
+      case 1:
 
-    if ($type == 1) {
-      //re-predict
-      $row->predict_food([
-        'notification' => false,
-      ]);
-    } else {
-      //re-check
-      //step 2= photo scan
-      $row->model_api_1([
-        'confidence' => SysRobo::_SCAN_CONFIDENCE,
-        'overlap' => SysRobo::_SCAN_OVERLAP,
+        $rfs->rfs_photo_predict([
+          'notification' => false,
+        ]);
 
-        'api_recall' => true,
-      ]);
+        break;
 
-      //step 3= photo predict
-      $row->predict_food([
-        'notification' => false,
+      case 2:
 
-        'api_recall' => true,
-      ]);
+        $rfs->rfs_photo_scan([
+          'notification' => false,
+        ]);
 
+        break;
     }
 
     return response()->json([
@@ -536,7 +527,7 @@ class SensorController extends Controller
       ->where('missing_ids', '=', $values['missing_ids']);
 
     if (!empty($time_scan)) {
-      $times = $this->_sys_app->parse_date_range($time_scan);
+      $times = SysCore::arr_date_range($time_scan);
       if (!empty($times['time_from'])) {
         $select->where('time_scan', '>=', $times['time_from']);
       }
@@ -545,7 +536,7 @@ class SensorController extends Controller
       }
     }
     if (!empty($time_upload)) {
-      $times = $this->_sys_app->parse_date_range($time_upload);
+      $times = SysCore::arr_date_range($time_upload);
       if (!empty($times['time_from'])) {
         $select->where('time_photo', '>=', $times['time_from']);
       }
@@ -1023,7 +1014,7 @@ class SensorController extends Controller
 
     $row = NULL;
 
-    $folder_setting = $this->_sys_app->parse_s3_bucket_address($restaurant->s3_bucket_address);
+    $folder_setting = SysCore::str_trim_slash($restaurant->s3_bucket_address);
     $directory = $folder_setting . '/' . $cur_date . '/' . $cur_hour . '/';
 
     $files = Storage::disk('sensors')->files($directory);
@@ -1247,7 +1238,7 @@ class SensorController extends Controller
             . ', [Need to re-check]'
           ;
 
-          $this->_sys_app->aws_s3_polly([
+          SysAws::s3_polly([
             'text_to_speak' => $text_to_speak,
             'text_rate' => 'slow',
           ]);

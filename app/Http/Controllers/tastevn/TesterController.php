@@ -21,6 +21,7 @@ use App\Excel\ImportData;
 use Validator;
 use Aws\S3\S3Client;
 use App\Api\SysApp;
+use App\Api\SysAws;
 use App\Api\SysCore;
 use App\Api\SysRobo;
 use App\Api\SysZalo;
@@ -61,6 +62,11 @@ class TesterController extends Controller
     $date = date('Y-m-d');
 
     var_dump($sys_app::_DEBUG_BREAK);
+
+    SysAws::s3_polly([
+      'text_to_speak' => '[testing], missing 1 ingredient',
+      'text_rate' => 'slow',
+    ]);
 
 //    $rfs->rfs_photo_scan([
 //      'notification' => false,
