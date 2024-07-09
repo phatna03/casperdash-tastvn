@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Storage;
 //lib
 use App\Api\SysApp;
+use App\Api\SysCore;
 use App\Models\Restaurant;
 use App\Models\RestaurantParent;
 use App\Models\RestaurantFoodScan;
@@ -337,12 +338,10 @@ class SysRobo
 
   public static function photo_check($pars = [])
   {
-    $sys_app = new SysApp();
-
     //pars
     $debug = isset($pars['debug']) ? (bool)$pars['debug'] : false;
     if ($debug) {
-      var_dump($sys_app::_DEBUG_BREAK);
+      var_dump(SysCore::var_dump_break());
       var_dump('photo check...');
     }
 
@@ -372,9 +371,9 @@ class SysRobo
 
     //scan
     //setting
-    $api_key = $sys_app->get_setting('rbf_api_key');
-    $dataset = $sys_app->parse_s3_bucket_address($sys_app->get_setting('rbf_dataset_scan'));
-    $version = $sys_app->get_setting('rbf_dataset_ver');
+    $api_key = SysCore::get_sys_setting('rbf_api_key');
+    $dataset = SysCore::str_trim_slash(SysCore::get_sys_setting('rbf_dataset_scan'));
+    $version = SysCore::get_sys_setting('rbf_dataset_ver');
     //pars
     $dataset = isset($pars['sys_dataset']) && !empty($pars['sys_dataset']) ? $pars['sys_dataset'] : $dataset;
     $version = isset($pars['sys_version']) && !empty($pars['sys_version']) ? $pars['sys_version'] : $version;
@@ -398,14 +397,14 @@ class SysRobo
     ]);
 
     if ($debug) {
-      var_dump($sys_app::_DEBUG_BREAK);
+      var_dump(SysCore::var_dump_break());
       var_dump('photo scan datas...');
       var_dump($datas);
     }
 
     if (!$datas['status']) {
 
-      $sys_app->bug_add([
+      SysCore::log_sys_bug([
         'type' => 'photo_check',
         'file' => isset($datas['error']['file']) ? $datas['error']['file'] : NULL,
         'line' => isset($datas['error']['line']) ? $datas['error']['line'] : NULL,
@@ -414,7 +413,7 @@ class SysRobo
       ]);
 
       if ($debug) {
-        var_dump($sys_app::_DEBUG_BREAK);
+        var_dump(SysCore::var_dump_break());
         var_dump('photo scan error...');
       }
 
@@ -442,7 +441,7 @@ class SysRobo
     ]);
 
     if ($debug) {
-      var_dump($sys_app::_DEBUG_BREAK);
+      var_dump(SysCore::var_dump_break());
       var_dump('find foods...');
       var_dump($foods);
     }
@@ -450,7 +449,7 @@ class SysRobo
     if (!count($foods)) {
 
       if ($debug) {
-        var_dump($sys_app::_DEBUG_BREAK);
+        var_dump(SysCore::var_dump_break());
         var_dump('no foods found...');
       }
 
@@ -467,7 +466,7 @@ class SysRobo
     if (!count($foods)) {
 
       if ($debug) {
-        var_dump($sys_app::_DEBUG_BREAK);
+        var_dump(SysCore::var_dump_break());
         var_dump('no food 1 found...');
       }
 
@@ -475,7 +474,7 @@ class SysRobo
     }
 
     if ($debug) {
-      var_dump($sys_app::_DEBUG_BREAK);
+      var_dump(SysCore::var_dump_break());
       var_dump('food 1 final= ' . $foods['food'] . ' - confidence= ' . $foods['confidence']);
     }
 
@@ -487,7 +486,7 @@ class SysRobo
     ]);
 
     if ($debug) {
-      var_dump($sys_app::_DEBUG_BREAK);
+      var_dump(SysCore::var_dump_break());
       if ($food_category) {
         var_dump('category= ' . $food_category->name . ' - ID= ' . $food_category->id);
       } else {
@@ -504,7 +503,7 @@ class SysRobo
     ]);
 
     if ($debug) {
-      var_dump($sys_app::_DEBUG_BREAK);
+      var_dump(SysCore::var_dump_break());
       var_dump('food ingredients found...');
       var_dump($ingredients_found);
     }
@@ -519,7 +518,7 @@ class SysRobo
     ]);
 
     if ($debug) {
-      var_dump($sys_app::_DEBUG_BREAK);
+      var_dump(SysCore::var_dump_break());
       var_dump('food ingredients missing...');
       var_dump($ingredients_missing);
     }
@@ -1049,6 +1048,7 @@ class SysRobo
         $prediction = (array)$prediction;
 
         if (strtolower(trim($prediction['class'])) == 'beef buger'
+          || strtolower(trim($prediction['class'])) == 'beef burger'
           || strtolower(trim($prediction['class'])) == 'grilled chicken') {
           $quantity++;
         }

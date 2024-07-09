@@ -11,6 +11,7 @@ use App\Notifications\IngredientMissingMail;
 use App\Notifications\PhotoNote;
 use Intervention\Image\ImageManagerStatic as Image;
 use App\Api\SysApp;
+use App\Api\SysCore;
 use App\Api\SysRobo;
 
 class RestaurantFoodScan extends Model
@@ -972,11 +973,10 @@ class RestaurantFoodScan extends Model
 
   public function photo_1024_create()
   {
-    $sys_app = new SysApp();
     $photo_url = url('sensors') . '/' . $this->photo_name;
 
     $file_photo = public_path('sensors') . '/' . $this->photo_name;
-    $file_photo = $sys_app->os_slash_file($file_photo);
+    $file_photo = SysCore::os_slash_file($file_photo);
     if (is_file($file_photo)) {
 
       //create 1024 from sensor photo
@@ -992,7 +992,7 @@ class RestaurantFoodScan extends Model
       $path_1024 = $photo_path . $photo_name_1024;
 
       $file_1024 = public_path('sensors') . '/' . $path_1024;
-      $file_1024 = $sys_app->os_slash_file($file_1024);
+      $file_1024 = SysCore::os_slash_file($file_1024);
       $thumb_1024->save($file_1024, 100);
 
       $photo_url = url('sensors') . '/' . $path_1024;
@@ -1003,7 +1003,6 @@ class RestaurantFoodScan extends Model
 
   public function photo_1024()
   {
-    $sys_app = new SysApp();
     $sensor = $this->get_restaurant();
     $photo_url = NULL;
 
@@ -1015,7 +1014,7 @@ class RestaurantFoodScan extends Model
 
     if ($this->local_storage) {
       $file_1024 = public_path('sensors') . '/' . $path_1024;
-      $file_1024 = $sys_app->os_slash_file($file_1024);
+      $file_1024 = SysCore::os_slash_file($file_1024);
 
       if (is_file($file_1024)) {
         $photo_url = url('sensors') . '/' . $path_1024;
@@ -1039,7 +1038,7 @@ class RestaurantFoodScan extends Model
     return $photo_url;
   }
 
-  public function rfs_photo_reset()
+  public function rfs_photo_scan_before()
   {
     //keep
     //time_photo
@@ -1072,11 +1071,26 @@ class RestaurantFoodScan extends Model
     ]);
   }
 
-  public function rfs_photo_scan()
+  public function rfs_photo_scan($pars = [])
   {
+    $this->rfs_photo_scan_before();
+
     //model 1
+    $api_key = SysCore::get_sys_setting('rbf_api_key');
+    $dataset = SysCore::str_trim_slash(SysCore::get_sys_setting('rbf_dataset_scan'));
+    $version = SysCore::get_sys_setting('rbf_dataset_ver');
+
+    $debug = false;
+
     //img_1024
     $img_url = $this->photo_1024();
+
+    //time_scan
+    if (empty($this->time_scan)) {
+      $this->update([
+        'time_scan' => date('Y-m-d H:i:s'),
+      ]);
+    }
 
     $datas = SysRobo::photo_scan([
       'img_url' => $img_url,
@@ -1085,19 +1099,310 @@ class RestaurantFoodScan extends Model
       'dataset' => $dataset,
       'version' => $version,
 
-      'confidence' => $confidence,
-      'overlap' => $overlap,
-      'max_objects' => $max_objects,
+      'confidence' => SysRobo::_RBF_CONFIDENCE,
+      'overlap' => SysRobo::_RBF_OVERLAP,
+      'max_objects' => SysRobo::_RBF_MAX_OBJECTS,
 
-      'debug' => true,
+      'debug' => $debug,
+    ]);
+//    var_dump($datas);
+
+    $no_data = false;
+    if (!count($datas) || !$datas['status']
+      || ($datas['status'] && (!isset($datas['result']['predictions'])) || !count($datas['result']['predictions']))) {
+      $no_data = true;
+    }
+
+    $this->update([
+      'status' => $no_data ? 'failed' : 'scanned',
+      'total_seconds' => isset($datas['result']['time']) ? $datas['result']['time'] : $this->total_seconds,
+      'rbf_api' => json_encode($datas),
+      'rbf_version' => json_encode([
+        'dataset' => $dataset,
+        'version' => $version,
+      ]),
     ]);
 
+    if (!$no_data) {
+      $this->rfs_photo_predict($pars);
+    }
+
+    //time_end
+    if (empty($this->time_end)) {
+      $this->update([
+        'time_end' => date('Y-m-d H:i:s'),
+      ]);
+    }
+  }
+
+  public function rfs_photo_scan_after()
+  {
 
   }
 
-  public function rfs_photo_predict()
+  public function rfs_photo_predict_before()
+  {
+    //keep
+    //time_photo
+    //time_scan
+    //time_end
+
+    $this->update([
+      'food_category_id' => 0,
+      'food_id' => 0,
+      'confidence' => 0,
+      'found_by' => NULL,
+      'total_seconds' => 0,
+      'missing_ids' => NULL,
+      'missing_texts' => NULL,
+
+      'sys_predict' => 0,
+      'sys_confidence' => 0,
+      'usr_predict' => 0,
+      'rbf_predict' => 0,
+      'rbf_confidence' => 0,
+      'usr_edited' => NULL,
+
+//      'status' => 'new',
+//      'rbf_api' => NULL,
+//      'rbf_api_js' => NULL,
+//      'rbf_version' => NULL,
+//      'rbf_model' => 0,
+//      'rbf_api_1' => NULL,
+//      'rbf_api_2' => NULL,
+    ]);
+
+    //notify
+    DB::table('notifications')
+      ->distinct()
+      ->where('notifiable_type', 'App\Models\User')
+      ->whereIn('type', ['App\Notifications\IngredientMissing'])
+      ->where('restaurant_food_scan_id', $this->id)
+      ->delete();
+
+  }
+
+  public function rfs_photo_predict($pars = [])
+  {
+    $this->rfs_photo_predict_before();
+
+    //model 1
+    $api_result = (array)json_decode($this->rbf_api, true);
+    $predictions = isset($api_result['result']) && isset($api_result['result']['predictions'])
+      ? (array)$api_result['result']['predictions'] : [];
+
+    $notification = isset($pars['notification']) ? (bool)$pars['notification'] : true;
+    $sensor = $this->get_restaurant();
+    $debug = false;
+
+    //find foods
+    $foods = SysRobo::foods_find([
+      'predictions' => $predictions,
+      'restaurant_parent_id' => $sensor->restaurant_parent_id,
+
+      'debug' => $debug,
+    ]);
+//    var_dump($foods);
+
+    $no_food = true;
+
+    if (count($foods)) {
+      //find food 1
+      $foods = SysRobo::foods_valid($foods, [
+        'predictions' => $predictions,
+
+        'debug' => $debug,
+      ]);
+//      var_dump($foods);
+
+      if (count($foods)) {
+        $no_food = false;
+
+        //find category
+        $food = Food::find($foods['food']);
+
+        $food_category = $food->get_category([
+          'restaurant_parent_id' => $sensor->restaurant_parent_id,
+        ]);
+
+        //find ingredients found
+        $ingredients_found = SysRobo::ingredients_found($food, [
+          'predictions' => $predictions,
+          'restaurant_parent_id' => $sensor->restaurant_parent_id,
+
+          'debug' => $debug
+        ]);
+//        var_dump($ingredients_found);
+
+        //find ingredients missing
+        $ingredients_missing = SysRobo::ingredients_missing($food, [
+          'predictions' => $predictions,
+          'restaurant_parent_id' => $sensor->restaurant_parent_id,
+          'ingredients_found' => $ingredients_found,
+
+          'debug' => $debug
+        ]);
+//        var_dump($ingredients_missing);
+
+        $this->update([
+          'status' => 'checked',
+
+          'food_id' => $food->id,
+          'food_category_id' => $food_category ? $food_category->id : 0,
+          'confidence' => $foods['confidence'],
+          'rbf_confidence' => $foods['confidence'],
+          'found_by' => 'rbf',
+          'rbf_predict' => $food->id,
+        ]);
+
+        $this->rfs_ingredients_missing($food, $ingredients_missing, $notification);
+      }
+    }
+
+//    var_dump($no_food);
+    if ($no_food) {
+      $this->update([
+        'status' => 'failed',
+      ]);
+    }
+  }
+
+  public function rfs_photo_predict_after()
   {
 
+  }
+
+  public function rfs_ingredients_missing($food, $ingredients = [], $notification = true)
+  {
+    RestaurantFoodScanMissing::where('restaurant_food_scan_id', $this->id)
+      ->delete();
+
+    if (count($ingredients)) {
+      foreach ($ingredients as $ingredient) {
+        RestaurantFoodScanMissing::create([
+          'restaurant_food_scan_id' => $this->id,
+          'ingredient_id' => $ingredient['id'],
+          'ingredient_quantity' => $ingredient['quantity'],
+          'ingredient_type' => isset($ingredient['type']) ? $ingredient['type'] : 'additive',
+        ]);
+      }
+    }
+
+    $this->rfs_ingredients_missing_text($ingredients);
+
+    $food = $this->get_food();
+    $sensor = $this->get_restaurant();
+    $restaurant = $sensor->get_parent();
+    $users = $sensor->get_users();
+
+    //notify
+    if (count($ingredients) && count($users) && $notification) {
+      $live_group = $restaurant->get_food_live_group($food);
+
+      foreach ($users as $user) {
+
+        //live_group
+        $valid_group = true;
+        if ($live_group > 1 || $this->confidence < 90) {
+          $valid_group = false;
+        }
+        if ($user->is_super_admin()) {
+          $valid_group = true;
+        }
+
+        //isset notify
+        $notify = DB::table('notifications')
+          ->distinct()
+          ->where('notifiable_type', 'App\Models\User')
+          ->where('notifiable_id', $user->id)
+          ->where('restaurant_food_scan_id', $this->id)
+          ->whereIn('type', ['App\Notifications\IngredientMissing'])
+          ->orderBy('id', 'desc')
+          ->limit(1)
+          ->first();
+
+        if (!$valid_group || $notify) {
+          continue;
+        }
+
+        //notify db
+        Notification::sendNow($user, new IngredientMissing([
+          'restaurant_food_scan_id' => $this->id,
+        ]), ['database']);
+
+        //notify mail
+        if ((int)$user->get_setting('missing_ingredient_alert_email')) {
+          $user->notify((new IngredientMissingMail([
+            'type' => 'ingredient_missing',
+            'restaurant_id' => $sensor->id,
+            'restaurant_food_scan_id' => $this->id,
+            'user' => $user,
+          ]))->delay([
+            'mail' => now()->addMinutes(5),
+          ]));
+        }
+
+        //notify db update
+        $rows = $user->notifications()
+          ->whereIn('type', ['App\Notifications\IngredientMissing'])
+          ->where('data', 'LIKE', '%{"restaurant_food_scan_id":' . $this->id . '}%')
+          ->where('restaurant_food_scan_id', 0)
+          ->get();
+        if (count($rows)) {
+          foreach ($rows as $row) {
+            $notify = SysNotification::find($row->id);
+            if ($notify) {
+              $notify->update([
+                'restaurant_food_scan_id' => $this->id,
+                'restaurant_id' => $sensor->id,
+                'food_id' => $food ? $food->id : 0,
+                'object_type' => 'restaurant_food_scan',
+                'object_id' => $this->id,
+                'data' => json_encode([
+                  'status' => 'valid'
+                ]),
+              ]);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  public function rfs_ingredients_missing_text($ingredients = [])
+  {
+    $ids = [];
+    $texts = NULL;
+
+    $ingredients = count($ingredients) ? $ingredients : $this->get_ingredients_missing();
+    if (count($ingredients)) {
+      foreach ($ingredients as $ingredient) {
+
+        $quantity = isset($ingredient['ingredient_quantity']) ? $ingredient['ingredient_quantity'] : $ingredient['quantity'];
+        $ing_name = $ingredient['name'];
+
+        if (strtolower(trim($ing_name)) == 'beef buger'
+          || strtolower(trim($ing_name)) == 'beef burger'
+          || strtolower(trim($ing_name)) == 'grilled chicken') {
+          $ing_name = 'beef burger or grilled chicken';
+        }
+
+        $text = $quantity . ' ' . $ing_name;
+        if (!empty($ingredient['name_vi'])) {
+          $text .= ' - ' . $ingredient['name_vi'];
+        }
+
+        $ids[] = (int)$ingredient['id'];
+        $texts .= $text . ' &nbsp ';
+      }
+    }
+
+    sort($ids);
+
+    $this->update([
+      'missing_ids' => count($ids) ? $ids : NULL,
+      'missing_texts' => $texts,
+    ]);
   }
 
   public function get_ingredients_missing()

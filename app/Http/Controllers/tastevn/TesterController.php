@@ -56,12 +56,19 @@ class TesterController extends Controller
 
     $restaurant = RestaurantParent::find(1);
     $sensor = Restaurant::find(11);
-    $rfs = RestaurantFoodScan::find(57028);
+    $rfs = RestaurantFoodScan::find(52375);
     $date = date('Y-m-d');
 
     var_dump($sys_app::_DEBUG_BREAK);
 
+    $rfs->rfs_photo_scan([
+//      'notification' => false,
+    ]);
 
+
+//    foreach ($notify as $notif) {
+//      var_dump($notif->notifiable_id);
+//    }
 
     //zalo testing
 //    $zalo5 = '4889535897686365921';
