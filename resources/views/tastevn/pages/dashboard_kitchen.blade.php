@@ -185,9 +185,6 @@
     </div>
   @endif
 
-{{--  <script src="https://cdn.roboflow.com/0.2.26/roboflow.js"></script>--}}
-{{--  <script src="{{url('custom/library/roboflow/roboflow.js')}}"></script>--}}
-
   <script type="text/javascript">
     $(document).ready(function () {
 
@@ -199,114 +196,12 @@
 
       // sensor_checker();
       setInterval(function () {
-        if (sys_ready) {
-          sensor_checker();
-        }
-      }, 500);
+        sensor_checker();
+      }, acmcfs.timeout_kitchen);
 
     });
 
     var sys_running = 0;
-    var sys_ready = 1; //!parseInt(acmcfs.rbf_js);
-
-    if (parseInt(acmcfs.rbf_js)) {
-      //roboflow init
-      roboflow.auth({
-        publishable_key: "rf_3DtUFXV7oiSXMh2VkXK8d0EHcRD2"
-      });
-
-      async function rbf_load_model() {
-        var model = await roboflow.load({
-          model: "missing-dish-ingredients",
-          version: 29
-        });
-
-        model.configure({
-          threshold: 0.3,
-          overlap: 0.6,
-          max_objects: 100
-        });
-
-        acmcfs.rbf_model = model;
-
-        return model;
-      }
-
-      //roboflow check ready
-      rbf_load_model().then(model => {
-        console.log("==============================================");
-        console.log("RBF load success......");
-
-        // Do something with the model
-        console.log(model.getMetadata());
-        console.log(model.getConfiguration());
-        console.log('ok...');
-
-        sys_ready = 1;
-
-      }).catch(error => {
-        console.log("==============================================");
-        console.error('Error loading model:', error);
-      });
-    }
-
-    function food_predict_by_datas(item_id, datas) {
-      var wrap = $('.wrap-selected-food');
-
-      $('.result_photo_status .data_result').empty()
-        .append('<div class="badge bg-success fw-bold acm-ml-px-10 acm-fs-13">predicting...</div>');
-
-      axios.post('/admin/kitchen/predict', {
-        item: item_id,
-        restaurant_id: '{{$pageConfigs['item']->id}}',
-        datas: datas,
-      })
-        .then(response => {
-
-          //show data
-          food_datas(response.data.datas);
-
-          //notify
-          if (response.data.notifys && response.data.notifys.length) {
-
-            response.data.notifys.forEach(function (v, k) {
-
-              var html_toast = '<div class="cursor-pointer" onclick="sensor_food_scan_info(' + v.itd + ')">';
-              html_toast += '<div class="acm-fs-13">+ Dish: <b><span class="acm-mr-px-5 text-danger">' + v.food_confidence + '%</span><span>' + v.food_name + '</span></b></div>';
-
-              html_toast += '<div class="acm-fs-13">+ Ingredients Missing:</div>';
-              v.ingredients.forEach(function (v1, k1) {
-                if (v1 && v1 !== '' && v1.trim() !== '') {
-                  html_toast += '<div class="acm-fs-13 acm-ml-px-10">- ' + v1 + '</div>';
-                }
-              });
-
-              html_toast += '</div>';
-              // message_from_toast('info', v.restaurant_name, html_toast, true);
-            });
-
-
-            // if (response.data.printer) {
-            // page_open(acmcfs.link_base_url + '/printer?ids=' + response.data.notify_ids.toString());
-            // }
-          }
-
-          if (response.data.speaker) {
-            setTimeout(function () {
-              speaker_play();
-            }, 888);
-          }
-
-          //end
-          sys_ready = 1;
-
-        })
-        .catch(error => {
-          console.log(error);
-        });
-
-      return false;
-    }
 
     function food_predict_by_api(item_id) {
       var wrap = $('.wrap-selected-food');
@@ -355,9 +250,6 @@
               speaker_play();
             }, 888);
           }
-
-          //end
-          sys_ready = 1;
 
         })
         .catch(error => {
@@ -412,31 +304,10 @@
               food_datas(response.data.datas);
             }
 
-            if (sys_ready && response.data.status == 'new') {
+            if (response.data.status == 'new') {
               sys_running = 1;
 
-              // if (parseInt(acmcfs.rbf_js)) {
-              //   var photo_img = new Image();
-              //   photo_img.crossOrigin = "anonymous";
-              //   photo_img.src = response.data.file_url;
-              //
-              //   console.log("==============================================");
-              //   console.log("RBF start......");
-              //
-              //   if (acmcfs.rbf_model) {
-              //
-              //     setTimeout(function () {
-              //       acmcfs.rbf_model.detect(photo_img).then(function (predictions) {
-              //         console.log("Photo URL: ", response.data.file_url);
-              //         console.log("Predictions: ", predictions);
-              //         food_predict_by_datas(response.data.file_id, predictions);
-              //
-              //       });
-              //     }, 888);
-              //   }
-              // } else {
               food_predict_by_api(response.data.file_id);
-              // }
             }
           }
         })
@@ -464,7 +335,7 @@
         $('.result_photo_status .data_result').empty()
           .append('<div class="badge bg-primary fw-bold acm-ml-px-10 acm-fs-13 d-none">checked</div>');
         if (datas.ingredients_missing.length) {
-          $('.result_photo_status .data_btns').removeClass('d-none');
+          // $('.result_photo_status .data_btns').removeClass('d-none');
         }
 
         //predicted_dish
@@ -475,11 +346,17 @@
 
         // console.log(datas.ingredients_missing);
         // console.log(datas.ingredients_found);
+
         //ingredients_missing
         var html = '';
         if (datas.ingredients_missing.length) {
           datas.ingredients_missing.forEach(function (v, k) {
-            html += '<div class="text-dark fw-bold fs-1">- <b class="text-dark acm-mr-px-5">' + v.quantity + '</b> ' + v.name + '</div>';
+            var ing_name = v.name;
+            if (ing_name == 'beef buger' || ing_name == 'beef burger' || ing_name == 'grilled chicken') {
+              ing_name = 'beef burger or grilled chicken';
+            }
+
+            html += '<div class="text-dark fw-bold fs-1">- <b class="text-dark acm-mr-px-5">' + v.ingredient_quantity + '</b> ' + ing_name + '</div>';
           });
         }
         if (html && html != '') {
@@ -488,41 +365,47 @@
         }
 
         //btns
-        $('.result_photo_status .data_btns .btn_resolved').removeClass('btn-success')
-          .addClass('btn-primary');
-        $('.result_photo_status .data_btns .btn_resolved').text('Resolve');
-        $('.result_photo_status .data_btns .btn_resolved').attr('data-value', 0);
-
-        $('.result_photo_status .data_btns .btn_marked').removeClass('btn-success')
-          .addClass('btn-primary');
-        $('.result_photo_status .data_btns .btn_marked').text('Mark');
-        $('.result_photo_status .data_btns .btn_marked').attr('data-value', 0);
-
-        //is_resolved
-        if (datas.is_resolved) {
-          $('.result_ingredients_missing').addClass('d-none');
-
-          $('.result_photo_status .data_btns .btn_resolved').addClass('btn-success')
-            .removeClass('btn-primary');
-          $('.result_photo_status .data_btns .btn_resolved').text('Resolved');
-          $('.result_photo_status .data_btns .btn_resolved').attr('data-value', 1);
-        }
-        //is_marked
-        if (datas.is_marked) {
-
-          $('.result_photo_status .data_btns .btn_marked').addClass('btn-success')
-            .removeClass('btn-primary');
-          $('.result_photo_status .data_btns .btn_marked').text('Marked');
-          $('.result_photo_status .data_btns .btn_marked').attr('data-value', 1);
-        }
+        // $('.result_photo_status .data_btns .btn_resolved').removeClass('btn-success')
+        //   .addClass('btn-primary');
+        // $('.result_photo_status .data_btns .btn_resolved').text('Resolve');
+        // $('.result_photo_status .data_btns .btn_resolved').attr('data-value', 0);
+        //
+        // $('.result_photo_status .data_btns .btn_marked').removeClass('btn-success')
+        //   .addClass('btn-primary');
+        // $('.result_photo_status .data_btns .btn_marked').text('Mark');
+        // $('.result_photo_status .data_btns .btn_marked').attr('data-value', 0);
+        //
+        // //is_resolved
+        // if (datas.is_resolved) {
+        //   $('.result_ingredients_missing').addClass('d-none');
+        //
+        //   $('.result_photo_status .data_btns .btn_resolved').addClass('btn-success')
+        //     .removeClass('btn-primary');
+        //   $('.result_photo_status .data_btns .btn_resolved').text('Resolved');
+        //   $('.result_photo_status .data_btns .btn_resolved').attr('data-value', 1);
+        // }
+        // //is_marked
+        // if (datas.is_marked) {
+        //
+        //   $('.result_photo_status .data_btns .btn_marked').addClass('btn-success')
+        //     .removeClass('btn-primary');
+        //   $('.result_photo_status .data_btns .btn_marked').text('Marked');
+        //   $('.result_photo_status .data_btns .btn_marked').attr('data-value', 1);
+        // }
 
         //ingredients_found
         html = '';
         if (datas.ingredients_found.length) {
           html += '<div class="row m-0">';
           datas.ingredients_found.forEach(function (v, k) {
+
+            var ing_name = v.name;
+            if (ing_name == 'beef buger' || ing_name == 'beef burger' || ing_name == 'grilled chicken') {
+              ing_name = 'beef burger or grilled chicken';
+            }
+
             html += '<div class="col-lg-6">';
-            html += '<div class="text-dark acm-ml-px-10 fs-5 fw-bold">- <b class="text-danger acm-mr-px-5">' + v.quantity + '</b> ' + v.name + '</div>';
+            html += '<div class="text-dark acm-ml-px-10 fs-5 fw-bold">- <b class="text-danger acm-mr-px-5">' + v.ingredient_quantity + '</b> ' + ing_name + '</div>';
             html += '</div>';
           });
           html += '</div>';

@@ -63,14 +63,8 @@ class TesterController extends Controller
 
     var_dump($sys_app::_DEBUG_BREAK);
 
-    SysAws::s3_polly([
-      'text_to_speak' => '[testing], missing 1 ingredient',
-      'text_rate' => 'slow',
-    ]);
 
-//    $rfs->rfs_photo_scan([
-//      'notification' => false,
-//    ]);
+
 
 
 //    foreach ($notify as $notif) {
@@ -101,8 +95,8 @@ class TesterController extends Controller
     //=======================================================================================
 
     //v3
-//    $rfs = RestaurantFoodScan::find(56122);
-//
+    $rfs = RestaurantFoodScan::find(53221);
+
 //    $this->photo_check([
 //      'debug' => true,
 //
@@ -111,6 +105,9 @@ class TesterController extends Controller
 //
 //      'img_1024' => true,
 //    ]);
+
+    var_dump($rfs->get_ingredients_missing()->toArray());
+    var_dump($rfs->get_ingredients_found());
 
     //=======================================================================================
 

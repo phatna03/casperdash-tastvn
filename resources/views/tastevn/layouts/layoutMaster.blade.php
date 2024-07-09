@@ -55,6 +55,7 @@ $version = '112';
     timeout_default: 2000,
     timeout_quick: 500,
     timeout_notification: 5000,
+    timeout_kitchen: {{$devMode == 'production' ? 500 : 5000}},
 
     notify_running: 0,
 

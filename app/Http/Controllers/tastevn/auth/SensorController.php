@@ -328,7 +328,7 @@ class SensorController extends Controller
       'item' => $row,
       'food_datas' => $food_datas,
 
-      'debug' => $debug,
+      'debug' => $debug && $this->_viewer->is_super_admin(),
     ];
 
     $this->_viewer->add_log([
@@ -985,7 +985,8 @@ class SensorController extends Controller
       'hasCustomizer' => false,
 
       'item' => $row,
-      'debug' => $debug,
+
+      'debug' => $debug && $this->_viewer->is_super_admin(),
     ];
 
     return view('tastevn.pages.dashboard_kitchen', ['pageConfigs' => $pageConfigs]);
@@ -1002,34 +1003,34 @@ class SensorController extends Controller
       return response()->json($validator->errors(), 422);
     }
     //invalid
-    $restaurant = Restaurant::find((int)$values['item']);
-    if (!$restaurant) {
+    $sensor = Restaurant::find((int)$values['item']);
+    if (!$sensor) {
       return response()->json([
         'error' => 'Invalid item'
       ], 422);
     }
 
+    $rfs = NULL;
+    //live
     $cur_date = date('Y-m-d');
     $cur_hour = (int)date('H');
-
-    $row = NULL;
-
-    $folder_setting = SysCore::str_trim_slash($restaurant->s3_bucket_address);
+    //sensor folder
+    $folder_setting = SysCore::str_trim_slash($sensor->s3_bucket_address);
     $directory = $folder_setting . '/' . $cur_date . '/' . $cur_hour . '/';
-
+    //sensor files
     $files = Storage::disk('sensors')->files($directory);
     if (count($files)) {
-      //desc
+      //desc = order by last updated or modified
       $files = array_reverse($files);
 
-      //step 1= photo check
       foreach ($files as $file) {
+        //sensor ext = jpg
         $ext = array_filter(explode('.', $file));
         if (!count($ext) || $ext[count($ext) - 1] != 'jpg') {
           continue;
         }
 
-        //no 1024
+        //photo width 1024
         $temps = array_filter(explode('/', $file));
         $photo_name = $temps[count($temps) - 1];
         if (substr($photo_name, 0, 5) == '1024_') {
@@ -1043,21 +1044,22 @@ class SensorController extends Controller
 
         try {
           //check exist
-          $row = RestaurantFoodScan::where('restaurant_id', $restaurant->id)
+          $rfs = RestaurantFoodScan::where('restaurant_id', $sensor->id)
             ->where('photo_name', $file)
             ->first();
-          if (!$row) {
+          if (!$rfs) {
 
             $status = 'new';
 
+            //sensor capture > 1 photo
             $rows = RestaurantFoodScan::where('photo_name', 'LIKE', $keyword)
-              ->where('restaurant_id', $restaurant->id)
+              ->where('restaurant_id', $sensor->id)
               ->get();
             if (count($rows)) {
               $status = 'duplicated';
             }
 
-            $row = $restaurant->photo_save([
+            $rfs = $sensor->photo_save([
               'local_storage' => 1,
               'photo_url' => NULL,
               'photo_name' => $file,
@@ -1079,8 +1081,8 @@ class SensorController extends Controller
       }
     }
 
-    if (!$row || ($row && $row->status == 'duplicated')) {
-      $row = RestaurantFoodScan::where('restaurant_id', $restaurant->id)
+    if (!$rfs || ($rfs && $rfs->status == 'duplicated')) {
+      $rfs = RestaurantFoodScan::where('restaurant_id', $sensor->id)
         ->where('status', '<>', 'duplicated')
         ->where('deleted', 0)
         ->orderBy('id', 'desc')
@@ -1088,23 +1090,15 @@ class SensorController extends Controller
         ->first();
     }
 
-    $datas = [];
-    if ($row) {
-      $datas = $this->kitchen_food_datas($row, [
-        'kitchen' => true,
-      ]);
-
-      if (count($datas) && !$datas['confidence']) {
-
-      }
-    }
+    $rfs = RestaurantFoodScan::find(56122);
+    $datas = $rfs ? $this->kitchen_food_datas($rfs) : [];
 
     return response()->json([
-      'status' => $row ? $row->status : 'no_photo',
+      'status' => $rfs ? $rfs->status : 'no_photo',
 
-      'file' => $row ? $row->photo_name : '',
-      'file_url' => $row ? $row->get_photo() : '',
-      'file_id' => $row ? $row->id : 0,
+      'file' => $rfs ? $rfs->photo_name : '',
+      'file_url' => $rfs ? $rfs->get_photo() : '',
+      'file_id' => $rfs ? $rfs->id : 0,
 
       'datas' => $datas,
     ]);
@@ -1248,9 +1242,7 @@ class SensorController extends Controller
 
     $datas = [];
     if ($row) {
-      $datas = $this->kitchen_food_datas($row, [
-        'kitchen' => true,
-      ]);
+      $datas = $this->kitchen_food_datas($row);
 
       if (count($datas) && !$datas['confidence']) {
         $notifys = [];
@@ -1282,11 +1274,9 @@ class SensorController extends Controller
       return [];
     }
 
-    $restaurant = $row->get_restaurant();
-    $restaurant_parent = $row->get_restaurant()->get_parent();
+    $sensor = $row->get_restaurant();
+    $restaurant = $row->get_restaurant()->get_parent();
     $food = $row->get_food() ? $row->get_food() : NULL;
-
-    $kitchen = isset($pars['kitchen']) ? (bool)$pars['kitchen'] : false;
 
     $ingredients_found = [];
     $ingredients_missing = [];
@@ -1304,7 +1294,7 @@ class SensorController extends Controller
       $food_id = $food->id;
       $food_name = $food->name;
       $food_photo = $food->get_photo([
-        'restaurant_parent_id' => $restaurant->restaurant_parent_id
+        'restaurant_parent_id' => $sensor->restaurant_parent_id
       ]);
 
       $is_resolved = $row->is_resolved;
@@ -1313,73 +1303,25 @@ class SensorController extends Controller
       //info recipe
       $html_info = view('tastevn.htmls.item_food_dashboard')
         ->with('recipes', $food->get_recipes([
-          'restaurant_parent_id' => $restaurant->restaurant_parent_id,
+          'restaurant_parent_id' => $sensor->restaurant_parent_id,
         ]))
         ->render();
 
       //ingredient missing
-      $ids = [];
-      $temps = $row->get_ingredients_missing();
-      if (count($temps)) {
-        foreach ($temps as $ing) {
-          $ingredients_missing[] = [
-            'id' => $ing->id,
-            'quantity' => $ing->ingredient_quantity,
-            'name' => $ing->name,
-            'name_vi' => $ing->name_vi,
-            'type' => $ing->ingredient_type,
-          ];
-
-          $ids[] = $ing->id;
-        }
-      }
+      $ingredients_missing = $row->get_ingredients_missing();
 
       //ingredient found
-      $temps = $food->get_ingredients([
-        'restaurant_parent_id' => $restaurant->restaurant_parent_id,
-      ]);
-      if (count($temps)) {
-        foreach ($temps as $ing) {
-          if (count($ids) && in_array($ing->id, $ids)) {
+      $ingredients = $row->get_ingredients_found();
+      if (count($ingredients)) {
+        foreach ($ingredients as $ing) {
+          $ing = (array)$ing;
 
-            if ($ing->ingredient_quantity > 1) {
-
-              $quantity = 0;
-              if (count($ingredients_missing)) {
-                foreach ($ingredients_missing as $missing) {
-                  if ($missing['id'] == $ing->id) {
-                    $quantity = $missing['quantity'];
-                    break;
-                  }
-                }
-              }
-
-              if ($ing->ingredient_quantity - $quantity) {
-                $ingredients_found[] = [
-                  'id' => $ing->id,
-                  'quantity' => $ing->ingredient_quantity - $quantity,
-                  'name' => $ing->name,
-                  'name_vi' => $ing->name_vi,
-                  'type' => $ing->ingredient_type,
-                ];
-              }
-            }
-
-            continue;
-          }
-
-          $ingredients_found[] = [
-            'id' => $ing->id,
-            'quantity' => $ing->ingredient_quantity,
-            'name' => $ing->name,
-            'name_vi' => $ing->name_vi,
-            'type' => $ing->ingredient_type,
-          ];
+          $ingredients_found[] = $ing;
         }
       }
 
       //uat
-      $live_group = $restaurant_parent->get_food_live_group($food);
+      $live_group = $restaurant->get_food_live_group($food);
       switch ($live_group) {
         case 1:
 

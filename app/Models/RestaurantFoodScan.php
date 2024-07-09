@@ -764,11 +764,29 @@ class RestaurantFoodScan extends Model
     $food = $this->get_food();
     $sensor = $this->get_restaurant();
 
+    $burger_ingredients = SysRobo::_SYS_BURGER_INGREDIENTS;
+
     $ingredients = [];
     if ($food) {
       $ingredients = $food->get_ingredients([
         'restaurant_parent_id' => $sensor->restaurant_parent_id
       ]);
+
+      if (count($ingredients)) {
+        $temps = [];
+
+        foreach ($ingredients as $ing) {
+          $temps[] = [
+            'id' => $ing->id,
+            'name' => $ing->name,
+            'name_vi' => $ing->name_vi,
+            'ingredient_quantity' => $ing->ingredient_quantity,
+            'ingredient_type' => $ing->ingredient_type,
+          ];
+        }
+
+        $ingredients = $temps;
+      }
     }
 
     if (count($ingredients_missing)) {
@@ -791,28 +809,28 @@ class RestaurantFoodScan extends Model
 
       if (count($ingredients)) {
         foreach ($ingredients as $ing) {
-          if (in_array($ing->id, $ids)) {
+          if (in_array($ing['id'], $ids)) {
 
-            $quantity = $ing->ingredient_quantity - $temp1s[$ing->id]['ingredient_quantity'];
+            $quantity = $ing['ingredient_quantity'] - $temp1s[$ing['id']]['ingredient_quantity'];
 
             if ($quantity) {
-              $temp2s[$ing->id] = [
-                'id' => $ing->id,
-                'name' => $ing->name,
-                'name_vi' => $ing->name_vi,
-                'ingredient_quantity' => $ing->ingredient_quantity,
-                'ingredient_type' => $ing->ingredient_type,
+              $temp2s[$ing['id']] = [
+                'id' => $ing['id'],
+                'name' => $ing['name'],
+                'name_vi' => $ing['name_vi'],
+                'ingredient_quantity' => $quantity,
+                'ingredient_type' => $ing['ingredient_type'],
               ];
             }
 
           } else {
 
-            $temp2s[$ing->id] = [
-              'id' => $ing->id,
-              'name' => $ing->name,
-              'name_vi' => $ing->name_vi,
-              'ingredient_quantity' => $ing->ingredient_quantity,
-              'ingredient_type' => $ing->ingredient_type,
+            $temp2s[$ing['id']] = [
+              'id' => $ing['id'],
+              'name' => $ing['name'],
+              'name_vi' => $ing['name_vi'],
+              'ingredient_quantity' => $ing['ingredient_quantity'],
+              'ingredient_type' => $ing['ingredient_type'],
             ];
           }
         }

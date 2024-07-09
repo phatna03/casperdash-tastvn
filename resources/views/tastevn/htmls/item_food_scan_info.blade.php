@@ -1,5 +1,6 @@
 @php
-
+  $burger_ingredient_name = 'beef burger or grilled chicken';
+  $burger_ingredients = \App\Api\SysRobo::_SYS_BURGER_INGREDIENTS;
 @endphp
 
 <div class="row">
@@ -87,19 +88,21 @@
               foreach($ingredients_missing as $ing):
               $ing_name = $ing['name'];
 
-              if (strtolower(trim($ing_name)) == 'beef buger'
-                || strtolower(trim($ing_name)) == 'beef burger'
-                || strtolower(trim($ing_name)) == 'grilled chicken') {
-                $ing_name = 'beef burger or grilled chicken';
+              if (in_array($ing['id'], $burger_ingredients)) {
+                  $burger_ingredient_check = true;
               }
               @endphp
                 <div class="acm-text-line-one">
                   - <b class="acm-mr-px-5 text-danger">{{$ing['ingredient_quantity']}}</b>
                   <span class="text-dark">
-                    @if(!empty($ing['name_vi']))
-                      {{$ing_name . ' - ' . $ing['name_vi']}}
+                    @if($burger_ingredient_check)
+                      {{$burger_ingredient_name}}
                     @else
-                      {{$ing_name}}
+                      @if(!empty($ing['name_vi']))
+                        {{$ing_name . ' - ' . $ing['name_vi']}}
+                      @else
+                        {{$ing_name}}
+                      @endif
                     @endif
                   </span>
                 </div>
@@ -114,21 +117,24 @@
             @if(count($ingredients_found))
             @php
               foreach($ingredients_found as $ing):
-            $ing_name = $ing['name'];
+              $ing_name = $ing['name'];
 
-            if (strtolower(trim($ing_name)) == 'beef buger'
-              || strtolower(trim($ing_name)) == 'beef burger'
-              || strtolower(trim($ing_name)) == 'grilled chicken') {
-              $ing_name = 'beef burger or grilled chicken';
-            }
+              $burger_ingredient_check = false;
+              if (in_array($ing['id'], $burger_ingredients)) {
+                  $burger_ingredient_check = true;
+              }
             @endphp
                 <div class="acm-text-line-one">
                   - <b class="acm-mr-px-5 text-danger">{{$ing['ingredient_quantity']}}</b>
                   <span class="text-dark">
-                    @if(!empty($ing['name_vi']))
-                      {{$ing_name . ' - ' . $ing['name_vi']}}
+                    @if($burger_ingredient_check)
+                      {{$burger_ingredient_name}}
                     @else
-                      {{$ing_name}}
+                      @if(!empty($ing['name_vi']))
+                        {{$ing_name . ' - ' . $ing['name_vi']}}
+                      @else
+                        {{$ing_name}}
+                      @endif
                     @endif
                   </span>
                 </div>
@@ -184,24 +190,25 @@
           <div>
             @if(count($ingredients_recipe))
               @php
-              foreach($ingredients_recipe as $ing):
-              $ing_name = $ing['name'];
+                foreach($ingredients_recipe as $ing):
+                $ing_name = $ing['name'];
 
-              if ($ing['ingredient_quantity'] > 1) {
-                if (strtolower(trim($ing_name)) == 'beef buger'
-                  || strtolower(trim($ing_name)) == 'beef burger'
-                  || strtolower(trim($ing_name)) == 'grilled chicken') {
-                  $ing_name = 'beef burger or grilled chicken';
+                $burger_ingredient_check = false;
+                if (in_array($ing['id'], $burger_ingredients)) {
+                  $burger_ingredient_check = true;
                 }
-              }
-            @endphp
+              @endphp
                 <div class="acm-text-line-one">
-                  - <b class="acm-mr-px-5 text-danger">{{$ing['ingredient_quantity']}}</b>
+                  - <b class="acm-mr-px-5 text-danger d-none">{{$ing['ingredient_quantity']}}</b>
                   <span class="text-dark">
-                    @if(!empty($ing['name_vi']))
-                      {{$ing_name . ' - ' . $ing['name_vi']}}
+                    @if($burger_ingredient_check)
+                      {{$burger_ingredient_name}}
                     @else
-                      {{$ing_name}}
+                      @if(!empty($ing['name_vi']))
+                        {{$ing_name . ' - ' . $ing['name_vi']}}
+                      @else
+                        {{$ing_name}}
+                      @endif
                     @endif
                   </span>
                 </div>
@@ -251,16 +258,26 @@
                   </div>
                   <div class="overflow-hidden">
                     @if(count($ingredients_missing))
-                      @foreach($ingredients_missing as $ing)
+                      @php
+                        foreach($ingredients_missing as $ing):
+                        $burger_ingredient_check = false;
+                        if (in_array($ing['id'], $burger_ingredients)) {
+                          $burger_ingredient_check = true;
+                        }
+                      @endphp
                         <div class="acm-text-line-one">
                           - <b class="acm-mr-px-5 text-danger">{{$ing['ingredient_quantity']}}</b>
                           <span class="text-dark">
-                              @if(!empty($ing['name_vi']))
-                              {{$ing['name'] . ' - ' . $ing['name_vi']}}
+                            @if($burger_ingredient_check)
+                              {{$burger_ingredient_name}}
                             @else
-                              {{$ing['name']}}
+                              @if(!empty($ing['name_vi']))
+                                {{$ing['name'] . ' - ' . $ing['name_vi']}}
+                              @else
+                                {{$ing['name']}}
+                              @endif
                             @endif
-                              </span>
+                          </span>
                         </div>
                       @endforeach
                     @endif
