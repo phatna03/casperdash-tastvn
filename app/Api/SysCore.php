@@ -37,6 +37,24 @@ class SysCore
     return $path;
   }
 
+  public static function set_sys_setting($key, $val)
+  {
+    $row = SysSetting::where('key', $key)
+      ->first();
+
+    if (!$row) {
+      $row = SysSetting::create([
+        'key' => $key,
+      ]);
+    }
+
+    $row->update([
+      'value' => $val,
+    ]);
+
+    return $row;
+  }
+
   public static function get_sys_setting($key)
   {
     $row = SysSetting::where('key', $key)

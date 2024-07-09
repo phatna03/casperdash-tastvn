@@ -21,6 +21,7 @@ use App\Excel\ImportData;
 use Validator;
 use Aws\S3\S3Client;
 use App\Api\SysApp;
+use App\Api\SysCore;
 use App\Api\SysRobo;
 use App\Api\SysZalo;
 
@@ -61,9 +62,9 @@ class TesterController extends Controller
 
     var_dump($sys_app::_DEBUG_BREAK);
 
-    $rfs->rfs_photo_scan([
+//    $rfs->rfs_photo_scan([
 //      'notification' => false,
-    ]);
+//    ]);
 
 
 //    foreach ($notify as $notif) {

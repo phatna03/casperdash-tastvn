@@ -83,14 +83,23 @@
           <div class="col-12 mb-1">
             <div class="acm-lbl-dark text-primary">+ Ingredients Missing:</div>
             <div>
-              @foreach($ingredients_missing as $ing)
+              @php
+              foreach($ingredients_missing as $ing):
+              $ing_name = $ing['name'];
+
+              if (strtolower(trim($ing_name)) == 'beef buger'
+                || strtolower(trim($ing_name)) == 'beef burger'
+                || strtolower(trim($ing_name)) == 'grilled chicken') {
+                $ing_name = 'beef burger or grilled chicken';
+              }
+              @endphp
                 <div class="acm-text-line-one">
                   - <b class="acm-mr-px-5 text-danger">{{$ing['ingredient_quantity']}}</b>
                   <span class="text-dark">
                     @if(!empty($ing['name_vi']))
-                      {{$ing['name'] . ' - ' . $ing['name_vi']}}
+                      {{$ing_name . ' - ' . $ing['name_vi']}}
                     @else
-                      {{$ing['name']}}
+                      {{$ing_name}}
                     @endif
                   </span>
                 </div>
@@ -103,14 +112,23 @@
           <div class="acm-lbl-dark text-primary">+ Ingredients found:</div>
           <div>
             @if(count($ingredients_found))
-              @foreach($ingredients_found as $ing)
+            @php
+              foreach($ingredients_found as $ing):
+            $ing_name = $ing['name'];
+
+            if (strtolower(trim($ing_name)) == 'beef buger'
+              || strtolower(trim($ing_name)) == 'beef burger'
+              || strtolower(trim($ing_name)) == 'grilled chicken') {
+              $ing_name = 'beef burger or grilled chicken';
+            }
+            @endphp
                 <div class="acm-text-line-one">
                   - <b class="acm-mr-px-5 text-danger">{{$ing['ingredient_quantity']}}</b>
                   <span class="text-dark">
                     @if(!empty($ing['name_vi']))
-                      {{$ing['name'] . ' - ' . $ing['name_vi']}}
+                      {{$ing_name . ' - ' . $ing['name_vi']}}
                     @else
-                      {{$ing['name']}}
+                      {{$ing_name}}
                     @endif
                   </span>
                 </div>
@@ -165,14 +183,25 @@
           <div class="acm-lbl-dark text-primary">+ Recipe Ingredients:</div>
           <div>
             @if(count($ingredients_recipe))
-              @foreach($ingredients_recipe as $ing)
+              @php
+              foreach($ingredients_recipe as $ing):
+              $ing_name = $ing['name'];
+
+              if ($ing['ingredient_quantity'] > 1) {
+                if (strtolower(trim($ing_name)) == 'beef buger'
+                  || strtolower(trim($ing_name)) == 'beef burger'
+                  || strtolower(trim($ing_name)) == 'grilled chicken') {
+                  $ing_name = 'beef burger or grilled chicken';
+                }
+              }
+            @endphp
                 <div class="acm-text-line-one">
                   - <b class="acm-mr-px-5 text-danger">{{$ing['ingredient_quantity']}}</b>
                   <span class="text-dark">
                     @if(!empty($ing['name_vi']))
-                      {{$ing['name'] . ' - ' . $ing['name_vi']}}
+                      {{$ing_name . ' - ' . $ing['name_vi']}}
                     @else
-                      {{$ing['name']}}
+                      {{$ing_name}}
                     @endif
                   </span>
                 </div>
@@ -191,11 +220,13 @@
       <form onsubmit="return event.preventDefault();">
         <div class="row">
           <div class="col-12 mb-1 text-center position-relative clearfix overflow-hidden acm-height-30-min">
+            @if($viewer->is_moderator())
             <div class="position-absolute acm-top-0">
               <button type="button" class="btn btn-sm btn-danger p-1" onclick="sensor_food_scan_update_prepare()">
                 Update Result
               </button>
             </div>
+            @endif
             <div class="position-absolute acm-top-0 acm-right-15px text-uppercase">
               <span class="badge bg-secondary">final status</span>
             </div>

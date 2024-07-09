@@ -12,6 +12,10 @@
     if (!$rfs) {
         continue;
     }
+
+    if (in_array($notification->type, $type2s) && (!$rfs->food_id || empty($rfs->missing_texts))) {
+        continue;
+    }
 @endphp
 <li
   class="list-group-item list-group-item-action dropdown-notifications-item cursor-pointer p-1 @if(!empty($notification->read_at)) @else bg-primary-subtle @endif "

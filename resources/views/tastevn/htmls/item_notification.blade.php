@@ -12,6 +12,10 @@
     if (!$rfs) {
         continue;
     }
+
+    if (in_array($notification->type, $type2s) && (!$rfs->food_id || empty($rfs->missing_texts))) {
+        continue;
+    }
 @endphp
 <div
   class="acm-itm-notify itm_notify_{{$rfs->id}} position-relative m-1 p-1 @if(!empty($notification->read_at)) @else bg-primary-subtle @endif "
