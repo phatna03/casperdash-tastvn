@@ -1224,8 +1224,8 @@ class SensorController extends Controller
 
           $text_ingredients_missing = '';
           foreach ($row->get_ingredients_missing() as $ing) {
-//            $text_ingredients_missing .= $ing['ingredient_quantity'] . ' ' . $ing['name'] . ', ';
-            $text_ingredients_missing .= $ing['name'] . ', ';
+//            $text_ingredients_missing .= $ing['quantity'] . ' ' . $ing['name'] . ', ';
+            $text_ingredients_missing .= SysRobo::burger_ingredient_chicken_beef($ing['name']) . ', ';
           }
 
           $text_to_speak = '[Missing], '

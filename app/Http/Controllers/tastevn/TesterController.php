@@ -63,9 +63,6 @@ class TesterController extends Controller
 
     var_dump($sys_app::_DEBUG_BREAK);
 
-//    $ingredients_found = $rfs->get_ingredients_found();
-//    var_dump($ingredients_found);
-
 
 //    foreach ($notify as $notif) {
 //      var_dump($notif->notifiable_id);

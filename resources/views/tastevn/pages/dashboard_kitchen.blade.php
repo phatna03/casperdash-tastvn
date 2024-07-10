@@ -351,12 +351,7 @@
         var html = '';
         if (datas.ingredients_missing.length) {
           datas.ingredients_missing.forEach(function (v, k) {
-            var ing_name = v.name;
-            if (ing_name == 'beef buger' || ing_name == 'beef burger' || ing_name == 'grilled chicken') {
-              ing_name = 'beef burger or grilled chicken';
-            }
-
-            html += '<div class="text-dark fw-bold fs-1">- <b class="text-dark acm-mr-px-5">' + v.ingredient_quantity + '</b> ' + ing_name + '</div>';
+            html += '<div class="text-dark fw-bold fs-1">- <b class="text-dark acm-mr-px-5">' + v.ingredient_quantity + '</b> ' + v.name + '</div>';
           });
         }
         if (html && html != '') {
@@ -398,14 +393,8 @@
         if (datas.ingredients_found.length) {
           html += '<div class="row m-0">';
           datas.ingredients_found.forEach(function (v, k) {
-
-            var ing_name = v.name;
-            if (ing_name == 'beef buger' || ing_name == 'beef burger' || ing_name == 'grilled chicken') {
-              ing_name = 'beef burger or grilled chicken';
-            }
-
             html += '<div class="col-lg-6">';
-            html += '<div class="text-dark acm-ml-px-10 fs-5 fw-bold">- <b class="text-danger acm-mr-px-5">' + v.ingredient_quantity + '</b> ' + ing_name + '</div>';
+            html += '<div class="text-dark acm-ml-px-10 fs-5 fw-bold">- <b class="text-danger acm-mr-px-5">' + v.ingredient_quantity + '</b> ' + v.name + '</div>';
             html += '</div>';
           });
           html += '</div>';

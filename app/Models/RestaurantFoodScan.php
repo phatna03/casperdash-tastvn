@@ -92,12 +92,12 @@ class RestaurantFoodScan extends Model
     if (count($arr)) {
       foreach ($arr as $key => $itm) {
         $missings[] = [
-          'id' => $itm->id,
-          'quantity' => $itm->ingredient_quantity,
+          'id' => $itm['id'],
+          'quantity' => $itm['quantity'],
         ];
 
-        $a1[$key] = $itm->id;
-        $a2[$key] = $itm->ingredient_quantity;
+        $a1[$key] = $itm['id'];
+        $a2[$key] = $itm['quantity'];
       }
 
       array_multisort($a1, SORT_ASC, $a2, SORT_DESC, $missings);
@@ -696,10 +696,7 @@ class RestaurantFoodScan extends Model
     $ingredients = count($ingredients) ? $ingredients : $this->get_ingredients_missing();
     if (count($ingredients)) {
       foreach ($ingredients as $ingredient) {
-
-        $quantity = isset($ingredient['ingredient_quantity']) ? $ingredient['ingredient_quantity'] : $ingredient['quantity'];
-
-        $text = $quantity . ' ' . $ingredient['name'];
+        $text = $ingredient['quantity'] . ' ' . SysRobo::burger_ingredient_chicken_beef($ingredient['name']);
         if (!empty($ingredient['name_vi'])) {
           $text .= ' - ' . $ingredient['name_vi'];
         }

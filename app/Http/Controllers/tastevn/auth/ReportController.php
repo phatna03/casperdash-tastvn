@@ -464,7 +464,7 @@ class ReportController extends Controller
 
     //tester
     $ingredients = $rfs->get_ingredients_missing();
-    $ingredients = count($ingredients) ? array_column($ingredients->toArray(), 'id') : [];
+    $ingredients = count($ingredients) ? array_column($ingredients, 'id') : [];
 
     return response()->json([
       'status' => true,
@@ -746,7 +746,7 @@ class ReportController extends Controller
 
     //tester
     $ingredients = $rfs->get_ingredients_missing();
-    $ingredients = count($ingredients) ? array_column($ingredients->toArray(), 'id') : [];
+    $ingredients = count($ingredients) ? array_column($ingredients, 'id') : [];
 
     $photo_ids = ReportPhoto::select('restaurant_food_scan_id as id')
       ->where('report_id', $row->id)

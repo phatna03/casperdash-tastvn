@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 //lib
 use App\Api\SysApp;
+use App\Api\SysCore;
+use App\Api\SysRobo;
 //model
 use App\Models\RestaurantFoodScan;
 
@@ -196,7 +198,7 @@ class NotificationController extends Controller
 
             $text_ingredients_missing = '';
             foreach ($row->get_ingredients_missing() as $ing) {
-              $text_ingredients_missing .= $ing['ingredient_quantity'] . ' ' . $ing['name'] . ', ';
+              $text_ingredients_missing .= $ing['quantity'] . ' ' . SysRobo::burger_ingredient_chicken_beef($ing['name']) . ', ';
             }
 
             $text_to_speak = '[Missing], '

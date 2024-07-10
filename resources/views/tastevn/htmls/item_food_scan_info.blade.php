@@ -1,8 +1,3 @@
-@php
-  $burger_ingredient_name = 'beef burger or grilled chicken';
-  $burger_ingredients = \App\Api\SysRobo::_SYS_BURGER_INGREDIENTS;
-@endphp
-
 <div class="row">
   <div class="col-lg-6 mb-1">
     <div class="acm-border-css p-1">
@@ -86,23 +81,16 @@
             <div>
               @php
               foreach($ingredients_missing as $ing):
-              $ing_name = $ing['name'];
+              $ing_name = \App\Api\SysRobo::burger_ingredient_chicken_beef($ing['name']);
 
-              if (in_array($ing['id'], $burger_ingredients)) {
-                  $burger_ingredient_check = true;
-              }
               @endphp
                 <div class="acm-text-line-one">
                   - <b class="acm-mr-px-5 text-danger">{{$ing['ingredient_quantity']}}</b>
                   <span class="text-dark">
-                    @if($burger_ingredient_check)
-                      {{$burger_ingredient_name}}
+                    @if(!empty($ing['name_vi']))
+                      {{$ing_name . ' - ' . $ing['name_vi']}}
                     @else
-                      @if(!empty($ing['name_vi']))
-                        {{$ing_name . ' - ' . $ing['name_vi']}}
-                      @else
-                        {{$ing_name}}
-                      @endif
+                      {{$ing_name}}
                     @endif
                   </span>
                 </div>
@@ -117,24 +105,15 @@
             @if(count($ingredients_found))
             @php
               foreach($ingredients_found as $ing):
-              $ing_name = $ing['name'];
 
-              $burger_ingredient_check = false;
-              if (in_array($ing['id'], $burger_ingredients)) {
-                  $burger_ingredient_check = true;
-              }
             @endphp
                 <div class="acm-text-line-one">
                   - <b class="acm-mr-px-5 text-danger">{{$ing['ingredient_quantity']}}</b>
                   <span class="text-dark">
-                    @if($burger_ingredient_check)
-                      {{$burger_ingredient_name}}
+                    @if(!empty($ing['name_vi']))
+                      {{$ing['name'] . ' - ' . $ing['name_vi']}}
                     @else
-                      @if(!empty($ing['name_vi']))
-                        {{$ing_name . ' - ' . $ing['name_vi']}}
-                      @else
-                        {{$ing_name}}
-                      @endif
+                      {{$ing['name']}}
                     @endif
                   </span>
                 </div>
@@ -191,24 +170,14 @@
             @if(count($ingredients_recipe))
               @php
                 foreach($ingredients_recipe as $ing):
-                $ing_name = $ing['name'];
-
-                $burger_ingredient_check = false;
-                if (in_array($ing['id'], $burger_ingredients)) {
-                  $burger_ingredient_check = true;
-                }
               @endphp
                 <div class="acm-text-line-one">
                   - <b class="acm-mr-px-5 text-danger d-none">{{$ing['ingredient_quantity']}}</b>
                   <span class="text-dark">
-                    @if($burger_ingredient_check)
-                      {{$burger_ingredient_name}}
+                    @if(!empty($ing['name_vi']))
+                      {{$ing['name'] . ' - ' . $ing['name_vi']}}
                     @else
-                      @if(!empty($ing['name_vi']))
-                        {{$ing_name . ' - ' . $ing['name_vi']}}
-                      @else
-                        {{$ing_name}}
-                      @endif
+                      {{$ing['name']}}
                     @endif
                   </span>
                 </div>
@@ -260,22 +229,15 @@
                     @if(count($ingredients_missing))
                       @php
                         foreach($ingredients_missing as $ing):
-                        $burger_ingredient_check = false;
-                        if (in_array($ing['id'], $burger_ingredients)) {
-                          $burger_ingredient_check = true;
-                        }
+                        $ing_name = \App\Api\SysRobo::burger_ingredient_chicken_beef($ing['name']);
                       @endphp
                         <div class="acm-text-line-one">
                           - <b class="acm-mr-px-5 text-danger">{{$ing['ingredient_quantity']}}</b>
                           <span class="text-dark">
-                            @if($burger_ingredient_check)
-                              {{$burger_ingredient_name}}
+                            @if(!empty($ing['name_vi']))
+                              {{$ing_name . ' - ' . $ing['name_vi']}}
                             @else
-                              @if(!empty($ing['name_vi']))
-                                {{$ing['name'] . ' - ' . $ing['name_vi']}}
-                              @else
-                                {{$ing['name']}}
-                              @endif
+                              {{$ing_name}}
                             @endif
                           </span>
                         </div>
