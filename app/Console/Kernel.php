@@ -1,9 +1,10 @@
 <?php
 
 namespace App\Console;
-
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
+//lib
+use App\Models\Restaurant;
 
 class Kernel extends ConsoleKernel
 {
@@ -21,88 +22,51 @@ class Kernel extends ConsoleKernel
    */
   protected function schedule(Schedule $schedule): void
   {
-    //custome
-
-    //optimize & check cron
-    //shortcut if new sensor add
+    //every 15s
 //    local:check-images
+    $sensors = Restaurant::where('deleted', 0)
+      ->where('restaurant_parent_id', '>', 0)
+      ->where('s3_bucket_name', '<>', NULL)
+      ->where('s3_bucket_address', '<>', NULL)
+      ->orderBy('id', 'asc')
+      ->get();
+    if (count($sensors)) {
+      for ($i = 1; $i <= count($sensors); $i++) {
+        $schedule->command('local:check-images', [1, $i])
+          ->withoutOverlapping()
+          ->everyFifteenSeconds()
+          ->runInBackground();
+      }
+    }
 
-    //every 10min
-//    sync:images-to-s3
-
-    //every 15min
+    //every 5min
 //    local:check-status-images
-
-    //daily at 1am
-//    local:clear-images
-
-    //daily at 2am
-//    thirdparty:zalo-token-access
-
-    //cargo
-    $schedule->command('local:check-images', [1, 1])
-      ->withoutOverlapping()
-      ->everyMinute()
-      ->runInBackground();
-
-    $schedule->command('local:check-images', [1, 2])
-      ->withoutOverlapping()
-      ->everyFifteenSeconds()
-      ->runInBackground();
-    //deli
-    $schedule->command('local:check-images', [1, 3])
-      ->withoutOverlapping()
-      ->everyFifteenSeconds()
-      ->runInBackground();
-
-    $schedule->command('local:check-images', [1, 4])
-      ->withoutOverlapping()
-      ->everyMinute()
-      ->runInBackground();
-    //market
-    $schedule->command('local:check-images', [1, 5])
-      ->withoutOverlapping()
-      ->everyFifteenSeconds()
-      ->runInBackground();
-    //poison
-    $schedule->command('local:check-images', [1, 6])
-      ->withoutOverlapping()
-      ->everyFifteenSeconds()
-      ->runInBackground();
-
-    //morning glory lounge
-    $schedule->command('local:check-images', [1, 7])
-      ->withoutOverlapping()
-      ->everyFiveSeconds()
-      ->runInBackground();
-    $schedule->command('local:check-images', [1, 8])
-      ->withoutOverlapping()
-      ->everyFiveSeconds()
-      ->runInBackground();
-
-    //sync photos
-    $schedule->command('sync:images-to-s3')
-      ->twiceDaily(1, 17)
-      ->withoutOverlapping()
-      ->runInBackground();
-
-    //clear photos
-    $schedule->command('local:clear-images')
-      ->dailyAt('02:00')
-      ->withoutOverlapping()
-      ->runInBackground();
-
-    //status photos
     $schedule->command('local:check-status-images')
-      ->dailyAt('03:00')
+      ->everyFourMinutes()
       ->withoutOverlapping()
       ->runInBackground();
 
-    //zalo token
-    $schedule->command('thirdparty:zalo-token-access')
-      ->dailyAt('04:00')
+    //every 2h
+//    sync:images-to-s3
+    $schedule->command('sync:images-to-s3')
+      ->everyTwoHours()
       ->withoutOverlapping()
       ->runInBackground();
+
+    //daily at 5am
+//    local:clear-images
+    $schedule->command('local:clear-images')
+      ->dailyAt('05:00')
+      ->withoutOverlapping()
+      ->runInBackground();
+
+    //daily at 6am
+//    thirdparty:zalo-token-access
+    $schedule->command('thirdparty:zalo-token-access')
+      ->dailyAt('06:00')
+      ->withoutOverlapping()
+      ->runInBackground();
+
   }
 
   /**

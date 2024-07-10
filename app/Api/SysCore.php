@@ -28,6 +28,23 @@ class SysCore
     return $text;
   }
 
+  public static function str_format_hour($hour)
+  {
+    if ((int)$hour < 10) {
+      $hour = '0' . $hour;
+    }
+
+    return $hour;
+  }
+
+  public static function str_db_query($query)
+  {
+    return vsprintf(str_replace('?', '%s', $query->toSql()), collect($query->getBindings())->map(function ($binding) {
+      $binding = addslashes($binding);
+      return is_numeric($binding) ? $binding : "'{$binding}'";
+    })->toArray());
+  }
+
   public static function arr_date_range($times = NULL)
   {
     $time_from = NULL;

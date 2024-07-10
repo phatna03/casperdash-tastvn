@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Storage;
 //lib
 use Zalo\Zalo;
-use App\Api\SysApp;
+use App\Api\SysCore;
 use App\Models\RestaurantFoodScan;
 
 class SysZalo
@@ -14,9 +14,17 @@ class SysZalo
   public const _APP_SECRET_KEY = '5N9dmSO007UHfm8415gI';
   public const _APP_ID = '1735239634616456366';
 
+  public static function zalo_token($pars = [])
+  {
+    $datas = SysZalo::daily_access_token();
+    if (count($datas) && isset($datas['access_token'])) {
+      SysCore::set_sys_setting('zalo_token_refresh', $datas['refresh_token']);
+      SysCore::set_sys_setting('zalo_token_access', $datas['access_token']);
+    }
+  }
+
   public static function daily_access_token()
   {
-    $sys_app = new SysApp();
 
     $ch = curl_init();
     $url_header = [
@@ -26,7 +34,9 @@ class SysZalo
     ];
     $url_api = 'https://oauth.zaloapp.com/v4/oa/access_token';
 
-    $url_params = 'app_id=' . SysZalo::_APP_ID . '&grant_type=refresh_token&refresh_token=' . $sys_app->get_setting('zalo_token_refresh');
+    $url_params = 'app_id=' . SysZalo::_APP_ID
+      . '&grant_type=refresh_token&refresh_token='
+      . SysCore::get_sys_setting('zalo_token_refresh');
 
     curl_setopt($ch, CURLOPT_URL, $url_api);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
@@ -45,9 +55,7 @@ class SysZalo
 
   public static function access_token()
   {
-    $sys_app = new SysApp();
-
-    return $sys_app->get_setting('zalo_token_access');
+    return SysCore::get_sys_setting('zalo_token_access');
   }
 
   public static function user_list($pars = [])

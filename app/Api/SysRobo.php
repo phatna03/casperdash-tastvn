@@ -5,7 +5,6 @@ use App\Models\RestaurantFood;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Storage;
 //lib
-use App\Api\SysApp;
 use App\Api\SysCore;
 use App\Models\Restaurant;
 use App\Models\RestaurantParent;
@@ -15,9 +14,14 @@ use App\Models\Ingredient;
 
 class SysRobo
 {
-  public const _SCAN_CONFIDENCE = 30;
-  public const _SCAN_OVERLAP = 60;
-  public const _FOOD_CONFIDENCE = 70;
+  public const _RBF_CONFIDENCE = 30;
+  public const _RBF_OVERLAP = 60;
+  public const _RBF_MAX_OBJECTS = 70;
+
+  public const _SYS_BURGER_GROUP_1 = [32, 33, 71, 72];
+  public const _SYS_BURGER_GROUP_2 = [34];
+  public const _SYS_BURGER_GROUP_VEGAN = [32];
+  public const _SYS_BURGER_INGREDIENTS = [45, 114];
 
   public static function s3_bucket_folder()
   {
@@ -68,67 +72,48 @@ class SysRobo
 
   public static function photo_get($pars = [])
   {
-    $sys_app = new SysApp();
-
     $limit = isset($pars['limit']) ? (int)$pars['limit'] : 1;
     $page = isset($pars['page']) ? (int)$pars['page'] : 1;
 
     //run
-    $restaurant = Restaurant::where('deleted', 0)
+    $sensor = Restaurant::where('deleted', 0)
+      ->where('restaurant_parent_id', '>', 0)
       ->where('s3_bucket_name', '<>', NULL)
       ->where('s3_bucket_address', '<>', NULL)
-      ->where('s3_checking', 0)
-      ->orderBy('rbf_scan', 'asc')
       ->orderBy('id', 'asc')
       ->paginate($limit, ['*'], 'page', $page)
       ->first();
 
-    if (!$restaurant) {
+    if (!$sensor || ($sensor && $sensor->s3_checking)) {
       return false;
     }
 
-    $file_log = 'public/logs/cron_get_photos_' . $restaurant->id . '.log';
+    $file_log = 'public/logs/cron_photo_get_' . $sensor->id . '.log';
     Storage::append($file_log, '===================================================================================');
-
-    $restaurant_parent = $restaurant->get_parent();
+    Storage::append($file_log, 'AT_' . date('Y_m_d_H_i_s'));
 
     $cur_date = date('Y-m-d');
     $cur_hour = (int)date('H');
     $cur_minute = (int)date('i');
 
-    //old
-    $notify = true;
-    $old = false;
-
     if (isset($pars['date']) && !empty($pars['date'])) {
       $cur_date = $pars['date'];
-      $old = true;
     }
     if (isset($pars['hour'])) {
       $cur_hour = (int)$pars['hour'] ? (int)$pars['hour'] : $pars['hour'];
-      $notify = false;
-      $old = true;
     }
 
-    $row = NULL;
+    $rfs = NULL;
 
     //re-call for 59 like 18h59 -> 19h00
     if (!$cur_minute) {
       $cur_hour -= 1;
     }
 
-    $folder_setting = $sys_app->parse_s3_bucket_address($restaurant->s3_bucket_address);
+    $folder_setting = SysCore::str_trim_slash($sensor->s3_bucket_address);
     $directory = $folder_setting . '/' . $cur_date . '/' . $cur_hour . '/';
 
-    //model2
-    $model2 = false;
-    if ($restaurant_parent && $restaurant_parent->model_scan
-      && !empty($restaurant_parent->model_name) && !empty($restaurant_parent->model_version)
-    ) {
-      $model2 = true;
-    }
-
-    Storage::append($file_log, 'MODEL 2 CALL?= ' . $model2);
+    Storage::append($file_log, 'FOLDER_' . $directory);
 
     $files = Storage::disk('sensors')->files($directory);
     if (count($files)) {
@@ -163,22 +148,22 @@ class SysRobo
         $count++;
 
         //check exist
-        $row = RestaurantFoodScan::where('restaurant_id', $restaurant->id)
+        $rfs = RestaurantFoodScan::where('restaurant_id', $sensor->id)
           ->where('photo_name', $file)
           ->first();
-        if (!$row) {
+        if (!$rfs) {
 
           $status = 'new';
 
           $rows = RestaurantFoodScan::where('photo_name', 'LIKE', $keyword)
-            ->where('restaurant_id', $restaurant->id)
+            ->where('restaurant_id', $sensor->id)
             ->get();
           if (count($rows)) {
             $status = 'duplicated';
           }
 
           //step 1= photo get
-          $row = $restaurant->photo_save([
+          $rfs = $sensor->photo_save([
             'local_storage' => 1,
             'photo_url' => NULL,
             'photo_name' => $file,
@@ -188,76 +173,13 @@ class SysRobo
             'status' => $status,
           ]);
 
-          if ($old) {
-
-            $time_photo = $cur_date . ' '
-              . $sys_app->parse_hour_format($cur_hour) . ':'
-              . $sys_app->parse_hour_format($count) . ':'
-              . $sys_app->parse_hour_format($count);
-
-            $row->update([
-              'time_photo' => $time_photo,
-            ]);
-          }
         }
 
-        if ($row->status == 'new') {
-
-          $row = RestaurantFoodScan::find($row->id);
-
-          $dataset = $sys_app->parse_s3_bucket_address($sys_app->get_setting('rbf_dataset_scan'));
-          $version = $sys_app->get_setting('rbf_dataset_ver');
-
-          $rbf_version = [
-            'dataset' => $dataset,
-            'version' => $version,
-          ];
-
-          $row->update([
-            'rbf_model' => 3, //running
-            'time_scan' => date('Y-m-d H:i:s'),
-          ]);
-
-          //step 2= photo scan
-          $datas = SysRobo::photo_scan($row, [
-            'confidence' => SysRobo::_SCAN_CONFIDENCE,
-            'overlap' => SysRobo::_SCAN_OVERLAP,
-
-            'dataset' => $dataset,
-            'version' => $version,
-          ]);
-
-          $row->update([
-            'status' => $datas['status'] ? 'scanned' : 'failed',
-            'rbf_api' => $datas['status'] ? json_encode($datas['result']) : NULL,
-            'rbf_version' => json_encode($rbf_version),
-            'rbf_model' => 0,
-          ]);
-
-          //step 2= photo scan
-          //model2
-          if ($model2) {
-            $row->model_api_2([
-              'dataset' => $restaurant_parent->model_name,
-              'version' => $restaurant_parent->model_version,
-            ]);
-          }
-          else {
-            $row->model_api_1([
-              'confidence' => SysRobo::_SCAN_CONFIDENCE,
-              'overlap' => SysRobo::_SCAN_OVERLAP,
-            ]);
-          }
-
-          //step 3= photo predict
-          $row->predict_food([
-            'notification' => $old ? false : $notify,
-          ]);
+        if ($rfs->status == 'new') {
+          $rfs->rfs_photo_scan();
         }
       }
     }
-
-    Storage::append($file_log, '===================================================================================');
   }
 
   public static function photo_name_query($file)
@@ -282,15 +204,305 @@ class SysRobo
     return $keyword;
   }
 
-  //v3
-  public const _RBF_CONFIDENCE = 30;
-  public const _RBF_OVERLAP = 60;
-  public const _RBF_MAX_OBJECTS = 70;
+  public static function photo_duplicate($pars = [])
+  {
+    //pars
+    $debug = isset($pars['debug']) ? (bool)$pars['debug'] : false;
 
-  public const _SYS_BURGER_GROUP_1 = [32, 33, 71, 72];
-  public const _SYS_BURGER_GROUP_2 = [34];
-  public const _SYS_BURGER_GROUP_VEGAN = [32];
-  public const _SYS_BURGER_INGREDIENTS = [45, 114];
+    //date
+    $date_from = date('Y-m-01');
+    $date_to = date('Y-m-t');
+
+    if (isset($pars['date_from']) && !empty($pars['date_from'])) {
+      $date_from = $pars['date_from'];
+    }
+    if (isset($pars['date_to']) && !empty($pars['date_to'])) {
+      $date_to = $pars['date_to'];
+    }
+
+    $sensors = Restaurant::where('deleted', 0)
+      ->where('restaurant_parent_id', '>', 0)
+      ->where('s3_bucket_name', '<>', NULL)
+      ->where('s3_bucket_address', '<>', NULL)
+      ->orderBy('id', 'asc')
+      ->get();
+
+    if (count($sensors)) {
+      foreach ($sensors as $sensor) {
+        $file_log = 'public/logs/cron_photo_duplicate_' . $sensor->id . '.log';
+        Storage::append($file_log, '===================================================================================');
+        Storage::append($file_log, 'AT_' . date('Y_m_d_H_i_s'));
+
+        $select = RestaurantFoodScan::query('restaurant_food_scans')
+          ->where('restaurant_food_scans.restaurant_id', $sensor->id)
+          ->where('status', '<>', 'duplicated')
+          ->whereDate('restaurant_food_scans.time_photo', '>=', $date_from)
+          ->whereDate('restaurant_food_scans.time_photo', '<=', $date_to)
+          ->orderBy('id', 'asc');
+
+        if ($debug) {
+          var_dump(SysCore::var_dump_break());
+          var_dump('QUERY=');
+          var_dump(SysCore::str_db_query($select));
+        }
+
+        $rows = $select->get();
+
+        if ($debug) {
+          var_dump('TOTAL PHOTOS= ' . count($rows));
+        }
+
+        $ids_checked = [];
+        $main_status_invalids = [
+          'duplicated', 'failed', 'scanned',
+        ];
+
+        if (count($rows)) {
+
+          //reset
+          $select->update([
+            'photo_main' => 0,
+          ]);
+
+          foreach ($rows as $row) {
+            if ($debug) {
+              var_dump(SysCore::var_dump_break());
+              var_dump('ID= ' . $row->id);
+            }
+
+            //checked
+            if (in_array($row->id, $ids_checked)) {
+              continue;
+            }
+
+            //1024_
+            $temps = explode('/', $row->photo_name);
+            $photo_name = $temps[count($temps) - 1];
+            if (substr($photo_name, 0, 5) == '1024_') {
+
+              $row->update([
+                'deleted' => 1,
+              ]);
+
+              continue;
+            }
+
+            $ids_checked[] = $row->id;
+
+            if ($debug) {
+              var_dump('ID START CHECK= ' . $row->id);
+            }
+
+            $keyword = SysRobo::photo_name_query($row->photo_name);
+
+            if ($debug) {
+              var_dump($row->photo_name);
+              var_dump($keyword);
+            }
+
+            //find duplicate
+            $duplicates = RestaurantFoodScan::where('deleted', 0)
+              ->where('status', '<>', 'duplicated')
+              ->where('photo_name', 'LIKE', $keyword)
+              ->where('id', '<>', $row->id)
+              ->orderBy('food_id', 'desc')
+              ->get();
+
+            if ($debug) {
+              var_dump('TOTAL DUPLICATED= ' . count($duplicates));
+            }
+
+            //check missing
+            $id_main = 0;
+            if ($row->food_id) {
+
+              if (!empty($row->missing_ids)) {
+
+                $temp1 = RestaurantFoodScan::where('deleted', 0)
+                  ->where('status', '<>', 'duplicated')
+                  ->where('photo_name', 'LIKE', $keyword)
+                  ->where('id', '<>', $row->id)
+                  ->where('food_id', $row->food_id)
+                  ->where('missing_ids', NULL)
+                  ->orderBy('food_id', 'desc')
+                  ->orderBy('id', 'asc')
+                  ->first();
+
+                if ($temp1) {
+                  $id_main = $temp1->id;
+                } else {
+                  $id_main = $row->id;
+                }
+
+              } else {
+                $id_main = $row->id;
+              }
+            }
+
+            $id_duplicates = [];
+            $need_compare = false;
+
+            if (count($duplicates)) {
+
+              $need_compare = true;
+
+              foreach ($duplicates as $rfs) {
+
+                $ids_checked[] = $rfs->id;
+
+                if ($debug) {
+                  var_dump('ID DUPLICATED= ' . $rfs->id);
+                }
+
+                if (!$id_main && empty($rfs->missing_ids)) {
+                  $id_main = $rfs->id;
+                }
+
+                $id_duplicates[] = $rfs->id;
+              }
+            }
+            else {
+              //main
+              $row->update([
+                'photo_main' => 1,
+              ]);
+              if (in_array($row->status, $main_status_invalids)) {
+                $row->update([
+                  'status' => 'checked',
+                ]);
+              }
+            }
+
+            //main or not
+            if ($need_compare) {
+              if (!$id_main || $id_main == $row->id) {
+                $row->update([
+                  'photo_main' => 1,
+                ]);
+                if (in_array($row->status, $main_status_invalids)) {
+                  $row->update([
+                    'status' => 'checked',
+                  ]);
+                }
+
+                if (count($duplicates)) {
+                  foreach ($duplicates as $rfs) {
+                    $rfs->update([
+                      'status' => 'duplicated',
+                    ]);
+                  }
+                }
+              }
+              else {
+
+                if ($id_main) {
+
+                  $row->update([
+                    'status' => 'duplicated',
+                  ]);
+
+                  foreach ($duplicates as $rfs) {
+                    if ($id_main == $rfs->id) {
+
+                      $rfs->update([
+                        'photo_main' => 1,
+                      ]);
+                      if (in_array($rfs->status, $main_status_invalids)) {
+                        $rfs->update([
+                          'status' => 'checked',
+                        ]);
+                      }
+
+                    } else {
+
+                      $rfs->update([
+                        'status' => 'duplicated',
+                      ]);
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  public static function photo_sync($pars = [])
+  {
+    $s3_region = SysCore::get_sys_setting('s3_region');
+
+    $directories = SysRobo::s3_bucket_folder();
+    foreach ($directories as $restaurant => $directory) {
+      $file_log = 'public/logs/cron_photo_sync_' . $restaurant . '.log';
+      Storage::append($file_log, '===================================================================================');
+      $count = 0;
+
+      $localDisk = Storage::disk('sensors');
+      $s3Disk = Storage::disk($directory['bucket']);
+
+      $files = $localDisk->allFiles($directory['folder']);
+      foreach ($files as $file) {
+
+        $status = $s3Disk->put($file, $localDisk->get($file));
+        if ($status) {
+
+          $rfs = RestaurantFoodScan::where('photo_name', $file)
+            ->first();
+          if ($rfs) {
+
+            $sensor = $rfs->get_restaurant();
+            $img_url = "https://s3.{$s3_region}.amazonaws.com/{$sensor->s3_bucket_name}/{$file}";
+
+            if (@getimagesize($img_url)) {
+
+              $rfs->update([
+                'local_storage' => 0,
+                'photo_url' => $img_url,
+              ]);
+
+              $count++;
+            }
+          }
+        }
+
+        Storage::append($file_log, 'FILE_SYNC_STATUS= ' . $status);
+        Storage::append($file_log, 'FILE_SYNC_DATA= ' . $file);
+      }
+
+      Storage::append($file_log, 'TOTAL_FILES= ' . $count);
+    }
+  }
+
+  public static function photo_clear($pars = [])
+  {
+    $directories = SysRobo::s3_bucket_folder();
+    foreach ($directories as $restaurant => $directory) {
+      $file_log = 'public/logs/cron_photo_clear_' . $restaurant . '.log';
+      Storage::append($file_log, '===================================================================================');
+      $count = 0;
+
+      $localDisk = Storage::disk('sensors');
+      $s3Disk = Storage::disk($directory['bucket']);
+
+      $date = date('Y-m-d', strtotime("-3 days"));
+      $dir = "{$directory['folder']}SENSOR/1/{$date}/";
+
+      $files = $localDisk->allFiles($dir);
+      foreach ($files as $file) {
+        $storagePath = public_path('sensors') . '/' . $file;
+
+        if (is_file($storagePath)) {
+          unlink($storagePath);
+
+          $count++;
+        }
+      }
+
+      Storage::append($file_log, 'TOTAL_FILES= ' . $count);
+    }
+  }
 
   public static function photo_1024($img_url)
   {
