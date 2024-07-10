@@ -58,11 +58,15 @@ class TesterController extends Controller
 
     $restaurant = RestaurantParent::find(1);
     $sensor = Restaurant::find(11);
-    $rfs = RestaurantFoodScan::find(53221);
+    $rfs = RestaurantFoodScan::find(56846);
     $date = date('Y-m-d');
 
     var_dump($sys_app::_DEBUG_BREAK);
 
+//    $datas = $rfs->get_ingredients_missing();
+//    var_dump($datas);
+//    $datas = $rfs->get_ingredients_found();
+//    var_dump($datas);
 
 //    foreach ($notify as $notif) {
 //      var_dump($notif->notifiable_id);

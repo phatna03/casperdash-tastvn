@@ -509,6 +509,11 @@ class RestaurantFoodScan extends Model
     $api_result = (array)json_decode($this->rbf_api, true);
     $predictions = isset($api_result['result']) && isset($api_result['result']['predictions'])
       ? (array)$api_result['result']['predictions'] : [];
+    if (!count($predictions)) {
+      //old
+      $predictions = isset($api_result['predictions']) && isset($api_result['predictions'])
+        ? (array)$api_result['predictions'] : [];
+    }
 
     $notification = isset($pars['notification']) ? (bool)$pars['notification'] : true;
     $sensor = $this->get_restaurant();
@@ -771,23 +776,36 @@ class RestaurantFoodScan extends Model
     $arr1s = $this->get_ingredients_missing();
     $arr2s = [];
 
-    $rows = $food ? $food->get_ingredients([
-      'restaurant_parent_id' => $sensor->restaurant_parent_id
-    ]) : [];
-    if (count($rows)) {
-      $rows = $rows->toArray();
+    if ($food) {
+      $rows = $food->get_ingredients([
+        'restaurant_parent_id' => $sensor->restaurant_parent_id
+      ]);
+      if (count($rows)) {
+        $rows = $rows->toArray();
 
-      foreach ($rows as $row) {
-        $temp = (array)$row;
+        foreach ($rows as $row) {
+          $temp = (array)$row;
 
-        $temp['quantity'] = $temp['ingredient_quantity'];
-        $temp['name'] = SysRobo::burger_ingredient_chicken_beef($temp['name']);
+          $temp['quantity'] = $temp['ingredient_quantity'];
+          $temp['name'] = SysRobo::burger_ingredient_chicken_beef($temp['name']);
 
-        $arr2s[$temp['id']] = $temp;
+          $arr2s[$temp['id']] = $temp;
+        }
+      }
+
+      if (count($arr1s)) {
+        $arr2s = $this->arr_compact($arr1s, $arr2s);
+
+        //group burger
+        $burger1s = SysRobo::_SYS_BURGER_GROUP_1;
+        $burger2s = SysRobo::_SYS_BURGER_GROUP_2;
+        if (in_array($food->id, $burger1s) || in_array($food->id, $burger2s)) {
+          $arr2s = $this->arr_burger_missing_compact($arr1s, $arr2s);
+        }
       }
     }
 
-    return $this->arr_burger_missing_compact($arr1s, $arr2s);
+    return $arr2s;
   }
 
   public function arr_burger_missing_compact($arr1s, $arr2s, $pars = [])
@@ -851,5 +869,47 @@ class RestaurantFoodScan extends Model
     return $arr;
   }
 
+  public function arr_compact($arr1s, $arr2s, $pars = [])
+  {
+    $debug = isset($pars['debug']) ? (bool)$pars['debug'] : false;
+    $arr = [];
 
+    //required column = id + quantity
+    if (count($arr1s) && count($arr2s)) {
+
+      $arr1s = SysCore::arr_sort_by_id_quantity($arr1s);
+      $arr2s = SysCore::arr_sort_by_id_quantity($arr2s);
+
+      if ($debug) {
+        var_dump(SysCore::var_dump_break());
+        var_dump($arr1s);
+        var_dump(SysCore::var_dump_break());
+        var_dump($arr2s);
+      }
+
+      $ids = [];
+      foreach ($arr1s as $a1) {
+        $ids[] = $a1['id'];
+      }
+
+      foreach ($arr2s as $a2) {
+        $temp = (array)$a2;
+
+        if (in_array($temp['id'], $ids)) {
+          $temp['quantity'] = $temp['quantity'] - $arr1s[$temp['id']]['quantity'];
+        }
+
+        if ($temp['quantity']) {
+          $arr[$temp['id']] = $temp;
+        }
+      }
+    }
+
+    if ($debug) {
+      var_dump(SysCore::var_dump_break());
+      var_dump($arr);
+    }
+
+    return $arr;
+  }
 }

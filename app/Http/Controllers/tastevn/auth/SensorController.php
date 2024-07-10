@@ -434,6 +434,11 @@ class SensorController extends Controller
     $api_result = (array)json_decode($rfs->rbf_api, true);
     $predictions = isset($api_result['result']) && isset($api_result['result']['predictions'])
       ? (array)$api_result['result']['predictions'] : [];
+    if (!count($predictions)) {
+      //old
+      $predictions = isset($api_result['predictions']) && isset($api_result['predictions'])
+        ? (array)$api_result['predictions'] : [];
+    }
 
     $versions = (array)json_decode($rfs->rbf_version, true);
 
@@ -481,10 +486,15 @@ class SensorController extends Controller
     ]);
 
     return response()->json([
-      'item' => $rfs,
-      'restaurant' => $restaurant,
-//      'data' => $data,
       'html_info' => $html_info,
+
+      'rfs' => [
+        'id' => $rfs->id,
+      ],
+      'sensor' => [
+        'id' => $sensor->id,
+        'name' => $sensor->name,
+      ],
 
       'status' => true,
     ], 200);

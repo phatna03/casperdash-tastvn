@@ -108,7 +108,7 @@
 
             @endphp
                 <div class="acm-text-line-one">
-                  - <b class="acm-mr-px-5 text-danger">{{$ing['ingredient_quantity']}}</b>
+                  - <b class="acm-mr-px-5 text-danger">{{$ing['quantity']}}</b>
                   <span class="text-dark">
                     @if(!empty($ing['name_vi']))
                       {{$ing['name'] . ' - ' . $ing['name_vi']}}

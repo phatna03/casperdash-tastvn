@@ -1015,7 +1015,7 @@ function sensor_stats_view(type, item = 0) {
         })
           .then(response => {
 
-            var title = response.data.restaurant.name + ' <span class="badge acm-ml-px-10 bg-primary">ID: ' + response.data.item.id + '</span>';
+            var title = response.data.sensor.name + ' <span class="badge acm-ml-px-10 bg-primary">ID: ' + response.data.rfs.id + '</span>';
             popup.find('.modal-header h4').empty().append(title);
 
             popup.find('.modal-body').removeClass('text-center').empty()
@@ -1458,7 +1458,7 @@ function sensor_food_scan_info(id) {
   })
     .then(response => {
 
-      var title = response.data.restaurant.name + ' <span class="badge acm-ml-px-10 bg-primary">ID: ' + response.data.item.id + '</span>';
+      var title = response.data.sensor.name + ' <span class="badge acm-ml-px-10 bg-primary">ID: ' + response.data.rfs.id + '</span>';
       popup.find('.modal-header h4').empty().append(title);
 
       popup.find('.modal-body').removeClass('text-center').empty()
@@ -1529,7 +1529,7 @@ function sensor_food_scan_info_rebind(id) {
   })
     .then(response => {
 
-      var title = response.data.restaurant.name + ' <span class="badge acm-ml-px-10 bg-primary">ID: ' + response.data.item.id + '</span>';
+      var title = response.data.sensor.name + ' <span class="badge acm-ml-px-10 bg-primary">ID: ' + response.data.rfs.id + '</span>';
       popup.find('.modal-header h4').empty().append(title);
 
       popup.find('.modal-body').removeClass('text-center').empty()
