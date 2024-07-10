@@ -58,13 +58,13 @@ class TesterController extends Controller
 
     $restaurant = RestaurantParent::find(1);
     $sensor = Restaurant::find(11);
-    $rfs = RestaurantFoodScan::find(52375);
+    $rfs = RestaurantFoodScan::find(53221);
     $date = date('Y-m-d');
 
     var_dump($sys_app::_DEBUG_BREAK);
 
-
-
+//    $ingredients_found = $rfs->get_ingredients_found();
+//    var_dump($ingredients_found);
 
 
 //    foreach ($notify as $notif) {
@@ -95,8 +95,8 @@ class TesterController extends Controller
     //=======================================================================================
 
     //v3
-    $rfs = RestaurantFoodScan::find(53221);
-
+//    $rfs = RestaurantFoodScan::find(53221);
+//
 //    $this->photo_check([
 //      'debug' => true,
 //
@@ -105,9 +105,6 @@ class TesterController extends Controller
 //
 //      'img_1024' => true,
 //    ]);
-
-    var_dump($rfs->get_ingredients_missing()->toArray());
-    var_dump($rfs->get_ingredients_found());
 
     //=======================================================================================
 

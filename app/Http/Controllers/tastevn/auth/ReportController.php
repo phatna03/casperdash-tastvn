@@ -462,6 +462,7 @@ class ReportController extends Controller
     $texts = $rfs->get_texts(['text_id_only' => 1]);
     $texts = count($texts) ? array_column($texts->toArray(), 'id') : [];
 
+    //tester
     $ingredients = $rfs->get_ingredients_missing();
     $ingredients = count($ingredients) ? array_column($ingredients->toArray(), 'id') : [];
 
@@ -743,6 +744,7 @@ class ReportController extends Controller
     $texts = $rfs->get_texts(['text_id_only' => 1]);
     $texts = count($texts) ? array_column($texts->toArray(), 'id') : [];
 
+    //tester
     $ingredients = $rfs->get_ingredients_missing();
     $ingredients = count($ingredients) ? array_column($ingredients->toArray(), 'id') : [];
 

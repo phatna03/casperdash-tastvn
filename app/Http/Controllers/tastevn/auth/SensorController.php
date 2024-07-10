@@ -1090,7 +1090,8 @@ class SensorController extends Controller
         ->first();
     }
 
-    $rfs = RestaurantFoodScan::find(56122);
+    //tester
+    $rfs = RestaurantFoodScan::find(53221);
     $datas = $rfs ? $this->kitchen_food_datas($rfs) : [];
 
     return response()->json([

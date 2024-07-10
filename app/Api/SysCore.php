@@ -59,6 +59,32 @@ class SysCore
     ];
   }
 
+  public static function arr_sort_by_id_quantity($arr)
+  {
+    $a1 = [];
+    $a2 = [];
+
+    $temps = [];
+    $datas = [];
+
+    foreach ($arr as $key => $val) {
+      $temps[] = $val;
+
+      $a1[$key] = $val['id'];
+      $a2[$key] = $val['quantity'];
+    }
+
+    array_multisort($a1, SORT_ASC, $a2, SORT_DESC, $temps);
+
+    if (count($temps)) {
+      foreach ($temps as $temp) {
+        $datas[$temp['id']] = $temp;
+      }
+    }
+
+    return $datas;
+  }
+
   public static function os_slash_file($path)
   {
     if (strtoupper(substr(PHP_OS, 0, 3)) == 'WIN') {

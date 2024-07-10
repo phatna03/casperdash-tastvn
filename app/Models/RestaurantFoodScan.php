@@ -698,15 +698,8 @@ class RestaurantFoodScan extends Model
       foreach ($ingredients as $ingredient) {
 
         $quantity = isset($ingredient['ingredient_quantity']) ? $ingredient['ingredient_quantity'] : $ingredient['quantity'];
-        $ing_name = $ingredient['name'];
 
-        if (strtolower(trim($ing_name)) == 'beef buger'
-          || strtolower(trim($ing_name)) == 'beef burger'
-          || strtolower(trim($ing_name)) == 'grilled chicken') {
-          $ing_name = 'beef burger or grilled chicken';
-        }
-
-        $text = $quantity . ' ' . $ing_name;
+        $text = $quantity . ' ' . $ingredient['name'];
         if (!empty($ingredient['name_vi'])) {
           $text .= ' - ' . $ingredient['name_vi'];
         }
@@ -744,7 +737,7 @@ class RestaurantFoodScan extends Model
     $table_1 = app(RestaurantFoodScanMissing::class)->getTable();
     $table_2 = app(Ingredient::class)->getTable();
 
-    $select = RestaurantFoodScanMissing::query($table_1)
+    $rows = RestaurantFoodScanMissing::query($table_1)
       ->distinct()
       ->select("{$table_2}.id", "{$table_2}.name", "{$table_2}.name_vi",
         "{$table_1}.ingredient_quantity", "{$table_1}.ingredient_type"
@@ -753,93 +746,113 @@ class RestaurantFoodScan extends Model
       ->where("$table_1.restaurant_food_scan_id", $this->id)
       ->orderBy("{$table_1}.ingredient_type", "asc")
       ->orderBy("{$table_1}.ingredient_quantity", "desc")
-      ->orderBy("{$table_1}.id");
+      ->orderBy("{$table_1}.id")
+      ->get()
+      ->toArray();
 
-    return $select->get();
+    //arr required
+    $items = [];
+    if (count($rows)) {
+      foreach ($rows as $row) {
+        $temp = (array)$row;
+
+        $temp['quantity'] = $temp['ingredient_quantity'];
+        $temp['name'] = SysRobo::burger_ingredient_chicken_beef($temp['name']);
+
+        $items[$temp['id']] = $temp;
+      }
+    }
+
+    return $items;
   }
 
   public function get_ingredients_found()
   {
-    $ingredients_missing = $this->get_ingredients_missing();
     $food = $this->get_food();
     $sensor = $this->get_restaurant();
 
-    $burger_ingredients = SysRobo::_SYS_BURGER_INGREDIENTS;
+    $arr1s = $this->get_ingredients_missing();
+    $arr2s = [];
 
-    $ingredients = [];
-    if ($food) {
-      $ingredients = $food->get_ingredients([
-        'restaurant_parent_id' => $sensor->restaurant_parent_id
-      ]);
+    $rows = $food ? $food->get_ingredients([
+      'restaurant_parent_id' => $sensor->restaurant_parent_id
+    ]) : [];
+    if (count($rows)) {
+      $rows = $rows->toArray();
 
-      if (count($ingredients)) {
-        $temps = [];
+      foreach ($rows as $row) {
+        $temp = (array)$row;
 
-        foreach ($ingredients as $ing) {
-          $temps[] = [
-            'id' => $ing->id,
-            'name' => $ing->name,
-            'name_vi' => $ing->name_vi,
-            'ingredient_quantity' => $ing->ingredient_quantity,
-            'ingredient_type' => $ing->ingredient_type,
-          ];
-        }
+        $temp['quantity'] = $temp['ingredient_quantity'];
+        $temp['name'] = SysRobo::burger_ingredient_chicken_beef($temp['name']);
 
-        $ingredients = $temps;
+        $arr2s[$temp['id']] = $temp;
       }
     }
 
-    if (count($ingredients_missing)) {
+    return $this->arr_burger_missing_compact($arr1s, $arr2s);
+  }
+
+  public function arr_burger_missing_compact($arr1s, $arr2s, $pars = [])
+  {
+    $debug = isset($pars['debug']) ? (bool)$pars['debug'] : false;
+    $arr = [];
+
+    //required column = id + quantity
+    if (count($arr1s) && count($arr2s)) {
+
+      $arr1s = SysCore::arr_sort_by_id_quantity($arr1s);
+      $arr2s = SysCore::arr_sort_by_id_quantity($arr2s);
+
+      if ($debug) {
+        var_dump(SysCore::var_dump_break());
+        var_dump($arr1s);
+        var_dump(SysCore::var_dump_break());
+        var_dump($arr2s);
+      }
 
       $ids = [];
-      $temp1s = [];
-      $temp2s = [];
-
-      foreach ($ingredients_missing as $ing) {
-        $temp1s[$ing->id] = [
-          'id' => $ing->id,
-          'name' => $ing->name,
-          'name_vi' => $ing->name_vi,
-          'ingredient_quantity' => $ing->ingredient_quantity,
-          'ingredient_type' => $ing->ingredient_type,
-        ];
-
-        $ids[] = $ing->id;
+      foreach ($arr1s as $a1) {
+        $ids[] = $a1['id'];
       }
 
-      if (count($ingredients)) {
-        foreach ($ingredients as $ing) {
-          if (in_array($ing['id'], $ids)) {
+      foreach ($arr2s as $a2) {
+        $temp = (array)$a2;
 
-            $quantity = $ing['ingredient_quantity'] - $temp1s[$ing['id']]['ingredient_quantity'];
+//        SysRobo::_SYS_BURGER_INGREDIENTS
+        if ($temp['id'] == 114) {
+          if (isset($arr[45])) {
+            $arr[45]['quantity'] += $temp['quantity'];
+          } else {
+            $temp['id'] = 45;
 
-            if ($quantity) {
-              $temp2s[$ing['id']] = [
-                'id' => $ing['id'],
-                'name' => $ing['name'],
-                'name_vi' => $ing['name_vi'],
-                'ingredient_quantity' => $quantity,
-                'ingredient_type' => $ing['ingredient_type'],
-              ];
+            if (in_array($temp['id'], $ids)) {
+              $temp['quantity'] = $temp['quantity'] - $arr1s[$temp['id']]['quantity'];
             }
 
-          } else {
-
-            $temp2s[$ing['id']] = [
-              'id' => $ing['id'],
-              'name' => $ing['name'],
-              'name_vi' => $ing['name_vi'],
-              'ingredient_quantity' => $ing['ingredient_quantity'],
-              'ingredient_type' => $ing['ingredient_type'],
-            ];
+            $arr[$temp['id']] = $temp;
           }
+
+          continue;
+        }
+
+        if (in_array($temp['id'], $ids)) {
+          $temp['quantity'] = $temp['quantity'] - $arr1s[$temp['id']]['quantity'];
+        }
+
+        if ($temp['quantity']) {
+          $arr[$temp['id']] = $temp;
         }
       }
-
-      $ingredients = $temp2s;
     }
 
-    return $ingredients;
+    if ($debug) {
+      var_dump(SysCore::var_dump_break());
+      var_dump($arr);
+    }
+
+    return $arr;
   }
+
 
 }

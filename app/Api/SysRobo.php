@@ -1024,6 +1024,17 @@ class SysRobo
     return $quantity;
   }
 
+  public static function burger_ingredient_chicken_beef($text)
+  {
+    if (strtolower(trim($text)) == 'beef buger'
+      || strtolower(trim($text)) == 'beef burger'
+      || strtolower(trim($text)) == 'grilled chicken') {
+      $text = 'beef burger or grilled chicken';
+    }
+
+    return $text;
+  }
+
   public static function ingredients_compact($pars = [])
   {
     $arr = [];
