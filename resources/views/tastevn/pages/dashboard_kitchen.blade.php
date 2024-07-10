@@ -214,36 +214,36 @@
       axios.post('/admin/kitchen/predict', {
         item: item_id,
         restaurant_id: '{{$pageConfigs['item']->id}}',
-        type: 'api',
       })
         .then(response => {
 
           //show data
           food_datas(response.data.datas);
 
+          //temp off
           //notify
-          if (response.data.notifys && response.data.notifys.length) {
-
-            response.data.notifys.forEach(function (v, k) {
-
-              var html_toast = '<div class="cursor-pointer" onclick="sensor_food_scan_info(' + v.itd + ')">';
-              html_toast += '<div class="acm-fs-13">+ Dish: <b><span class="acm-mr-px-5 text-danger">' + v.food_confidence + '%</span><span>' + v.food_name + '</span></b></div>';
-
-              html_toast += '<div class="acm-fs-13">+ Ingredients Missing:</div>';
-              v.ingredients.forEach(function (v1, k1) {
-                if (v1 && v1 !== '' && v1.trim() !== '') {
-                  html_toast += '<div class="acm-fs-13 acm-ml-px-10">- ' + v1 + '</div>';
-                }
-              });
-
-              html_toast += '</div>';
-              // message_from_toast('info', v.restaurant_name, html_toast, true);
-            });
-
-            // if (response.data.printer) {
-            // page_open(acmcfs.link_base_url + '/printer?ids=' + response.data.notify_ids.toString());
-            // }
-          }
+          // if (response.data.notifys && response.data.notifys.length) {
+          //
+          //   response.data.notifys.forEach(function (v, k) {
+          //
+          //     var html_toast = '<div class="cursor-pointer" onclick="sensor_food_scan_info(' + v.itd + ')">';
+          //     html_toast += '<div class="acm-fs-13">+ Dish: <b><span class="acm-mr-px-5 text-danger">' + v.food_confidence + '%</span><span>' + v.food_name + '</span></b></div>';
+          //
+          //     html_toast += '<div class="acm-fs-13">+ Ingredients Missing:</div>';
+          //     v.ingredients.forEach(function (v1, k1) {
+          //       if (v1 && v1 !== '' && v1.trim() !== '') {
+          //         html_toast += '<div class="acm-fs-13 acm-ml-px-10">- ' + v1 + '</div>';
+          //       }
+          //     });
+          //
+          //     html_toast += '</div>';
+          //     message_from_toast('info', v.restaurant_name, html_toast, true);
+          //   });
+          //
+          //   if (response.data.printer) {
+          //   page_open(acmcfs.link_base_url + '/printer?ids=' + response.data.notify_ids.toString());
+          //   }
+          // }
 
           if (response.data.speaker) {
             setTimeout(function () {

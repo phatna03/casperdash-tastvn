@@ -61,7 +61,7 @@ class TesterController extends Controller
     $rfs = RestaurantFoodScan::find(56846);
     $date = date('Y-m-d');
 
-    var_dump($sys_app::_DEBUG_BREAK);
+
 
 //    $datas = $rfs->get_ingredients_missing();
 //    var_dump($datas);

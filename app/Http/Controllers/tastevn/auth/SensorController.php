@@ -1101,17 +1101,17 @@ class SensorController extends Controller
     }
 
     //tester
-    $rfs = RestaurantFoodScan::find(53221);
+//    $rfs = RestaurantFoodScan::find(53221);
     $datas = $rfs ? $this->kitchen_food_datas($rfs) : [];
 
     return response()->json([
       'status' => $rfs ? $rfs->status : 'no_photo',
 
+      'datas' => $datas,
+
       'file' => $rfs ? $rfs->photo_name : '',
       'file_url' => $rfs ? $rfs->get_photo() : '',
       'file_id' => $rfs ? $rfs->id : 0,
-
-      'datas' => $datas,
     ]);
   }
 
@@ -1127,155 +1127,50 @@ class SensorController extends Controller
       return response()->json($validator->errors(), 422);
     }
     //invalid
-    $row = RestaurantFoodScan::find((int)$values['item']);
-    $restaurant = Restaurant::find((int)$values['restaurant_id']);
-    if (!$restaurant || !$row) {
+    $rfs = RestaurantFoodScan::find((int)$values['item']);
+    $sensor = Restaurant::find((int)$values['restaurant_id']);
+    if (!$sensor || !$rfs) {
       return response()->json([
         'error' => 'Invalid item'
       ], 422);
     }
 
-    $restaurant_parent = $restaurant->get_parent();
-
-    $type = isset($values['type']) ? $values['type'] : NULL;
-    //model2
-    $model2 = false;
-    if ($restaurant_parent && $restaurant_parent->model_scan
-      && !empty($restaurant_parent->model_name) && !empty($restaurant_parent->model_version)
-    ) {
-      $model2 = true;
+    //scan & predict
+    if ($rfs->status == 'new') {
+      $rfs->rfs_photo_scan();
     }
 
-    switch ($type) {
-      case 'api':
-
-        if ($row->status == 'new') {
-
-          //step 2= photo scan
-          //model2
-          if ($model2) {
-            $row->model_api_2([
-              'dataset' => $restaurant_parent->model_name,
-              'version' => $restaurant_parent->model_version,
-            ]);
-          }
-          else {
-            $row->model_api_1([
-              'confidence' => SysRobo::_SCAN_CONFIDENCE,
-              'overlap' => SysRobo::_SCAN_OVERLAP,
-            ]);
-          }
-
-          //step 3= photo predict
-          $row->predict_food();
-        }
-
-        break;
-
-      default:
-
-        $datas = isset($values['datas']) ? (array)$values['datas'] : [];
-        if (count($datas) && $row->status == 'new') {
-
-          //photo result
-          $row->update([
-            'time_scan' => date('Y-m-d H:i:s'),
-            'status' => count($datas) ? 'scanned' : 'failed',
-            'rbf_api_js' => count($datas) ? json_encode($datas) : NULL,
-          ]);
-
-          //step 3= photo predict
-          $row->predict_food();
-        }
-    }
-
-    //refresh
-    $row = RestaurantFoodScan::find($row->id);
-
-    //notify
-    $notifys = [];
-    $notify_ids = [];
-    $valid_types = [
-      //force
-      'App\Notifications\IngredientMissing'
-    ];
+    $rfs = RestaurantFoodScan::find($rfs->id);
+    $datas = $rfs ? $this->kitchen_food_datas($rfs) : [];
 
     //speaker
     $text_to_speak = '';
-    $text_to_speech = false;
-    if ((int)$this->_viewer->get_setting('missing_ingredient_alert_speaker')) {
-      $text_to_speech = true;
-    }
 
-    //printer
-    $printer = false;
-    if ((int)$this->_viewer->get_setting('missing_ingredient_alert_printer')) {
-      $printer = true;
-    }
+    $ingredients_missing = isset($datas['ingredients_missing']) ? (array)$datas['ingredients_missing'] : [];
+    if (count($ingredients_missing)) {
 
-    //notify
-    if (!empty($row->missing_texts)) {
-
-      $ingredients = array_filter(explode('&nbsp', $row->missing_texts));
-      if (count($ingredients)) {
-
-        $notifys[] = [
-          'itd' => $row->id,
-          'photo_url' => $row->get_photo(),
-          'restaurant_name' => $row->get_restaurant()->name,
-          'food_name' => $row->get_food()->name,
-          'food_confidence' => $row->confidence,
-          'ingredients' => $ingredients,
-        ];
-
-        $notify_ids[] = $row->id;
-
-        if ($text_to_speech) {
-
-          $text_ingredients_missing = '';
-          foreach ($row->get_ingredients_missing() as $ing) {
-//            $text_ingredients_missing .= $ing['quantity'] . ' ' . $ing['name'] . ', ';
-            $text_ingredients_missing .= SysRobo::burger_ingredient_chicken_beef($ing['name']) . ', ';
-          }
-
-          $text_to_speak = '[Missing], '
-            . $text_ingredients_missing
-            . ', [Need to re-check]'
-          ;
-
-          SysAws::s3_polly([
-            'text_to_speak' => $text_to_speak,
-            'text_rate' => 'slow',
-          ]);
-        }
+      $ingredients_missing_speak = '';
+      foreach ($ingredients_missing as $ing) {
+        $ingredients_missing_speak .= SysRobo::burger_ingredient_chicken_beef($ing['name']) . ', ';
       }
-    }
 
-    $datas = [];
-    if ($row) {
-      $datas = $this->kitchen_food_datas($row);
+      $text_to_speak = '[Missing], '
+        . $ingredients_missing_speak
+        . ', [Need to re-check]'
+      ;
 
-      if (count($datas) && !$datas['confidence']) {
-        $notifys = [];
-        $notify_ids = [];
-        $text_to_speech = false;
-        $text_to_speak = '';
-        $printer = false;
-      }
+      SysAws::s3_polly([
+        'text_to_speak' => $text_to_speak,
+        'text_rate' => 'slow',
+      ]);
     }
 
     return response()->json([
       'status' => true,
 
-      //data
-      'food_id' => $row->get_food() ? $row->get_food()->id : 0,
+      'speaker' => isset($datas['confidence']) && (int)$datas['confidence'] == 1 && !empty($text_to_speak),
+
       'datas' => $datas,
-      //notify
-      'notifys' => $notifys,
-      'notify_ids' => $notify_ids,
-      'speaker' => $text_to_speech && !empty($text_to_speak),
-      'speaker_text' => $text_to_speak,
-      'printer' => $printer,
     ]);
   }
 
