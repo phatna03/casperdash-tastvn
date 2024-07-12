@@ -3,6 +3,7 @@
 namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 //lib
@@ -352,6 +353,16 @@ class RestaurantFoodScan extends Model
 
       if (@getimagesize($url_1024)) {
         $photo_url = $url_1024;
+      }
+    }
+
+    $s3_region = SysCore::get_sys_setting('s3_region');
+    //localhost
+    if (App::environment() == 'local') {
+      //check s3
+      $photo_url = "https://s3.{$s3_region}.amazonaws.com/{$sensor->s3_bucket_name}/1024_{$this->photo_name}";
+      if (!@getimagesize($photo_url)) {
+        $photo_url = "https://s3.{$s3_region}.amazonaws.com/{$sensor->s3_bucket_name}/{$this->photo_name}";
       }
     }
 

@@ -689,6 +689,11 @@ class FoodController extends Controller
             'ingredients' => $ingredients,
           ]);
 
+          $row->add_recipes([
+            'restaurant_parent_id' => $restaurant_parent_id,
+            'ingredients' => $ingredients,
+          ]);
+
           $this->_viewer->add_log([
             'type' => 'import_' . $row->get_type(),
             'item_id' => (int)$row->id,

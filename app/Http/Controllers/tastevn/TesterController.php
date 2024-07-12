@@ -61,7 +61,15 @@ class TesterController extends Controller
     $rfs = RestaurantFoodScan::find(56846);
     $date = date('Y-m-d');
 
+    SysRobo::photo_get([
+      'limit' => 1,
+      'page' => 1,
 
+      'debug' => true,
+
+      'date' => '2024-07-10',
+      'hour' => 11
+    ]);
 
 
 //    $datas = $rfs->get_ingredients_missing();

@@ -346,14 +346,14 @@
             'data-bs-target': '#modal_import',
           }
         },
-        {
-          text: '<i class="mdi mdi-plus me-0 me-sm-1"></i><span class="d-none d-sm-inline-block">Recipes</span>',
-          className: 'add-new btn btn-warning waves-effect waves-light',
-          attr: {
-            'data-bs-toggle': 'modal',
-            'data-bs-target': '#modal_import_recipe',
-          }
-        },
+        // {
+        //   text: '<i class="mdi mdi-plus me-0 me-sm-1"></i><span class="d-none d-sm-inline-block">Recipes</span>',
+        //   className: 'add-new btn btn-warning waves-effect waves-light',
+        //   attr: {
+        //     'data-bs-toggle': 'modal',
+        //     'data-bs-target': '#modal_import_recipe',
+        //   }
+        // },
         {
           text: '<i class="mdi mdi-plus me-0 me-sm-1"></i><span class="d-none d-sm-inline-block">Add Dish</span>',
           className: 'add-new btn btn-primary waves-effect waves-light',

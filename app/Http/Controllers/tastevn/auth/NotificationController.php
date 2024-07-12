@@ -128,20 +128,16 @@ class NotificationController extends Controller
       'App\Notifications\IngredientMissing'
     ];
 
-    //user_setting
-//    if ((int)$this->_viewer->get_setting('missing_ingredient_receive')) {
-//      $valid_types[] = 'App\Notifications\IngredientMissing';
+    //temp off
+//    //speaker
+//    if ((int)$this->_viewer->get_setting('missing_ingredient_alert_speaker')) {
+//      $text_to_speech = true;
 //    }
-
-    //speaker
-    if ((int)$this->_viewer->get_setting('missing_ingredient_alert_speaker')) {
-      $text_to_speech = true;
-    }
-
-    //printer
-    if ((int)$this->_viewer->get_setting('missing_ingredient_alert_printer')) {
-      $printer = true;
-    }
+//
+//    //printer
+//    if ((int)$this->_viewer->get_setting('missing_ingredient_alert_printer')) {
+//      $printer = true;
+//    }
 
     if (!empty($this->_viewer->time_notification)) {
 
@@ -162,7 +158,7 @@ class NotificationController extends Controller
       if (count($notifications)) {
         foreach ($notifications as $notification) {
           $row = RestaurantFoodScan::find($notification->restaurant_food_scan_id);
-          if (!$row) {
+          if (!$row || ($row && empty($row->missing_texts))) {
             continue;
           }
 
