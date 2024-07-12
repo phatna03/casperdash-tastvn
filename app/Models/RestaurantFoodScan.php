@@ -296,22 +296,23 @@ class RestaurantFoodScan extends Model
 
     $file_photo = public_path('sensors') . '/' . $this->photo_name;
     $file_photo = SysCore::os_slash_file($file_photo);
-    if (is_file($file_photo)) {
+
+    $temps = array_filter(explode('/', $this->photo_name));
+    $photo_name = $temps[count($temps) - 1];
+    $photo_path = str_replace($photo_name, '', $this->photo_name);
+    $photo_name_1024 = '1024_' . $photo_name;
+    $path_1024 = $photo_path . $photo_name_1024;
+
+    $file_1024 = public_path('sensors') . '/' . $path_1024;
+    $file_1024 = SysCore::os_slash_file($file_1024);
+
+    if (is_file($file_photo) && !is_file($file_1024)) {
 
       //create 1024 from sensor photo
       $thumb_1024 = Image::make($file_photo);
       $thumb_1024->resize(1024, 1024, function ($constraint) {
         $constraint->aspectRatio();
       });
-
-      $temps = array_filter(explode('/', $this->photo_name));
-      $photo_name = $temps[count($temps) - 1];
-      $photo_path = str_replace($photo_name, '', $this->photo_name);
-      $photo_name_1024 = '1024_' . $photo_name;
-      $path_1024 = $photo_path . $photo_name_1024;
-
-      $file_1024 = public_path('sensors') . '/' . $path_1024;
-      $file_1024 = SysCore::os_slash_file($file_1024);
       $thumb_1024->save($file_1024, 100);
 
       $photo_url = url('sensors') . '/' . $path_1024;

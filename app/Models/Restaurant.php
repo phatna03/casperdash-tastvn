@@ -26,8 +26,8 @@ class Restaurant extends Model
     'count_foods',
     'creator_id',
 
-    'rbf_scan', //live kitchen or not
-    'img_1024', //live config sensor
+    'rbf_scan', //temp off
+    'img_1024', //temp off
     'deleted',
   ];
 
@@ -450,7 +450,7 @@ class Restaurant extends Model
       ]);
 
       if ($row->status == 'new') {
-        $row->img_1024();
+        $row->photo_1024_create();
       }
     }
 

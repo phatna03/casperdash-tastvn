@@ -63,7 +63,7 @@ class Ingredient extends Model
       foreach ($rows as $row) {
         $scan = RestaurantFoodScan::find($row->restaurant_food_scan_id);
         if ($scan) {
-          $scan->update_ingredients_missing_text();
+          $scan->rfs_ingredients_missing_text();
         }
       }
     }

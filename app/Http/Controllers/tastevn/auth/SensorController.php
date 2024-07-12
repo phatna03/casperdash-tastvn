@@ -659,7 +659,7 @@ class SensorController extends Controller
             ];
           }
         }
-        $row->add_ingredients_missing($food, $ingredients_missing, false);
+        $row->rfs_ingredients_missing($food, $ingredients_missing, false);
 
       }
     }
@@ -861,10 +861,10 @@ class SensorController extends Controller
     if ($val) {
       RestaurantFoodScanMissing::where('restaurant_food_scan_id', $rfs->id)
         ->delete();
-      $rfs->update_ingredients_missing_text();
+      $rfs->rfs_ingredients_missing_text();
     } else {
       //refresh
-      $rfs->predict_food([
+      $rfs->rfs_photo_predict([
         'notification' => false,
       ]);
     }

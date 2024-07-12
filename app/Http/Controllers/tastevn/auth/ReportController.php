@@ -544,12 +544,12 @@ class ReportController extends Controller
           ];
         }
 
-        $rfs->add_ingredients_missing($food, $ingredients_missing, false);
+        $rfs->rfs_ingredients_missing($food, $ingredients_missing, false);
       }
     }
     else {
       //no missing
-      $rfs->add_ingredients_missing($food, [], false);
+      $rfs->rfs_ingredients_missing($food, [], false);
     }
 
     //texts
