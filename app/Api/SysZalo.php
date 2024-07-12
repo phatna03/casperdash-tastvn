@@ -6,7 +6,9 @@ use Illuminate\Support\Facades\Storage;
 //lib
 use Zalo\Zalo;
 use App\Api\SysCore;
+use App\Models\User;
 use App\Models\RestaurantFoodScan;
+use App\Models\ZaloUserSend;
 
 class SysZalo
 {
@@ -205,49 +207,80 @@ class SysZalo
     return (array)json_decode($result);
   }
 
-  public static function send_rfs_note($user_id, $type, RestaurantFoodScan $rfs, $pars = [])
+  public static function send_rfs_note(User $user, $type, RestaurantFoodScan $rfs, $pars = [])
   {
-    $img_url = $rfs->get_photo();
+    $zaloer = $user ? $user->get_zalo() : NULL;
 
-    switch ($type) {
-      case 'photo_comment':
+    if (!$user || !$rfs || !$zaloer) {
 
-        $message = '+ Photo ID: ' . $rfs->id . ' \n';
+      SysCore::log_sys_bug([
+        'type' => 'zalo_' . $type,
+        'message' => 'Invalid params...',
+        'params' => json_encode(array_merge($pars, [
+          'user' => $user,
+          'zaloer' => $zaloer,
+          'rfs' => $rfs,
+        ])),
+      ]);
 
-        if (!empty($rfs->note)) {
-          $note = $rfs->note;
-          $text_note = preg_replace("/[\n\r]/","", $note);
+      return [];
+    }
 
-          $text_noter = '';
-          $noter = $rfs->get_noter();
+    $img_url = $rfs->photo_1024();
+    $sensor = $rfs->get_restaurant();
 
-          $message .= '\n+ MAIN NOTE: \n' . $text_note;
+    $params = [
+      'user_id' => $user->id,
+      'zalo_user_id' => $zaloer->zalo_user_id,
+      'type' => $type,
+      'rfs' => $rfs->id,
+      'params' => $pars,
+    ];
 
-          if ($noter) {
-            $text_noter = '(last edited by @ ' . $noter->name . ')';
+    $datas = [];
+    $status = 0;
 
-            $message .= '\n' . $text_noter;
+    try {
+
+      switch ($type) {
+        case 'photo_comment':
+
+          $message = '+ Restaurant: ' . $sensor->name . ' \n'
+            . '+ Photo ID: ' . $rfs->id . ' \n';
+
+          if (!empty($rfs->note)) {
+            $note = $rfs->note;
+            $text_note = preg_replace("/[\n\r]/", "", $note);
+
+            $text_noter = '';
+            $noter = $rfs->get_noter();
+
+            $message .= '+ MAIN NOTE: \n' . $text_note;
+
+            if ($noter) {
+              $text_noter = '(last edited by @ ' . $noter->name . ')';
+
+              $message .= '\n' . $text_noter;
+            }
           }
-        }
 
-        $cmts = $rfs->get_comments();
-        if (count($cmts)) {
-          foreach ($cmts as $cmt) {
-            $time = date('d/m/Y H:i:s', strtotime($cmt->created_at));
-            $text_content = preg_replace("/[\n\r]/","", $cmt->content);
+          $cmts = $rfs->get_comments();
+          if (count($cmts)) {
+            foreach ($cmts as $cmt) {
+              $time = date('d/m/Y H:i:s', strtotime($cmt->created_at));
+              $text_content = preg_replace("/[\n\r]/", "", $cmt->content);
 
-            $message .= '\n\n+ ' . $time . ' - ' .
-              '@' . $cmt->owner->name . ': \n' .
-              $text_content
-            ;
+              $message .= '\n+ ' . $time . ' - ' .
+                '@' . $cmt->owner->name . ': \n' .
+                $text_content;
+            }
           }
-        }
 
-        $btn_url = 'https://ai.block8910.com/admin/photos?photo=52375';
+          $btn_url = 'https://ai.block8910.com/admin/photos?photo=52375';
 
-        $url_params = '{
+          $url_params = '{
   "recipient": {
-    "user_id": "' . $user_id . '"
+    "user_id": "' . $zaloer->zalo_user_id . '"
   },
   "message": {
     "text": "' . $message . '",
@@ -275,35 +308,35 @@ class SysZalo
   }
 }';
 
-        break;
+          break;
 
-      case 'ingredient_missing':
+        case 'ingredient_missing':
 
-      $ingredients_missing_text = '';
-      if (!empty($rfs->missing_texts)) {
-        $temps = array_filter(explode('&nbsp', $rfs->missing_texts));
-        if (count($temps)) {
-          foreach ($temps as $text) {
-            $text = trim($text);
-            if (!empty($text)) {
-              $ingredients_missing_text .= '- ' . $text . '\n';
+          $ingredients_missing_text = '';
+          if (!empty($rfs->missing_texts)) {
+            $temps = array_filter(explode('&nbsp', $rfs->missing_texts));
+            if (count($temps)) {
+              foreach ($temps as $text) {
+                $text = trim($text);
+                if (!empty($text)) {
+                  $ingredients_missing_text .= '- ' . $text . '\n';
+                }
+              }
             }
+
           }
-        }
 
-      }
+          $message = '+ Restaurant: ' . $sensor->name . ' \n' .
+            '+ Photo ID: ' . $rfs->id . ' \n' .
+            '+ Ingredients Missing: \n' .
+            $ingredients_missing_text;
 
-      $message = '+ Photo ID: ' . $rfs->id . ' \n' .
-        '\n+ Ingredients Missing: \n' .
-        $ingredients_missing_text
-      ;
+          $btn_url = url('admin/photos/?photo=' . $rfs->id);
+          $btn_url = 'https://ai.block8910.com/admin/photos?photo=52375';
 
-        $btn_url = url('admin/photos/?photo=' . $rfs->id);
-        $btn_url = 'https://ai.block8910.com/admin/photos?photo=52375';
-
-      $url_params = '{
+          $url_params = '{
   "recipient": {
-    "user_id": "' . $user_id . '"
+    "user_id": "' . $zaloer->zalo_user_id . '"
   },
   "message": {
     "text": "' . $message . '",
@@ -329,41 +362,61 @@ class SysZalo
   }
 }';
 
-      break;
+          break;
 
-      default:
-        $url_params = '';
-    }
+        default:
+          $url_params = '';
+      }
 
 //    var_dump($url_params);
 //    var_dump((array)json_decode($url_params, true));die;
 
-    if (empty($url_params)) {
-      die('no data...');
+      if (!empty($url_params)) {
+        $ch = curl_init();
+        $url_header = [
+          'Accept: application/json',
+          'Content-Type: application/json',
+          'access_token: ' . SysZalo::access_token(),
+        ];
+        $url_api = SysZalo::_URL_API . '/v3.0/oa/message/cs';
+
+        curl_setopt($ch, CURLOPT_URL, $url_api);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $url_header);
+
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $url_params);
+
+        $statusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $result = curl_exec($ch);
+        $datas = (array)json_decode($result);
+
+        curl_close($ch);
+      }
+
+    } catch (\Exception $e) {
+
+      SysCore::log_sys_bug([
+        'type' => 'zalo_' . $type,
+        'line' => $e->getLine(),
+        'file' => $e->getFile(),
+        'message' => $e->getMessage(),
+        'params' => json_encode(array_merge($params, $datas)),
+      ]);
     }
 
-    $ch = curl_init();
-    $url_header = [
-      'Accept: application/json',
-      'Content-Type: application/json',
-      'access_token: ' . SysZalo::access_token(),
-    ];
-    $url_api = SysZalo::_URL_API . '/v3.0/oa/message/cs';
+    if (count($datas) && isset($datas['data'])) {
+      $obj = (array)$datas['data'];
+      if (isset($obj['message_id'])) {
+        $status = 1;
+      }
+    }
+    $params['status'] = $status;
+    $params['params'] = json_encode($params);
+    $params['datas'] = json_encode($datas);
 
-    curl_setopt($ch, CURLOPT_URL, $url_api);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, $url_header);
+    ZaloUserSend::create($params);
 
-    curl_setopt($ch, CURLOPT_POST, 1);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, $url_params);
-
-    $result = curl_exec($ch);
-    $statusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-
-    curl_close($ch);
-
-    var_dump($result);
-
-    return (array)json_decode($result);
+    return $datas;
   }
 }

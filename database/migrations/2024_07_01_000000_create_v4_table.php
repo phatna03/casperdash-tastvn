@@ -52,6 +52,19 @@ return new class extends Migration {
         $table->timestamps();
       });
     }
+
+    if (!Schema::hasTable('zalo_user_sends')) {
+      Schema::create('zalo_user_sends', function (Blueprint $table) {
+        $table->id();
+        $table->bigInteger('user_id');
+        $table->string('zalo_user_id');
+        $table->string('type');
+        $table->smallInteger('status')->default(0);
+        $table->longText('params')->nullable();
+        $table->longText('datas')->nullable();
+        $table->timestamps();
+      });
+    }
   }
 
   /**
@@ -63,5 +76,7 @@ return new class extends Migration {
     Schema::dropIfExists('kas_shifts');
 
     Schema::dropIfExists('zalo_users');
+    Schema::dropIfExists('zalo_user_sends');
+
   }
 };

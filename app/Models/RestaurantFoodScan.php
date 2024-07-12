@@ -11,9 +11,9 @@ use App\Notifications\IngredientMissing;
 use App\Notifications\IngredientMissingMail;
 use App\Notifications\PhotoNote;
 use Intervention\Image\ImageManagerStatic as Image;
-use App\Api\SysApp;
 use App\Api\SysCore;
 use App\Api\SysRobo;
+use App\Api\SysZalo;
 
 class RestaurantFoodScan extends Model
 {
@@ -676,6 +676,12 @@ class RestaurantFoodScan extends Model
           ]))->delay([
             'mail' => now()->addMinutes(5),
           ]));
+        }
+
+        //notify zalo
+        $zalo = $user->get_zalo();
+        if ($zalo && $zalo->zalo_user_id) {
+          SysZalo::send_rfs_note($user, 'ingredient_missing', $this);
         }
 
         //notify db update
