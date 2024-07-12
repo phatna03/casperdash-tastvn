@@ -641,13 +641,13 @@ class UserController extends Controller
     switch ($type) {
       case 'request':
 
-        $datas = SysZalo::send_request_info($zalo->zalo_user_id);
+        $datas = SysZalo::send_request_info($row);
 
         break;
 
       case 'custom':
 
-        $datas = SysZalo::send_text_only($zalo->zalo_user_id, $message);
+        $datas = SysZalo::send_text_only($row, $message);
 
         break;
     }

@@ -118,11 +118,39 @@ class SysZalo
     return (array)json_decode($result);
   }
 
-  public static function send_request_info($user_id)
+  public static function send_request_info(User $user, $pars = [])
   {
-    $url_params = '{
+    $zaloer = $user ? $user->get_zalo() : NULL;
+
+    if (!$user) {
+
+      SysCore::log_sys_bug([
+        'type' => 'zalo_send_request_info',
+        'message' => 'Invalid params...',
+        'params' => json_encode(array_merge($pars, [
+          'user' => $user,
+          'zaloer' => $zaloer,
+        ])),
+      ]);
+
+      return [];
+    }
+
+    $params = [
+      'user_id' => $user->id,
+      'zalo_user_id' => $zaloer->zalo_user_id,
+      'type' => 'send_request_info',
+      'params' => $pars,
+    ];
+
+    $datas = [];
+    $status = 0;
+
+    try {
+
+      $url_params = '{
   "recipient": {
-    "user_id": "' . $user_id . '"
+    "user_id": "' . $zaloer->zalo_user_id . '"
   },
   "message": {
     "attachment": {
@@ -143,39 +171,92 @@ class SysZalo
 
 //    var_dump($url_params);
 
-    $ch = curl_init();
-    $url_header = [
-      'Accept: application/json',
-      'Content-Type: application/json',
-      'access_token: ' . SysZalo::access_token(),
-    ];
-    $url_api = SysZalo::_URL_API . '/v3.0/oa/message/cs';
+      $ch = curl_init();
+      $url_header = [
+        'Accept: application/json',
+        'Content-Type: application/json',
+        'access_token: ' . SysZalo::access_token(),
+      ];
+      $url_api = SysZalo::_URL_API . '/v3.0/oa/message/cs';
 
-    curl_setopt($ch, CURLOPT_URL, $url_api);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, $url_header);
+      curl_setopt($ch, CURLOPT_URL, $url_api);
+      curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+      curl_setopt($ch, CURLOPT_HTTPHEADER, $url_header);
 
-    curl_setopt($ch, CURLOPT_POST, 1);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, $url_params);
+      curl_setopt($ch, CURLOPT_POST, 1);
+      curl_setopt($ch, CURLOPT_POSTFIELDS, $url_params);
 
-    $result = curl_exec($ch);
-    $statusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+      $statusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+      $result = curl_exec($ch);
+      $datas = (array)json_decode($result);
 
-    curl_close($ch);
+      curl_close($ch);
 
-    return (array)json_decode($result);
+    } catch (\Exception $e) {
+
+      SysCore::log_sys_bug([
+        'type' => 'zalo_send_request_info',
+        'line' => $e->getLine(),
+        'file' => $e->getFile(),
+        'message' => $e->getMessage(),
+        'params' => json_encode(array_merge($params, $datas)),
+      ]);
+    }
+
+    if (count($datas) && isset($datas['data'])) {
+      $obj = (array)$datas['data'];
+      if (isset($obj['message_id'])) {
+        $status = 1;
+      }
+    }
+    $params['status'] = $status;
+    $params['params'] = json_encode($params);
+    $params['datas'] = json_encode($datas);
+
+    ZaloUserSend::create($params);
+
+    return $datas;
   }
 
-  public static function send_text_only($user_id, $message)
+  public static function send_text_only(User $user, $message, $pars = [])
   {
-    $specialChars = array("\r", "\n");
-    $replaceChars = array(" ", " ");
+    $zaloer = $user ? $user->get_zalo() : NULL;
 
-    $message = str_replace($specialChars, $replaceChars, $message);
+    if (!$user || empty($message)) {
 
-    $url_params = '{
+      SysCore::log_sys_bug([
+        'type' => 'zalo_send_text_only',
+        'message' => 'Invalid params...',
+        'params' => json_encode(array_merge($pars, [
+          'user' => $user,
+          'zaloer' => $zaloer,
+          'message' => $message,
+        ])),
+      ]);
+
+      return [];
+    }
+
+    $params = [
+      'user_id' => $user->id,
+      'zalo_user_id' => $zaloer->zalo_user_id,
+      'type' => 'zalo_send_text_only',
+      'params' => $pars,
+    ];
+
+    $datas = [];
+    $status = 0;
+
+    try {
+
+      $specialChars = array("\r", "\n");
+      $replaceChars = array(" ", " ");
+
+      $message = str_replace($specialChars, $replaceChars, $message);
+
+      $url_params = '{
   "recipient": {
-    "user_id": "' . $user_id . '"
+    "user_id": "' . $zaloer->zalo_user_id . '"
   },
   "message": {
     "text": "' . $message . '"
@@ -184,27 +265,51 @@ class SysZalo
 
 //    var_dump($url_params);
 
-    $ch = curl_init();
-    $url_header = [
-      'Accept: application/json',
-      'Content-Type: application/json',
-      'access_token: ' . SysZalo::access_token(),
-    ];
-    $url_api = SysZalo::_URL_API . '/v3.0/oa/message/cs';
+      $ch = curl_init();
+      $url_header = [
+        'Accept: application/json',
+        'Content-Type: application/json',
+        'access_token: ' . SysZalo::access_token(),
+      ];
+      $url_api = SysZalo::_URL_API . '/v3.0/oa/message/cs';
 
-    curl_setopt($ch, CURLOPT_URL, $url_api);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, $url_header);
+      curl_setopt($ch, CURLOPT_URL, $url_api);
+      curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+      curl_setopt($ch, CURLOPT_HTTPHEADER, $url_header);
 
-    curl_setopt($ch, CURLOPT_POST, 1);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, $url_params);
+      curl_setopt($ch, CURLOPT_POST, 1);
+      curl_setopt($ch, CURLOPT_POSTFIELDS, $url_params);
 
-    $result = curl_exec($ch);
-    $statusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+      $statusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+      $result = curl_exec($ch);
+      $datas = (array)json_decode($result);
 
-    curl_close($ch);
+      curl_close($ch);
 
-    return (array)json_decode($result);
+    } catch (\Exception $e) {
+
+      SysCore::log_sys_bug([
+        'type' => 'zalo_send_text_only',
+        'line' => $e->getLine(),
+        'file' => $e->getFile(),
+        'message' => $e->getMessage(),
+        'params' => json_encode(array_merge($params, $datas)),
+      ]);
+    }
+
+    if (count($datas) && isset($datas['data'])) {
+      $obj = (array)$datas['data'];
+      if (isset($obj['message_id'])) {
+        $status = 1;
+      }
+    }
+    $params['status'] = $status;
+    $params['params'] = json_encode($params);
+    $params['datas'] = json_encode($datas);
+
+    ZaloUserSend::create($params);
+
+    return $datas;
   }
 
   public static function send_rfs_note(User $user, $type, RestaurantFoodScan $rfs, $pars = [])
