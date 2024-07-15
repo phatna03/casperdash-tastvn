@@ -942,11 +942,15 @@
     };
 
     function datatable_listing_scan_refresh() {
-      datatable_listing_scan.ajax.reload();
+      if (datatable_listing_scan) {
+        datatable_listing_scan.ajax.reload();
+      }
     }
 
     function datatable_listing_error_refresh() {
-      datatable_listing_error.ajax.reload();
+      if (datatable_listing_error) {
+        datatable_listing_error.ajax.reload();
+      }
     }
 
     function func_food_group(food_id) {

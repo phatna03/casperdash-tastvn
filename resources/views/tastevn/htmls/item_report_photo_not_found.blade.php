@@ -7,7 +7,7 @@
             <span class="text-dark">photo standard:  <b class="text-danger">{{$rfs->get_food()->name}}</b></span>
           </div>
         </div>
-        <img class="acm-width-max-100 h-auto acm-border-css" loading="lazy"
+        <img class="w-100" loading="lazy"
              src="{{$rfs->get_food()->get_photo(['restaurant_parent_id' => $rfs->get_restaurant()->restaurant_parent_id])}}"/>
       </div>
     </div>
@@ -18,7 +18,7 @@
             <span class="text-dark">photo sensor id:  <b class="text-danger">{{$rfs->id}}</b></span>
           </div>
         </div>
-        <img class="acm-width-max-100 h-auto acm-border-css" loading="lazy" src="{{$rfs->get_photo()}}"/>
+        <img class="w-100" loading="lazy" src="{{$rfs->get_photo()}}"/>
       </div>
     </div>
   </div>
@@ -29,7 +29,7 @@
         <span class="text-dark">photo sensor id:  <b class="text-danger">{{$rfs->id}}</b></span>
       </div>
     </div>
-    <img class="acm-width-max-100 h-auto acm-border-css" loading="lazy" src="{{$rfs->get_photo()}}"/>
+    <img class="w-100" loading="lazy" src="{{$rfs->get_photo()}}"/>
   </div>
 @endif
 

@@ -152,8 +152,13 @@
           targets: 2,
           render: function(data, type, full, meta) {
             //custome
-            var render_html = '<div>' + data + '</div>';
-            return $(render_html).text();
+            var html = '<div>' + data + '</div>';
+
+            if (full['item_type'] == 'restaurant_food_scan') {
+              return ('<div class="cursor-pointer" onclick="sensor_food_scan_info(' + full['item_id'] + ')">' + $(html).text() + '</div>');
+            }
+
+            return $(html).text();
           }
         },
       ],
