@@ -50,18 +50,18 @@
           <h4 class="modal-title text-danger fw-bold left_content">Review photos</h4>
           <button type="button" class="btn-close right_content" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-        <div class="modal-body">
+        <div class="modal-body p-1">
           <div class="row">
-            <div class="col-lg-9 mb-1 position-relative wrap_report">
+            <div class="col-lg-9 mb-1 position-relative wrap_report @if(!$isMobi) acm-pr-px-0 @endif">
               <div class="p-1 sensor-wrapper wrap_datas">
 
               </div>
             </div>
 
-            <div class="col-lg-3 mb-1 position-relative wrap_infos">
+            <div class="col-lg-3 mb-1 position-relative wrap_infos @if(!$isMobi) acm-pl-px-0 @endif">
               <form class="p-1" onsubmit="return event.preventDefault();">
                 <div class="row">
-                  <div class="col-lg-12 mb-3 acm-text-right">
+                  <div class="col-lg-12 mb-2 acm-text-right">
                     <div class="wrap-btns">
                       @include('tastevn.htmls.form_button_loading')
                       <button type="button" class="btn btn-danger btn-ok btn-submit d-none" onclick="report_photo_nf_clear_prepare()">Clear Result</button>
@@ -71,7 +71,7 @@
                     <input type="hidden" name="rfs" />
                     <input type="hidden" name="item" value="{{$pageConfigs['item']->id}}" />
                   </div>
-                  <div class="col-lg-12 mb-3">
+                  <div class="col-lg-12 mb-2">
                     <div class="form-floating form-floating-outline">
                       <div class="form-control acm-wrap-selectize pb-0" id="failed-update-food">
                         <select class="ajx_selectize" name="food"
@@ -84,7 +84,7 @@
                       <label for="failed-update-food" class="text-danger">Select Dish Valid</label>
                     </div>
                   </div>
-                  <div class="col-lg-4 mb-3 acm-pr-px-0">
+                  <div class="col-lg-4 mb-2 acm-pr-px-0">
                     <div class="form-floating form-floating-outline mb-2">
                       <div class="form-control">
                         <input class="form-check-input" type="checkbox" id="failed-update-robot-error"
@@ -94,7 +94,7 @@
                       <label for="failed-update-robot-error" class="text-danger">Robot Error?</label>
                     </div>
                   </div>
-                  <div class="col-lg-4 mb-3 acm-pr-px-0">
+                  <div class="col-lg-4 mb-2 acm-pr-px-0">
                     <div class="form-floating form-floating-outline">
                       <div class="form-control acm-wrap-selectize" id="failed-update-missing">
                         <div class="form-control text-center pb-0 pt-0 border-0">
@@ -107,7 +107,7 @@
                       <label for="failed-update-missing" class="text-danger">Missing?</label>
                     </div>
                   </div>
-                  <div class="col-lg-4 mb-3">
+                  <div class="col-lg-4 mb-2">
                     <div class="form-floating form-floating-outline">
                       <div class="form-control acm-wrap-selectize" id="failed-update-point">
                         <select class="form-control text-center pb-0 pt-0 border-0" name="point"
@@ -130,7 +130,7 @@
                       <label for="failed-update-point" class="text-danger">Point?</label>
                     </div>
                   </div>
-                  <div class="col-lg-12 mb-3 d-none wrap_ingredients_missing">
+                  <div class="col-lg-12 mb-2 d-none wrap_ingredients_missing">
                     <div class="form-floating form-floating-outline">
                       <div class="form-control acm-wrap-selectize datas" id="failed-update-ingredients">
 
@@ -138,15 +138,15 @@
                       <label for="failed-update-ingredients" class="text-danger">Ingredients Missing</label>
                     </div>
                   </div>
-                  <div class="col-lg-12 mb-3">
+                  <div class="col-lg-12 mb-2">
                     <div class="form-floating form-floating-outline">
                       <div class="form-control acm-wrap-selectize" id="failed-update-note">
-                        <textarea name="note" class="form-control h-px-100 pb-0 pt-0 border-0" placeholder="take note..."></textarea>
+                        <textarea name="note" class="form-control h-px-100 p-0 border-0" placeholder="take note..."></textarea>
                       </div>
                       <label for="failed-update-note" class="text-danger">Main Note</label>
                     </div>
                   </div>
-                  <div class="col-lg-12 mb-3">
+                  <div class="col-lg-12 mb-2">
                     <div class="form-floating form-floating-outline wrap-texts @if(!count($pageConfigs['texts'])) d-none @endif">
                       <div class="form-control acm-height-px-auto acm-overflow-y-auto acm-height-300-max p-2" id="user-update-text">
                         @if(count($pageConfigs['texts']))
@@ -163,6 +163,14 @@
                         @endif
                       </div>
                       <label for="user-update-text" class="text-danger">Text Notes</label>
+                    </div>
+                  </div>
+                  <div class="col-lg-12 mb-2">
+                    <div class="form-floating form-floating-outline wrap-cmts d-none">
+                      <div class="form-control acm-wrap-selectize acm-clearfix datas" id="failed-update-cmt">
+
+                      </div>
+                      <label for="failed-update-cmt" class="text-danger">Comments</label>
                     </div>
                   </div>
                 </div>

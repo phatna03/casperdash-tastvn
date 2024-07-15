@@ -3440,8 +3440,6 @@ function report_photo_nf() {
         if (response.data.rfs.rbf_error) {
           form.find('input[name=rbf_error]').prop('checked', true);
         }
-        // console.log('1111111111');
-        // console.log(response.data.rfs.rbf_error);
 
         form.find('input[name=rfs]').val(response.data.rfs.id);
         form.find('select[name=point]').val(response.data.photo.point);
@@ -3455,6 +3453,25 @@ function report_photo_nf() {
               input.prop('checked', true);
             }
           });
+        }
+
+        form.find('.wrap-cmts').addClass('d-none');
+        if (response.data.rfs.comments.length) {
+          var html = '';
+
+          response.data.rfs.comments.forEach(function (v, k) {
+            html += '<div class="acm-clearfix position-relative acm-col-noted p-1">' +
+              '<div class="acm-float-right acm-fs-12 acm-text-right">' +
+              '<div class="text-dark">' + v.created_at_1 + '</div>' +
+              '<div class="text-dark">' + v.created_at_2 + '</div>' +
+              '</div>' +
+              '<div class="text-dark fw-bold">@' + v.user_name + ': </div>' +
+              '<div class="text-dark">' + bind_nl2br(v.user_noted) + '</div>' +
+              '</div>';
+          });
+
+          form.find('.wrap-cmts .datas').empty().append(html);
+          form.find('.wrap-cmts').removeClass('d-none');
         }
 
         setTimeout(function () {
@@ -3750,6 +3767,25 @@ function report_photo_nf_itm(itd) {
           });
         }
 
+        form.find('.wrap-cmts').addClass('d-none');
+        if (response.data.rfs.comments.length) {
+          var html = '';
+
+          response.data.rfs.comments.forEach(function (v, k) {
+            html += '<div class="acm-clearfix position-relative acm-col-noted p-1">' +
+              '<div class="acm-float-right acm-fs-12 acm-text-right">' +
+              '<div class="text-dark">' + v.created_at_1 + '</div>' +
+              '<div class="text-dark">' + v.created_at_2 + '</div>' +
+              '</div>' +
+              '<div class="text-dark fw-bold">@' + v.user_name + ': </div>' +
+              '<div class="text-dark">' + bind_nl2br(v.user_noted) + '</div>' +
+              '</div>';
+          });
+
+          form.find('.wrap-cmts .datas').empty().append(html);
+          form.find('.wrap-cmts').removeClass('d-none');
+        }
+
         setTimeout(function () {
           form.find('select[name=food]').selectize()[0].selectize.setValue(response.data.rfs.food_id);
 
@@ -3818,8 +3854,6 @@ function report_photo_nf_full(food_id, type) {
         if (response.data.rfs.rbf_error) {
           form.find('input[name=rbf_error]').prop('checked', true);
         }
-        // console.log('22222222222');
-        // console.log(response.data.rfs.rbf_error);
 
         form.find('input[name=rfs]').val(response.data.rfs.id);
         form.find('select[name=point]').val(response.data.photo.point);
@@ -3833,6 +3867,25 @@ function report_photo_nf_full(food_id, type) {
               input.prop('checked', true);
             }
           });
+        }
+
+        form.find('.wrap-cmts').addClass('d-none');
+        if (response.data.rfs.comments.length) {
+          var html = '';
+
+          response.data.rfs.comments.forEach(function (v, k) {
+            html += '<div class="acm-clearfix position-relative acm-col-noted p-1">' +
+              '<div class="acm-float-right acm-fs-12 acm-text-right">' +
+              '<div class="text-dark">' + v.created_at_1 + '</div>' +
+              '<div class="text-dark">' + v.created_at_2 + '</div>' +
+              '</div>' +
+              '<div class="text-dark fw-bold">@' + v.user_name + ': </div>' +
+              '<div class="text-dark">' + bind_nl2br(v.user_noted) + '</div>' +
+              '</div>';
+          });
+
+          form.find('.wrap-cmts .datas').empty().append(html);
+          form.find('.wrap-cmts').removeClass('d-none');
         }
 
         setTimeout(function () {

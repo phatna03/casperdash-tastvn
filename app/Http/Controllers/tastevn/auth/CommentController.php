@@ -91,6 +91,8 @@ class CommentController extends Controller
         'noter_id' => $this->_viewer->id,
       ]);
 
+      $item->update_main_note($this->_viewer);
+
       return response()->json([
         'status' => true,
       ], 200);

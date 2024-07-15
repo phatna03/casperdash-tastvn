@@ -451,12 +451,25 @@ class ReportController extends Controller
       $rbf_predictions = count($api2) ? $api2['predictions'] : [];
     }
 
+    $comments = [];
+    $cmts = $rfs->get_comments();
+    if (count($cmts)) {
+      foreach ($cmts as $cmt) {
+        $comments[] = [
+          'user_name' => $cmt->owner->name,
+          'user_noted' => $cmt->content,
+          'created_at_1' => date('d/m/Y', strtotime($cmt->created_at)),
+          'created_at_2' => date('H:i:s', strtotime($cmt->created_at)),
+        ];
+      }
+    }
+
     $html = view('tastevn.htmls.item_report_photo_not_found')
       ->with('rfs', $rfs)
       ->with('predictions', $rbf_predictions)
       ->with('versions', $rbf_versions)
       ->with('model', $rfs->rbf_model)
-      ->with('comments', $rfs->get_comments())
+      ->with('comments', $comments)
       ->render();
 
     $texts = $rfs->get_texts(['text_id_only' => 1]);
@@ -480,6 +493,7 @@ class ReportController extends Controller
         'texts' => $texts,
         'ingredients' => $ingredients,
         'rbf_error' => $rfs->rbf_error,
+        'comments' => $comments,
       ],
       'html' => $html,
     ], 200);
@@ -733,12 +747,25 @@ class ReportController extends Controller
       ], 422);
     }
 
+    $comments = [];
+    $cmts = $rfs->get_comments();
+    if (count($cmts)) {
+      foreach ($cmts as $cmt) {
+        $comments[] = [
+          'user_name' => $cmt->owner->name,
+          'user_noted' => $cmt->content,
+          'created_at_1' => date('d/m/Y', strtotime($cmt->created_at)),
+          'created_at_2' => date('H:i:s', strtotime($cmt->created_at)),
+        ];
+      }
+    }
+
     $html = view('tastevn.htmls.item_report_photo_not_found')
       ->with('rfs', $rfs)
       ->with('predictions', $rbf_predictions)
       ->with('versions', $rbf_versions)
       ->with('model', $rfs->rbf_model)
-      ->with('comments', $rfs->get_comments())
+      ->with('comments', $comments)
       ->render();
 
     $texts = $rfs->get_texts(['text_id_only' => 1]);
@@ -770,6 +797,7 @@ class ReportController extends Controller
         'texts' => $texts,
         'ingredients' => $ingredients,
         'rbf_error' => $rfs->rbf_error,
+        'comments' => $comments,
       ],
       'html' => $html,
     ], 200);
