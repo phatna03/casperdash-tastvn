@@ -1018,6 +1018,7 @@
     var populate_lb = function (el) {
       //custome
       el.txt = $('body .lc_lightbox_photo_' + el.author).attr('data-lcl-txt');
+      el.txt = el.txt && el.txt !== '' && el.txt !== 'null' && el.txt !== 'undefined' ? el.txt : '';
 
       var el_index = lcl_ai_vars.elem_index;
 

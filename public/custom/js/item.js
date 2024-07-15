@@ -2583,8 +2583,14 @@ function restaurant_food_scan_notes(id) {
       var html = '';
       var html_noter = '';
 
+      var type = $('.result_photo_sensor').length ? 'kitchens' : '';
+
       if (response.data.note && response.data.note != '' && response.data.note != 'null') {
         noted = true;
+
+        if (type == 'kitchens') {
+          wrap.find('textarea[name=note]').val(response.data.note);
+        }
 
         if (response.data.noter && response.data.noter.name) {
           html_noter = '<div class="text-dark acm-text-italic">(last edited by @' + response.data.noter.name + ')</div>';
@@ -2652,6 +2658,7 @@ function restaurant_food_scan_cmt(ele) {
   var customer_requested = parent.find('input[name=customer_requested]').is(':checked') ? 1 : 0;
   var food_multi = parent.find('input[name=food_multi]').is(':checked') ? 1 : 0;
   var food_count = parent.find('input[name=food_count]').val();
+  var type = $('.result_photo_sensor').length ? 'kitchens' : '';
 
   axios.post('/admin/comment/note', {
     object_id: object_id,
@@ -2660,6 +2667,7 @@ function restaurant_food_scan_cmt(ele) {
     customer_requested: customer_requested,
     food_multi: food_multi,
     food_count: input_number_only(food_count),
+    type: type,
   })
     .then(response => {
 
@@ -2667,6 +2675,10 @@ function restaurant_food_scan_cmt(ele) {
 
       if ($('body .restaurant_food_scan_' + object_id).length) {
         $('body .restaurant_food_scan_' + object_id).attr('data-lcl-txt', content);
+      }
+
+      if ($('.result_photo_sensor').length) {
+        $('.result_photo_sensor a').attr('data-lcl-txt', content);
       }
 
     })
@@ -3889,12 +3901,18 @@ function mobi_photo_view(itd) {
       var html = '';
       var html_noter = '';
 
+      var type = $('.result_photo_sensor').length ? 'kitchens' : '';
+
       if (response.data.user_comment && response.data.user_comment != '' && response.data.user_comment != 'null') {
         popup.find('textarea[name=note]').val(response.data.user_comment);
       }
 
       if (response.data.note && response.data.note != '' && response.data.note != 'null') {
         noted = true;
+
+        if (type == 'kitchens') {
+          popup.find('textarea[name=note]').val(response.data.note);
+        }
 
         if (response.data.noter && response.data.noter.name) {
           html_noter = '<div class="text-dark acm-text-italic">(last edited by @' + response.data.noter.name + ')</div>';

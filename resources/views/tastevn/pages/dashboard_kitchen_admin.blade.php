@@ -1,13 +1,15 @@
 @extends('tastevn/layouts/layoutMaster')
 
-@section('title', 'Admin - Sensor Kitchen Optimize Performance')
+@section('title', 'Admin - Sensor Kitchen Admin')
 
 @section('vendor-style')
-  {{--  <link rel="stylesheet" href="{{asset('assets/vendor/libs/spinkit/spinkit.css')}}" />--}}
+  <link rel="stylesheet" href="{{url('custom/library/lightbox/lc_lightbox.css')}}" />
+  <link rel="stylesheet" href="{{url('custom/library/lightbox/minimal.css')}}" />
 @endsection
 
 @section('vendor-script')
-  {{--  <script src="{{asset('assets/vendor/libs/dropzone/dropzone.js')}}"></script>--}}
+  <script src="{{url('custom/library/lightbox/lc_lightbox.lite.js')}}"></script>
+  <script src="{{url('custom/library/lightbox/alloy_finger.min.js')}}"></script>
 @endsection
 
 @section('page-script')
@@ -27,7 +29,7 @@
           </button>
         </div>
 
-        <span class="text-muted fw-light">Admin /</span> Main Dashboard
+        <span class="text-muted fw-light">Admin /</span> Sensor Dashboard
 
         <input type="hidden" name="current_itd"/>
 
@@ -90,7 +92,9 @@
 
                     <div class="col-lg-12 mb-1 wrap_notify_result d-none result_photo_sensor">
                       <div class="d-inline-block">
-                        <img class="w-100" loading="lazy" src=""/>
+                        <a class="acm-lightbox-photo">
+                          <img class="w-100" loading="lazy" src=""/>
+                        </a>
                       </div>
                     </div>
 
@@ -230,6 +234,19 @@
             if (response.data.datas && (response.data.datas != '' || response.data.datas != '[]')) {
               food_datas(response.data.datas);
             }
+
+            //lc_lightbox
+            $('.result_photo_sensor a').attr('href', response.data.file_url + '?dpr=1&auto=format&fit=crop&w=2000&q=80&cs=tinysrgb');
+            $('.result_photo_sensor a').attr('title', response.data.datas.sensor_name + ' at ' + response.data.datas.rfs_time);
+            $('.result_photo_sensor a').attr('data-lcl-txt', response.data.datas.rfs_note);
+            $('.result_photo_sensor a').attr('data-lcl-author', response.data.datas.rfs_id);
+            $('.result_photo_sensor a').attr('data-lcl-thumb', response.data.datas.file_url + '?dpr=1&auto=format&fit=crop&w=150&q=80&cs=tinysrgb');
+
+            lc_lightbox('.acm-lightbox-photo', {
+              wrap_class: 'lcl_fade_oc',
+              thumb_attr: 'data-lcl-thumb',
+            });
+
           }
         })
         .catch(error => {

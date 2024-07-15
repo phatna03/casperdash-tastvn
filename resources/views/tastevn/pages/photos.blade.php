@@ -201,12 +201,10 @@
 
             datas.find('.load_more').removeClass('d-none');
 
-            if (!acmcfs.is_mobi) {
-              lc_lightbox('.acm-lightbox-photo', {
-                wrap_class: 'lcl_fade_oc',
-                thumb_attr: 'data-lcl-thumb',
-              });
-            }
+            lc_lightbox('.acm-lightbox-photo', {
+              wrap_class: 'lcl_fade_oc',
+              thumb_attr: 'data-lcl-thumb',
+            });
 
           } else {
 

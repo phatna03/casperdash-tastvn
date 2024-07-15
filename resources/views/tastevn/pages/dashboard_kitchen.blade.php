@@ -1,6 +1,6 @@
 @extends('tastevn/layouts/layoutMaster')
 
-@section('title', 'Admin - Sensor Kitchen Optimize Performance')
+@section('title', 'Admin - Sensor Kitchen')
 
 @section('vendor-style')
   {{--  <link rel="stylesheet" href="{{asset('assets/vendor/libs/spinkit/spinkit.css')}}" />--}}

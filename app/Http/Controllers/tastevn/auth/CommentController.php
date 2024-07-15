@@ -34,6 +34,7 @@ class CommentController extends Controller
   {
     $values = $request->post();
 
+    $type = isset($values['type']) && !empty($values['type']) ? $values['type'] : NULL;
     $content = isset($values['content']) && !empty($values['content']) ? trim($values['content']) : NULL;
     $object_type = isset($values['object_type']) && !empty($values['object_type']) ? trim($values['object_type']) : NULL;
     $object_id = isset($values['object_id']) && !empty($values['object_id']) ? (int)$values['object_id'] : 0;
@@ -81,6 +82,18 @@ class CommentController extends Controller
         }
 
         break;
+    }
+
+    if ($type == 'kitchens') {
+
+      $item->update([
+        'note' => !empty($content) ? $content : '',
+        'noter_id' => $this->_viewer->id,
+      ]);
+
+      return response()->json([
+        'status' => true,
+      ], 200);
     }
 
     $row = Comment::where('user_id', $this->_viewer->id)

@@ -1302,6 +1302,9 @@ class SensorController extends Controller
       'restaurant_id' => $restaurant ? $restaurant->id : 0,
       'restaurant_name' => $restaurant ? $restaurant->name : NULL,
 
+      'rfs_id' => $row->id,
+      'rfs_note' => $row->note,
+      'rfs_time' => date('d/m/Y H:i:s', strtotime($row->time_photo)),
     ];
   }
 
