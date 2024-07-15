@@ -1295,7 +1295,28 @@ class SensorController extends Controller
 
       'ingredients_missing' => $ingredients_missing,
       'ingredients_found' => $ingredients_found,
+
+      'sensor_id' => $sensor ? $sensor->id : 0,
+      'sensor_name' => $sensor ? $sensor->name : NULL,
+
+      'restaurant_id' => $restaurant ? $restaurant->id : 0,
+      'restaurant_name' => $restaurant ? $restaurant->name : NULL,
+
     ];
   }
 
+  public function kitchens(Request $request)
+  {
+    $values = $request->all();
+    $debug = isset($values['debug']) ? (int)$values['debug'] : 0;
+
+    $pageConfigs = [
+      'myLayout' => 'horizontal',
+      'hasCustomizer' => false,
+
+      'debug' => $debug && $this->_viewer->is_super_admin(),
+    ];
+
+    return view('tastevn.pages.dashboard_kitchen_admin', ['pageConfigs' => $pageConfigs]);
+  }
 }

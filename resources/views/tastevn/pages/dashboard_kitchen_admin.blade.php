@@ -15,10 +15,10 @@
 @endsection
 
 @section('content')
-  <div class="row m-0">
-    <div class="col-12 mb-1">
+  <div class="row m-0 mt-3">
+    <div class="col-6 mb-1">
       <h4 class="position-relative w-100 mb-0">
-        <div class="acm-float-right">
+        <div class="acm-float-right d-none">
           <button type="button" class="btn btn-sm btn-primary p-1" onclick="speaker_allow()">
             <i class="mdi mdi-speaker"></i> Test Speaker
           </button>
@@ -27,13 +27,23 @@
           </button>
         </div>
 
-        <span class="text-muted fw-light">Admin /</span> {{$pageConfigs['item']->name}}
+        <span class="text-muted fw-light">Admin /</span> Main Dashboard
 
-        <input type="hidden" name="restaurant_id" value="{{$pageConfigs['item']->id}}"/>
-        <input type="hidden" name="restaurant_parent_id" value="{{$pageConfigs['item']->restaurant_parent_id}}"/>
         <input type="hidden" name="current_itd"/>
 
       </h4>
+    </div>
+
+    <div class="col-lg-6 mb-1 wrap_sensor_selected">
+      <div class="form-floating form-floating-outline mb-1">
+        <div class="form-control acm-wrap-selectize" id="select-item-restaurant">
+          <select name="restaurant_id" class="ajx_selectize" required
+                  data-value="restaurant" onchange="sensor_selected(this)"
+                  data-placeholder="Please choose restaurant sensor..."
+          ></select>
+        </div>
+        <label for="select-item-restaurant" class="text-danger">Restaurant Sensor</label>
+      </div>
     </div>
 
     <div class="col-12 mb-1">
@@ -47,39 +57,13 @@
                 </div>
                 <div class="wrap-selected-food">
                   <div class="row m-0">
-                    <div class="col-lg-6 mb-1 d-none">
-                      <div class="form-floating form-floating-outline mb-1">
-                        <div class="form-control acm-wrap-selectize" id="select-item-restaurant">
-                          <select name="restaurant_parent_id" class="ajx_selectize" required
-                                  data-value="restaurant_parent" onchange="restaurant_selected(this)"
-                                  data-placeholder="Please choose restaurant..."
-                          ></select>
-                        </div>
-                        <label for="select-item-restaurant" class="text-danger">Restaurant</label>
-                      </div>
-                    </div>
-
-                    <div class="col-lg-6 mb-1 d-none">
-                      <div class="form-floating form-floating-outline mb-1">
-                        <div class="form-control acm-wrap-selectize" id="select-item-food">
-                          <select name="food" class="opt_selectize" onchange="food_selected(this)"
-                                  data-placeholder="Please choose dish..."
-                          ></select>
-                        </div>
-                        <label for="select-item-food" class="text-danger">Dish</label>
-
-                        <input type="hidden" name="current_food"/>
-                        <input type="hidden" name="current_restaurant_parent_id"/>
-                      </div>
-                    </div>
-
                     <div class="col-lg-12 p-0 mb-1 position-relative">
                       <div class="text-center w-auto d-none">
                         <h3 class="food-name"></h3>
                       </div>
 
                       <div class="text-center w-auto">
-                        <img class="w-100 food-photo" loading="lazy" src="{{url('custom/img/logo_'. $pageConfigs['item']->restaurant_parent_id . '.png')}}"/>
+                        <img class="w-100 food-photo" loading="lazy" />
                       </div>
                     </div>
 
@@ -194,73 +178,15 @@
 
       toggle_header();
 
-      // sensor_checker();
-      setInterval(function () {
-        sensor_checker();
+      interval_running = setInterval(function () {
+        sensor_actived();
       }, acmcfs.timeout_kitchen);
 
     });
 
     var sys_running = 0;
-
-    function food_predict_by_api(item_id) {
-      var wrap = $('.wrap-selected-food');
-
-      sys_running = 1;
-
-      $('.result_photo_status .data_result').empty()
-        .append('<div class="badge bg-success fw-bold acm-ml-px-10 acm-fs-13">predicting...</div>');
-
-      axios.post('/admin/kitchen/predict', {
-        item: item_id,
-        restaurant_id: '{{$pageConfigs['item']->id}}',
-      })
-        .then(response => {
-
-          //show data
-          food_datas(response.data.datas);
-
-          //temp off
-          //notify
-          // if (response.data.notifys && response.data.notifys.length) {
-          //
-          //   response.data.notifys.forEach(function (v, k) {
-          //
-          //     var html_toast = '<div class="cursor-pointer" onclick="sensor_food_scan_info(' + v.itd + ')">';
-          //     html_toast += '<div class="acm-fs-13">+ Dish: <b><span class="acm-mr-px-5 text-danger">' + v.food_confidence + '%</span><span>' + v.food_name + '</span></b></div>';
-          //
-          //     html_toast += '<div class="acm-fs-13">+ Ingredients Missing:</div>';
-          //     v.ingredients.forEach(function (v1, k1) {
-          //       if (v1 && v1 !== '' && v1.trim() !== '') {
-          //         html_toast += '<div class="acm-fs-13 acm-ml-px-10">- ' + v1 + '</div>';
-          //       }
-          //     });
-          //
-          //     html_toast += '</div>';
-          //     message_from_toast('info', v.restaurant_name, html_toast, true);
-          //   });
-          //
-          //   if (response.data.printer) {
-          //   page_open(acmcfs.link_base_url + '/printer?ids=' + response.data.notify_ids.toString());
-          //   }
-          // }
-
-          if (response.data.speaker) {
-            setTimeout(function () {
-              speaker_play();
-            }, 888);
-          }
-
-        })
-        .catch(error => {
-          console.log(error);
-        })
-        .then(res => {
-          sys_running = 0;
-        });
-
-      return false;
-    }
+    var cur_sensor = 0;
+    var interval_running = null;
 
     function sensor_checker() {
 
@@ -270,7 +196,8 @@
       sys_running = 1;
 
       axios.post('/admin/kitchen/checker', {
-        item: '{{$pageConfigs['item']->id}}',
+        item: cur_sensor,
+        type: 'main_dashboard',
       })
         .then(response => {
 
@@ -302,12 +229,6 @@
             //show data
             if (response.data.datas && (response.data.datas != '' || response.data.datas != '[]')) {
               food_datas(response.data.datas);
-            }
-
-            if (response.data.status == 'new') {
-              sys_running = 1;
-
-              food_predict_by_api(response.data.file_id);
             }
           }
         })
@@ -411,7 +332,7 @@
 
       } else {
 
-        var no_photo = '{{url('custom/img/logo_'. $pageConfigs['item']->restaurant_parent_id . '.png')}}';
+        var no_photo = '{{url('custom/img/logo_')}}' + datas.restaurant_id + '.png';
 
         wrap.find('.food-photo').attr('src', no_photo);
         wrap.find('.wrap-ingredients').empty();
@@ -530,6 +451,30 @@
         .catch(error => {
           console.log(error);
         });
+    }
+
+    function sensor_selected(ele) {
+      var bind = $(ele);
+      var selected = parseInt(bind.val());
+      if (!selected) {
+        return false;
+      }
+
+      cur_sensor = selected;
+    }
+
+    function sensor_actived() {
+      var selector = $('.wrap_sensor_selected select');
+      var selected = parseInt(selector.val());
+      if (selector.hasClass('ajx_selectize')) {
+        return false;
+      }
+
+      if (!selected) {
+        $('.wrap_sensor_selected select').selectize()[0].selectize.setValue(5);
+      }
+
+      sensor_checker();
     }
   </script>
 @endsection

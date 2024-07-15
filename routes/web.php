@@ -259,6 +259,7 @@ Route::post('/admin/sensor/food/scan/view', [SensorController::class, 'food_scan
 Route::get('/admin/kitchen/{id}', [SensorController::class, 'kitchen']);
 Route::post('/admin/kitchen/checker', [SensorController::class, 'kitchen_checker']);
 Route::post('/admin/kitchen/predict', [SensorController::class, 'kitchen_predict']);
+Route::get('/admin/kitchens', [SensorController::class, 'kitchens']);
 //notify
 Route::get('/admin/notifications', [NotificationController::class, 'index']);
 Route::post('/admin/notification/read', [NotificationController::class, 'notification_read']);
