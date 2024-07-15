@@ -189,6 +189,9 @@ class RestaurantFoodScan extends Model
               }
             }
           }
+
+          //notify zalo
+
         }
       }
     }
@@ -666,17 +669,18 @@ class RestaurantFoodScan extends Model
           'restaurant_food_scan_id' => $this->id,
         ]), ['database']);
 
+        //temp off
         //notify mail
-        if ((int)$user->get_setting('missing_ingredient_alert_email')) {
-          $user->notify((new IngredientMissingMail([
-            'type' => 'ingredient_missing',
-            'restaurant_id' => $sensor->id,
-            'restaurant_food_scan_id' => $this->id,
-            'user' => $user,
-          ]))->delay([
-            'mail' => now()->addMinutes(5),
-          ]));
-        }
+//        if ((int)$user->get_setting('missing_ingredient_alert_email')) {
+//          $user->notify((new IngredientMissingMail([
+//            'type' => 'ingredient_missing',
+//            'restaurant_id' => $sensor->id,
+//            'restaurant_food_scan_id' => $this->id,
+//            'user' => $user,
+//          ]))->delay([
+//            'mail' => now()->addMinutes(5),
+//          ]));
+//        }
 
         //notify zalo
         $zalo = $user->get_zalo();

@@ -40,9 +40,22 @@
           $owner = $sys_app->get_item($notification->data['owner_id'], 'user');
           $comment = $sys_app->get_item($notification->object_id, $notification->object_type);
 
-          $text1 = 'added new note for the photo with ID: ';
+          $content = $comment->content;
+          if (isset($notification->data['content'])) {
+              $content = $notification->data['content'];
+          }
+
+          if (!$content || empty($content)) {
+              continue;
+          }
+
+          $text1 = 'added new comment for the photo with ID: ';
           if ($type == 'photo_comment_edit') {
-              $text1 = 'updated their note for the photo with ID: ';
+              $text1 = 'updated their comment for the photo with ID: ';
+          } elseif ($type == 'photo_reply_edit') {
+              $text1 = 'updated their comment for the photo with ID that you commented: ';
+          } elseif ($type == 'photo_reply_add') {
+              $text1 = 'added new comment for the photo with ID that you commented: ';
           }
         @endphp
         <div class="text-dark">
@@ -50,7 +63,7 @@
               class="acm-ml-px-5">{{$rfs->id}}</span></b>
         </div>
         <div class="text-dark">
-            <?php echo nl2br($comment->content); ?>
+            <?php echo nl2br($content); ?>
         </div>
       @elseif(in_array($notification->type, $type2s))
         <div class="text-dark">

@@ -62,13 +62,8 @@ class TesterController extends Controller
     $date = date('Y-m-d');
     $user = User::find(5);
 
-    $datas = SysZalo::send_rfs_note($user, 'photo_comment', $rfs);
-    var_dump($datas);
 
-    //zalo testing
-//    SysZalo::send_rfs_note($user, 'photo_comment', $rfs, [
-//
-//    ]);
+
 
 //    $datas = SysZalo::daily_access_token();
 //    if (count($datas) && isset($datas['access_token'])) {
@@ -84,6 +79,7 @@ class TesterController extends Controller
 
 //    $this->checked_notify_remove();
 //    $this->checked_food_category_update();
+//    $this->zalo_user_list_detail();
 
     //=======================================================================================
     //=======================================================================================

@@ -49,9 +49,7 @@
                 <div class="w-px-400 p-2">
                   <div class="form-floating form-floating-outline">
                     <input type="text" class="form-control text-center date_time_picker" name="search_time"
-                           autocomplete="off"
-                           onchange="sensor_stats()"
-                           data-value="last_and_current_day"
+                           autocomplete="off" data-value="last_and_current_day"
                     />
                     <label>Date Time Range</label>
                   </div>
@@ -470,10 +468,6 @@
     var $ = jQuery.noConflict();
     $(document).ready(function () {
 
-      //datatable
-      datatable_listing_scan = $('#datatable-listing-scan table').DataTable(Object.assign(datatable_listing_scan_cfs, acmcfs.datatable_init));
-      datatable_listing_error = $('#datatable-listing-error table').DataTable(Object.assign(datatable_listing_error_cfs, acmcfs.datatable_init));
-
       //keyCode
       $(document).keydown(function(e) {
         // console.log(e.keyCode);
@@ -489,7 +483,13 @@
       //later call
       setTimeout(function () {
         //stats
-        sensor_stats();
+        // sensor_stats();
+        $('#wrap-stats-total input[name=search_time]').attr('onchange', sensor_stats());
+
+        //datatable
+        datatable_listing_scan = $('#datatable-listing-scan table').DataTable(Object.assign(datatable_listing_scan_cfs, acmcfs.datatable_init));
+        datatable_listing_error = $('#datatable-listing-error table').DataTable(Object.assign(datatable_listing_error_cfs, acmcfs.datatable_init));
+
       }, acmcfs.timeout_default);
     });
 
