@@ -316,7 +316,7 @@ class SysZalo
   {
     $zaloer = $user ? $user->get_zalo() : NULL;
 
-    if (!$user || !$rfs || !$zaloer) {
+    if (!$user || !$rfs || !$zaloer || ($zaloer && empty($zaloer->zalo_user_id))) {
 
       SysCore::log_sys_bug([
         'type' => 'zalo_' . $type,

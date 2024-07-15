@@ -1,15 +1,15 @@
 <?php
 
 namespace App\Models;
-
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Notification;
 use App\Notifications\PhotoComment;
 use App\Notifications\PhotoCommentMail;
-
+//lib
 use App\Api\SysApp;
+use App\Api\SysZalo;
 
 class Comment extends Model
 {
@@ -112,6 +112,9 @@ class Comment extends Model
             }
           }
 
+          //notify zalo
+          SysZalo::send_rfs_note($user, 'photo_comment', $rfs);
+
         }
       }
 
@@ -158,6 +161,9 @@ class Comment extends Model
               }
             }
           }
+
+          //notify zalo
+          SysZalo::send_rfs_note($user, 'photo_comment', $rfs);
 
           //temp off
           //notify mail
@@ -240,9 +246,11 @@ class Comment extends Model
             }
           }
 
+          //notify zalo
+          SysZalo::send_rfs_note($user, 'photo_comment', $rfs);
+
         }
       }
-
 
       $users = $sensor->get_users();
       if (count($users)) {
@@ -287,6 +295,9 @@ class Comment extends Model
               }
             }
           }
+
+          //notify zalo
+          SysZalo::send_rfs_note($user, 'photo_comment', $rfs);
 
           //temp off
           //notify mail

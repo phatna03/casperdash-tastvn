@@ -191,7 +191,7 @@ class RestaurantFoodScan extends Model
           }
 
           //notify zalo
-
+          SysZalo::send_rfs_note($user, 'photo_comment', $this);
         }
       }
     }
@@ -683,10 +683,7 @@ class RestaurantFoodScan extends Model
 //        }
 
         //notify zalo
-        $zalo = $user->get_zalo();
-        if ($zalo && $zalo->zalo_user_id) {
-          SysZalo::send_rfs_note($user, 'ingredient_missing', $this);
-        }
+        SysZalo::send_rfs_note($user, 'ingredient_missing', $this);
 
         //notify db update
         $rows = $user->notifications()
