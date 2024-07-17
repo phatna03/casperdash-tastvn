@@ -873,4 +873,30 @@ class RestaurantController extends Controller
       'html' => $html,
     ], 200);
   }
+
+  public function foods(Request $request)
+  {
+    $restaurants = RestaurantParent::where('deleted', 0)
+      ->orderBy('id', 'asc')
+      ->get();
+
+    $foods = Food::where('deleted', 0)
+      ->orderByRaw('TRIM(LOWER(name))')
+      ->get();
+
+    $pageConfigs = [
+      'myLayout' => 'horizontal',
+      'hasCustomizer' => false,
+
+      'restaurants' => $restaurants,
+      'foods' => $foods,
+    ];
+
+//    $this->_viewer->add_log([
+//      'type' => 'view_listing_restaurant_food',
+//    ]);
+
+    return view('tastevn.pages.restaurant_foods', ['pageConfigs' => $pageConfigs]);
+  }
+
 }

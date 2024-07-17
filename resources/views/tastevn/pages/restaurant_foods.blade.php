@@ -1,0 +1,60 @@
+@extends('tastevn/layouts/layoutMaster')
+
+@section('title', 'Admin - Dishes Checker')
+
+@section('content')
+  @php
+  $restaurants = $pageConfigs['restaurants'];
+  $foods = $pageConfigs['foods'];
+
+  @endphp
+
+  <div class="card">
+    <div class="card-body p-2">
+      <div class="table_fixed_first">
+        <table class="table">
+          <thead>
+          <tr>
+            <th class="td_fixed">Dishes / Restaurants</th>
+            @foreach($restaurants as $restaurant)
+              <th class="td_content td_title_restaurant">{{$restaurant->name}}</th>
+            @endforeach
+          </tr>
+          </thead>
+          <tbody>
+          @php
+            $stt = 0;
+              foreach($foods as $food):
+            $stt++;
+          @endphp
+          <tr class="table_line table_line_food_{{$food->id}}">
+            <th class="td_fixed">
+              <div>{{$stt . '. '}}</div>
+              <div>{{$food->name}}</div>
+            </th>
+            @for($i=1;$i<=count($restaurants);$i++)
+              <td class="td_content"></td>
+            @endfor
+          </tr>
+          @endforeach
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+@endsection
+
+@section('js_end')
+  <script type="text/javascript">
+    var $ = jQuery.noConflict();
+
+    $('.page_main_content').removeClass('container-xxl');
+
+    $(document).ready(function() {
+
+
+
+    });
+  </script>
+@endsection

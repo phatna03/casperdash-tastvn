@@ -714,6 +714,92 @@
    background-color: #ffffff;
 }
 
+.table_fixed_first {
+  max-width: 100%;
+  max-height: 680px;
+  overflow: scroll;
+}
+
+/* Use position: sticky to have it stick to the edge
+ * and top, right, or left to choose which edge to stick to: */
+
+.table_fixed_first thead th {
+  position: -webkit-sticky; /* for Safari */
+  position: sticky;
+  top: 0;
+  border-right: 1px solid #fff;
+}
+
+.table_fixed_first tbody th {
+  position: -webkit-sticky; /* for Safari */
+  position: sticky;
+  left: 0;
+}
+
+.table_fixed_first thead:last-child th {
+  bottom: 0;
+}
+
+/* To have the header in the first column stick to the left: */
+.table_fixed_first thead th:first-child {
+  left: 0;
+  z-index: 999999;
+}
+/* Just to display it nicely: */
+
+.table_fixed_first tbody th {
+  background: #FFF;
+  border-right: 1px solid #CCC;
+  z-index: 888888;
+}
+
+.table_fixed_first table {
+  border-collapse: collapse;
+}
+
+.table_fixed_first thead th {
+  background: #000;
+  color: #FFF;
+  vertical-align: middle;
+}
+
+.table_fixed_first td,
+.table_fixed_first th {
+  padding: 0.5em;
+}
+
+.table_fixed_first .table th {
+  border-top-color: #aaa;
+}
+
+.table_fixed_first .tbody th {
+  color: #111;
+}
+
+.table_fixed_first .table td {
+  border-top-color: #aaa;
+  border-right: 1px solid #aaa;
+}
+
+.table_fixed_first .table td:hover {
+  background-color: #efefef;
+  color: #111 !important;
+}
+
+.table_fixed_first .td_fixed {
+  width: 200px;
+  text-transform: capitalize;
+}
+
+.table_fixed_first .td_content {
+  width: 300px;
+}
+
+.table_fixed_first .td_title_restaurant {
+  text-transform: capitalize;
+  text-align: center;
+}
+
 /*modal 2*/
 .layout-navbar-fixed body:not(.modal-open) .layout-navbar-full .layout-navbar,
 .layout-menu-fixed body:not(.modal-open) .layout-navbar-full .layout-navbar,

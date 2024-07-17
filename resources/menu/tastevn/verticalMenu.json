@@ -44,6 +44,18 @@
       "slug": "dashboard",
       "submenu": [
         {
+          "url": "admin/foods",
+          "name": "Dishes",
+          "icon": "menu-icon tf-icons mdi mdi-food",
+          "slug": "admin-foods"
+        },
+        {
+          "url": "admin/restaurant/foods",
+          "name": "Dishes Checker",
+          "icon": "menu-icon tf-icons mdi mdi-compare",
+          "slug": "admin-restaurant-foods"
+        },
+        {
           "url": "admin/texts",
           "name": "Text Notes",
           "icon": "menu-icon tf-icons mdi mdi-text-box-edit",
