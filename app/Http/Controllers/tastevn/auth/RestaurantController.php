@@ -899,4 +899,44 @@ class RestaurantController extends Controller
     return view('tastevn.pages.restaurant_foods', ['pageConfigs' => $pageConfigs]);
   }
 
+  public function food_serve(Request $request)
+  {
+    $values = $request->post();
+
+    $restaurant_parent_id = isset($values['restaurant_parent_id']) ? (int)$values['restaurant_parent_id'] : 0;
+    $restaurant_parent = RestaurantParent::find($restaurant_parent_id);
+    if (!$restaurant_parent) {
+      return response()->json([
+        'error' => 'Invalid data'
+      ], 404);
+    }
+
+    $datas = [];
+
+    $foods = $restaurant_parent->get_foods();
+    if (count($foods)) {
+      foreach ($foods as $f) {
+        $food = Food::find($f->food_id);
+
+        $food_photo = $food->get_photo([
+          'restaurant_parent_id' => $restaurant_parent->id
+        ]);
+        $food_ingredients = $food->get_ingredients([
+          'restaurant_parent_id' => $restaurant_parent->id
+        ]);
+
+        $datas[] = [
+          'food_id' => $food->id,
+          'food_photo' => $food_photo,
+          'ingredients' => count($food_ingredients) ? $food_ingredients->toArray() : [],
+        ];
+      }
+    }
+
+    return response()->json([
+      'status' => true,
+
+      'datas' => $datas,
+    ], 200);
+  }
 }

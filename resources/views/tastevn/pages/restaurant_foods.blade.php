@@ -27,14 +27,14 @@
               foreach($foods as $food):
             $stt++;
           @endphp
-          <tr class="table_line table_line_food_{{$food->id}}">
+          <tr class="tr_food_{{$food->id}}">
             <th class="td_fixed">
               <div>{{$stt . '. '}}</div>
               <div>{{$food->name}}</div>
             </th>
-            @for($i=1;$i<=count($restaurants);$i++)
-              <td class="td_content"></td>
-            @endfor
+            @foreach($restaurants as $restaurant)
+              <td class="td_content tr_restaurant_food_{{$restaurant->id}}_{{$food->id}}"></td>
+            @endforeach
           </tr>
           @endforeach
           </tbody>
@@ -53,7 +53,9 @@
 
     $(document).ready(function() {
 
-
+      @foreach($restaurants as $restaurant)
+        restaurant_food_serve({{$restaurant->id}});
+      @endforeach
 
     });
   </script>

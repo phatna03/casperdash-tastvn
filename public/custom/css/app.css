@@ -716,7 +716,7 @@
 
 .table_fixed_first {
   max-width: 100%;
-  max-height: 680px;
+  max-height: 550px;
   overflow: scroll;
 }
 
@@ -743,14 +743,23 @@
 /* To have the header in the first column stick to the left: */
 .table_fixed_first thead th:first-child {
   left: 0;
-  z-index: 999999;
+  /*z-index: 999999;*/
 }
 /* Just to display it nicely: */
 
 .table_fixed_first tbody th {
-  background: #FFF;
-  border-right: 1px solid #CCC;
-  z-index: 888888;
+  /*background: #FFF;*/
+  /*border-right: 1px solid #CCC;*/
+  z-index: 3;
+
+  background: #e0e0fc;
+  color: #111;
+  vertical-align: middle;
+  font-size: 22px;
+}
+
+.table_fixed_first tbody td {
+  vertical-align: top;
 }
 
 .table_fixed_first table {
@@ -758,9 +767,10 @@
 }
 
 .table_fixed_first thead th {
-  background: #000;
-  color: #FFF;
+  background: #e0e0fc;
+  color: #111;
   vertical-align: middle;
+  font-size: 16px;
 }
 
 .table_fixed_first td,
@@ -772,31 +782,31 @@
   border-top-color: #aaa;
 }
 
-.table_fixed_first .tbody th {
-  color: #111;
-}
-
 .table_fixed_first .table td {
   border-top-color: #aaa;
-  border-right: 1px solid #aaa;
+  border-right: 1px solid #ccc;
 }
 
 .table_fixed_first .table td:hover {
-  background-color: #efefef;
-  color: #111 !important;
+  /*background-color: #efefef;*/
+  /*color: #111 !important;*/
 }
 
 .table_fixed_first .td_fixed {
-  width: 200px;
+  width: 200px !important;
+  min-width: 200px !important;
+  max-width: 200px !important;
   text-transform: capitalize;
 }
 
 .table_fixed_first .td_content {
-  width: 300px;
+  width: 300px !important;
+  min-width: 300px !important;
+  max-width: 300px !important;
 }
 
 .table_fixed_first .td_title_restaurant {
-  text-transform: capitalize;
+  text-transform: uppercase;
   text-align: center;
 }
 

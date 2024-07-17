@@ -749,6 +749,55 @@ function restaurant_food_robot(evt, frm) {
 
   return false;
 }
+function restaurant_food_serve(itd) {
+
+  axios.post('/admin/restaurant/food/serve', {
+    restaurant_parent_id: itd,
+
+  })
+    .then(response => {
+
+      // console.log(response.data.datas);
+      if (response.data.datas.length) {
+        var html1 = '';
+        var html2 = '';
+        var cls2 = '';
+
+        response.data.datas.forEach(function (v, k) {
+          html1 = '';
+          html2 = '---';
+
+          if ($('.tr_restaurant_food_' + itd + '_' + v.food_id).length) {
+
+            if (v.ingredients.length) {
+              html2 = '';
+              cls2 = '';
+
+              v.ingredients.forEach(function (v1, k1) {
+                cls2 = v1.ingredient_type == 'core' ? 'text-danger' : '';
+
+                html2 += '<div class="' + cls2 + '">- ' + v1.ingredient_quantity + ' ' + v1.name + '</div>';
+              });
+            }
+
+            html1 += '<div>' +
+              '<div><img src="' + v.food_photo + '" loading="lazy" class="w-100" /></div>' +
+              '<div><b class="text-primary">+ Roboflow Ingredients</b></div>' +
+              '<div>' + html2 + '</div>' +
+              '</div>';
+
+            $('.tr_restaurant_food_' + itd + '_' + v.food_id).empty().append(html1);
+          }
+        });
+      }
+
+    })
+    .catch(error => {
+      console.log(error);
+    });
+
+  return false;
+}
 //sensor
 function sensor_add(evt, frm) {
   evt.preventDefault();
