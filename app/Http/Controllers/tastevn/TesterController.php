@@ -17,6 +17,8 @@ use App\Notifications\IngredientMissingMail;
 
 use Maatwebsite\Excel\Facades\Excel;
 use App\Excel\ImportData;
+use App\Excel\ExportData;
+use App\Excel\ExportDataRfs;
 
 use Validator;
 use Aws\S3\S3Client;
@@ -57,13 +59,23 @@ class TesterController extends Controller
     $sys_app = new SysApp();
 
     $restaurant = RestaurantParent::find(1);
-    $sensor = Restaurant::find(5);
-    $rfs = RestaurantFoodScan::find(57042);
+    $sensor = Restaurant::find(13);
+    $rfs = RestaurantFoodScan::find(57628);
     $date = date('Y-m-d');
     $user = User::find(5);
 
+//    SysZalo::send_rfs_note($user, 'photo_comment', $rfs);
 
-
+//    $items = $this->checked_rfs_by_date([
+//      'sensor_id' => $sensor->id,
+//      'date_from' => '2024-07-01',
+//      'date_to' => '2024-07-15',
+//    ]);
+//
+//    $file = new ExportDataRfs();
+//    $file->set_items($items);
+//
+//    return Excel::download($file, 'report_rfs_' . $sensor->id . '.xlsx');
 
 //    $datas = SysZalo::daily_access_token();
 //    if (count($datas) && isset($datas['access_token'])) {
@@ -79,7 +91,7 @@ class TesterController extends Controller
 
 //    $this->checked_notify_remove();
 //    $this->checked_food_category_update();
-//    $this->zalo_user_list_detail();
+    $this->zalo_user_list_detail();
 
     //=======================================================================================
     //=======================================================================================
@@ -111,7 +123,7 @@ class TesterController extends Controller
     $sys_app = new SysApp();
 
     $datas = SysZalo::user_list([
-      'offset' => 0, //stt 50
+      'offset' => 50, //stt 50
     ]);
 
     var_dump($datas);
@@ -267,5 +279,94 @@ class TesterController extends Controller
 //    ]);
 
     SysRobo::photo_check($pars);
+  }
+
+  protected function checked_photo_day($pars = [])
+  {
+    $debug = isset($pars['debug']) ? (bool)$pars['debug'] : false;
+
+    $date_from = date('Y-m-01');
+    $date_to = date('Y-m-d');
+
+    $sensors = Restaurant::where('deleted', 0)
+      ->orderBy('id', 'asc')
+      ->get();
+
+    $items = [];
+
+    for ($d = (int)date('d'); $d > 14; $d--) {
+
+      if ((int)$d < 10) {
+        $d = '0' . $d;
+      }
+
+      $date = date('Y-m-' . $d);
+
+      $temps = [];
+
+      if ($debug) {
+        var_dump(SysCore::var_dump_break());
+        var_dump('DATE= ' . $date);
+      }
+
+      foreach ($sensors as $sensor) {
+
+        if ($debug) {
+          var_dump($sensor->id . ' - ' . $sensor->name);
+        }
+
+        $photo1s = RestaurantFoodScan::where('restaurant_id', $sensor->id)
+          ->where('deleted', 0)
+          ->whereDate('time_photo', $date)
+          ->get();
+
+        $photo2s = RestaurantFoodScan::where('restaurant_id', $sensor->id)
+          ->where('deleted', 0)
+          ->where('status', '<>', 'duplicated')
+          ->whereDate('time_photo', $date)
+          ->get();
+
+        if ($debug) {
+          var_dump('PHOTO_TOTAL= ' . count($photo1s));
+          var_dump('PHOTO_VALID= ' . count($photo2s));
+        }
+
+        $temps[] = [
+          'sensor_id' => $sensor->id,
+          'sensor_name' => $sensor->name,
+          'photo_total' => count($photo1s),
+          'photo_valid' => count($photo2s),
+        ];
+      }
+
+      $items[$date] = $temps;
+    }
+
+//    var_dump($items);
+    return $items;
+  }
+
+  protected function checked_rfs_by_date($pars = [])
+  {
+    $select = RestaurantFoodScan::query('restaurant_food_scans')
+      ->select('id', 'photo_url', 'time_photo', 'time_scan', 'time_end')
+      ->where('deleted', 0)
+      ->where('status', '<>', 'duplicated')
+      ->where('rbf_api', '<>', NULL)
+    ;
+
+    if (isset($pars['sensor_id'])) {
+      $select->where('restaurant_id', (int)$pars['sensor_id']);
+    }
+
+    if (isset($pars['date_from'])) {
+      $select->whereDate('time_photo', '>=', $pars['date_from']);
+    }
+
+    if (isset($pars['date_to'])) {
+      $select->whereDate('time_photo', '<=', $pars['date_to']);
+    }
+
+    return $select->get()->toArray();
   }
 }
