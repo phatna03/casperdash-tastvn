@@ -305,15 +305,20 @@ function restaurant_food_photo_prepare(ele) {
   var form = $('#frm_food_photo_standard');
 
   form.find('input[name=food_id]').val(food_item.attr('data-food_id'));
-  // form.find('input[name=restaurant_parent_id]').val(food_item.attr('data-restaurant_parent_id'));
+
+  var popup = form.closest('.modal');
+  if (popup.length) {
+    popup.find('input[name=restaurant_parent_id]').val(food_item.attr('data-restaurant_parent_id'));
+  }
 
   form.find('input[type=file]').val("");
   form.find('input[type=file]')[0].click();
 }
 function restaurant_food_photo(ele) {
   var form = $('#frm_food_photo_standard');
-  var popup = form.closest('.modal');
   var food_id = form.find('input[name=food_id]').val();
+
+  var popup = form.closest('.modal');
   var restaurant_parent_id = popup.find('input[name=restaurant_parent_id]').val();
 
   //photo
@@ -643,13 +648,17 @@ function restaurant_food_recipe(evt, frm) {
 
   return false;
 }
-function restaurant_food_robot_prepare(ele) {
+function restaurant_food_robot_prepare(ele, rpitd = 0) {
   var food_item = $(ele).closest('.data_food_item');
   var popup1 = $(ele).closest('.modal');
   var popup2 = $('#modal_food_ingredient_robot');
   var form = popup2.find('form');
 
-  var restaurant_parent_id = popup1.find('input[name=restaurant_parent_id]').val();
+  var restaurant_parent_id = popup1.length ? popup1.find('input[name=restaurant_parent_id]').val() : 0;
+  if (parseInt(rpitd)) {
+    restaurant_parent_id = rpitd;
+  }
+
   var food_id = food_item.attr('data-food_id');
 
   popup2.find('input[name=restaurant_parent_id]').val(restaurant_parent_id);
@@ -732,7 +741,12 @@ function restaurant_food_robot(evt, frm) {
 
       message_from_toast('success', acmcfs.message_title_success, acmcfs.message_description_success_update, true);
 
-      popup1.find('.data_food_item_' + food_id + ' .food_ingredient_robot').empty().append(response.data.html);
+      if (popup1.length) {
+        popup1.find('.data_food_item_' + food_id + ' .food_ingredient_robot').empty().append(response.data.html);
+      }
+      else if ($('.tr_restaurant_food_' + restaurant_parent_id + '_' + food_id).length) {
+        restaurant_food_serve_tr(restaurant_parent_id, food_id, response.data.datas);
+      }
 
     })
     .catch(error => {
@@ -759,34 +773,9 @@ function restaurant_food_serve(itd) {
 
       // console.log(response.data.datas);
       if (response.data.datas.length) {
-        var html1 = '';
-        var html2 = '';
-        var cls2 = '';
-
         response.data.datas.forEach(function (v, k) {
-          html1 = '';
-          html2 = '---';
-
           if ($('.tr_restaurant_food_' + itd + '_' + v.food_id).length) {
-
-            if (v.ingredients.length) {
-              html2 = '';
-              cls2 = '';
-
-              v.ingredients.forEach(function (v1, k1) {
-                cls2 = v1.ingredient_type == 'core' ? 'text-danger' : '';
-
-                html2 += '<div class="' + cls2 + '">- ' + v1.ingredient_quantity + ' ' + v1.name + '</div>';
-              });
-            }
-
-            html1 += '<div>' +
-              '<div><img src="' + v.food_photo + '" loading="lazy" class="w-100" /></div>' +
-              '<div><b class="text-primary">+ Roboflow Ingredients</b></div>' +
-              '<div>' + html2 + '</div>' +
-              '</div>';
-
-            $('.tr_restaurant_food_' + itd + '_' + v.food_id).empty().append(html1);
+            restaurant_food_serve_tr(itd, v.food_id, v);
           }
         });
       }
@@ -797,6 +786,62 @@ function restaurant_food_serve(itd) {
     });
 
   return false;
+}
+function restaurant_food_serve_tr(restaurant_parent_id, food_id, datas) {
+  var html1 = '';
+  var html2 = '---';
+  var cls2 = '';
+  var sel2 = '';
+  var opt2 = '';
+  var opt2_selected = '';
+  var opt2_value = 0;
+
+  if (datas.ingredients.length) {
+    html2 = '';
+
+    datas.ingredients.forEach(function (v1, k1) {
+      cls2 = (v1.ingredient_type == 'core') ? 'text-danger' : '';
+
+      for (opt2_value = 95; opt2_value >= 30;) {
+        opt2_selected = (opt2_value == parseInt(v1.confidence)) ? ' selected="selected" ' : '';
+
+        opt2 += '<option value="' + opt2_value + '" ' + opt2_selected + '>' + opt2_value + '%</option>';
+
+        opt2_value = opt2_value - 5;
+      }
+
+      sel2 = '<select class="form-control p-1 acm-width-50-max" onchange="food_ingredient_confidence_quick(this, ' + v1.food_ingredient_id + ')">' +
+        opt2 +
+        '</select>';
+
+      html2 += '<div class="' + cls2 + '">' +
+        '<div class="d-inline-block">' +
+        sel2 +
+        '</div>' +
+        '<div class="d-inline-block acm-ml-px-5">' +
+        ' - ' + v1.ingredient_quantity + ' ' + v1.name +
+        '</div>' +
+        '</div>';
+    });
+  }
+
+  html1 += '<div class="acm-clearfix position-relative data_food_item" data-food_id="' + food_id + '" data-restaurant_parent_id="' + restaurant_parent_id + '">' +
+    '<button type="button" class="btn btn-danger p-1 position-absolute acm-right-0 " onclick="restaurant_food_photo_prepare(this)">' +
+    '<i class="mdi mdi-upload"></i> Upload Photo' +
+    '</button>' +
+    '<div><img src="' + datas.food_photo + '" loading="lazy" class="w-100" id="food_photo_standard_' + restaurant_parent_id + '_' + food_id + '" /></div>' +
+    '<div class="mb-1 mt-1">' +
+    '<button type="button" class="btn btn-sm btn-info p-1 d-inline-block" onclick="restaurant_food_robot_prepare(this, ' + restaurant_parent_id + ')">' +
+    '<i class="mdi mdi-pencil"></i>' +
+    '</button>' +
+    '<div class="d-inline-block acm-ml-px-5">' +
+    '<b class="text-primary">Roboflow Ingredients</b>' +
+    '</div>' +
+    '</div>' +
+    '<div>' + html2 + '</div>' +
+    '</div>';
+
+  $('.tr_restaurant_food_' + restaurant_parent_id + '_' + food_id).empty().append(html1);
 }
 //sensor
 function sensor_add(evt, frm) {

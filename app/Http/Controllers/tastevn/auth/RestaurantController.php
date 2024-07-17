@@ -866,11 +866,25 @@ class RestaurantController extends Controller
         break;
     }
 
+    $food_photo = $food->get_photo([
+      'restaurant_parent_id' => $restaurant_parent->id
+    ]);
+    $food_ingredients = $food->get_ingredients([
+      'restaurant_parent_id' => $restaurant_parent->id
+    ]);
 
+    $datas = [
+      'food_id' => $food->id,
+      'food_photo' => $food_photo,
+      'ingredients' => count($food_ingredients) ? $food_ingredients->toArray() : [],
+    ];
 
     return response()->json([
       'status' => true,
+
       'html' => $html,
+
+      'datas' => $datas,
     ], 200);
   }
 

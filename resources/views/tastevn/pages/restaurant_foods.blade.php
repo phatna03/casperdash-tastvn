@@ -43,6 +43,61 @@
     </div>
   </div>
 
+  <!-- modal food photo fake -->
+  <div class="modal">
+    <div class="frm_upload_photo d-none">
+      <form onsubmit="return event.preventDefault();" id="frm_food_photo_standard">
+        <input type="file" name="photo"
+               onchange="restaurant_food_photo(this)"
+               accept=".jpg,.jpeg,.png,.webp"
+        />
+
+        <input type="hidden" name="food_id" />
+      </form>
+    </div>
+
+    <input type="hidden" name="restaurant_parent_id" />
+  </div>
+  <!-- modal food robot -->
+  <div class="modal fade modal-second" id="modal_food_ingredient_robot" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title">Edit Roboflow Ingredients</h4>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form class="pt-0" onsubmit="return restaurant_food_robot(event, this);">
+          <div class="modal-body">
+            <div class="row">
+              <div class="col mb-12 mt-2">
+                <div class="wrap-add-item-ingredients">
+                  <div class="wrap-ingredients wrap-custom p-1">
+                    <div class="ingredient-item-add mb-1 acm-text-right">
+                      <button class="btn btn-sm btn-info me-sm-3 me-1" type="button" onclick="ingredient_item_add(this)"><i class="mdi mdi-plus me-0 me-sm-1"></i> Add Ingredient</button>
+                    </div>
+                  </div>
+                  <div class="wrap-ingredients wrap-fetch p-1">
+
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <div class="wrap-btns">
+              @include('tastevn.htmls.form_button_loading')
+              <button type="submit" class="btn btn-primary btn-ok btn-submit acm-float-right">Submit</button>
+              <button type="button" class="btn btn-outline-secondary btn-ok btn-cancel" data-bs-dismiss="modal">Cancel</button>
+            </div>
+
+            <input type="hidden" name="restaurant_parent_id" />
+            <input type="hidden" name="food_id" />
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
 @endsection
 
 @section('js_end')
@@ -53,9 +108,11 @@
 
     $(document).ready(function() {
 
-      @foreach($restaurants as $restaurant)
-        restaurant_food_serve({{$restaurant->id}});
-      @endforeach
+{{--      @foreach($restaurants as $restaurant)--}}
+{{--        restaurant_food_serve({{$restaurant->id}});--}}
+{{--      @endforeach--}}
+
+  restaurant_food_serve(1);
 
     });
   </script>

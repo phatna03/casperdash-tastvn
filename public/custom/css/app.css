@@ -426,7 +426,7 @@
 .acm-modal-arrow img {
   width: 55px;
   z-index: 99999999;
-  background: #111;
+  background: #000;
   border-radius: 50%;
   padding: 5px;
 }
@@ -459,7 +459,7 @@
   text-transform: uppercase;
   font-weight: bold;
   font-size: 13px;
-  color: #111;
+  color: #000;
 }
 
 .acm-text-italic {
@@ -539,7 +539,7 @@
   width: 55px;
   z-index: 999;
   opacity: 1;
-  background: #111;
+  background: #000;
   border-radius: 50%;
   padding: 5px;
 }
@@ -752,8 +752,8 @@
   /*border-right: 1px solid #CCC;*/
   z-index: 3;
 
-  background: #e0e0fc;
-  color: #111;
+  background: #d0d1fb;
+  color: #000;
   vertical-align: middle;
   font-size: 22px;
 }
@@ -767,10 +767,11 @@
 }
 
 .table_fixed_first thead th {
-  background: #e0e0fc;
-  color: #111;
+  background: #d0d1fb;
+  color: #000;
   vertical-align: middle;
   font-size: 16px;
+  z-index: 3;
 }
 
 .table_fixed_first td,
