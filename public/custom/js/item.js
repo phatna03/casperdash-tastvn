@@ -807,12 +807,20 @@ function restaurant_food_serve_tr(restaurant_parent_id, food_id, datas) {
   var opt2 = '';
   var opt2_selected = '';
   var opt2_value = 0;
+  var cor2 = '';
 
   if (datas.ingredients.length) {
     html2 = '';
 
     datas.ingredients.forEach(function (v1, k1) {
       cls2 = (v1.ingredient_type == 'core') ? 'text-danger' : '';
+      cor2 = ' - ' + v1.ingredient_quantity + ' ' + v1.name;
+
+      if (acmcfs.user_role == 'super_admin' || parseInt(acmcfs.uid) == 5) {
+        cor2 = '<span class="wrap_text_roboflow_ingredient cursor-pointer" onclick="food_ingredient_core_quick(this, ' + v1.food_ingredient_id + ')">' +
+          cor2 +
+          '</span>';
+      }
 
       for (opt2_value = 95; opt2_value >= 30;) {
         opt2_selected = (opt2_value == parseInt(v1.confidence)) ? ' selected="selected" ' : '';
@@ -831,7 +839,7 @@ function restaurant_food_serve_tr(restaurant_parent_id, food_id, datas) {
         sel2 +
         '</div>' +
         '<div class="d-inline-block acm-ml-px-5">' +
-        ' - ' + v1.ingredient_quantity + ' ' + v1.name +
+        cor2 +
         '</div>' +
         '</div>';
     });
