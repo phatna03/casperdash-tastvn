@@ -138,6 +138,43 @@
                       <label for="failed-update-ingredients" class="text-danger">Ingredients Missing</label>
                     </div>
                   </div>
+                  <div class="col-lg-4 mb-2 acm-pr-px-0">
+                    <div class="form-floating form-floating-outline mb-2">
+                      <div class="form-control">
+                        <input class="form-check-input" type="checkbox" id="failed-update-customer_requested"
+                               name="customer_requested" />
+                        <span class="text-dark">Yes</span>
+                      </div>
+                      <label for="failed-update-customer_requested" class="text-danger">Requested?</label>
+                    </div>
+                  </div>
+                  <div class="col-lg-4 mb-2 acm-pr-px-0">
+                    <div class="form-floating form-floating-outline mb-2">
+                      <div class="form-control">
+                        <input class="form-check-input" type="checkbox" id="failed-update-food_multi"
+                               onchange="sensor_food_scan_update_food_multi(this)"
+                               name="food_multi" />
+                        <span class="text-dark">Yes</span>
+                      </div>
+                      <label for="failed-update-food_multi" class="text-danger">Multiple Dishes?</label>
+                    </div>
+                  </div>
+                  <div class="col-lg-4 mb-2">
+                    <div class="form-floating form-floating-outline mb-2">
+                      <div class="form-control">
+                        <input class="form-check-input" type="checkbox" id="failed-update-note_kitchen"
+                               name="note_kitchen" />
+                        <span class="text-dark">Yes</span>
+                      </div>
+                      <label for="failed-update-note_kitchen" class="text-danger">Note Kitchen?</label>
+                    </div>
+                  </div>
+                  <div class="col-lg-12 mb-2 d-none food_count">
+                    <div class="form-floating form-floating-outline">
+                      <input type="text" class="form-control text-dark text-center fw-bold fnumber" name="food_count" autocomplete="off"
+                             placeholder="Number of dishes" onblur="input_number_min_two(this);"  />
+                    </div>
+                  </div>
                   <div class="col-lg-12 mb-2">
                     <div class="form-floating form-floating-outline">
                       <div class="form-control acm-wrap-selectize" id="failed-update-note">

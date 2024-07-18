@@ -1484,6 +1484,10 @@ function sensor_food_scan_update_food_multi(ele) {
   if (bind.is(':checked')) {
     parent.find('.food_count').removeClass('d-none');
     parent.find('input[name=food_count]').val('');
+
+    setTimeout(function () {
+      parent.find('input[name=food_count]').focus();
+    }, 500);
   }
 }
 function sensor_food_scan_update_select(ele) {
@@ -3593,6 +3597,23 @@ function report_photo_nf() {
         if (response.data.rfs.rbf_error) {
           form.find('input[name=rbf_error]').prop('checked', true);
         }
+        form.find('input[name=customer_requested]').prop('checked', false);
+        if (response.data.rfs.customer_requested) {
+          form.find('input[name=customer_requested]').prop('checked', true);
+        }
+        form.find('input[name=note_kitchen]').prop('checked', false);
+        if (response.data.rfs.note_kitchen) {
+          form.find('input[name=note_kitchen]').prop('checked', true);
+        }
+
+        form.find('.food_count').addClass('d-none');
+        form.find('input[name=food_multi]').prop('checked', false);
+        if (parseInt(response.data.rfs.count_foods) > 1) {
+          form.find('input[name=food_multi]').prop('checked', true);
+
+          form.find('.food_count').removeClass('d-none');
+          form.find('input[name=food_count]').val(response.data.rfs.count_foods);
+        }
 
         form.find('input[name=rfs]').val(response.data.rfs.id);
         form.find('select[name=point]').val(response.data.photo.point);
@@ -3770,6 +3791,10 @@ function report_photo_nf_update(ele) {
     note: form.find('textarea[name=note]').val(),
     texts: texts,
     rbf_error: form.find('input[name=rbf_error]').is(':checked') ? 1 : 0,
+    customer_requested: form.find('input[name=customer_requested]').is(':checked') ? 1 : 0,
+    note_kitchen: form.find('input[name=note_kitchen]').is(':checked') ? 1 : 0,
+    food_multi: form.find('input[name=food_multi]').is(':checked') ? 1 : 0,
+    food_count: form.find('input[name=food_count]').val(),
   })
     .then(response => {
 
@@ -3906,6 +3931,29 @@ function report_photo_nf_itm(itd) {
 
         popup.find('input[name=popup_view_id_itm]').val(response.data.rfs.id);
 
+        form.find('input[name=rbf_error]').prop('checked', false);
+        if (response.data.rfs.rbf_error) {
+          form.find('input[name=rbf_error]').prop('checked', true);
+        }
+
+        form.find('input[name=customer_requested]').prop('checked', false);
+        if (response.data.rfs.customer_requested) {
+          form.find('input[name=customer_requested]').prop('checked', true);
+        }
+        form.find('input[name=note_kitchen]').prop('checked', false);
+        if (response.data.rfs.note_kitchen) {
+          form.find('input[name=note_kitchen]').prop('checked', true);
+        }
+
+        form.find('.food_count').addClass('d-none');
+        form.find('input[name=food_multi]').prop('checked', false);
+        if (parseInt(response.data.rfs.count_foods) > 1) {
+          form.find('input[name=food_multi]').prop('checked', true);
+
+          form.find('.food_count').removeClass('d-none');
+          form.find('input[name=food_count]').val(response.data.rfs.count_foods);
+        }
+
         form.find('input[name=rfs]').val(response.data.rfs.id);
         form.find('select[name=point]').val(response.data.photo.point);
         form.find('textarea[name=note]').val(response.data.rfs.note);
@@ -4006,6 +4054,24 @@ function report_photo_nf_full(food_id, type) {
         form.find('input[name=rbf_error]').prop('checked', false);
         if (response.data.rfs.rbf_error) {
           form.find('input[name=rbf_error]').prop('checked', true);
+        }
+
+        form.find('input[name=customer_requested]').prop('checked', false);
+        if (response.data.rfs.customer_requested) {
+          form.find('input[name=customer_requested]').prop('checked', true);
+        }
+        form.find('input[name=note_kitchen]').prop('checked', false);
+        if (response.data.rfs.note_kitchen) {
+          form.find('input[name=note_kitchen]').prop('checked', true);
+        }
+
+        form.find('.food_count').addClass('d-none');
+        form.find('input[name=food_multi]').prop('checked', false);
+        if (parseInt(response.data.rfs.count_foods) > 1) {
+          form.find('input[name=food_multi]').prop('checked', true);
+
+          form.find('.food_count').removeClass('d-none');
+          form.find('input[name=food_count]').val(response.data.rfs.count_foods);
         }
 
         form.find('input[name=rfs]').val(response.data.rfs.id);

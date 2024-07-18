@@ -489,11 +489,18 @@ class ReportController extends Controller
       'rfs' => [
         'id' => $rfs->id,
         'food_id' => $rfs->food_id,
+
         'note' => $rfs->note,
         'texts' => $texts,
-        'ingredients' => $ingredients,
-        'rbf_error' => $rfs->rbf_error,
+
         'comments' => $comments,
+
+        'ingredients' => $ingredients,
+
+        'rbf_error' => $rfs->rbf_error,
+        'customer_requested' => $rfs->customer_requested,
+        'note_kitchen' => $rfs->note_kitchen,
+        'count_foods' => $rfs->count_foods,
       ],
       'html' => $html,
     ], 200);
@@ -522,7 +529,6 @@ class ReportController extends Controller
 
     $item_old = $rfs->toArray();
 
-    $rbf_error = isset($values['rbf_error']) ? (int)$values['rbf_error'] : 0;
     $food = isset($values['food']) ? (int)$values['food'] : 0;
     $point = isset($values['point']) ? (float)$values['point'] : 0;
     $noted = isset($values['note']) && !empty($values['note']) ? $values['note'] : NULL;
@@ -530,6 +536,14 @@ class ReportController extends Controller
     $missing = isset($values['missing']) ? (int)$values['missing'] : 0;
     $ingredients = isset($values['ingredients']) ? (array)$values['ingredients'] : [];
     $type = isset($values['type']) && !empty($values['type']) ? $values['type'] : 'not_found';
+
+    $rbf_error = isset($values['rbf_error']) ? (int)$values['rbf_error'] : 0;
+    $customer_requested = isset($values['customer_requested']) && !empty($values['customer_requested'])
+      ? (int)$values['customer_requested'] : 0;
+    $note_kitchen = isset($values['note_kitchen']) && !empty($values['note_kitchen'])
+      ? (int)$values['note_kitchen'] : 0;
+    $food_multi = isset($values['food_multi']) && !empty($values['food_multi']) ? (int)$values['food_multi'] : 0;
+    $food_count = isset($values['food_count']) && !empty($values['food_count']) ? (int)$values['food_count'] : 0;
 
     //food
     $food = Food::find($food);
@@ -610,6 +624,51 @@ class ReportController extends Controller
       $rfs->update([
         'rbf_error' => 0,
       ]);
+    }
+
+    //customer_requested
+    if (!$customer_requested) {
+      $rfs->update([
+        'customer_requested' => 0,
+      ]);
+    }
+    if (!$rfs->customer_requested && $customer_requested) {
+      $rfs->update([
+        'customer_requested' => $this->_viewer->id,
+      ]);
+    }
+
+    //count_foods
+    if (!$food_multi) {
+      $rfs->update([
+        'count_foods' => 0,
+      ]);
+    }
+    if ($food_multi && $food_count > 1) {
+      $rfs->update([
+        'count_foods' => $food_count,
+      ]);
+    }
+
+    //note_kitchen
+    if (!$note_kitchen) {
+      $rfs->update([
+        'note_kitchen' => 0,
+      ]);
+    }
+    if (!$rfs->note_kitchen && $note_kitchen) {
+
+      if ($rfs->get_food()) {
+        RestaurantFoodScan::where('restaurant_id', $rfs->restaurant_id)
+          ->where('food_id', $rfs->get_food()->id)
+          ->update([
+            'note_kitchen' => 0,
+          ]);
+
+        $rfs->update([
+          'note_kitchen' => $this->_viewer->id,
+        ]);
+      }
     }
 
     //report photo_update
@@ -793,11 +852,18 @@ class ReportController extends Controller
       'rfs' => [
         'id' => $rfs->id,
         'food_id' => $rfs->food_id,
+
         'note' => $rfs->note,
         'texts' => $texts,
-        'ingredients' => $ingredients,
-        'rbf_error' => $rfs->rbf_error,
+
         'comments' => $comments,
+
+        'ingredients' => $ingredients,
+
+        'rbf_error' => $rfs->rbf_error,
+        'customer_requested' => $rfs->customer_requested,
+        'note_kitchen' => $rfs->note_kitchen,
+        'count_foods' => $rfs->count_foods,
       ],
       'html' => $html,
     ], 200);

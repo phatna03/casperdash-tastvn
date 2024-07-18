@@ -618,7 +618,7 @@ class SensorController extends Controller
         'count_foods' => 0,
       ]);
     }
-    if ($food_multi && $food_count) {
+    if ($food_multi && $food_count > 1) {
       $row->update([
         'count_foods' => $food_count,
       ]);
