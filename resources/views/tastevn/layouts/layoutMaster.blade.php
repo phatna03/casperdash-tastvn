@@ -252,4 +252,33 @@ $version = '112';
       </div>
     </div>
   </div>
+  <!-- modal ingredient sync -->
+  <div class="modal fade modal-second" id="modal_food_ingredient_sync" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title">Sync Ingredients</h4>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form class="pt-0" onsubmit="return restaurant_food_sync(event, this);">
+          <div class="modal-body">
+            <select class="ajx_selectize" data-value="restaurant_parent" name="restaurant_parent_id" multiple>
+              <option value="">Please choose restaurants</option>
+            </select>
+          </div>
+          <div class="modal-footer">
+            <div class="wrap-btns">
+              @include('tastevn.htmls.form_button_loading')
+              <button type="submit" class="btn btn-primary btn-ok btn-submit acm-float-right">Submit</button>
+              <button type="button" class="btn btn-outline-secondary btn-ok btn-cancel" data-bs-dismiss="modal">Cancel</button>
+            </div>
+
+            <input type="hidden" name="restaurant_parent_id" />
+            <input type="hidden" name="food_id" />
+            <input type="hidden" name="type" />
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
 @endauth

@@ -27,7 +27,9 @@
           </button>
         </div>
 
-        <span class="text-muted fw-light">Admin /</span> {{$pageConfigs['item']->name}}
+        <a href="{{url('admin')}}">
+          <span class="text-muted fw-light">Admin /</span> <span class="text-dark">{{$pageConfigs['item']->name}}</span>
+        </a>
 
         <input type="hidden" name="restaurant_id" value="{{$pageConfigs['item']->id}}"/>
         <input type="hidden" name="restaurant_parent_id" value="{{$pageConfigs['item']->restaurant_parent_id}}"/>

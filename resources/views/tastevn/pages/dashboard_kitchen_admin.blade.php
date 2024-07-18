@@ -29,7 +29,9 @@
           </button>
         </div>
 
-        <span class="text-muted fw-light">Admin /</span> Sensor Dashboard
+        <a href="{{url('admin')}}">
+          <span class="text-muted fw-light">Admin /</span> <span class="text-dark">Sensor Dashboard</span>
+        </a>
 
         <input type="hidden" name="current_itd"/>
 

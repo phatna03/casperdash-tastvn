@@ -56,6 +56,11 @@
     </div>
     <div class="col-lg-3 mb-1">
       <div class="acm-clearfix">
+        @if($viewer->is_admin())
+          <button type="button" class="btn btn-sm btn-warning p-1 d-inline-block" onclick="restaurant_food_sync_prepare(this, 'recipe')">
+            <i class="mdi mdi-sync"></i>
+          </button>
+        @endif
         @if($viewer->is_moderator())
         <button type="button" class="btn btn-sm btn-info p-1 d-inline-block" onclick="restaurant_food_recipe_prepare(this)">
           <i class="mdi mdi-pencil"></i>
@@ -70,6 +75,11 @@
     </div>
     <div class="col-lg-3 mb-1">
       <div class="acm-clearfix">
+        @if($viewer->is_admin())
+          <button type="button" class="btn btn-sm btn-warning p-1 d-inline-block" onclick="restaurant_food_sync_prepare(this, 'robot')">
+            <i class="mdi mdi-sync"></i>
+          </button>
+        @endif
         @if($viewer->is_moderator())
           <button type="button" class="btn btn-sm btn-info p-1 d-inline-block" onclick="restaurant_food_robot_prepare(this)">
             <i class="mdi mdi-pencil"></i>

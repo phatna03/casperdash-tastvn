@@ -879,6 +879,11 @@ class RestaurantController extends Controller
 
   public function foods(Request $request)
   {
+    $invalid_roles = ['user', 'moderator'];
+    if (in_array($this->_viewer->role, $invalid_roles)) {
+      return redirect('admin/photos');
+    }
+
     $restaurants = RestaurantParent::where('deleted', 0)
       ->orderBy('id', 'asc')
       ->get();
@@ -929,6 +934,53 @@ class RestaurantController extends Controller
       'status' => true,
 
       'datas' => $datas,
+    ], 200);
+  }
+
+  public function food_sync(Request $request)
+  {
+    $values = $request->post();
+
+    //required
+    $validator = Validator::make($values, [
+      'restaurant_parent_id' => 'required',
+      'food_id' => 'required',
+      'type' => 'required',
+      'restaurants' => 'required',
+    ]);
+    if ($validator->fails()) {
+      return response()->json($validator->errors(), 422);
+    }
+
+    $restaurant_parent_id = isset($values['restaurant_parent_id']) ? (int)$values['restaurant_parent_id'] : 0;
+    $restaurant_parent = RestaurantParent::find($restaurant_parent_id);
+    $food_id = isset($values['food_id']) ? (int)$values['food_id'] : 0;
+    $food = RestaurantParent::find($food_id);
+    if (!$restaurant_parent || !$food) {
+      return response()->json([
+        'error' => 'Invalid data'
+      ], 404);
+    }
+
+    $type = isset($values['type']) ? $values['type'] : 'recipe';
+    $restaurants = isset($values['restaurants']) ? (array)$values['restaurants'] : [];
+
+    if (count($restaurants)) {
+      foreach ($restaurants as $rid) {
+        $restaurant = Restaurant::find((int)$rid);
+
+        if (!$restaurant || $restaurant_parent->id == (int)$rid) {
+          continue;
+        }
+
+
+      }
+    }
+
+    return response()->json([
+      'status' => true,
+
+      'restaurants' => $restaurants,
     ], 200);
   }
 

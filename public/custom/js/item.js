@@ -888,6 +888,9 @@ function restaurant_food_serve_tr(restaurant_parent_id, food_id, datas) {
     '</div>' +
     '<div class="mt-2"><img src="' + datas.food_photo + '" loading="lazy" class="w-100" id="food_photo_standard_' + restaurant_parent_id + '_' + food_id + '" /></div>' +
     '<div class="mb-1 mt-1">' +
+    '<button type="button" class="btn btn-sm btn-warning p-1 d-inline-block acm-mr-px-5" onclick="restaurant_food_sync_prepare(this, \'robot\', ' + restaurant_parent_id + ')">' +
+    '<i class="mdi mdi-sync"></i>' +
+    '</button>' +
     '<button type="button" class="btn btn-sm btn-info p-1 d-inline-block" onclick="restaurant_food_robot_prepare(this, ' + restaurant_parent_id + ')">' +
     '<i class="mdi mdi-pencil"></i>' +
     '</button>' +
@@ -899,6 +902,66 @@ function restaurant_food_serve_tr(restaurant_parent_id, food_id, datas) {
     '</div>';
 
   $('.tr_restaurant_food_' + restaurant_parent_id + '_' + food_id).empty().append(html1);
+}
+function restaurant_food_sync_prepare(ele, type, rpitd = 0) {
+  var food_item = $(ele).closest('.data_food_item');
+  var popup1 = $(ele).closest('.modal');
+  var popup2 = $('#modal_food_ingredient_sync');
+  var form = popup2.find('form');
+
+  var restaurant_parent_id = popup1.length ? popup1.find('input[name=restaurant_parent_id]').val() : 0;
+  if (parseInt(rpitd)) {
+    restaurant_parent_id = rpitd;
+  }
+
+  var food_id = food_item.attr('data-food_id');
+
+  popup2.find('input[name=restaurant_parent_id]').val(restaurant_parent_id);
+  popup2.find('input[name=food_id]').val(food_id);
+  popup2.find('input[name=type]').val(type);
+
+  popup2.find('select[name=restaurant_parent_id]').selectize()[0].selectize.setValue('[]');
+
+  popup2.modal('show');
+}
+function restaurant_food_sync(evt, frm) {
+  evt.preventDefault();
+  var form = $(frm);
+  var popup1 = $('#modal_info_item');
+  var popup2 = $('#modal_food_ingredient_sync');
+
+  var selecteds = popup2.find('select[name=restaurant_parent_id]').val();
+  if (!selecteds.length) {
+    message_from_toast('error', acmcfs.message_title_error, "Restaurants required", true);
+    return false;
+  }
+
+  form_loading(form);
+
+  axios.post('/admin/restaurant/food/sync', {
+    restaurant_parent_id: popup2.find('input[name=restaurant_parent_id]').val(),
+    food_id: popup2.find('input[name=food_id]').val(),
+    type: popup2.find('input[name=type]').val(),
+    restaurants: selecteds,
+  })
+    .then(response => {
+
+      message_from_toast('error', acmcfs.message_title_error, "Restaurants required", true);
+
+    })
+    .catch(error => {
+      if (error.response.data && Object.values(error.response.data).length) {
+        Object.values(error.response.data).forEach(function (v, k) {
+          message_from_toast('error', acmcfs.message_title_error, v);
+        });
+      }
+    })
+    .then(() => {
+      form_loading(form, false);
+      form_close(popup2);
+    });
+
+  return false;
 }
 //sensor
 function sensor_add(evt, frm) {
