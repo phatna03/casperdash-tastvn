@@ -833,6 +833,11 @@
                 }
               }
 
+              if (full['note_kitchen']) {
+                html += '<div>' + '<span class="badge bg-secondary p-1">Note Kitchen</span>' +
+                  '</div>';
+              }
+
               if (full['note'] && full['note'] !== 'null') {
                 html += '<div>+ ' + full['note'] + '</div>';
               }

@@ -210,18 +210,18 @@
           <div class="col-12 mb-2 mt-2">
             <div class="form-floating form-floating-outline" id="final-status-wrapper">
               <div class="form-control acm-height-px-auto p-1">
-                <div class="form-group clearfix p-2">
-                  <div class="acm-float-right">
-                    @if($food)
-                      <span class="badge bg-primary acm-fs-14">{{$food->name}}</span>
-                    @endif
-                  </div>
+                <div class="form-group clearfix p-1">
                   <div class="overflow-hidden">
                     <label class="acm-lbl-dark text-primary">+ Dish:</label>
                   </div>
+                  @if($food)
+                  <div class="overflow-hidden">
+                    <div class="fw-bold">- {{$food->name}}</div>
+                  </div>
+                  @endif
                 </div>
 
-                <div class="form-group clearfix p-2">
+                <div class="form-group clearfix p-1">
                   <div class="overflow-hidden">
                     <label class="acm-lbl-dark text-primary">+ Ingredients Missing:</label>
                   </div>
@@ -246,7 +246,12 @@
                   </div>
                 </div>
 
-                <div class="form-group clearfix p-2">
+                <div class="form-group clearfix p-1">
+                  @if($rfs->note_kitchen)
+                  <div class="acm-float-right">
+                      <span class="badge bg-success">Note Kitchen</span>
+                  </div>
+                  @endif
                   <div class="overflow-hidden">
                     <label class="acm-lbl-dark text-primary">+ Note:</label>
                   </div>
@@ -256,7 +261,7 @@
                         <div>- {{$text->name}}</div>
                       @endforeach
                     @endif
-                    <div>- <?php echo nl2br($rfs->note)?></div>
+                    <div class="@if($rfs->note_kitchen) fw-bold @endif">- <?php echo nl2br($rfs->note)?></div>
                   </div>
                 </div>
               </div>

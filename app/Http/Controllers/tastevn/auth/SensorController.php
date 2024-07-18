@@ -591,7 +591,10 @@ class SensorController extends Controller
     $rbf_error = isset($values['rbf_error']) ? (int)$values['rbf_error'] : 0;
     $noted = isset($values['note']) ? $values['note'] : NULL;
     $texts = isset($values['texts']) && count($values['texts']) ? (array)$values['texts'] : [];
-    $customer_requested = isset($values['customer_requested']) && !empty($values['customer_requested']) ? (int)$values['customer_requested'] : 0;
+    $customer_requested = isset($values['customer_requested']) && !empty($values['customer_requested'])
+      ? (int)$values['customer_requested'] : 0;
+    $note_kitchen = isset($values['note_kitchen']) && !empty($values['note_kitchen'])
+      ? (int)$values['note_kitchen'] : 0;
     $food_multi = isset($values['food_multi']) && !empty($values['food_multi']) ? (int)$values['food_multi'] : 0;
     $food_count = isset($values['food_count']) && !empty($values['food_count']) ? (int)$values['food_count'] : 0;
 
@@ -744,6 +747,27 @@ class SensorController extends Controller
 
     if ($notify_note) {
       $row->update_main_note($this->_viewer);
+    }
+
+    //note_kitchen
+    if (!$note_kitchen) {
+      $row->update([
+        'note_kitchen' => 0,
+      ]);
+    }
+    if (!$row->note_kitchen && $note_kitchen) {
+
+      if ($row->get_food()) {
+        RestaurantFoodScan::where('restaurant_id', $row->restaurant_id)
+          ->where('food_id', $row->get_food()->id)
+          ->update([
+            'note_kitchen' => 0,
+          ]);
+
+        $row->update([
+          'note_kitchen' => $this->_viewer->id,
+        ]);
+      }
     }
 
     return response()->json([
@@ -1021,89 +1045,103 @@ class SensorController extends Controller
     }
 
     $rfs = NULL;
-    //live
-    $cur_date = date('Y-m-d');
-    $cur_hour = (int)date('H');
-    //sensor folder
-    $folder_setting = SysCore::str_trim_slash($sensor->s3_bucket_address);
-    $directory = $folder_setting . '/' . $cur_date . '/' . $cur_hour . '/';
-    //sensor files
-    $files = Storage::disk('sensors')->files($directory);
-    if (count($files)) {
-      //desc = order by last updated or modified
-      $files = array_reverse($files);
+    $type = isset($values['type']) ? $values['type'] : NULL;
 
-      foreach ($files as $file) {
-        //sensor ext = jpg
-        $ext = array_filter(explode('.', $file));
-        if (!count($ext) || $ext[count($ext) - 1] != 'jpg') {
-          continue;
-        }
+    if ($type == 'main_dashboard') {
 
-        //photo width 1024
-        $temps = array_filter(explode('/', $file));
-        $photo_name = $temps[count($temps) - 1];
-        if (substr($photo_name, 0, 5) == '1024_') {
-          continue;
-        }
-
-        //no duplicate
-        $keyword = SysRobo::photo_name_query($file);
-
-        DB::beginTransaction();
-
-        try {
-          //check exist
-          $rfs = RestaurantFoodScan::where('restaurant_id', $sensor->id)
-            ->where('photo_name', $file)
-            ->first();
-          if (!$rfs) {
-
-            $status = 'new';
-
-            //sensor capture > 1 photo
-            $rows = RestaurantFoodScan::where('photo_name', 'LIKE', $keyword)
-              ->where('restaurant_id', $sensor->id)
-              ->get();
-            if (count($rows)) {
-              $status = 'duplicated';
-            }
-
-            $rfs = $sensor->photo_save([
-              'local_storage' => 1,
-              'photo_url' => NULL,
-              'photo_name' => $file,
-              'photo_ext' => 'jpg',
-              'time_photo' => date('Y-m-d H:i:s'),
-
-              'status' => $status,
-            ]);
-          }
-
-          DB::commit();
-
-        } catch (Exception $e) {
-          DB::rollBack();
-        }
-
-        //get 1 latest file
-        break;
-      }
-    }
-
-    if (!$rfs || ($rfs && $rfs->status == 'duplicated')) {
       $rfs = RestaurantFoodScan::where('restaurant_id', $sensor->id)
-        ->where('status', '<>', 'duplicated')
+        ->whereIn('status', ['checked', 'failed'])
         ->where('deleted', 0)
         ->orderBy('id', 'desc')
         ->limit(1)
         ->first();
+
+    }
+    else {
+      //live
+      $cur_date = date('Y-m-d');
+      $cur_hour = (int)date('H');
+      //sensor folder
+      $folder_setting = SysCore::str_trim_slash($sensor->s3_bucket_address);
+      $directory = $folder_setting . '/' . $cur_date . '/' . $cur_hour . '/';
+      //sensor files
+      $files = Storage::disk('sensors')->files($directory);
+      if (count($files)) {
+        //desc = order by last updated or modified
+        $files = array_reverse($files);
+
+        foreach ($files as $file) {
+          //sensor ext = jpg
+          $ext = array_filter(explode('.', $file));
+          if (!count($ext) || $ext[count($ext) - 1] != 'jpg') {
+            continue;
+          }
+
+          //photo width 1024
+          $temps = array_filter(explode('/', $file));
+          $photo_name = $temps[count($temps) - 1];
+          if (substr($photo_name, 0, 5) == '1024_') {
+            continue;
+          }
+
+          //no duplicate
+          $keyword = SysRobo::photo_name_query($file);
+
+          DB::beginTransaction();
+
+          try {
+            //check exist
+            $rfs = RestaurantFoodScan::where('restaurant_id', $sensor->id)
+              ->where('photo_name', $file)
+              ->first();
+            if (!$rfs) {
+
+              $status = 'new';
+
+              //sensor capture > 1 photo
+              $rows = RestaurantFoodScan::where('photo_name', 'LIKE', $keyword)
+                ->where('restaurant_id', $sensor->id)
+                ->get();
+              if (count($rows)) {
+                $status = 'duplicated';
+              }
+
+              $rfs = $sensor->photo_save([
+                'local_storage' => 1,
+                'photo_url' => NULL,
+                'photo_name' => $file,
+                'photo_ext' => 'jpg',
+                'time_photo' => date('Y-m-d H:i:s'),
+
+                'status' => $status,
+              ]);
+            }
+
+            DB::commit();
+
+          } catch (Exception $e) {
+            DB::rollBack();
+          }
+
+          //get 1 latest file
+          break;
+        }
+      }
+
+      if (!$rfs || ($rfs && $rfs->status == 'duplicated')) {
+        $rfs = RestaurantFoodScan::where('restaurant_id', $sensor->id)
+          ->where('status', '<>', 'duplicated')
+          ->where('deleted', 0)
+          ->orderBy('id', 'desc')
+          ->limit(1)
+          ->first();
+      }
     }
 
     //tester
-//    $rfs = RestaurantFoodScan::find(53221);
-    $datas = $rfs ? $this->kitchen_food_datas($rfs) : [];
+//    $rfs = RestaurantFoodScan::find(61506);
 
+    $datas = $rfs ? $this->kitchen_food_datas($rfs) : [];
     return response()->json([
       'status' => $rfs ? $rfs->status : 'no_photo',
 

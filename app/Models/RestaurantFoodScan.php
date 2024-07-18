@@ -37,6 +37,7 @@ class RestaurantFoodScan extends Model
     'status',
     'note',
     'noter_id',
+    'note_kitchen',
 
     'customer_requested',
     'count_foods',

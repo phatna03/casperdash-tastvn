@@ -300,6 +300,13 @@
             'onclick': 'setTimeout(function () { $("#offcanvas_add_item form input[name=name]").focus(); }, 500)',
           }
         },
+        {
+          text: '<i class="mdi mdi-chef-hat me-0 me-sm-1"></i><span class="d-none d-sm-inline-block">Kitchens Dashboard</span>',
+          className: 'add-new btn btn-success waves-effect waves-light acm-mr-px-10',
+          attr: {
+            'onclick': 'page_url("{{url('admin/kitchens')}}")',
+          }
+        },
           @endif
         {
           text: '<i class="mdi mdi-reload me-0 me-sm-1"></i><span class="d-none d-sm-inline-block">Refresh</span>',

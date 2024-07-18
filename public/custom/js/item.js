@@ -1417,6 +1417,7 @@ function sensor_food_scan_update(evt, frm) {
   var form = $(frm);
   var view_current = parseInt($('body input[name=popup_view_id_itm]').val());
   var customer_requested = form.find('input[name=customer_requested]').is(':checked') ? 1 : 0;
+  var note_kitchen = form.find('input[name=note_kitchen]').is(':checked') ? 1 : 0;
   var food_multi = form.find('input[name=food_multi]').is(':checked') ? 1 : 0;
   var food_count = form.find('input[name=food_count]').val();
 
@@ -1452,6 +1453,7 @@ function sensor_food_scan_update(evt, frm) {
     missings: missings,
     texts: texts,
     customer_requested: customer_requested,
+    note_kitchen: note_kitchen,
     food_multi: food_multi,
     food_count: input_number_only(food_count),
   })

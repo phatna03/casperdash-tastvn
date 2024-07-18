@@ -940,14 +940,13 @@ class SysRobo
 
     }
 
-
     if ($debug) {
       var_dump('foods temps...');
       var_dump($food_temps);
     }
 
     if (!count($foods) && count($food_temps) == 1) {
-      $foods = $food_temps;
+//      $foods = $food_temps;
     }
 
     return $foods;
