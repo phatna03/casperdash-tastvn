@@ -357,6 +357,14 @@
   min-width: 600px;
 }
 
+.acm-width-700-min {
+  min-width: 700px;
+}
+
+.acm-width-800-min {
+  min-width: 800px;
+}
+
 .acm-w-10 {
   width: 10%;
 }

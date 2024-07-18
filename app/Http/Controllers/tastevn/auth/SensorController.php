@@ -758,7 +758,8 @@ class SensorController extends Controller
     if (!$row->note_kitchen && $note_kitchen) {
 
       if ($row->get_food()) {
-        RestaurantFoodScan::where('restaurant_id', $row->restaurant_id)
+        RestaurantFoodScan::where('deleted', 0)
+//          ->where('restaurant_id', $row->restaurant_id)
           ->where('food_id', $row->get_food()->id)
           ->update([
             'note_kitchen' => 0,
@@ -1139,7 +1140,7 @@ class SensorController extends Controller
     }
 
     //tester
-//    $rfs = RestaurantFoodScan::find(61506);
+    $rfs = RestaurantFoodScan::find(59811);
 
     $datas = $rfs ? $this->kitchen_food_datas($rfs) : [];
     return response()->json([
@@ -1232,6 +1233,7 @@ class SensorController extends Controller
     $is_resolved = 0;
     $is_marked = 0;
     $live_group = 3;
+    $main_note = '';
 
     if ($food) {
 
@@ -1253,6 +1255,15 @@ class SensorController extends Controller
 
       //ingredient missing
       $ingredients_missing = $row->get_ingredients_missing();
+      if (count($ingredients_missing)) {
+        $temps = [];
+
+        foreach ($ingredients_missing as $ing) {
+          $temps[] = (array)$ing;
+        }
+
+        $ingredients_missing = $temps;
+      }
 
       //ingredient found
       $ingredients = $row->get_ingredients_found();
@@ -1309,6 +1320,17 @@ class SensorController extends Controller
 
           break;
       }
+
+      //main note
+      $main_note = RestaurantFoodScan::where('deleted', 0)
+        ->where('food_id', $food->id)
+        ->where('note_kitchen', '>', 0)
+        ->where('note', '<>', NULL)
+        ->limit(1)
+        ->first();
+      if ($main_note) {
+        $main_note = $main_note->note;
+      }
     }
 
     return [
@@ -1319,6 +1341,7 @@ class SensorController extends Controller
       'is_marked' => $is_marked,
 
       'confidence' => $live_group,
+      'main_note' => $main_note,
 
       'html_info' => $html_info,
 

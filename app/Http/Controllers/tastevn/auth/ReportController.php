@@ -659,7 +659,8 @@ class ReportController extends Controller
     if (!$rfs->note_kitchen && $note_kitchen) {
 
       if ($rfs->get_food()) {
-        RestaurantFoodScan::where('restaurant_id', $rfs->restaurant_id)
+        RestaurantFoodScan::where('deleted', 0)
+//          ->where('restaurant_id', $rfs->restaurant_id)
           ->where('food_id', $rfs->get_food()->id)
           ->update([
             'note_kitchen' => 0,

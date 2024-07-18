@@ -162,16 +162,14 @@
     </div>
   </div>
 
-  @if($viewer->is_super_admin())
-    <div class="acm-toast-wrapper toast-bottom-left d-none result_time_check">
-      <div class="toast toast-error @if(!$isMobi) acm-width-500-min @endif bg-danger-subtle" aria-live="assertive"
-           style="display: block;">
-        <div class="toast-title"><span class="badge bg-danger text-uppercase fs-6">Times</span>
-        </div>
-        <div class="toast-message data_result"></div>
+  <div class="acm-toast-wrapper toast-bottom-left d-none result_main_note">
+    <div class="toast toast-error @if(!$isMobi) acm-width-800-min @endif bg-danger-subtle" aria-live="assertive"
+         style="display: block;">
+      <div class="toast-title"><span class="badge bg-danger text-uppercase fs-6">Main Note</span>
       </div>
+      <div class="toast-message data_result"></div>
     </div>
-  @endif
+  </div>
 
   <script type="text/javascript">
     $(document).ready(function () {
@@ -211,6 +209,7 @@
           if (response.data.file && response.data.file != '' && current_file_url != response.data.file) {
 
             $('.result_ingredients_missing').addClass('d-none');
+            $('.result_main_note').addClass('d-none');
             $('.result_photo_status .data_btns').addClass('d-none');
 
             $('.wrap_sensor_foods input[name=current_file_id]').val(response.data.file_id);
@@ -297,6 +296,14 @@
           $('.result_ingredients_missing').removeClass('d-none');
         }
 
+        //main_note
+        if (datas.main_note && datas.main_note !== '' && datas.main_note !== 'null') {
+          html = '<div class="text-dark fw-bold fs-3">' + bind_nl2br(datas.main_note) + '</div>';
+
+          $('.result_main_note .data_result').empty().append(html);
+          $('.result_main_note').removeClass('d-none');
+        }
+
         //btns
         // $('.result_photo_status .data_btns .btn_resolved').removeClass('btn-success')
         //   .addClass('btn-primary');
@@ -358,48 +365,6 @@
           .append('<div class="badge bg-danger fw-bold acm-ml-px-10 acm-fs-13">Not Trained Yet</div>');
       }
 
-      @if($viewer->is_super_admin())
-      var html_times = '';
-      var time_photo = datas.time_photo;
-      var time_scan = datas.time_scan;
-      var time_end = datas.time_end;
-      var total_times = datas.total_times;
-      var localhost = parseInt(datas.localhost);
-
-      var html_robos = '';
-      @if($pageConfigs['debug'])
-      if (localhost) {
-        html_robos = '<div class="mb-2 acm-clearfix">' +
-          '<div class="text-dark fw-bold acm-float-right">' + datas.total_robos + '</div>' +
-          '<div class="text-dark overflow-hidden">Robos (seconds): </div>' +
-          '</div>';
-      }
-      @endif
-
-      $('.result_time_check').removeClass('d-none');
-
-      html_times = '<div class="position-relative">' +
-        '<div class="mb-2 acm-clearfix">' +
-        '<div class="text-dark fw-bold acm-float-right">' + time_photo + '</div>' +
-        '<div class="text-dark overflow-hidden">Photo Uploaded At: </div>' +
-        '</div>' +
-        '<div class="mb-2 acm-clearfix">' +
-        '<div class="text-dark fw-bold acm-float-right">' + time_scan + '</div>' +
-        '<div class="text-dark overflow-hidden">Photo Begin Scan At: </div>' +
-        '</div>' +
-        '<div class="mb-2 acm-clearfix">' +
-        '<div class="text-dark fw-bold acm-float-right">' + time_end + '</div>' +
-        '<div class="text-dark overflow-hidden">Finish Predicted At: </div>' +
-        '</div>' + html_robos +
-        '<div class="mb-2 acm-clearfix">' +
-        '<div class="text-dark fw-bold acm-float-right">' + total_times + '</div>' +
-        '<div class="text-dark overflow-hidden">Total (seconds): </div>' +
-        '</div>' +
-        '</div>';
-
-      $('.result_time_check .data_result').empty()
-        .append(html_times);
-      @endif
     }
 
     function photo_resolve(ele) {
