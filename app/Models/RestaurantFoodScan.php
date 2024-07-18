@@ -417,6 +417,13 @@ class RestaurantFoodScan extends Model
 
     $debug = false;
 
+    $sensor = $this->get_restaurant();
+    $restaurant = $sensor->get_parent();
+    if ($restaurant->model_scan && !empty($restaurant->model_name) && !empty($restaurant->model_version)) {
+      $dataset = SysCore::str_trim_slash($restaurant->model_name);
+      $version = $restaurant->model_version;
+    }
+
     //img_1024
     $img_url = $this->photo_1024();
 
@@ -458,9 +465,7 @@ class RestaurantFoodScan extends Model
       ]),
     ]);
 
-    if (!$no_data) {
-      $this->rfs_photo_predict($pars);
-    }
+    $this->rfs_photo_predict($pars);
 
     //time_end
     if (empty($this->time_end)) {
@@ -515,6 +520,9 @@ class RestaurantFoodScan extends Model
       ->where('restaurant_food_scan_id', $this->id)
       ->delete();
 
+    //missing
+    RestaurantFoodScanMissing::where('restaurant_food_scan_id', $this->id)
+      ->delete();
   }
 
   public function rfs_photo_predict($pars = [])

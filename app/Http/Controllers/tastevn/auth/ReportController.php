@@ -553,7 +553,7 @@ class ReportController extends Controller
         'usr_predict' => $food->id,
         'found_by' => 'usr',
         'status' => 'edited',
-        'confidence' => 100,
+//        'confidence' => 100,
       ]);
 
       //ingredients_missing
