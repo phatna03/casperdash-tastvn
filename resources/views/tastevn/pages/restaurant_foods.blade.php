@@ -9,36 +9,53 @@
 
   @endphp
 
-  <div class="card">
-    <div class="card-body p-2">
-      <div class="table_fixed_first">
-        <table class="table">
-          <thead>
-          <tr>
-            <th class="td_fixed">Dishes / Restaurants</th>
-            @foreach($restaurants as $restaurant)
-              <th class="td_content td_title_restaurant">{{$restaurant->name}}</th>
-            @endforeach
-          </tr>
-          </thead>
-          <tbody>
-          @php
-            $stt = 0;
-              foreach($foods as $food):
-            $stt++;
-          @endphp
-          <tr class="tr_food_{{$food->id}}">
-            <th class="td_fixed">
-              <div>{{$stt . '. '}}</div>
-              <div>{{$food->name}}</div>
-            </th>
-            @foreach($restaurants as $restaurant)
-              <td class="td_content tr_restaurant_food_{{$restaurant->id}}_{{$food->id}}"></td>
-            @endforeach
-          </tr>
-          @endforeach
-          </tbody>
-        </table>
+  <div class="row m-0">
+    <div class="col-12 mb-1">
+      <h4 class="position-relative w-100 mb-0">
+        <div class="acm-float-right">
+          <button type="button" class="btn btn-sm btn-info p-1" onclick="toggle_header()">
+            <i class="mdi mdi-alert-remove"></i> Toggle Header
+          </button>
+        </div>
+
+        <span class="text-muted fw-light">Admin /</span> Dishes Checker
+
+      </h4>
+    </div>
+
+    <div class="col-12 mb-1">
+      <div class="card">
+        <div class="card-body p-2">
+          <div class="table_fixed_first">
+            <table class="table table-bordered">
+              <thead>
+              <tr>
+                <th class="td_fixed">Dishes / Restaurants</th>
+                @foreach($restaurants as $restaurant)
+                  <th class="td_content td_title_restaurant">{{$restaurant->name}}</th>
+                @endforeach
+              </tr>
+              </thead>
+              <tbody>
+              @php
+                $stt = 0;
+                  foreach($foods as $food):
+                $stt++;
+              @endphp
+              <tr class="tr_food_{{$food->id}}">
+                <th class="td_fixed">
+                  <div>{{$stt . '. '}}</div>
+                  <div>{{$food->name}}</div>
+                </th>
+                @foreach($restaurants as $restaurant)
+                  <td class="td_content tr_restaurant_food_{{$restaurant->id}}_{{$food->id}}"></td>
+                @endforeach
+              </tr>
+              @endforeach
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -138,7 +155,7 @@
             </div>
             <div class="col-lg-12 mt-2 mb-2 d-none wrap_updated wrap_confidence">
               <label class="text-dark fw-bold">Roboflow Food Confidence</label>
-              <input type="text" class="form-control text-center fnumber" onblur="input_number_min_30(this);" name="confidence" />
+              <input type="text" class="form-control text-center fnumber" onblur="input_number_min_30_max_100(this);" name="confidence" />
             </div>
             <div class="col-lg-12 mt-2 mb-2 d-none wrap_updated wrap_category_name">
               <label class="text-dark fw-bold">Category Name</label>
@@ -171,11 +188,12 @@
 
     $(document).ready(function() {
 
-{{--      @foreach($restaurants as $restaurant)--}}
-{{--        restaurant_food_serve({{$restaurant->id}});--}}
-{{--      @endforeach--}}
+      @foreach($restaurants as $restaurant)
+        restaurant_food_serve({{$restaurant->id}});
+      @endforeach
 
-  restaurant_food_serve(1);
+      toggle_header();
+  // restaurant_food_serve(1);
 
     });
   </script>

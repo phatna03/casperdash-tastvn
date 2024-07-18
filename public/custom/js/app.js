@@ -459,12 +459,15 @@ function input_number_min_two(ele) {
     bind.val(2);
   }
 }
-function input_number_min_30(ele) {
+function input_number_min_30_max_100(ele) {
   var bind = $(ele);
   var val = bind.val().trim();
 
   if (!val || val === '' || parseInt(val) <= 30) {
     bind.val(30);
+  }
+  if (!val || val === '' || parseInt(val) > 100) {
+    bind.val(99);
   }
 }
 function input_date_time(date) {
