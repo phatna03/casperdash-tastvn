@@ -930,8 +930,8 @@ function restaurant_food_sync(evt, frm) {
   var popup1 = $('#modal_info_item');
   var popup2 = $('#modal_food_ingredient_sync');
 
-  var selecteds = popup2.find('select[name=restaurant_parent_id]').val();
-  if (!selecteds.length) {
+  var restaurants = popup2.find('select[name=restaurant_parent_id]').val();
+  if (!restaurants.length) {
     message_from_toast('error', acmcfs.message_title_error, "Restaurants required", true);
     return false;
   }
@@ -942,11 +942,19 @@ function restaurant_food_sync(evt, frm) {
     restaurant_parent_id: popup2.find('input[name=restaurant_parent_id]').val(),
     food_id: popup2.find('input[name=food_id]').val(),
     type: popup2.find('input[name=type]').val(),
-    restaurants: selecteds,
+    restaurants: restaurants,
   })
     .then(response => {
 
-      message_from_toast('error', acmcfs.message_title_error, "Restaurants required", true);
+      message_from_toast('success', acmcfs.message_title_success, acmcfs.message_description_success_update, true);
+
+      if (restaurants.length) {
+        restaurants.forEach(function (v, k) {
+          if ($('.checker_restaurant_' + v).length) {
+            restaurant_food_serve(v);
+          }
+        });
+      }
 
     })
     .catch(error => {

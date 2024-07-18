@@ -32,7 +32,7 @@
               <tr>
                 <th class="td_fixed">Dishes / Restaurants</th>
                 @foreach($restaurants as $restaurant)
-                  <th class="td_content td_title_restaurant">{{$restaurant->name}}</th>
+                  <th class="td_content td_title_restaurant checker_restaurant_{{$restaurant->id}}">{{$restaurant->name}}</th>
                 @endforeach
               </tr>
               </thead>

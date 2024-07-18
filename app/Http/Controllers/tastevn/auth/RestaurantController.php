@@ -14,6 +14,7 @@ use App\Models\RestaurantParent;
 use App\Models\Food;
 use App\Models\FoodIngredient;
 use App\Models\FoodCategory;
+use App\Models\FoodRecipe;
 use App\Models\Restaurant;
 use App\Models\RestaurantFood;
 
@@ -946,7 +947,6 @@ class RestaurantController extends Controller
       'restaurant_parent_id' => 'required',
       'food_id' => 'required',
       'type' => 'required',
-      'restaurants' => 'required',
     ]);
     if ($validator->fails()) {
       return response()->json($validator->errors(), 422);
@@ -955,7 +955,7 @@ class RestaurantController extends Controller
     $restaurant_parent_id = isset($values['restaurant_parent_id']) ? (int)$values['restaurant_parent_id'] : 0;
     $restaurant_parent = RestaurantParent::find($restaurant_parent_id);
     $food_id = isset($values['food_id']) ? (int)$values['food_id'] : 0;
-    $food = RestaurantParent::find($food_id);
+    $food = Food::find($food_id);
     if (!$restaurant_parent || !$food) {
       return response()->json([
         'error' => 'Invalid data'
@@ -964,16 +964,104 @@ class RestaurantController extends Controller
 
     $type = isset($values['type']) ? $values['type'] : 'recipe';
     $restaurants = isset($values['restaurants']) ? (array)$values['restaurants'] : [];
+    if (!count($restaurants)) {
+      return response()->json([
+        'error' => 'Invalid restaurants',
+        'restaurants' => $restaurants,
+      ], 404);
+    }
 
-    if (count($restaurants)) {
-      foreach ($restaurants as $rid) {
-        $restaurant = Restaurant::find((int)$rid);
+    foreach ($restaurants as $rid) {
+      $restaurant2 = Restaurant::find((int)$rid);
 
-        if (!$restaurant || $restaurant_parent->id == (int)$rid) {
-          continue;
-        }
+      if (!$restaurant2 || $restaurant_parent->id == (int)$rid) {
+        continue;
+      }
 
+      switch ($type) {
+        case 'robot':
 
+          $ingredients = FoodIngredient::where('deleted', 0)
+            ->where('restaurant_parent_id', $restaurant_parent->id)
+            ->where('food_id', $food->id)
+            ->get()
+            ->toArray();
+          if (count($ingredients)) {
+
+            FoodIngredient::where('restaurant_parent_id', $restaurant2->id)
+              ->where('food_id', $food->id)
+              ->delete();
+
+            foreach ($ingredients as $ing) {
+              $ing = (array)$ing;
+
+              unset($ing['id']);
+              unset($ing['created_at']);
+              unset($ing['updated_at']);
+
+              $ing['restaurant_parent_id'] = $restaurant2->id;
+
+              FoodIngredient::create($ing);
+            }
+
+            //serve
+            $restaurant1_food = RestaurantFood::where('restaurant_parent_id', $restaurant_parent->id)
+              ->where('food_id', $food->id)
+              ->limit(1)
+              ->first();
+
+            $restaurant2_food = RestaurantFood::where('restaurant_parent_id', $restaurant2->id)
+              ->where('food_id', $food->id)
+              ->limit(1)
+              ->first();
+            if (!$restaurant2_food) {
+              $restaurant2_food = RestaurantFood::create([
+                'restaurant_parent_id' => $restaurant2->id,
+                'food_id' => $food->id,
+                'creator_id' => $this->_viewer->id,
+              ]);
+            }
+
+//            $restaurant2_food->update([
+//              'food_category_id' => $restaurant1_food->food_category_id,
+//              'confidence' => $restaurant1_food->confidence,
+//              'photo' => $restaurant1_food->photo,
+//              'local_storage' => $restaurant1_food->local_storage,
+//              'live_group' => $restaurant1_food->live_group,
+//              'model_name' => $restaurant1_food->model_name,
+//              'model_version' => $restaurant1_food->model_version,
+//            ]);
+          }
+
+          break;
+
+        case 'recipe':
+
+          $ingredients = FoodRecipe::where('deleted', 0)
+            ->where('restaurant_parent_id', $restaurant_parent->id)
+            ->where('food_id', $food->id)
+            ->get()
+            ->toArray();
+          if (count($ingredients)) {
+
+            FoodRecipe::where('restaurant_parent_id', $restaurant2->id)
+              ->where('food_id', $food->id)
+              ->delete();
+
+            foreach ($ingredients as $ing) {
+              $ing = (array)$ing;
+
+              unset($ing['id']);
+              unset($ing['created_at']);
+              unset($ing['updated_at']);
+
+              $ing['restaurant_parent_id'] = $restaurant2->id;
+
+              FoodRecipe::create($ing);
+            }
+          }
+
+          break;
       }
     }
 
