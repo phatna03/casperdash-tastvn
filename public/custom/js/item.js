@@ -816,7 +816,7 @@ function restaurant_food_serve_tr(restaurant_parent_id, food_id, datas) {
       cls2 = (v1.ingredient_type == 'core') ? 'text-danger' : '';
       cor2 = ' - ' + v1.ingredient_quantity + ' ' + v1.name;
 
-      if (acmcfs.user_role == 'super_admin' || parseInt(acmcfs.uid) == 5) {
+      if (acmcfs.user_role == 'superadmin' || parseInt(acmcfs.uid) == 5) {
         cor2 = '<span class="wrap_text_roboflow_ingredient cursor-pointer" onclick="food_ingredient_core_quick(this, ' + v1.food_ingredient_id + ')">' +
           cor2 +
           '</span>';
