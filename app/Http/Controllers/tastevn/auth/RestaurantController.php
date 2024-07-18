@@ -640,6 +640,8 @@ class RestaurantController extends Controller
       'count_foods_1' => count($foods_group_1),
       'count_foods_2' => count($foods_group_2),
       'count_foods_3' => count($foods_group_3),
+
+      'datas' => $this->restaurant_food_datas($restaurant_parent, $food)
     ], 200);
   }
 
@@ -866,25 +868,12 @@ class RestaurantController extends Controller
         break;
     }
 
-    $food_photo = $food->get_photo([
-      'restaurant_parent_id' => $restaurant_parent->id
-    ]);
-    $food_ingredients = $food->get_ingredients([
-      'restaurant_parent_id' => $restaurant_parent->id
-    ]);
-
-    $datas = [
-      'food_id' => $food->id,
-      'food_photo' => $food_photo,
-      'ingredients' => count($food_ingredients) ? $food_ingredients->toArray() : [],
-    ];
-
     return response()->json([
       'status' => true,
 
       'html' => $html,
 
-      'datas' => $datas,
+      'datas' => $this->restaurant_food_datas($restaurant_parent, $food),
     ], 200);
   }
 
@@ -932,18 +921,7 @@ class RestaurantController extends Controller
       foreach ($foods as $f) {
         $food = Food::find($f->food_id);
 
-        $food_photo = $food->get_photo([
-          'restaurant_parent_id' => $restaurant_parent->id
-        ]);
-        $food_ingredients = $food->get_ingredients([
-          'restaurant_parent_id' => $restaurant_parent->id
-        ]);
-
-        $datas[] = [
-          'food_id' => $food->id,
-          'food_photo' => $food_photo,
-          'ingredients' => count($food_ingredients) ? $food_ingredients->toArray() : [],
-        ];
+        $datas[] = $this->restaurant_food_datas($restaurant_parent, $food);
       }
     }
 
@@ -952,5 +930,36 @@ class RestaurantController extends Controller
 
       'datas' => $datas,
     ], 200);
+  }
+
+  protected function restaurant_food_datas(RestaurantParent $restaurant_parent, Food $food)
+  {
+    $food_photo = $food->get_photo([
+      'restaurant_parent_id' => $restaurant_parent->id
+    ]);
+    $food_category = $food->get_category([
+      'restaurant_parent_id' => $restaurant_parent->id
+    ]);
+    $food_live_group = $food->get_live_group([
+      'restaurant_parent_id' => $restaurant_parent->id
+    ]);
+    $food_confidence = $food->get_food_confidence([
+      'restaurant_parent_id' => $restaurant_parent->id
+    ]);
+    $food_ingredients = $food->get_ingredients([
+      'restaurant_parent_id' => $restaurant_parent->id
+    ]);
+
+    $datas = [
+      'food_id' => $food->id,
+      'food_photo' => $food_photo,
+      'food_category_id' => $food_category ? $food_category->id : 0,
+      'food_category_name' => $food_category ? $food_category->name : '',
+      'food_live_group' => $food_live_group,
+      'food_confidence' => $food_confidence,
+      'ingredients' => count($food_ingredients) ? $food_ingredients->toArray() : [],
+    ];
+
+    return $datas;
   }
 }

@@ -237,6 +237,16 @@ class RestaurantParent extends Model
     return $row ? $row->live_group : 3;
   }
 
+  public function get_food_confidence(Food $food)
+  {
+    $row = RestaurantFood::where('deleted', 0)
+      ->where('restaurant_parent_id', $this->id)
+      ->where('food_id', $food->id)
+      ->first();
+
+    return $row ? $row->confidence : 30;
+  }
+
   public function get_food_model_name(Food $food)
   {
     $row = RestaurantFood::where('deleted', 0)

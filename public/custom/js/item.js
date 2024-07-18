@@ -369,10 +369,15 @@ function restaurant_food_photo(ele) {
 }
 function restaurant_food_update_prepare(ele, type) {
   var food_item = $(ele).closest('.data_food_item');
-  var popup1 = $(ele).closest('.modal');
   var popup2 = $('#modal_food_update');
 
-  popup2.find('input[name=restaurant_parent_id]').val(popup1.find('input[name=restaurant_parent_id]').val());
+  popup2.find('input[name=restaurant_parent_id]').val(food_item.attr('data-restaurant_parent_id'));
+
+  var popup1 = $(ele).closest('.modal');
+  if (popup1.length) {
+    popup2.find('input[name=restaurant_parent_id]').val(popup1.find('input[name=restaurant_parent_id]').val());
+  }
+
   popup2.find('input[name=food_id]').val(food_item.attr('data-food_id'));
   popup2.find('input[name=type]').val(type);
 
@@ -435,43 +440,50 @@ function restaurant_food_update() {
 
       message_from_toast('success', acmcfs.message_title_success, acmcfs.message_description_success_update, true);
 
-      var food_item = popup1.find('.data_food_item_' + food_id);
-      switch (type) {
-        case 'live_group':
-          food_item.attr('data-live_group', live_group);
+      if (popup1.length) {
 
-          var texted = 'Super Confidence';
-          if (parseInt(live_group) == 2) {
-            texted = 'Less Training';
-          } else if (parseInt(live_group) == 3) {
-            texted = 'Not Trained Yet';
-          }
-          food_item.find('.btn_inputs input[name=live_group]').val(texted);
-          break;
-        case 'model_name':
-          food_item.attr('data-model_name', model_name);
-          food_item.find('.btn_inputs input[name=model_name]').val(model_name);
-          break;
-        case 'model_version':
-          food_item.attr('data-model_version', model_version);
-          food_item.find('.btn_inputs input[name=model_version]').val(model_version);
-          break;
-        case 'confidence':
-          food_item.attr('data-confidence', confidence);
-          food_item.find('.btn_inputs input[name=confidence]').val(confidence);
-          break;
-        case 'category_name':
-          food_item.attr('data-category_name', category_name);
-          food_item.find('.food_category_name').text('(' + category_name + ')');
-          break;
+        var food_item = popup1.find('.data_food_item_' + food_id);
+        switch (type) {
+          case 'live_group':
+            food_item.attr('data-live_group', live_group);
+
+            var texted = 'Super Confidence';
+            if (parseInt(live_group) == 2) {
+              texted = 'Less Training';
+            } else if (parseInt(live_group) == 3) {
+              texted = 'Not Trained Yet';
+            }
+            food_item.find('.btn_inputs input[name=live_group]').val(texted);
+            break;
+          case 'model_name':
+            food_item.attr('data-model_name', model_name);
+            food_item.find('.btn_inputs input[name=model_name]').val(model_name);
+            break;
+          case 'model_version':
+            food_item.attr('data-model_version', model_version);
+            food_item.find('.btn_inputs input[name=model_version]').val(model_version);
+            break;
+          case 'confidence':
+            food_item.attr('data-confidence', confidence);
+            food_item.find('.btn_inputs input[name=confidence]').val(confidence);
+            break;
+          case 'category_name':
+            food_item.attr('data-category_name', category_name);
+            food_item.find('.food_category_name').text('(' + category_name + ')');
+            break;
+        }
+
+        var wrap_foods = popup1.find('.frm_restaurant_foods');
+
+        wrap_foods.find('.count_foods').text('(' + response.data.count_foods + ')');
+        wrap_foods.find('.count_foods_1').text(response.data.count_foods_1);
+        wrap_foods.find('.count_foods_2').text(response.data.count_foods_2);
+        wrap_foods.find('.count_foods_3').text(response.data.count_foods_3);
+
       }
-
-      var wrap_foods = popup1.find('.frm_restaurant_foods');
-
-      wrap_foods.find('.count_foods').text('(' + response.data.count_foods + ')');
-      wrap_foods.find('.count_foods_1').text(response.data.count_foods_1);
-      wrap_foods.find('.count_foods_2').text(response.data.count_foods_2);
-      wrap_foods.find('.count_foods_3').text(response.data.count_foods_3);
+      else if ($('.tr_restaurant_food_' + restaurant_parent_id + '_' + food_id).length) {
+        restaurant_food_serve_tr(restaurant_parent_id, food_id, response.data.datas);
+      }
     })
     .catch(error => {
       if (error.response.data && Object.values(error.response.data).length) {
@@ -825,11 +837,56 @@ function restaurant_food_serve_tr(restaurant_parent_id, food_id, datas) {
     });
   }
 
-  html1 += '<div class="acm-clearfix position-relative data_food_item" data-food_id="' + food_id + '" data-restaurant_parent_id="' + restaurant_parent_id + '">' +
-    '<button type="button" class="btn btn-danger p-1 position-absolute acm-right-0 " onclick="restaurant_food_photo_prepare(this)">' +
+  var confidence_rate = parseInt(datas.food_confidence) ? datas.food_confidence : 30;
+  var confidence_group = 'Not Trained Yet';
+  if (parseInt(datas.food_live_group) == 1) {
+    confidence_group = 'Super Confidence';
+  } else if (parseInt(datas.food_live_group) == 2) {
+    confidence_group = 'Less Training';
+  }
+
+  html1 += '<div class="acm-clearfix position-relative data_food_item data_food_item_' + restaurant_parent_id + '_' + food_id + '" ' +
+    ' data-food_id="' + food_id + '" ' +
+    ' data-restaurant_parent_id="' + restaurant_parent_id + '" ' +
+    ' data-live_group="' + datas.food_live_group + '" ' +
+    ' data-confidence="' + datas.food_confidence + '" ' +
+    ' data-category_name="' + datas.food_category_name + '" ' +
+    ' >' +
+    '<div class="acm-clearfix overflow-hidden mb-2">' +
+    '<div class="acm-float-left w-100 mt-1">' +
+    '<div class="form-floating form-floating-outline position-relative">' +
+    '<button type="button" class="btn btn-sm btn-info p-1 position-absolute acm-right-0" onclick="restaurant_food_update_prepare(this, \'category_name\')">' +
+    '<i class="mdi mdi-pencil"></i>' +
+    '</button>' +
+    '<input type="text" class="form-control text-center p-1" id="robo-category-' + restaurant_parent_id + '-' + food_id + '" name="category_name" disabled="disabled" value="' + datas.food_category_name + '">' +
+    '<label class="text-dark fw-bold" for="robo-category-' + restaurant_parent_id + '-' + food_id + '">Category</label>' +
+    '</div>' +
+    '</div>' +
+    '<div class="acm-float-right acm-w-30 mt-1">' +
+    '<div class="form-floating form-floating-outline position-relative">' +
+    '<button type="button" class="btn btn-sm btn-info p-1 position-absolute acm-right-0" onclick="restaurant_food_update_prepare(this, \'confidence\')">' +
+    '<i class="mdi mdi-pencil"></i>' +
+    '</button>' +
+    '<input type="text" class="form-control text-center p-1" id="robo-confidence-' + restaurant_parent_id + '-' + food_id + '" name="confidence" disabled="disabled" value="' + confidence_rate + '">' +
+    '<label class="text-dark fw-bold" for="robo-confidence-' + restaurant_parent_id + '-' + food_id + '">Rate</label>' +
+    '</div>' +
+    '</div>' +
+    '<div class="acm-float-left acm-w-60 mt-1">' +
+    '<div class="form-floating form-floating-outline position-relative">' +
+    '<button type="button" class="btn btn-sm btn-info p-1 position-absolute acm-right-0" onclick="restaurant_food_update_prepare(this, \'live_group\')">' +
+    '<i class="mdi mdi-pencil"></i>' +
+    '</button>' +
+    '<input type="text" class="form-control p-1" id="robo-group-' + restaurant_parent_id + '-' + food_id + '" name="live_group" disabled="disabled" value="' + confidence_group + '">' +
+    '<label class="text-dark fw-bold" for="robo-group-' + restaurant_parent_id + '-' + food_id + '">Group</label>' +
+    '</div>' +
+    '</div>' +
+    '</div>' +
+    '<div class="position-absolute acm-right-0">' +
+    '<button type="button" class="btn btn-danger p-1" onclick="restaurant_food_photo_prepare(this)">' +
     '<i class="mdi mdi-upload"></i> Upload Photo' +
     '</button>' +
-    '<div><img src="' + datas.food_photo + '" loading="lazy" class="w-100" id="food_photo_standard_' + restaurant_parent_id + '_' + food_id + '" /></div>' +
+    '</div>' +
+    '<div class="mt-2"><img src="' + datas.food_photo + '" loading="lazy" class="w-100" id="food_photo_standard_' + restaurant_parent_id + '_' + food_id + '" /></div>' +
     '<div class="mb-1 mt-1">' +
     '<button type="button" class="btn btn-sm btn-info p-1 d-inline-block" onclick="restaurant_food_robot_prepare(this, ' + restaurant_parent_id + ')">' +
     '<i class="mdi mdi-pencil"></i>' +

@@ -82,6 +82,10 @@
   text-align: right;
 }
 
+.acm-text-left {
+  text-align: left !important;
+}
+
 .acm-clearfix {
   clear: both;
 }
@@ -351,6 +355,30 @@
 
 .acm-width-600-min {
   min-width: 600px;
+}
+
+.acm-w-10 {
+  width: 10%;
+}
+
+.acm-w-20 {
+  width: 20%;
+}
+
+.acm-w-30 {
+  width: 30%;
+}
+
+.acm-w-40 {
+  width: 40%;
+}
+
+.acm-w-60 {
+  width: 60%;
+}
+
+.acm-w-70 {
+  width: 70%;
 }
 
 .acm-overflow-y-auto {

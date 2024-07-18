@@ -99,10 +99,10 @@
         @endif
         <input type="text" class="form-control text-center" id="robo-group-{{$food->id}}" name="live_group"
                disabled value="{{$food_group}}" />
-        <label class="text-dark fw-bold" for="robo-group-{{$food->id}}">Roboflow Confidence</label>
+        <label class="text-dark fw-bold" for="robo-group-{{$food->id}}">Roboflow Confidence Group</label>
       </div>
 
-      <div class="form-floating form-floating-outline mb-3 position-relative">
+      <div class="form-floating form-floating-outline mb-3 position-relative d-none">
         @if($viewer->is_super_admin())
           <button type="button" class="btn btn-sm btn-info p-1 position-absolute acm-right-0"
                   onclick="restaurant_food_update_prepare(this, 'model_name')">
@@ -114,7 +114,7 @@
         <label class="text-dark fw-bold" for="robo-model-{{$food->id}}">Roboflow Model Name</label>
       </div>
 
-      <div class="form-floating form-floating-outline mb-3 position-relative">
+      <div class="form-floating form-floating-outline mb-3 position-relative d-none">
         @if($viewer->is_super_admin())
           <button type="button" class="btn btn-sm btn-info p-1 position-absolute acm-right-0"
                   onclick="restaurant_food_update_prepare(this, 'model_version')">
@@ -135,7 +135,7 @@
           @endif
           <input type="text" class="form-control text-center" id="robo-confidence-{{$food->id}}" name="confidence"
                  disabled value="{{$item['food_confidence']}}" />
-          <label class="text-dark fw-bold" for="robo-confidence-{{$food->id}}">Roboflow Food Confidence</label>
+          <label class="text-dark fw-bold" for="robo-confidence-{{$food->id}}">Roboflow Confidence Rate</label>
         </div>
     </div>
 

@@ -569,6 +569,21 @@ class Food extends Model
     return $live_group;
   }
 
+  public function get_food_confidence($pars = [])
+  {
+    $confidence = 30;
+
+    if (isset($pars['restaurant_parent_id']) && !empty($pars['restaurant_parent_id'])) {
+      $restaurant_parent_id = (int)$pars['restaurant_parent_id'];
+      $restaurant_parent = RestaurantParent::find($restaurant_parent_id);
+      if ($restaurant_parent) {
+        $confidence = $restaurant_parent->get_food_confidence($this);
+      }
+    }
+
+    return $confidence;
+  }
+
   public function get_model_name($pars = [])
   {
     $model_name = NULL;
