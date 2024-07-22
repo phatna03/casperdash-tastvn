@@ -281,7 +281,8 @@
       sys_running = 1;
 
       @if($pageConfigs['debug'])
-      internet_download_check();
+        var img_url = 'https://ai.block8910.com/sensors/58-5b-69-15-cd-2b/SENSOR/1/2024-07-22/10/SENSOR1_2024-07-22-10-31-01-708_170.jpg';
+        internet_download_check(img_url);
       @endif
 
       axios.post('/admin/kitchen/checker', {

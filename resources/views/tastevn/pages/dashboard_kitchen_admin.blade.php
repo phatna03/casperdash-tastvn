@@ -8,7 +8,7 @@
 @endsection
 
 @section('vendor-script')
-  <script src="{{url('custom/library/lightbox/lc_lightbox.lite.js')}}"></script>
+  <script src="{{url('custom/library/lightbox/lc_lightbox.lite.js?v=101')}}"></script>
   <script src="{{url('custom/library/lightbox/alloy_finger.min.js')}}"></script>
 @endsection
 

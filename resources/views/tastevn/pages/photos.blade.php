@@ -26,7 +26,7 @@
   <script type="text/javascript" src="https://cdn.datatables.net/plug-ins/1.10.21/dataRender/datetime.js"></script>
   <script type="text/javascript" src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
 
-  <script src="{{url('custom/library/lightbox/lc_lightbox.lite.js')}}"></script>
+  <script src="{{url('custom/library/lightbox/lc_lightbox.lite.js?v=101')}}"></script>
   <script src="{{url('custom/library/lightbox/alloy_finger.min.js')}}"></script>
 @endsection
 

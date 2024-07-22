@@ -918,10 +918,10 @@ function roboflow_retraining_confirm() {
 //internet
 let download_time_start, download_time_end;
 
-function internet_download_check() {
+function internet_download_check(img_url) {
   download_time_start = (new Date()).getTime();
   var download = new Image();
-  download.src = 'https://s3.ap-southeast-1.amazonaws.com/market.tastevietnam.asisa/58-5b-69-20-a8-f6/SENSOR/1/2024-07-21/22/SENSOR1_2024-07-21-22-00-05-236_113.jpg?' + download_time_start;
+  download.src = img_url + '?' + download_time_start;
   download.onload = function() {
     download_time_end = (new Date()).getTime();
     internet_download_speed();
