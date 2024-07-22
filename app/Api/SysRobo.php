@@ -976,7 +976,8 @@ class SysRobo
           }
         }
 
-        if ($count < $core['ingredient_quantity']) {
+        if (!$count) {
+//        if ($count < $core['ingredient_quantity']) {
           $valid = false;
           break;
         }

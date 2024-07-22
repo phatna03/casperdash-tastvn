@@ -325,9 +325,9 @@ class SysZalo
         'type' => 'zalo_' . $type,
         'message' => 'Invalid params...',
         'params' => json_encode(array_merge($pars, [
-          'user' => $user,
-          'zaloer' => $zaloer,
-          'rfs' => $rfs,
+          'user_id' => $user ? $user->id : 0,
+          'zaloer_user_id' => $zaloer ? $zaloer->user_id : 0,
+          'rfs_id' => $rfs ? $rfs->id : 0,
         ])),
       ]);
 

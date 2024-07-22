@@ -14,7 +14,7 @@
 
 {{--tastevn--}}
 @php
-$version = '118';
+$version = '120';
 @endphp
 {{--css--}}
 <link rel="stylesheet" href="{{asset('assets/vendor/libs/spinkit/spinkit.css')}}"/>

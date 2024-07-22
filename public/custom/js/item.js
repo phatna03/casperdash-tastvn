@@ -813,11 +813,11 @@ function restaurant_food_serve_tr(restaurant_parent_id, food_id, datas) {
     html2 = '';
 
     datas.ingredients.forEach(function (v1, k1) {
-      cls2 = (v1.ingredient_type == 'core') ? 'text-danger' : '';
+      cls2 = (v1.ingredient_type == 'core') ? 'text-danger cored' : 'text-dark';
       cor2 = ' - ' + v1.ingredient_quantity + ' ' + v1.name;
 
       if (acmcfs.user_role == 'superadmin' || parseInt(acmcfs.uid) == 5) {
-        cor2 = '<span class="wrap_text_roboflow_ingredient cursor-pointer" onclick="food_ingredient_core_quick(this, ' + v1.food_ingredient_id + ')">' +
+        cor2 = '<span class="wrap_text_roboflow_ingredient cursor-pointer ' + cls2 + '" onclick="food_ingredient_core_quick(this, ' + v1.food_ingredient_id + ')">' +
           cor2 +
           '</span>';
       }
@@ -834,7 +834,7 @@ function restaurant_food_serve_tr(restaurant_parent_id, food_id, datas) {
         opt2 +
         '</select>';
 
-      html2 += '<div class="' + cls2 + '">' +
+      html2 += '<div>' +
         '<div class="d-inline-block">' +
         sel2 +
         '</div>' +

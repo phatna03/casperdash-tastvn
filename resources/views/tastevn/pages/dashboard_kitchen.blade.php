@@ -463,6 +463,11 @@
 
       $('.result_time_check').removeClass('d-none');
 
+      var connection = '';
+      if (navigator && navigator.connection) {
+        connection = navigator.connection.effectiveType + ' - ' + navigator.connection.downlink + ' Mb/s - ' + navigator.connection.rtt + ' ms';
+      }
+
       html_times = '<div class="position-relative">' +
         '<div class="mb-2 acm-clearfix">' +
         '<div class="text-dark fw-bold acm-float-right">' + time_photo + '</div>' +
@@ -479,6 +484,10 @@
         '<div class="mb-2 acm-clearfix">' +
         '<div class="text-dark fw-bold acm-float-right">' + total_times + '</div>' +
         '<div class="text-dark overflow-hidden">Total (seconds): </div>' +
+        '</div>' +
+        '<div class="mb-2 acm-clearfix">' +
+        '<div class="text-dark fw-bold acm-float-right">' + connection + '</div>' +
+        '<div class="text-dark overflow-hidden">Navigator Connection: </div>' +
         '</div>' +
         '</div>';
 

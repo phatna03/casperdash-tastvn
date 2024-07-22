@@ -59,14 +59,17 @@ class ErrorController extends Controller
     $date = date('Y-m-d');
     $count = 0;
 
+    $date_from = date('Y-m-01');
+    $date_to = date('Y-m-t');
 
-    $rows = RestaurantFoodScan::whereIn('restaurant_id', [5,6])
+
+    $rows = RestaurantFoodScan::where('deleted', 0)
       ->where('rbf_api', '<>', NULL)
-      ->whereDate('time_photo', '>=', '2024-06-24')
-//      ->whereDate('time_photo', '<', '2024-06-10')
+      ->whereDate('time_photo', '>=', $date_from)
+      ->whereDate('time_photo', '<', $date_to)
       ->where('sys_confidence', 0)
-      ->where('deleted', 0)
-      ->whereIn('status', ['checked', 'failed', 'edited'])
+      ->where('missing_ids', '<>', NULL)
+      ->whereIn('status', ['checked'])
       ->orderBy('id', 'desc')
       ->limit(6)
       ->get();
@@ -74,18 +77,25 @@ class ErrorController extends Controller
     if (count($rows)) {
       foreach ($rows as $row) {
 
-
+        $row->rfs_photo_predict([
+          'notification' => false,
+        ]);
 
         $ids[] = $row->id;
+
+        $row->update([
+          'sys_confidence' => 101,
+        ]);
       }
     }
 
-    $count = RestaurantFoodScan::whereIn('restaurant_id', [5,6])
+    $count = RestaurantFoodScan::where('deleted', 0)
       ->where('rbf_api', '<>', NULL)
-      ->whereDate('time_photo', '>=', '2024-06-24')
-      ->where('sys_confidence', 201)
-      ->where('deleted', 0)
-      ->whereIn('status', ['checked', 'failed', 'edited'])
+      ->whereDate('time_photo', '>=', $date_from)
+      ->whereDate('time_photo', '<', $date_to)
+      ->where('sys_confidence', 0)
+      ->where('missing_ids', '<>', NULL)
+      ->whereIn('status', ['checked'])
       ->count();
 
     return response()->json([

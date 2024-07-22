@@ -96,7 +96,7 @@ class TesterController extends Controller
 //    $this->checked_notify_remove();
 //    $this->checked_food_category_update();
     $datas = $this->zalo_user_list_detail([
-      'offset' => 0,
+      'offset' => 50,
     ]);
     var_dump($datas);
 
