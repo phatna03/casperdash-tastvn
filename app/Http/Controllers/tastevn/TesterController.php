@@ -95,7 +95,12 @@ class TesterController extends Controller
 
 //    $this->checked_notify_remove();
 //    $this->checked_food_category_update();
-//    $this->zalo_user_list_detail();
+    $datas = $this->zalo_user_list_detail([
+      'offset' => 0,
+    ]);
+    var_dump($datas);
+
+
 
     //=======================================================================================
     //=======================================================================================
@@ -122,15 +127,15 @@ class TesterController extends Controller
     ]);
   }
 
-  protected function zalo_user_list_detail()
+  protected function zalo_user_list_detail($pars = [])
   {
     $sys_app = new SysApp();
 
     $datas = SysZalo::user_list([
-      'offset' => 50, //stt 50
+      'offset' => isset($pars['offset']) ? (int)$pars['offset'] : 0, //max 50
     ]);
 
-    var_dump($datas);
+//    var_dump($datas);
 
     if (count($datas) && isset($datas['data'])) {
       $temps = (array)$datas['data'];
@@ -139,9 +144,9 @@ class TesterController extends Controller
         foreach ($temps['users'] as $temp) {
           $temp = (array)$temp;
 
-          var_dump($sys_app::_DEBUG_BREAK);
-
-          var_dump($temp['user_id']);
+//          var_dump($sys_app::_DEBUG_BREAK);
+//
+//          var_dump($temp['user_id']);
 
           $row = ZaloUser::where('zalo_user_id', $temp['user_id'])
             ->first();
@@ -155,6 +160,8 @@ class TesterController extends Controller
         }
       }
     }
+
+    return $datas;
   }
 
   //v3

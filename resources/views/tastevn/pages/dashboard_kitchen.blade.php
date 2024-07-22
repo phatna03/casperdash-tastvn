@@ -280,6 +280,10 @@
       }
       sys_running = 1;
 
+      @if($pageConfigs['debug'])
+      internet_download_check();
+      @endif
+
       axios.post('/admin/kitchen/checker', {
         item: '{{$pageConfigs['item']->id}}',
       })

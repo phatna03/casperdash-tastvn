@@ -915,3 +915,44 @@ function roboflow_retraining_confirm() {
   return false;
 }
 
+//internet
+let download_time_start, download_time_end;
+
+function internet_download_check() {
+  download_time_start = (new Date()).getTime();
+  var download = new Image();
+  download.src = 'https://s3.ap-southeast-1.amazonaws.com/market.tastevietnam.asisa/58-5b-69-20-a8-f6/SENSOR/1/2024-07-21/22/SENSOR1_2024-07-21-22-00-05-236_113.jpg?' + download_time_start;
+  download.onload = function() {
+    download_time_end = (new Date()).getTime();
+    internet_download_speed();
+  }
+}
+
+function internet_download_speed() {
+  var duration = (download_time_end - download_time_start) / 1000;
+  var bitsLoaded = 1024 * 1024 * 5 * 8;
+  var bps = (bitsLoaded / duration).toFixed(2);
+  var kbps = (bps / 1024).toFixed(2);
+  var mbps = (kbps / 1024).toFixed(2);
+
+  if ($('.result_time_check').length) {
+
+    var html = '<div class="internet_speed position-relative">' +
+      '<div class="mb-2 acm-clearfix">' +
+      '<div class="text-dark fw-bold acm-float-right">' + mbps + '</div>' +
+      '<div class="text-dark overflow-hidden">Speed Download (mbps): </div>' +
+      '</div>' +
+      '</div>';
+
+    $('.result_time_check .data_result .internet_speed').remove();
+    $('.result_time_check .data_result').append(html);
+  }
+
+  return mbps;
+
+  // console.log(`Your connection speed:
+  //   ${bps} bps
+  //   ${kbps} kbps
+  //   ${mbps} mbps`);
+}
+
