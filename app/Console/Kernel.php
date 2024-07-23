@@ -41,11 +41,11 @@ class Kernel extends ConsoleKernel
 
     $schedule->command('local:check-images', [1, 1])
       ->withoutOverlapping()
-      ->everyMinute()
+      ->everyTwoSeconds()
       ->runInBackground();
     $schedule->command('local:check-images', [1, 2])
       ->withoutOverlapping()
-      ->everyMinute()
+      ->everyTwoSeconds()
       ->runInBackground();
 
     $schedule->command('local:check-images', [1, 3])
@@ -54,24 +54,24 @@ class Kernel extends ConsoleKernel
       ->runInBackground();
     $schedule->command('local:check-images', [1, 4])
       ->withoutOverlapping()
-      ->everyMinute()
+      ->everyTwoSeconds()
       ->runInBackground();
 
     $schedule->command('local:check-images', [1, 5])
       ->withoutOverlapping()
-      ->everyFifteenSeconds()
+      ->everyTwoSeconds()
       ->runInBackground();
     $schedule->command('local:check-images', [1, 6])
       ->withoutOverlapping()
-      ->everyFifteenSeconds()
+      ->everyTwoSeconds()
       ->runInBackground();
     $schedule->command('local:check-images', [1, 7])
       ->withoutOverlapping()
-      ->everyFifteenSeconds()
+      ->everyTwoSeconds()
       ->runInBackground();
     $schedule->command('local:check-images', [1, 8])
       ->withoutOverlapping()
-      ->everyFifteenSeconds()
+      ->everyTwoSeconds()
       ->runInBackground();
 
     //every 1h

@@ -139,7 +139,7 @@ class SysRobo
 
       if (count($files)) {
         //desc
-//      $files = array_reverse($files);
+        $files = array_reverse($files);
         $count = 0;
 
         Storage::append($file_log, 'TOTAL FILES= ' . count($files));
@@ -220,6 +220,12 @@ class SysRobo
 
             if ($debug) {
               var_dump('PHOTO_SCANNED= YES');
+            }
+
+          } else {
+
+            if (in_array($rfs->status, ['checked', 'failed'])) {
+              break;
             }
           }
         }

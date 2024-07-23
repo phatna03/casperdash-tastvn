@@ -59,7 +59,7 @@ class TesterController extends Controller
     $sys_app = new SysApp();
 
     $restaurant = RestaurantParent::find(1);
-    $sensor = Restaurant::find(13);
+    $sensor = Restaurant::find(5);
     $rfs = RestaurantFoodScan::find(69236);
     $date = date('Y-m-d');
     $user = User::find(5);
@@ -72,7 +72,44 @@ class TesterController extends Controller
 //    ]);
 
 
-
+//live
+//    $cur_date = date('Y-m-d');
+//    $cur_hour = (int)date('H');
+//    //sensor folder
+//    $folder_setting = SysCore::str_trim_slash($sensor->s3_bucket_address);
+//    $directory = $folder_setting . '/' . $cur_date . '/' . $cur_hour . '/';
+//    //sensor files
+//    $files = Storage::disk('sensors')->files($directory);
+//    if (count($files)) {
+//      //desc = order by last updated or modified
+//      $files = array_reverse($files);
+//
+//      foreach ($files as $file) {
+//        //sensor ext = jpg
+//        $ext = array_filter(explode('.', $file));
+//        if (!count($ext) || $ext[count($ext) - 1] != 'jpg') {
+//          continue;
+//        }
+//
+//        //photo width 1024
+//        $temps = array_filter(explode('/', $file));
+//        $photo_name = $temps[count($temps) - 1];
+//        if (substr($photo_name, 0, 5) == '1024_') {
+//          continue;
+//        }
+//
+//        var_dump($file);
+//      }
+//    }
+//
+//    if (!$rfs || ($rfs && $rfs->status == 'duplicated')) {
+//      $rfs = RestaurantFoodScan::where('restaurant_id', $sensor->id)
+//        ->where('status', '<>', 'duplicated')
+//        ->where('deleted', 0)
+//        ->orderBy('id', 'desc')
+//        ->limit(1)
+//        ->first();
+//    }
 
 
 
