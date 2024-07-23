@@ -24,25 +24,60 @@ class Kernel extends ConsoleKernel
   {
     //every 15s
 //    local:check-images
-    $sensors = Restaurant::where('deleted', 0)
-      ->where('restaurant_parent_id', '>', 0)
-      ->where('s3_bucket_name', '<>', NULL)
-      ->where('s3_bucket_address', '<>', NULL)
-      ->orderBy('id', 'asc')
-      ->get();
-    if (count($sensors)) {
-      for ($i = 1; $i <= count($sensors); $i++) {
-        $schedule->command('local:check-images', [1, $i])
-          ->withoutOverlapping()
-          ->everyFifteenSeconds()
-          ->runInBackground();
-      }
-    }
+//    $sensors = Restaurant::where('deleted', 0)
+//      ->where('restaurant_parent_id', '>', 0)
+//      ->where('s3_bucket_name', '<>', NULL)
+//      ->where('s3_bucket_address', '<>', NULL)
+//      ->orderBy('id', 'asc')
+//      ->get();
+//    if (count($sensors)) {
+//      for ($i = 1; $i <= count($sensors); $i++) {
+//        $schedule->command('local:check-images', [1, $i])
+//          ->withoutOverlapping()
+//          ->everyFifteenSeconds()
+//          ->runInBackground();
+//      }
+//    }
 
-    //every 5min
+    $schedule->command('local:check-images', [1, 1])
+      ->withoutOverlapping()
+      ->everyMinute()
+      ->runInBackground();
+    $schedule->command('local:check-images', [1, 2])
+      ->withoutOverlapping()
+      ->everyMinute()
+      ->runInBackground();
+
+    $schedule->command('local:check-images', [1, 3])
+      ->withoutOverlapping()
+      ->everyMinute()
+      ->runInBackground();
+    $schedule->command('local:check-images', [1, 4])
+      ->withoutOverlapping()
+      ->everyMinute()
+      ->runInBackground();
+
+    $schedule->command('local:check-images', [1, 5])
+      ->withoutOverlapping()
+      ->everyFifteenSeconds()
+      ->runInBackground();
+    $schedule->command('local:check-images', [1, 6])
+      ->withoutOverlapping()
+      ->everyFifteenSeconds()
+      ->runInBackground();
+    $schedule->command('local:check-images', [1, 7])
+      ->withoutOverlapping()
+      ->everyFifteenSeconds()
+      ->runInBackground();
+    $schedule->command('local:check-images', [1, 8])
+      ->withoutOverlapping()
+      ->everyFifteenSeconds()
+      ->runInBackground();
+
+    //every 1h
 //    local:check-status-images
     $schedule->command('local:check-status-images')
-      ->everyFourMinutes()
+      ->hourly()
       ->withoutOverlapping()
       ->runInBackground();
 

@@ -319,6 +319,9 @@ class SysZalo
   {
     $zaloer = $user ? $user->get_zalo() : NULL;
 
+    //tester
+    return false;
+
     if (!$user || !$rfs || !$zaloer || ($zaloer && empty($zaloer->zalo_user_id))) {
 
       SysCore::log_sys_bug([
@@ -333,9 +336,6 @@ class SysZalo
 
       return [];
     }
-
-    //tester
-    return false;
 
     $img_url = $rfs->photo_1024();
     $sensor = $rfs->get_restaurant();

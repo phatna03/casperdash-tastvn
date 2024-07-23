@@ -770,7 +770,7 @@ class SysRobo
     }
 
     $server_url = 'https://detect.roboflow.com'; //robot
-    $server_url = 'http://47.128.217.148:9001'; //ec2 clone
+    $server_url = 'http://52.77.242.51:9001'; //ec2 clone
 
     //datas
     $datas = [

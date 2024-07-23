@@ -1051,7 +1051,7 @@ class SensorController extends Controller
     if ($type == 'main_dashboard') {
 
       $rfs = RestaurantFoodScan::where('restaurant_id', $sensor->id)
-        ->whereIn('status', ['checked', 'failed'])
+        ->whereIn('status', ['checked', 'failed', 'new'])
         ->where('deleted', 0)
         ->orderBy('id', 'desc')
         ->limit(1)

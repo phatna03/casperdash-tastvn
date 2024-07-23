@@ -60,10 +60,24 @@ class TesterController extends Controller
 
     $restaurant = RestaurantParent::find(1);
     $sensor = Restaurant::find(13);
-    $rfs = RestaurantFoodScan::find(57628);
+    $rfs = RestaurantFoodScan::find(69236);
     $date = date('Y-m-d');
     $user = User::find(5);
     $kas = KasWebhook::find(5);
+
+//    $rfs->rfs_photo_scan_before();
+
+//    $rfs->rfs_photo_predict([
+//      'notification' => false,
+//    ]);
+
+
+
+
+
+
+
+
 
 //    $datas = json_decode($kas->params, true);
 //    var_dump($datas);
@@ -95,10 +109,10 @@ class TesterController extends Controller
 
 //    $this->checked_notify_remove();
 //    $this->checked_food_category_update();
-    $datas = $this->zalo_user_list_detail([
-      'offset' => 50,
-    ]);
-    var_dump($datas);
+//    $datas = $this->zalo_user_list_detail([
+//      'offset' => 50,
+//    ]);
+//    var_dump($datas);
 
 
 

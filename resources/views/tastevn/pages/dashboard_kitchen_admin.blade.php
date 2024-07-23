@@ -141,7 +141,7 @@
                     </div>
 
                     <input type="hidden" name="current_file_id"/>
-                    <input type="hidden" name="current_file_url"/>
+                    <input type="hidden" name="current_file_status"/>
                   </div>
                 </div>
               </div>
@@ -204,51 +204,70 @@
         type: 'main_dashboard',
       })
         .then(response => {
+          var wrap = $('.wrap_sensor_foods');
 
-          var current_file_id = $('.wrap_sensor_foods input[name=current_file_id]').val();
-          var current_file_url = $('.wrap_sensor_foods input[name=current_file_url]').val();
+          var current_file_id = parseInt(wrap.find('input[name=current_file_id]').val());
+          var current_file_status = wrap.find('input[name=current_file_status]').val();
 
-          if (response.data.file && response.data.file != '' && current_file_url != response.data.file) {
+          var check_file_id = parseInt(response.data.file_id);
+          var check_file_status = response.data.status;
+
+          if (!check_file_id) {
+            return false;
+          }
+
+          if (check_file_id != current_file_id) {
+            wrap.find('input[name=current_file_id]').val(check_file_id);
+            wrap.find('input[name=current_file_status]').val(check_file_status);
+
+            $('.wrap_notify_result').addClass('d-none');
 
             $('.result_ingredients_missing').addClass('d-none');
             $('.result_main_note').addClass('d-none');
             $('.result_photo_status .data_btns').addClass('d-none');
 
-            $('.wrap_sensor_foods input[name=current_file_id]').val(response.data.file_id);
-
-            $('.wrap_notify_result').addClass('d-none');
-
-            $('.wrap_sensor_foods input[name=current_file_url]').val(response.data.file);
-
             $('.result_photo_sensor img').attr('src', response.data.file_url);
             $('.result_photo_sensor').removeClass('d-none');
 
             $('.result_photo_itd .data_result').empty()
-              .append('<div class="text-danger fw-bold acm-ml-px-10 acm-fs-15">' + response.data.file_id + '</div>');
+              .append('<div class="text-danger fw-bold acm-ml-px-10 acm-fs-15">' + check_file_id + '</div>');
             $('.result_photo_itd').removeClass('d-none');
+          }
+
+          if (check_file_status == current_file_status) {
+            return false;
+          }
+
+          if (check_file_status == 'new') {
+
+            var no_photo = '{{url('custom/img/logo_')}}' + response.data.datas.restaurant_id + '.png';
+            $('.wrap-selected-food').find('.food-photo').attr('src', no_photo);
+            $('.wrap-selected-food').find('.wrap-ingredients').empty();
 
             $('.result_photo_status .data_result').empty()
               .append('<div class="badge bg-info fw-bold acm-ml-px-10 acm-fs-13">checking...</div>');
             $('.result_photo_status').removeClass('d-none');
 
+          }
+          else {
             //show data
             if (response.data.datas && (response.data.datas != '' || response.data.datas != '[]')) {
               food_datas(response.data.datas);
             }
-
-            //lc_lightbox
-            $('.result_photo_sensor a').attr('href', response.data.file_url + '?dpr=1&auto=format&fit=crop&w=2000&q=80&cs=tinysrgb');
-            $('.result_photo_sensor a').attr('title', response.data.datas.sensor_name + ' at ' + response.data.datas.rfs_time);
-            $('.result_photo_sensor a').attr('data-lcl-txt', response.data.datas.rfs_note);
-            $('.result_photo_sensor a').attr('data-lcl-author', response.data.datas.rfs_id);
-            $('.result_photo_sensor a').attr('data-lcl-thumb', response.data.datas.file_url + '?dpr=1&auto=format&fit=crop&w=150&q=80&cs=tinysrgb');
-
-            lc_lightbox('.acm-lightbox-photo', {
-              wrap_class: 'lcl_fade_oc',
-              thumb_attr: 'data-lcl-thumb',
-            });
-
           }
+
+          //lc_lightbox
+          $('.result_photo_sensor a').attr('href', response.data.file_url + '?dpr=1&auto=format&fit=crop&w=2000&q=80&cs=tinysrgb');
+          $('.result_photo_sensor a').attr('title', response.data.datas.sensor_name + ' at ' + response.data.datas.rfs_time);
+          $('.result_photo_sensor a').attr('data-lcl-txt', response.data.datas.rfs_note);
+          $('.result_photo_sensor a').attr('data-lcl-author', response.data.datas.rfs_id);
+          $('.result_photo_sensor a').attr('data-lcl-thumb', response.data.datas.file_url + '?dpr=1&auto=format&fit=crop&w=150&q=80&cs=tinysrgb');
+
+          lc_lightbox('.acm-lightbox-photo', {
+            wrap_class: 'lcl_fade_oc',
+            thumb_attr: 'data-lcl-thumb',
+          });
+
         })
         .catch(error => {
           console.log(error);
@@ -262,6 +281,10 @@
 
     function food_datas(datas) {
       var wrap = $('.wrap-selected-food');
+
+      var no_photo = '{{url('custom/img/logo_')}}' + datas.restaurant_id + '.png';
+      wrap.find('.food-photo').attr('src', no_photo);
+      wrap.find('.wrap-ingredients').empty();
 
       if (datas.food_id) {
 
@@ -358,11 +381,7 @@
 
       } else {
 
-        var no_photo = '{{url('custom/img/logo_')}}' + datas.restaurant_id + '.png';
-
-        wrap.find('.food-photo').attr('src', no_photo);
-        wrap.find('.wrap-ingredients').empty();
-
+        $('.result_photo_status').removeClass('d-none');
         $('.result_photo_status .data_result').empty()
           .append('<div class="badge bg-danger fw-bold acm-ml-px-10 acm-fs-13">Not Trained Yet</div>');
       }
