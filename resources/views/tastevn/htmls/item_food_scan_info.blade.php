@@ -66,7 +66,7 @@
         <div class="col-12 mb-1">
           <div class="acm-lbl-dark text-primary">+ Predicted dish:</div>
           <div class="acm-text-line-one">
-            @if($food_rbf)
+            @if($food_rbf && $confidence_group < 3)
               - <b class="acm-mr-px-5 text-danger">{{$food_rbf_confidence}}
                 %</b> <span class="text-dark">{{$food_rbf->name}}</span>
             @else
@@ -75,7 +75,7 @@
           </div>
         </div>
 
-        @if($rfs->found_by == 'rbf' && count($ingredients_missing))
+        @if($rfs->found_by == 'rbf' && count($ingredients_missing) && $confidence_group < 3)
           <div class="col-12 mb-1">
             <div class="acm-lbl-dark text-primary">+ Ingredients Missing:</div>
             <div>
@@ -102,7 +102,7 @@
         <div class="col-12 mb-1">
           <div class="acm-lbl-dark text-primary">+ Ingredients found:</div>
           <div>
-            @if(count($ingredients_found))
+            @if(count($ingredients_found) && $confidence_group < 3)
             @php
               foreach($ingredients_found as $ing):
 
@@ -167,7 +167,7 @@
         <div class="col-12 mb-1">
           <div class="acm-lbl-dark text-primary">+ Recipe Ingredients:</div>
           <div>
-            @if(count($ingredients_recipe))
+            @if(count($ingredients_recipe) && $confidence_group < 3)
               @php
                 foreach($ingredients_recipe as $ing):
               @endphp
@@ -226,7 +226,7 @@
                     <label class="acm-lbl-dark text-primary">+ Ingredients Missing:</label>
                   </div>
                   <div class="overflow-hidden">
-                    @if(count($ingredients_missing))
+                    @if(count($ingredients_missing) && $rfs->found_by != 'usr' && $confidence_group < 3)
                       @php
                         foreach($ingredients_missing as $ing):
                         $ing_name = \App\Api\SysRobo::burger_ingredient_chicken_beef($ing['name']);

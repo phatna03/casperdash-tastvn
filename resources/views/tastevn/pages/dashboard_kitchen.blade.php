@@ -320,12 +320,12 @@
           }
 
           if (check_file_status == current_file_status) {
-            return false;
-          } else {
-            //speaker
-            if (check_file_status == 'checked' && current_file_status == 'new') {
-              food_predict_by_api(check_file_id);
-            }
+            // return false;
+          }
+
+          //speaker
+          if (check_file_status == 'checked' && current_file_status == 'new') {
+            food_predict_by_api(check_file_id);
           }
 
           if (check_file_status == 'new') {

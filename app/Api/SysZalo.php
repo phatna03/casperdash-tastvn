@@ -22,10 +22,9 @@ class SysZalo
     if (count($datas) && isset($datas['access_token'])) {
       SysCore::set_sys_setting('zalo_token_refresh', $datas['refresh_token']);
       SysCore::set_sys_setting('zalo_token_access', $datas['access_token']);
-
-
-
     }
+
+    return $datas;
   }
 
   public static function daily_access_token()

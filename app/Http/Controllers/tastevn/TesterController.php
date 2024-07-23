@@ -65,12 +65,23 @@ class TesterController extends Controller
     $user = User::find(5);
     $kas = KasWebhook::find(5);
 
-//    $rfs->rfs_photo_scan_before();
+    //=======================================================================================
+    //=======================================================================================
 
+
+
+    //=======================================================================================
+    //=======================================================================================
+
+//    $datas = SysZalo::zalo_token([
+//
+//    ]);
+//    var_dump($datas);
+
+//    $rfs->rfs_photo_scan_before();
 //    $rfs->rfs_photo_predict([
 //      'notification' => false,
 //    ]);
-
 
 //live
 //    $cur_date = date('Y-m-d');
@@ -111,16 +122,6 @@ class TesterController extends Controller
 //        ->first();
 //    }
 
-
-
-
-
-
-//    $datas = json_decode($kas->params, true);
-//    var_dump($datas);
-
-//    SysZalo::send_rfs_note($user, 'photo_comment', $rfs);
-
 //    $items = $this->checked_rfs_by_date([
 //      'sensor_id' => $sensor->id,
 //      'date_from' => '2024-07-01',
@@ -132,14 +133,6 @@ class TesterController extends Controller
 //
 //    return Excel::download($file, 'report_rfs_' . $sensor->id . '.xlsx');
 
-//    $datas = SysZalo::daily_access_token();
-//    if (count($datas) && isset($datas['access_token'])) {
-//      SysCore::set_sys_setting('zalo_token_refresh', $datas['refresh_token']);
-//      SysCore::set_sys_setting('zalo_token_access', $datas['access_token']);
-//    }
-//    var_dump($datas);
-
-
     //=======================================================================================
     //=======================================================================================
     //fix live
@@ -150,8 +143,6 @@ class TesterController extends Controller
 //      'offset' => 50,
 //    ]);
 //    var_dump($datas);
-
-
 
     //=======================================================================================
     //=======================================================================================

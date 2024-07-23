@@ -235,7 +235,7 @@
           }
 
           if (check_file_status == current_file_status) {
-            return false;
+            // return false;
           }
 
           if (check_file_status == 'new') {

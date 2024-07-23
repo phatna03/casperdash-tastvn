@@ -456,6 +456,13 @@ class SensorController extends Controller
       'text_name_only' => 1
     ]);
 
+    $confidence_group = 3;
+    if ($food_rbf) {
+      $confidence_group = $food_rbf->get_live_group([
+        'restaurant_parent_id' => $restaurant->id,
+      ]);
+    }
+
     //info
     $html_info = view('tastevn.htmls.item_food_scan_info')
       ->with('rfs', $rfs)
@@ -472,6 +479,8 @@ class SensorController extends Controller
       ->with('ingredients_missing', $ingredients_missing)
       ->with('ingredients_found', $ingredients_found)
       ->with('ingredients_recipe', $ingredients_recipe)
+
+      ->with('confidence_group', $confidence_group)
 
       ->with('comments', $comments)
       ->with('texts', $texts)
