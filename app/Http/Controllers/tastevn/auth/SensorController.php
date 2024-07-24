@@ -1065,7 +1065,7 @@ class SensorController extends Controller
 
     //tester
     if ($this->_viewer->is_dev()) {
-//      $rfs = RestaurantFoodScan::find(69218);
+//      $rfs = RestaurantFoodScan::find(64760);
     }
 
     $datas = $rfs ? $this->kitchen_food_datas($rfs) : [];
@@ -1212,7 +1212,7 @@ class SensorController extends Controller
 
         case 2:
 
-          if ($row->confidence < 80 || !count($ingredients_found)) {
+          if ($row->confidence < 85 || !count($ingredients_found)) {
             $food_id = 0;
             $food_name = '';
             $food_photo = '';
@@ -1225,15 +1225,17 @@ class SensorController extends Controller
           if ($food_id && !count($ingredients_missing)) {
 
           } else {
-            $ingredients_missing = [];
-            $ingredients_found = [];
+            if (count($ingredients_missing) > 2) {
+              $ingredients_missing = [];
+              $ingredients_found = [];
+            }
           }
 
           break;
 
         case 3:
 
-          if ($row->confidence < 90 || !count($ingredients_found)) {
+          if ($row->confidence < 95 || !count($ingredients_found)) {
             $food_id = 0;
             $food_name = '';
             $food_photo = '';

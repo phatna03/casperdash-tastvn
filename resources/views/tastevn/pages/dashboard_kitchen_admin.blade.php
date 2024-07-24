@@ -374,9 +374,12 @@
           $('.result_ingredients_found').removeClass('d-none');
         }
 
-        if (datas.confidence == 2 && !datas.ingredients_found.length) {
-          $('.result_photo_status .data_result').empty()
-            .append('<div class="badge bg-danger fw-bold acm-ml-px-10 acm-fs-13">Less Training</div>');
+        if (datas.confidence > 1) {
+          if (!datas.ingredients_missing.length || datas.ingredients_missing.length > 1) {
+            $('.result_photo_status').removeClass('d-none');
+            $('.result_photo_status .data_result').empty()
+              .append('<div class="badge bg-danger fw-bold acm-ml-px-10 acm-fs-13">Less Training</div>');
+          }
         }
 
       } else {
