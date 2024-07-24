@@ -1057,14 +1057,16 @@ class SensorController extends Controller
 //    $type = isset($values['type']) ? $values['type'] : NULL;
 
     $rfs = RestaurantFoodScan::where('restaurant_id', $sensor->id)
-      ->whereIn('status', ['checked', 'failed', 'new'])
+      ->whereIn('status', ['new', 'scanned', 'checked', 'failed'])
       ->where('deleted', 0)
       ->orderBy('id', 'desc')
       ->limit(1)
       ->first();
 
     //tester
-//    $rfs = RestaurantFoodScan::find(59811);
+    if ($this->_viewer->is_dev()) {
+//      $rfs = RestaurantFoodScan::find(69218);
+    }
 
     $datas = $rfs ? $this->kitchen_food_datas($rfs) : [];
     return response()->json([
@@ -1158,6 +1160,8 @@ class SensorController extends Controller
     $is_marked = 0;
     $live_group = 3;
     $main_note = '';
+
+    $text_to_speak = '';
 
     if ($food) {
 
@@ -1255,6 +1259,27 @@ class SensorController extends Controller
       if ($main_note) {
         $main_note = $main_note->note;
       }
+
+      //speaker
+      if (count($ingredients_missing)) {
+
+        $ingredients_missing_speak = '';
+        foreach ($ingredients_missing as $ing) {
+          $ing = (array)$ing;
+
+          $ingredients_missing_speak .= SysRobo::burger_ingredient_chicken_beef($ing['name']) . ', ';
+        }
+
+        $text_to_speak = '[Missing], '
+          . $ingredients_missing_speak
+          . ', [Need to re-check]'
+        ;
+
+        SysAws::s3_polly([
+          'text_to_speak' => $text_to_speak,
+          'text_rate' => 'slow',
+        ]);
+      }
     }
 
     return [
@@ -1290,6 +1315,8 @@ class SensorController extends Controller
       'rfs_id' => $row->id,
       'rfs_note' => $row->note,
       'rfs_time' => date('d/m/Y H:i:s', strtotime($row->time_photo)),
+
+      'speaker' => $live_group == 1 && !empty($text_to_speak) ? 1 : 0,
     ];
   }
 

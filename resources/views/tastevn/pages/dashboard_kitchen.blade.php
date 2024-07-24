@@ -256,11 +256,11 @@
           //   }
           // }
 
-          if (response.data.speaker) {
-            setTimeout(function () {
-              speaker_play();
-            }, 888);
-          }
+          // if (response.data.speaker) {
+          //   setTimeout(function () {
+          //     speaker_play();
+          //   }, 888);
+          // }
 
         })
         .catch(error => {
@@ -298,8 +298,18 @@
           var check_file_status = response.data.status;
 
           if (!check_file_id) {
+            sys_running = 0;
+
             return false;
           }
+
+          if (current_file_id == check_file_id && current_file_status == check_file_status) {
+            sys_running = 0;
+
+            return false;
+          }
+
+          var running_datas = 0;
 
           if (check_file_id != current_file_id) {
             wrap.find('input[name=current_file_id]').val(check_file_id);
@@ -319,16 +329,16 @@
             $('.result_photo_itd').removeClass('d-none');
           }
 
-          if (check_file_status == current_file_status) {
-            // return false;
-          }
+          // if (check_file_status == current_file_status) {
+          //   return false;
+          // }
 
           //speaker
-          if (check_file_status == 'checked' && current_file_status == 'new') {
-            food_predict_by_api(check_file_id);
-          }
+          // if (check_file_status == 'checked' && current_file_status == 'new') {
+          //   food_predict_by_api(check_file_id);
+          // }
 
-          if (check_file_status == 'new') {
+          if (check_file_status == 'new' || check_file_status == 'scanned') {
 
             var no_photo = '{{url('custom/img/logo_')}}' + response.data.datas.restaurant_id + '.png';
             $('.wrap-selected-food').find('.food-photo').attr('src', no_photo);
@@ -342,16 +352,21 @@
           else {
             //show data
             if (response.data.datas && (response.data.datas != '' || response.data.datas != '[]')) {
+              running_datas = 1;
+
               food_datas(response.data.datas);
             }
           }
 
+          if (!running_datas) {
+            sys_running = 0;
+          }
         })
         .catch(error => {
           console.log(error);
         })
         .then(res => {
-          sys_running = 0;
+          // sys_running = 0;
         });
 
       return false;
@@ -375,7 +390,11 @@
         $('.result_photo_status .data_result').empty()
           .append('<div class="badge bg-primary fw-bold acm-ml-px-10 acm-fs-13 d-none">checked</div>');
         if (datas.ingredients_missing.length) {
-          // $('.result_photo_status .data_btns').removeClass('d-none');
+          if (parseInt(datas.speaker)) {
+            $('.wrap_sensor_foods input[name=current_file_status]').val('checked');
+
+            speaker_play();
+          }
         }
 
         //predicted_dish
@@ -383,9 +402,6 @@
           $('.result_predicted_dish .data_result').empty().append('<div class="text-danger fw-bold acm-ml-px-10">' + datas.food_name + '</div>');
           $('.result_predicted_dish').removeClass('d-none');
         }
-
-        // console.log(datas.ingredients_missing);
-        // console.log(datas.ingredients_found);
 
         //ingredients_missing
         var html = '';
@@ -513,6 +529,8 @@
       $('.result_time_check .data_result').empty()
         .append(html_times);
       @endif
+
+        sys_running = 0;
     }
 
     function photo_resolve(ele) {

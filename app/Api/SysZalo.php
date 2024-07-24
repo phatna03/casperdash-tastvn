@@ -319,7 +319,7 @@ class SysZalo
     $zaloer = $user ? $user->get_zalo() : NULL;
 
     //tester
-    return false;
+//    return false;
 
     if (!$user || !$rfs || !$zaloer || ($zaloer && empty($zaloer->zalo_user_id))) {
 
@@ -356,7 +356,7 @@ class SysZalo
         case 'photo_comment':
 
           $message = '+ Restaurant: ' . $sensor->name . ' \n'
-            . '+ Photo ID: ' . $rfs->id . ' \n';
+            . '+ Photo ID: ' . $rfs->id . ' at ' . date('d/m/Y H:i:s', strtotime($rfs->time_photo)) . ' \n';
 
           if (!empty($rfs->note)) {
             $note = $rfs->note;
@@ -386,7 +386,8 @@ class SysZalo
             }
           }
 
-          $btn_url = 'https://ai.block8910.com/admin/photos?photo=52375';
+          $btn_url = url('admin/photos/?photo=' . $rfs->id);
+//          $btn_url = 'https://ai.block8910.com/admin/photos?photo=52375';
 
           $url_params = '{
   "recipient": {
@@ -437,12 +438,12 @@ class SysZalo
           }
 
           $message = '+ Restaurant: ' . $sensor->name . ' \n' .
-            '+ Photo ID: ' . $rfs->id . ' \n' .
-            '+ Ingredients Missing: \n' .
+            '+ Photo ID: ' . $rfs->id . ' at ' . date('d/m/Y H:i:s', strtotime($rfs->time_photo)) . ' \n' .
+            '+ Please double check: \n' .
             $ingredients_missing_text;
 
           $btn_url = url('admin/photos/?photo=' . $rfs->id);
-          $btn_url = 'https://ai.block8910.com/admin/photos?photo=52375';
+//          $btn_url = 'https://ai.block8910.com/admin/photos?photo=52375';
 
           $url_params = '{
   "recipient": {

@@ -415,7 +415,7 @@ class RestaurantFoodScan extends Model
     $dataset = SysCore::str_trim_slash(SysCore::get_sys_setting('rbf_dataset_scan'));
     $version = SysCore::get_sys_setting('rbf_dataset_ver');
 
-    $debug = false;
+    $debug = isset($pars['debug']) ? (bool)$pars['debug'] : false;
 
     $sensor = $this->get_restaurant();
     $restaurant = $sensor->get_parent();
@@ -541,7 +541,7 @@ class RestaurantFoodScan extends Model
 
     $notification = isset($pars['notification']) ? (bool)$pars['notification'] : true;
     $sensor = $this->get_restaurant();
-    $debug = false;
+    $debug = isset($pars['debug']) ? (bool)$pars['debug'] : false;
 
     //find foods
     $foods = SysRobo::foods_find([
