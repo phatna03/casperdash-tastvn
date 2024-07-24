@@ -564,8 +564,6 @@ class RestaurantFoodScan extends Model
 //      var_dump($foods);
 
       if (count($foods)) {
-        $no_food = false;
-
         //find category
         $food = Food::find($foods['food']);
 
@@ -592,18 +590,22 @@ class RestaurantFoodScan extends Model
         ]);
 //        var_dump($ingredients_missing);
 
-        $this->update([
-          'status' => 'checked',
+        if (count($ingredients_missing) < 4) {
+          $no_food = false;
 
-          'food_id' => $food->id,
-          'food_category_id' => $food_category ? $food_category->id : 0,
-          'confidence' => $foods['confidence'],
-          'rbf_confidence' => $foods['confidence'],
-          'found_by' => 'rbf',
-          'rbf_predict' => $food->id,
-        ]);
+          $this->update([
+            'status' => 'checked',
 
-        $this->rfs_ingredients_missing($food, $ingredients_missing, $notification);
+            'food_id' => $food->id,
+            'food_category_id' => $food_category ? $food_category->id : 0,
+            'confidence' => $foods['confidence'],
+            'rbf_confidence' => $foods['confidence'],
+            'found_by' => 'rbf',
+            'rbf_predict' => $food->id,
+          ]);
+
+          $this->rfs_ingredients_missing($food, $ingredients_missing, $notification);
+        }
       }
     }
 

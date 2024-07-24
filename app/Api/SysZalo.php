@@ -318,6 +318,8 @@ class SysZalo
   {
     $zaloer = $user ? $user->get_zalo() : NULL;
 
+    $zalo_log = isset($pars['zalo_no_log']) ? (int)$pars['zalo_no_log'] : 1;
+
     //tester
 //    return false;
 
@@ -526,7 +528,9 @@ class SysZalo
     $params['params'] = json_encode($params);
     $params['datas'] = json_encode($datas);
 
-    ZaloUserSend::create($params);
+    if ($zalo_log) {
+      ZaloUserSend::create($params);
+    }
 
     return $datas;
   }

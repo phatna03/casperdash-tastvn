@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\tastevn;
 use App\Http\Controllers\Controller;
+use App\Models\ZaloUserSend;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
@@ -48,6 +49,10 @@ use App\Models\KasWebhook;
 use App\Models\ReportPhoto;
 use App\Models\ReportFood;
 use App\Models\ZaloUser;
+
+use Zalo\Zalo;
+use Zalo\Builder\MessageBuilder;
+use Zalo\ZaloEndPoint;
 
 class TesterController extends Controller
 {
@@ -423,5 +428,74 @@ class TesterController extends Controller
     }
 
     return $select->get()->toArray();
+  }
+
+  protected function checked_zalo_rfs_note_resend($pars = [])
+  {
+    $types = isset($pars['types']) ? (array)$pars['types'] : [];
+
+    if (!count($types)) {
+      return false;
+    }
+
+    foreach ($types as $type) {
+
+      $rows = ZaloUserSend::where('status', 0)
+        ->where('type', $type)
+        ->orderBy('id', 'asc')
+        ->get();
+      if (count($rows)) {
+        foreach ($rows as $row) {
+          $user = User::find($row->user_id);
+
+          var_dump('//=======================================================================================//');
+          var_dump($row->type);
+
+          switch ($type) {
+            case 'photo_comment':
+
+//              {"user_id":3,"zalo_user_id":"7975661731571077013","type":"photo_comment","rfs":69495,"params":[],"status":0}
+              $params = (array)json_decode($row->params, true);
+              var_dump($params);
+
+              $rfs_id = 0;
+              if (count($params) && isset($params['rfs'])) {
+                $rfs_id = (int)$params['rfs'];
+
+                var_dump('PHOTO ID= ' . $rfs_id);
+
+                $rfs = RestaurantFoodScan::find($rfs_id);
+
+                if ($rfs) {
+                  $datas = SysZalo::send_rfs_note($user, $type, $rfs, [
+                    'zalo_no_log' => 0,
+                  ]);
+
+                  $sended = false;
+                  if (count($datas) && isset($datas['data'])) {
+                    $obj = (array)$datas['data'];
+                    if (isset($obj['message_id'])) {
+                      $sended = true;
+                    }
+                  }
+
+                  var_dump('SEND= ' . $sended);
+
+                  if ($sended) {
+                    $row->update([
+                      'status' => 1,
+                      'resend' => $row->resend++,
+                      'datas' => json_encode($datas)
+                    ]);
+                  }
+                }
+              }
+
+              break;
+          }
+
+        }
+      }
+    }
   }
 }

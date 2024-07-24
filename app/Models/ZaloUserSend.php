@@ -17,6 +17,7 @@ class ZaloUserSend extends Model
     'user_id',
     'zalo_user_id',
     'type',
+    'resend',
     'status',
     'params',
     'datas',
