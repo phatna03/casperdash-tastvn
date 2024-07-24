@@ -14,6 +14,7 @@ use Intervention\Image\ImageManagerStatic as Image;
 use App\Api\SysCore;
 use App\Api\SysRobo;
 use App\Api\SysZalo;
+use App\Jobs\PhotoNotify;
 
 class RestaurantFoodScan extends Model
 {
@@ -640,87 +641,11 @@ class RestaurantFoodScan extends Model
 
     $this->rfs_ingredients_missing_text($ingredients);
 
-    $food = $this->get_food();
-    $sensor = $this->get_restaurant();
-    $restaurant = $sensor->get_parent();
-    $users = $sensor->get_users();
-
-    //notify
-    if (count($ingredients) && count($users) && $notification) {
-      $live_group = $restaurant->get_food_live_group($food);
-
-      foreach ($users as $user) {
-
-        //live_group
-        $valid_group = true;
-        if ($live_group > 1 || $this->confidence < 90) {
-          $valid_group = false;
-        }
-        if ($user->is_super_admin()) {
-          $valid_group = true;
-        }
-
-        //isset notify
-        $notify = DB::table('notifications')
-          ->distinct()
-          ->where('notifiable_type', 'App\Models\User')
-          ->where('notifiable_id', $user->id)
-          ->where('restaurant_food_scan_id', $this->id)
-          ->whereIn('type', ['App\Notifications\IngredientMissing'])
-          ->orderBy('id', 'desc')
-          ->limit(1)
-          ->first();
-
-        if (!$valid_group || $notify) {
-          continue;
-        }
-
-        //notify db
-        Notification::sendNow($user, new IngredientMissing([
-          'restaurant_food_scan_id' => $this->id,
-        ]), ['database']);
-
-        //temp off
-        //notify mail
-//        if ((int)$user->get_setting('missing_ingredient_alert_email')) {
-//          $user->notify((new IngredientMissingMail([
-//            'type' => 'ingredient_missing',
-//            'restaurant_id' => $sensor->id,
-//            'restaurant_food_scan_id' => $this->id,
-//            'user' => $user,
-//          ]))->delay([
-//            'mail' => now()->addMinutes(5),
-//          ]));
-//        }
-
-        //notify zalo
-        SysZalo::send_rfs_note($user, 'ingredient_missing', $this);
-
-        //notify db update
-        $rows = $user->notifications()
-          ->whereIn('type', ['App\Notifications\IngredientMissing'])
-          ->where('data', 'LIKE', '%{"restaurant_food_scan_id":' . $this->id . '}%')
-          ->where('restaurant_food_scan_id', 0)
-          ->get();
-        if (count($rows)) {
-          foreach ($rows as $row) {
-            $notify = SysNotification::find($row->id);
-            if ($notify) {
-              $notify->update([
-                'restaurant_food_scan_id' => $this->id,
-                'restaurant_id' => $sensor->id,
-                'food_id' => $food ? $food->id : 0,
-                'object_type' => 'restaurant_food_scan',
-                'object_id' => $this->id,
-                'data' => json_encode([
-                  'status' => 'valid'
-                ]),
-              ]);
-            }
-          }
-        }
-      }
+    //job
+    if ($notification) {
+      dispatch(new PhotoNotify($this));
     }
+
   }
 
   public function rfs_ingredients_missing_text($ingredients = [])

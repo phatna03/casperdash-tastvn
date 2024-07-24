@@ -338,8 +338,12 @@ class SysZalo
       return [];
     }
 
-    $img_url = $rfs->photo_1024();
     $sensor = $rfs->get_restaurant();
+
+    $img_url = $rfs->photo_1024();
+    if (App::environment() == 'local') {
+      $img_url = "https://s3.ap-southeast-1.amazonaws.com/cargo.tastevietnam.asia/58-5b-69-19-ad-83/SENSOR/1/2024-07-08/19/SENSOR_2024-07-08-19-47-41-791_847.jpg";
+    }
 
     $params = [
       'user_id' => $user->id,
@@ -359,6 +363,14 @@ class SysZalo
 
           $message = '+ Restaurant: ' . $sensor->name . ' \n'
             . '+ Photo ID: ' . $rfs->id . ' at ' . date('d/m/Y H:i:s', strtotime($rfs->time_photo)) . ' \n';
+
+          if ($rfs->customer_requested) {
+            $message .= '+ Customer Requested \n';
+          }
+
+          if ($rfs->count_foods > 1) {
+            $message .= '+ Multiple Dishes: ' . $rfs->count_foods . ' \n';
+          }
 
           if (!empty($rfs->note)) {
             $note = $rfs->note;
@@ -389,7 +401,9 @@ class SysZalo
           }
 
           $btn_url = url('admin/photos/?photo=' . $rfs->id);
-//          $btn_url = 'https://ai.block8910.com/admin/photos?photo=52375';
+          if (App::environment() == 'local') {
+            $btn_url = 'https://ai.block8910.com/admin/photos?photo=' . $rfs->id;
+          }
 
           $url_params = '{
   "recipient": {
@@ -445,7 +459,9 @@ class SysZalo
             $ingredients_missing_text;
 
           $btn_url = url('admin/photos/?photo=' . $rfs->id);
-//          $btn_url = 'https://ai.block8910.com/admin/photos?photo=52375';
+          if (App::environment() == 'local') {
+            $btn_url = 'https://ai.block8910.com/admin/photos?photo=' . $rfs->id;
+          }
 
           $url_params = '{
   "recipient": {
