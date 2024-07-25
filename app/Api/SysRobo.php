@@ -1352,6 +1352,8 @@ class SysRobo
 
   public static function photo_notify($pars = [])
   {
+    $debug = isset($pars['debug']) ? (bool)$pars['debug'] : false;
+
     $rows = RestaurantFoodScan::where('deleted', 0)
       ->where('missing_ids', '<>', NULL)
       ->where('missing_notify', 0)
@@ -1394,6 +1396,17 @@ class SysRobo
               $valid_group = false;
             }
 
+            //debug
+            if ($debug) {
+              if (!$user->is_dev()) {
+                continue;
+              }
+
+
+              var_dump(SysCore::var_dump_break());
+              var_dump('RFS= ' . $rfs->id);
+            }
+
             //isset notify
             $notify = DB::table('notifications')
               ->distinct()
@@ -1404,6 +1417,14 @@ class SysRobo
               ->orderBy('id', 'desc')
               ->limit(1)
               ->first();
+
+            if ($debug) {
+              if ($notify) {
+                $notify->delete();
+              }
+
+              $valid_group = true;
+            }
 
             if (!$valid_group || $notify) {
               continue;
@@ -1456,6 +1477,10 @@ class SysRobo
           }
         }
 
+        if ($debug) {
+          var_dump(SysCore::var_dump_break());
+          var_dump('DONE...');
+        }
       }
     }
   }

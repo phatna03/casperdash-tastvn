@@ -326,9 +326,12 @@ class User extends Authenticatable
 
   public function is_dev()
   {
-    return $this->id == 5;
+    return $this->role == 'dev';
   }
 
-
+  public function is_chef()
+  {
+    return $this->role == 'chef';
+  }
 
 }
