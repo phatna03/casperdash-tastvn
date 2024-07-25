@@ -51,6 +51,7 @@ class RestaurantFoodScan extends Model
     'time_end',
     'missing_ids',
     'missing_texts',
+    'missing_notify',
 
     'sys_predict',
     'sys_confidence',

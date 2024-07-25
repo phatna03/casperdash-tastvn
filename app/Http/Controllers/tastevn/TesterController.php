@@ -75,6 +75,7 @@ class TesterController extends Controller
 
 
 
+
     //=======================================================================================
     //=======================================================================================
 
@@ -146,10 +147,7 @@ class TesterController extends Controller
 
 //    $this->checked_notify_remove();
 //    $this->checked_food_category_update();
-//    $datas = $this->zalo_user_list_detail([
-//      'offset' => 50,
-//    ]);
-//    var_dump($datas);
+//    $this->checked_zalo_user_get();
 
     //=======================================================================================
     //=======================================================================================
@@ -174,43 +172,6 @@ class TesterController extends Controller
     return response()->json([
       'status' => true,
     ]);
-  }
-
-  protected function zalo_user_list_detail($pars = [])
-  {
-    $sys_app = new SysApp();
-
-    $datas = SysZalo::user_list([
-      'offset' => isset($pars['offset']) ? (int)$pars['offset'] : 0, //max 50
-    ]);
-
-//    var_dump($datas);
-
-    if (count($datas) && isset($datas['data'])) {
-      $temps = (array)$datas['data'];
-
-      if (count($temps) && isset($temps['users']) && count($temps['users'])) {
-        foreach ($temps['users'] as $temp) {
-          $temp = (array)$temp;
-
-//          var_dump($sys_app::_DEBUG_BREAK);
-//
-//          var_dump($temp['user_id']);
-
-          $row = ZaloUser::where('zalo_user_id', $temp['user_id'])
-            ->first();
-          if (!$row) {
-            $row = ZaloUser::create([
-              'zalo_user_id' => $temp['user_id'],
-            ]);
-          }
-
-          $row->get_detail();
-        }
-      }
-    }
-
-    return $datas;
   }
 
   //v3
@@ -497,5 +458,91 @@ class TesterController extends Controller
         }
       }
     }
+  }
+
+  protected function checked_zalo_user_list_detail($pars = [])
+  {
+    $sys_app = new SysApp();
+
+    $datas = SysZalo::user_list([
+      'offset' => isset($pars['offset']) ? (int)$pars['offset'] : 0, //max 50
+    ]);
+
+//    var_dump($datas);
+
+    if (count($datas) && isset($datas['data'])) {
+      $temps = (array)$datas['data'];
+
+      if (count($temps) && isset($temps['users']) && count($temps['users'])) {
+        foreach ($temps['users'] as $temp) {
+          $temp = (array)$temp;
+
+//          var_dump($sys_app::_DEBUG_BREAK);
+//
+//          var_dump($temp['user_id']);
+
+          $row = ZaloUser::where('zalo_user_id', $temp['user_id'])
+            ->first();
+          if (!$row) {
+            $row = ZaloUser::create([
+              'zalo_user_id' => $temp['user_id'],
+            ]);
+          }
+
+          $row->get_detail();
+        }
+      }
+    }
+
+    return $datas;
+  }
+
+  protected function checked_zalo_user_get($pars = [])
+  {
+
+    $offset = 0;
+    $total = 0;
+
+    $count = 0;
+
+    do {
+
+      $count++;
+
+      var_dump(SysCore::var_dump_break());
+      var_dump('run= ' . $count);
+      var_dump('off= ' . $offset);
+
+      $datas = $this->checked_zalo_user_list_detail([
+        'offset' => $offset,
+      ]);
+
+      if (!count($datas)) {
+        break;
+      }
+
+      if (count($datas) && isset($datas['data'])) {
+        $datas = (array)$datas['data'];
+
+        if (count($datas) && isset($datas['total'])) {
+          $total = (int)$datas['total'];
+
+          $offset += 50;
+        }
+      }
+
+      if (!$total || $offset > $total) {
+        break;
+      }
+
+      var_dump(SysCore::var_dump_break());
+      var_dump('total= ' . $total);
+      var_dump('offset= ' . $offset);
+
+      if ($count > 3) {
+        break;
+      }
+
+    } while (1);
   }
 }

@@ -4,16 +4,18 @@ namespace App\Console;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 //lib
-use App\Models\Restaurant;
+
 
 class Kernel extends ConsoleKernel
 {
   protected $commands = [
     //custome
-    'App\Console\Commands\SyncImagesToS3',
-    'App\Console\Commands\ClearLocalImages',
-    'App\Console\Commands\CheckPhotos',
-    'App\Console\Commands\GetPhotos',
+    'App\Console\Commands\PhotoGet',
+    'App\Console\Commands\PhotoCheck',
+    'App\Console\Commands\PhotoSync',
+    'App\Console\Commands\PhotoClear',
+    'App\Console\Commands\PhotoNotify',
+
     'App\Console\Commands\ZaloToken',
   ];
 
@@ -22,86 +24,78 @@ class Kernel extends ConsoleKernel
    */
   protected function schedule(Schedule $schedule): void
   {
-    //every 15s
-//    local:check-images
-//    $sensors = Restaurant::where('deleted', 0)
-//      ->where('restaurant_parent_id', '>', 0)
-//      ->where('s3_bucket_name', '<>', NULL)
-//      ->where('s3_bucket_address', '<>', NULL)
-//      ->orderBy('id', 'asc')
-//      ->get();
-//    if (count($sensors)) {
-//      for ($i = 1; $i <= count($sensors); $i++) {
-//        $schedule->command('local:check-images', [1, $i])
-//          ->withoutOverlapping()
-//          ->everyFifteenSeconds()
-//          ->runInBackground();
-//      }
-//    }
 
-    $schedule->command('local:check-images', [1, 1])
+    //every 2s
+//    web:photo-get
+    $schedule->command('web:photo-get', [1, 1])
       ->withoutOverlapping()
       ->everyTwoSeconds()
       ->runInBackground();
-    $schedule->command('local:check-images', [1, 2])
+    $schedule->command('web:photo-get', [1, 2])
       ->withoutOverlapping()
       ->everyTwoSeconds()
       ->runInBackground();
 
-    $schedule->command('local:check-images', [1, 3])
+    $schedule->command('web:photo-get', [1, 3])
       ->withoutOverlapping()
-      ->everyMinute()
+      ->everyTwoSeconds()
       ->runInBackground();
-    $schedule->command('local:check-images', [1, 4])
+    $schedule->command('web:photo-get', [1, 4])
       ->withoutOverlapping()
       ->everyTwoSeconds()
       ->runInBackground();
 
-    $schedule->command('local:check-images', [1, 5])
+    $schedule->command('web:photo-get', [1, 5])
       ->withoutOverlapping()
       ->everyTwoSeconds()
       ->runInBackground();
-    $schedule->command('local:check-images', [1, 6])
+    $schedule->command('web:photo-get', [1, 6])
       ->withoutOverlapping()
       ->everyTwoSeconds()
       ->runInBackground();
-    $schedule->command('local:check-images', [1, 7])
+    $schedule->command('web:photo-get', [1, 7])
       ->withoutOverlapping()
       ->everyTwoSeconds()
       ->runInBackground();
-    $schedule->command('local:check-images', [1, 8])
+    $schedule->command('web:photo-get', [1, 8])
       ->withoutOverlapping()
       ->everyTwoSeconds()
+      ->runInBackground();
+
+    //every 5s
+//    web:photo-notify
+    $schedule->command('web:photo-notify')
+      ->withoutOverlapping()
+      ->everyFiveSeconds()
       ->runInBackground();
 
     //every 1h
-//    local:check-status-images
-    $schedule->command('local:check-status-images')
+//    web:photo-check
+    $schedule->command('web:photo-check')
       ->hourly()
       ->withoutOverlapping()
       ->runInBackground();
 
     //every 2h
-//    sync:images-to-s3
-    $schedule->command('sync:images-to-s3')
+//    web:photo-sync
+    $schedule->command('web:photo-sync')
       ->everyTwoHours()
       ->withoutOverlapping()
       ->runInBackground();
 
     //daily at 5am
-//    local:clear-images
-    $schedule->command('local:clear-images')
+//    web:photo-clear
+    $schedule->command('web:photo-clear')
       ->dailyAt('05:00')
       ->withoutOverlapping()
       ->runInBackground();
 
     //daily at 6am
-//    thirdparty:zalo-token-access
-    $schedule->command('thirdparty:zalo-token-access')
+//    zalo:token-access
+    $schedule->command('zalo:token-access')
       ->dailyAt('06:00')
       ->withoutOverlapping()
       ->runInBackground();
-
   }
 
   /**
