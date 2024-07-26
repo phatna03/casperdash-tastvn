@@ -210,14 +210,35 @@ class SysRobo
 
             if ($debug) {
               var_dump('PHOTO_SAVE= ' . $rfs->id);
+            }
 
+          }
+
+          if ($debug) {
+            var_dump('PHOTO_STATUS= ' . $rfs->status);
+          }
+
+          if ($rfs->status == 'new') {
+            $rfs->rfs_photo_scan([
+              'created' => true,
+
+              'debug' => $debug,
+            ]);
+
+            if ($debug) {
+              var_dump('PHOTO_SCANNED= YES');
               var_dump('PHOTO_STATUS= ' . $status);
             }
 
           } else {
 
+            if (in_array($rfs->status, ['checked', 'failed'])) {
+              break;
+            }
             break;
           }
+
+
         }
       }
     } catch (\Exception $e) {
@@ -1413,15 +1434,15 @@ class SysRobo
 
   public static function photo_notify($pars = [])
   {
-    return false;
     $debug = isset($pars['debug']) ? (bool)$pars['debug'] : false;
 
     $rows = RestaurantFoodScan::where('deleted', 0)
+      ->where('food_id', '>', 0)
       ->where('status', 'checked')
-      ->where('missing_ids', '<>', NULL)
-      ->where('rbf_api', NULL)
-      ->whereDate('time_photo', date('Y-m-d'))
+      ->whereDate('time_photo', date('Y-m-d')) //today
       ->where('missing_notify', 0)
+      ->where('missing_ids', '<>', NULL)
+      ->where('rbf_api', '<>', NULL)
       ->orderBy('id', 'asc')
       ->limit(3)
       ->get();
@@ -1436,13 +1457,14 @@ class SysRobo
 
         $ingredients = $rfs->get_ingredients_missing();
 
-        if (time() - strtotime($rfs->time_photo) > 60 * 5) {
-          continue;
-        }
-
         $rfs->update([
           'missing_notify' => 1,
         ]);
+
+        $time = time() - strtotime($rfs->time_photo);
+        if ($time > 60 * 5) { //in 5min
+          continue;
+        }
 
         //notify
         if (count($ingredients) && count($users)) {
@@ -1467,7 +1489,6 @@ class SysRobo
               if (!$user->is_dev()) {
                 continue;
               }
-
 
               var_dump(SysCore::var_dump_break());
               var_dump('RFS= ' . $rfs->id);

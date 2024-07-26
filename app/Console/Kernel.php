@@ -65,40 +65,40 @@ class Kernel extends ConsoleKernel
 
     //every 1s
 //    web:photo-scan
-    $schedule->command('web:photo-scan', [1, 1])
-      ->withoutOverlapping()
-      ->everySecond()
-      ->runInBackground();
-    $schedule->command('web:photo-scan', [1, 2])
-      ->withoutOverlapping()
-      ->everySecond()
-      ->runInBackground();
-
-    $schedule->command('web:photo-scan', [1, 3])
-      ->withoutOverlapping()
-      ->everySecond()
-      ->runInBackground();
-    $schedule->command('web:photo-scan', [1, 4])
-      ->withoutOverlapping()
-      ->everySecond()
-      ->runInBackground();
-
-    $schedule->command('web:photo-scan', [1, 5])
-      ->withoutOverlapping()
-      ->everySecond()
-      ->runInBackground();
-    $schedule->command('web:photo-scan', [1, 6])
-      ->withoutOverlapping()
-      ->everySecond()
-      ->runInBackground();
-    $schedule->command('web:photo-scan', [1, 7])
-      ->withoutOverlapping()
-      ->everySecond()
-      ->runInBackground();
-    $schedule->command('web:photo-scan', [1, 8])
-      ->withoutOverlapping()
-      ->everySecond()
-      ->runInBackground();
+//    $schedule->command('web:photo-scan', [1, 1])
+//      ->withoutOverlapping()
+//      ->everySecond()
+//      ->runInBackground();
+//    $schedule->command('web:photo-scan', [1, 2])
+//      ->withoutOverlapping()
+//      ->everySecond()
+//      ->runInBackground();
+//
+//    $schedule->command('web:photo-scan', [1, 3])
+//      ->withoutOverlapping()
+//      ->everySecond()
+//      ->runInBackground();
+//    $schedule->command('web:photo-scan', [1, 4])
+//      ->withoutOverlapping()
+//      ->everySecond()
+//      ->runInBackground();
+//
+//    $schedule->command('web:photo-scan', [1, 5])
+//      ->withoutOverlapping()
+//      ->everySecond()
+//      ->runInBackground();
+//    $schedule->command('web:photo-scan', [1, 6])
+//      ->withoutOverlapping()
+//      ->everySecond()
+//      ->runInBackground();
+//    $schedule->command('web:photo-scan', [1, 7])
+//      ->withoutOverlapping()
+//      ->everySecond()
+//      ->runInBackground();
+//    $schedule->command('web:photo-scan', [1, 8])
+//      ->withoutOverlapping()
+//      ->everySecond()
+//      ->runInBackground();
 
     //every 5s
 //    web:photo-notify
