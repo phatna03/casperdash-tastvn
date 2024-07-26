@@ -548,6 +548,12 @@ class RestaurantFoodScan extends Model
     $sensor = $this->get_restaurant();
     $debug = isset($pars['debug']) ? (bool)$pars['debug'] : false;
 
+    if (!$notification) {
+      $this->update([
+        'missing_notify' => 1,
+      ]);
+    }
+
     //find foods
     $foods = SysRobo::foods_find([
       'predictions' => $predictions,

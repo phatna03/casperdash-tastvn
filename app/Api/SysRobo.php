@@ -210,29 +210,13 @@ class SysRobo
 
             if ($debug) {
               var_dump('PHOTO_SAVE= ' . $rfs->id);
-            }
-          }
 
-          if ($debug) {
-            var_dump('PHOTO_STATUS= ' . $rfs->status);
-          }
-
-          if ($rfs->status == 'new') {
-            $rfs->rfs_photo_scan([
-              'created' => true,
-
-              'debug' => $debug,
-            ]);
-
-            if ($debug) {
-              var_dump('PHOTO_SCANNED= YES');
+              var_dump('PHOTO_STATUS= ' . $status);
             }
 
           } else {
 
-            if (in_array($rfs->status, ['checked', 'failed'])) {
-              break;
-            }
+            break;
           }
         }
       }
@@ -250,6 +234,84 @@ class SysRobo
     $sensor->update([
       's3_checking' => 0,
     ]);
+  }
+
+  public static function photo_handle($pars = [])
+  {
+    //pars
+    $debug = isset($pars['debug']) ? (bool)$pars['debug'] : false;
+    $limit = isset($pars['limit']) ? (int)$pars['limit'] : 1;
+    $page = isset($pars['page']) ? (int)$pars['page'] : 1;
+
+    //run
+    $sensor = Restaurant::where('deleted', 0)
+      ->where('restaurant_parent_id', '>', 0)
+      ->where('s3_bucket_name', '<>', NULL)
+      ->where('s3_bucket_address', '<>', NULL)
+      ->orderBy('id', 'asc')
+      ->paginate($limit, ['*'], 'page', $page)
+      ->first();
+
+    if (!$sensor) {
+      return false;
+    }
+
+    if ($debug) {
+      var_dump(SysCore::var_dump_break());
+      var_dump('SENSOR= ' . $sensor->name . ' - ID= ' . $sensor->id);
+    }
+
+    try {
+
+      $file_log = 'public/logs/cron_photo_handle_' . $sensor->id . '.log';
+      Storage::append($file_log, '===================================================================================');
+      Storage::append($file_log, 'AT_' . date('Y_m_d_H_i_s'));
+
+      $rows = RestaurantFoodScan::where('deleted', 0)
+        ->where('restaurant_id', $sensor->id)
+        ->whereDate('time_photo', date('Y-m-d'))
+        ->where('status', 'new')
+        ->where('rbf_api', NULL)
+        ->orderBy('id', 'desc')
+        ->limit(1)
+        ->get();
+
+      Storage::append($file_log, 'TOTAL ROWS= ' . count($rows));
+
+      if ($debug) {
+        var_dump('FILE_LOG= ' . $file_log);
+        var_dump('TOTAL_FILES= ' . count($rows));
+      }
+
+      if (count($rows)) {
+        foreach ($rows as $rfs) {
+
+          Storage::append($file_log, 'START RFS= ' . $rfs->id);
+
+          if ($debug) {
+            var_dump('RFS= ' . $rfs->id);
+          }
+
+          $rfs->rfs_photo_scan([
+            'created' => true,
+
+            'debug' => $debug,
+          ]);
+
+          Storage::append($file_log, 'END RFS= ' . $rfs->id);
+        }
+      }
+
+    } catch (\Exception $e) {
+
+      SysCore::log_sys_bug([
+        'type' => 'photo_get',
+        'line' => $e->getLine(),
+        'file' => $e->getFile(),
+        'message' => $e->getMessage(),
+        'params' => json_encode($e),
+      ]);
+    }
   }
 
   public static function photo_name_query($file)
@@ -1351,10 +1413,14 @@ class SysRobo
 
   public static function photo_notify($pars = [])
   {
+    return false;
     $debug = isset($pars['debug']) ? (bool)$pars['debug'] : false;
 
     $rows = RestaurantFoodScan::where('deleted', 0)
+      ->where('status', 'checked')
       ->where('missing_ids', '<>', NULL)
+      ->where('rbf_api', NULL)
+      ->whereDate('time_photo', date('Y-m-d'))
       ->where('missing_notify', 0)
       ->orderBy('id', 'asc')
       ->limit(3)
@@ -1369,6 +1435,10 @@ class SysRobo
         $users = $sensor->get_users();
 
         $ingredients = $rfs->get_ingredients_missing();
+
+        if (time() - strtotime($rfs->time_photo) > 60 * 5) {
+          continue;
+        }
 
         $rfs->update([
           'missing_notify' => 1,
