@@ -65,6 +65,14 @@ return new class extends Migration {
         $table->timestamps();
       });
     }
+
+    if (!Schema::hasTable('cache')) {
+      Schema::create('cache', function (Blueprint $table) {
+        $table->string('key')->unique();
+        $table->text('value');
+        $table->integer('expiration');
+      });
+    }
   }
 
   /**
@@ -72,11 +80,9 @@ return new class extends Migration {
    */
   public function down(): void
   {
-    Schema::dropIfExists('kas_sites');
-    Schema::dropIfExists('kas_shifts');
-
     Schema::dropIfExists('zalo_users');
     Schema::dropIfExists('zalo_user_sends');
 
+    Schema::dropIfExists('cache');
   }
 };

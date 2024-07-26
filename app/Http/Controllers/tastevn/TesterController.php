@@ -6,6 +6,7 @@ use App\Models\ZaloUserSend;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
@@ -73,11 +74,21 @@ class TesterController extends Controller
     //=======================================================================================
     //=======================================================================================
 
-    SysRobo::photo_notify([
+    var_dump('START AT = ' . date('Y-m-d H:i:s'));
+
+    $datas = SysRobo::photo_get([
+      'limit' => 1,
+      'page' => 1,
+
+      'date' => '2024-07-25',
+      'hour' => 21,
 
       'debug' => true,
     ]);
 
+    var_dump($datas);
+
+    var_dump('END AT = ' . date('Y-m-d H:i:s'));
 
     //=======================================================================================
     //=======================================================================================

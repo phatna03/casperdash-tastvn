@@ -219,6 +219,8 @@ class SysRobo
 
           if ($rfs->status == 'new') {
             $rfs->rfs_photo_scan([
+              'created' => true,
+
               'debug' => $debug,
             ]);
 
@@ -266,8 +268,7 @@ class SysRobo
       . $temp2s[0] . '-' . $temp2s[1] . '-' . $temp2s[2] . '-' . $temp2s[3] . '-' . $temp2s[4]
       . '-%'
       . '_' . $temp1s[2]
-      . '.jpg%'
-    ;
+      . '.jpg%';
 
     return $keyword;
   }
@@ -428,8 +429,7 @@ class SysRobo
 
                 $id_duplicates[] = $rfs->id;
               }
-            }
-            else {
+            } else {
               //main
               $row->update([
                 'photo_main' => 1,
@@ -460,8 +460,7 @@ class SysRobo
                     ]);
                   }
                 }
-              }
-              else {
+              } else {
 
                 if ($id_main) {
 
@@ -821,9 +820,9 @@ class SysRobo
 
     // Setup + Send Http request
     $options = array(
-      'http' => array (
+      'http' => array(
         'header' => "Content-type: application/x-www-form-urlencoded\r\n",
-        'method'  => 'POST'
+        'method' => 'POST'
       ));
 
     $result = [];
@@ -1383,18 +1382,15 @@ class SysRobo
 
             //live_group
             $valid_group = true;
-            if ($live_group > 1 || $rfs->confidence < 85) {
+            if ($live_group > 1 || $rfs->confidence < 85 || count($ingredients) > 3) {
               $valid_group = false;
             }
-            if ($live_group == 2 && count($ingredients) < 2 && $rfs->confidence > 85) {
-              $valid_group = true;
-            }
-//        if ($user->is_super_admin()) {
-//          $valid_group = true;
-//        }
-            if (count($ingredients) > 3) {
-              $valid_group = false;
-            }
+//            if ($live_group == 2 && count($ingredients) < 2 && $rfs->confidence > 85) {
+//              $valid_group = true;
+//            }
+//            if ($user->is_super_admin()) {
+//              $valid_group = true;
+//            }
 
             //debug
             if ($debug) {

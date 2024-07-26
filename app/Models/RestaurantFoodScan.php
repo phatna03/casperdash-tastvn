@@ -410,14 +410,17 @@ class RestaurantFoodScan extends Model
 
   public function rfs_photo_scan($pars = [])
   {
-    $this->rfs_photo_scan_before();
+    $debug = isset($pars['debug']) ? (bool)$pars['debug'] : false;
+    $created = isset($pars['created']) ? (bool)$pars['created'] : false;
+
+    if (!$created) {
+      $this->rfs_photo_scan_before();
+    }
 
     //model 1
     $api_key = SysCore::get_sys_setting('rbf_api_key');
     $dataset = SysCore::str_trim_slash(SysCore::get_sys_setting('rbf_dataset_scan'));
     $version = SysCore::get_sys_setting('rbf_dataset_ver');
-
-    $debug = isset($pars['debug']) ? (bool)$pars['debug'] : false;
 
     $sensor = $this->get_restaurant();
     $restaurant = $sensor->get_parent();

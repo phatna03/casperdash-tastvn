@@ -25,41 +25,41 @@ class Kernel extends ConsoleKernel
   protected function schedule(Schedule $schedule): void
   {
 
-    //every 2s
+    //every 1s
 //    web:photo-get
     $schedule->command('web:photo-get', [1, 1])
       ->withoutOverlapping()
-      ->everyTwoSeconds()
+      ->everySecond()
       ->runInBackground();
     $schedule->command('web:photo-get', [1, 2])
       ->withoutOverlapping()
-      ->everyTwoSeconds()
+      ->everySecond()
       ->runInBackground();
 
     $schedule->command('web:photo-get', [1, 3])
       ->withoutOverlapping()
-      ->everyTwoSeconds()
+      ->everySecond()
       ->runInBackground();
     $schedule->command('web:photo-get', [1, 4])
       ->withoutOverlapping()
-      ->everyTwoSeconds()
+      ->everySecond()
       ->runInBackground();
 
     $schedule->command('web:photo-get', [1, 5])
       ->withoutOverlapping()
-      ->everyTwoSeconds()
+      ->everySecond()
       ->runInBackground();
     $schedule->command('web:photo-get', [1, 6])
       ->withoutOverlapping()
-      ->everyTwoSeconds()
+      ->everySecond()
       ->runInBackground();
     $schedule->command('web:photo-get', [1, 7])
       ->withoutOverlapping()
-      ->everyTwoSeconds()
+      ->everySecond()
       ->runInBackground();
     $schedule->command('web:photo-get', [1, 8])
       ->withoutOverlapping()
-      ->everyTwoSeconds()
+      ->everySecond()
       ->runInBackground();
 
     //every 5s

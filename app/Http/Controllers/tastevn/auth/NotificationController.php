@@ -158,7 +158,7 @@ class NotificationController extends Controller
       if (count($notifications)) {
         foreach ($notifications as $notification) {
           $row = RestaurantFoodScan::find($notification->restaurant_food_scan_id);
-          if (!$row || ($row && empty($row->missing_texts))) {
+          if (!$row || ($row && empty($row->missing_texts)) || !$row->get_food()) {
             continue;
           }
 

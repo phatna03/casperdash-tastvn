@@ -54,12 +54,12 @@ class PhotoNotify implements ShouldQueue
           $valid_group = false;
         }
         if ($live_group == 2 && count($ingredients) < 2 && $rfs->confidence > 85) {
-          $valid_group = true;
+//          $valid_group = true;
         }
 //        if ($user->is_super_admin()) {
 //          $valid_group = true;
 //        }
-        if (count($ingredients) > 3) {
+        if (count($ingredients) >= 3) {
           $valid_group = false;
         }
 
