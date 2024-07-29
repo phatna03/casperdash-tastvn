@@ -74,7 +74,14 @@ class TesterController extends Controller
     //=======================================================================================
     //=======================================================================================
 
+    $this->photo_get([
+      'hour' => 17,
 
+      'limit' => 1,
+      'page' => 5,
+
+      'debug' => true,
+    ]);
 
 
     //=======================================================================================
@@ -149,6 +156,10 @@ class TesterController extends Controller
 //    $this->checked_notify_remove();
 //    $this->checked_food_category_update();
 //    $this->checked_zalo_user_get();
+//    $this->kas_time_sheet([
+//      'date_from' => '2024-07-20',
+//      'date_to' => '2024-07-29',
+//    ]);
 
     //=======================================================================================
     //=======================================================================================
@@ -547,9 +558,193 @@ class TesterController extends Controller
     } while (1);
   }
 
-  //kas
-  protected function kas_time_sheet()
+  protected function photo_get($pars = [])
   {
+    //pars
+    $debug = isset($pars['debug']) ? (bool)$pars['debug'] : false;
+    $notification = isset($pars['notification']) ? (bool)$pars['notification'] : false;
+
+    $limit = isset($pars['limit']) ? (int)$pars['limit'] : 1;
+    $page = isset($pars['page']) ? (int)$pars['page'] : 1;
+
+    //run
+    $sensor = Restaurant::where('deleted', 0)
+      ->where('restaurant_parent_id', '>', 0)
+      ->where('s3_bucket_name', '<>', NULL)
+      ->where('s3_bucket_address', '<>', NULL)
+      ->orderBy('id', 'asc')
+      ->paginate($limit, ['*'], 'page', $page)
+      ->first();
+
+    $file_log = 'public/logs/cron_photo_miss_' . $sensor->id . '.log';
+    Storage::append($file_log, '===================================================================================');
+    Storage::append($file_log, 'AT_' . date('Y_m_d_H_i_s'));
+
+    if (!$sensor) {
+      return false;
+    }
+
+    if ($debug) {
+      var_dump(SysCore::var_dump_break());
+      var_dump('SENSOR= ' . $sensor->name . ' - ID= ' . $sensor->id);
+    }
+
+//    $sensor->update([
+//      's3_checking' => 1,
+//    ]);
+
+    try {
+
+      $cur_date = date('Y-m-d');
+      $cur_hour = (int)date('H');
+      $cur_minute = (int)date('i');
+
+      if (isset($pars['date']) && !empty($pars['date'])) {
+        $cur_date = $pars['date'];
+      }
+      if (isset($pars['hour'])) {
+        $cur_hour = (int)$pars['hour'] ? (int)$pars['hour'] : $pars['hour'];
+      }
+
+      //re-call for 59 like 18h59 -> 19h00
+      if (!$cur_minute) {
+        $cur_hour -= 1;
+      }
+
+      $folder_setting = SysCore::str_trim_slash($sensor->s3_bucket_address);
+      $directory = $folder_setting . '/' . $cur_date . '/' . $cur_hour . '/';
+
+      Storage::append($file_log, 'FOLDER_' . $directory);
+
+      $files = Storage::disk('sensors')->files($directory);
+
+      if ($debug) {
+        var_dump('FILE_LOG= ' . $file_log);
+        var_dump('DATE= ' . $cur_date);
+        var_dump('HOUR= ' . $cur_hour);
+        var_dump('SETTING= ' . $folder_setting);
+        var_dump('FOLDER= ' . $directory);
+        var_dump('TOTAL_FILES= ' . count($files));
+      }
+
+      if (count($files)) {
+        //desc
+//        $files = array_reverse($files);
+        $count = 0;
+
+        Storage::append($file_log, 'TOTAL FILES= ' . count($files));
+
+        //step 1= photo check
+        foreach ($files as $file) {
+
+          if ($debug) {
+            var_dump(SysCore::var_dump_break());
+            var_dump('FILE= ' . $file);
+          }
+
+          $rfs = NULL;
+          Storage::append($file_log, 'FILE CHECK= ' . $file);
+
+          $ext = array_filter(explode('.', $file));
+          if (!count($ext) || $ext[count($ext) - 1] != 'jpg') {
+            continue;
+          }
+
+          //no 1024
+          $temps = array_filter(explode('/', $file));
+          $photo_name = $temps[count($temps) - 1];
+          if (substr($photo_name, 0, 5) == '1024_') {
+            continue;
+          }
+
+          Storage::append($file_log, 'FILE VALID= OK');
+
+          //no duplicate
+          $keyword = SysRobo::photo_name_query($file);
+
+          if ($debug) {
+            var_dump('KEYWORD= ' . $keyword);
+          }
+
+          $count++;
+
+          //check exist
+          $rfs = RestaurantFoodScan::where('restaurant_id', $sensor->id)
+            ->where('photo_name', $file)
+            ->first();
+          if (!$rfs) {
+
+            $status = 'new';
+
+            $rows = RestaurantFoodScan::where('photo_name', 'LIKE', $keyword)
+              ->where('restaurant_id', $sensor->id)
+              ->get();
+            if (count($rows)) {
+              $status = 'duplicated';
+            }
+
+            //step 1= photo get
+            $rfs = $sensor->photo_save([
+              'local_storage' => 1,
+              'photo_url' => NULL,
+              'photo_name' => $file,
+              'photo_ext' => 'jpg',
+              'time_photo' => date('Y-m-d H:i:s'),
+
+              'status' => $status,
+            ]);
+
+            if ($debug) {
+              var_dump('CREATED= ' . $file);
+              var_dump('PHOTO_SAVE= ' . $rfs->id);
+            }
+
+          }
+
+          if ($debug) {
+            var_dump('PHOTO_STATUS= ' . $rfs->status);
+          }
+
+          if ($rfs->status == 'new') {
+
+            $rfs->rfs_photo_scan([
+              'created' => true,
+              'notification' => false,
+
+              'debug' => $debug,
+            ]);
+
+            if ($debug) {
+              var_dump('PHOTO_SCANNED= YES');
+              var_dump('PHOTO_STATUS= ' . $status);
+            }
+
+          }
+
+        }
+      }
+    } catch (\Exception $e) {
+
+      SysCore::log_sys_bug([
+        'type' => 'photo_get',
+        'line' => $e->getLine(),
+        'file' => $e->getFile(),
+        'message' => $e->getMessage(),
+        'params' => json_encode($e),
+      ]);
+    }
+
+//    $sensor->update([
+//      's3_checking' => 0,
+//    ]);
+  }
+
+  //kas
+  protected function kas_time_sheet($pars = [])
+  {
+    $date_from = isset($pars['date_from']) ? $pars['date_from'] : date('Y-m-d', strtotime("-3 days"));
+    $date_to = isset($pars['date_to']) ? $pars['date_to'] : date('Y-m-d');
+
     $ch = curl_init();
     $url_header = [
       'Accept: application/json',
@@ -558,8 +753,12 @@ class TesterController extends Controller
     ];
     $url_api = 'https://tastevietnam.smac.cloud/publish/api/v1/TimesheetInfo';
 
-    $url_params = 'token=95e6c4d69fd657dc0c4f0947b0d37c414ad2b6cabbfc26b43d16a40f241278f8'
-      . '&from_date=2024-07-25&to_date=2024-07-28';
+    $kas_token = '95e6c4d69fd657dc0c4f0947b0d37c414ad2b6cabbfc26b43d16a40f241278f8';
+
+    $url_params = 'token=' . $kas_token
+      . '&from_date=' . $date_from
+      . '&to_date=' . $date_to
+    ;
 
 //    $url_params = [
 //      'token' => '95e6c4d69fd657dc0c4f0947b0d37c414ad2b6cabbfc26b43d16a40f241278f8',
@@ -581,6 +780,7 @@ class TesterController extends Controller
 
     $datas = (array)json_decode($result);
 
+    var_dump($datas);
 
     return $datas;
   }

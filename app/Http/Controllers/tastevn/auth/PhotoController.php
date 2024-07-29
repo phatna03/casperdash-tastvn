@@ -56,7 +56,7 @@ class PhotoController extends Controller
     $existed = isset($values['existed']) ? (array)$values['existed'] : [];
     $restaurants = isset($values['restaurants']) ? (array)$values['restaurants'] : [];
     $users = isset($values['users']) ? (array)$values['users'] : [];
-    $noted = isset($values['noted']) && !empty($values['time_upload']) ? $values['noted'] : NULL;
+    $noted = isset($values['noted']) && !empty($values['noted']) ? $values['noted'] : NULL;
     $time_upload = isset($values['time_upload']) && !empty($values['time_upload']) ? $values['time_upload'] : NULL;
     $keyword = isset($values['keyword']) && !empty($values['keyword']) ? trim($values['keyword']) : NULL;
 

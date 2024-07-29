@@ -653,7 +653,7 @@ class RestaurantFoodScan extends Model
 
     //job
     if ($notification) {
-      dispatch(new PhotoNotify($this));
+//      dispatch(new PhotoNotify($this));
     }
 
   }
