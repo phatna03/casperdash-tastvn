@@ -40,11 +40,11 @@ class SysRobo
         'bucket' => 's3_bucket_cargo',
         'folder' => '/58-5b-69-19-ad-67/',
       ],
-      'deli1' => [
-        'restaurant' => 'deli',
-        'bucket' => 's3_bucket_deli',
-        'folder' => '/58-5b-69-19-ad-b6/',
-      ],
+//      'deli1' => [
+//        'restaurant' => 'deli',
+//        'bucket' => 's3_bucket_deli',
+//        'folder' => '/58-5b-69-19-ad-b6/',
+//      ],
       'deli2' => [
         'restaurant' => 'deli',
         'bucket' => 's3_bucket_deli',
@@ -70,6 +70,12 @@ class SysRobo
         'restaurant' => 'deli',
         'bucket' => 's3_bucket_deli',
         'folder' => '/58-5b-69-21-f7-ca/',
+      ],
+      //leloi
+      'leloi51' => [
+        'restaurant' => 'deli',
+        'bucket' => 's3_bucket_deli',
+        'folder' => '/58-5b-69-21-f7-c5/',
       ],
     ];
   }
@@ -1434,7 +1440,7 @@ class SysRobo
 
   public static function photo_notify($pars = [])
   {
-    return false;
+//    return false;
     $debug = isset($pars['debug']) ? (bool)$pars['debug'] : false;
 
     $rows = RestaurantFoodScan::where('deleted', 0)

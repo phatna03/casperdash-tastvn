@@ -75,7 +75,29 @@ class TesterController extends Controller
     //=======================================================================================
 
 
-//    $rows = RestaurantFoodScan::whereIn('id', [74489, 74490,74491,74492,74493])
+
+    //=======================================================================================
+    //=======================================================================================
+
+//    $limit = 1;
+//    $page = 8;
+//
+//    //run
+//    for ($page=1; $page<=8; $page++) {
+//      $sensor = Restaurant::where('deleted', 0)
+//        ->where('restaurant_parent_id', '>', 0)
+//        ->where('s3_bucket_name', '<>', NULL)
+//        ->where('s3_bucket_address', '<>', NULL)
+//        ->orderBy('id', 'asc')
+//        ->paginate($limit, ['*'], 'page', $page)
+//        ->first();
+//
+//      if ($sensor) {
+//        var_dump($sensor->id . ' - ' . $sensor->name);
+//      }
+//    }
+
+//    $rows = RestaurantFoodScan::whereIn('id', [74400,74397])
 //      ->get();
 //
 //    foreach ($rows as $rfs) {
@@ -96,22 +118,6 @@ class TesterController extends Controller
 //        ]);
 //      }
 //    }
-
-
-    $this->photo_get([
-      'hour' => 19,
-      'date' => '2024-07-29',
-
-      'limit' => 1,
-      'page' => 5,
-
-//      'count_only' => true,
-      'debug' => true,
-    ]);
-
-
-    //=======================================================================================
-    //=======================================================================================
 
 //    $datas = SysZalo::zalo_token([
 //
@@ -179,12 +185,25 @@ class TesterController extends Controller
     //=======================================================================================
     //fix live
 
+//    $this->checked_photo_duplicated_and_not_found([
+//      'limit' => 100,
+//    ]);
 //    $this->checked_notify_remove();
 //    $this->checked_food_category_update();
 //    $this->checked_zalo_user_get();
 //    $this->kas_time_sheet([
 //      'date_from' => '2024-07-20',
 //      'date_to' => '2024-07-29',
+//    ]);
+//    $this->checked_photo_get_old_and_missing([
+//      'hour' => 20,
+//      'date' => '2024-07-29',
+//
+//      'limit' => 1,
+//      'page' => 8,
+//
+////      'count_only' => true,
+//      'debug' => true,
 //    ]);
 
     //=======================================================================================
@@ -584,7 +603,7 @@ class TesterController extends Controller
     } while (1);
   }
 
-  protected function photo_get($pars = [])
+  protected function checked_photo_get_old_and_missing($pars = [])
   {
     //pars
     $debug = isset($pars['debug']) ? (bool)$pars['debug'] : false;
@@ -862,6 +881,78 @@ class TesterController extends Controller
 
     }
   }
+
+  protected function checked_photo_duplicated_and_not_found($pars = [])
+  {
+    $limit = isset($pars['limit']) ? (int)$pars['limit'] : 50;
+
+    $s3_region = SysCore::get_sys_setting('s3_region');
+
+    $rows = RestaurantFoodScan::where('local_storage', 1)
+      ->where('deleted', 0)
+      ->orderBy('id', 'asc')
+      ->limit($limit)
+      ->get();
+
+    var_dump('TOTAL= ' . count($rows));
+    if (count($rows)) {
+
+      $count_deleted = 0;
+      $count_ok = 0;
+
+      foreach ($rows as $rfs) {
+
+        var_dump(SysCore::var_dump_break());
+        var_dump('RFS= ' . $rfs->id);
+        var_dump('TIME= ' . $rfs->time_photo);
+        var_dump('NAME= ' . $rfs->photo_name);
+
+        switch ($rfs->status) {
+          case 'duplicated':
+
+            $rfs->update([
+              'deleted' => 1,
+            ]);
+
+            $count_deleted++;
+
+            break;
+
+          case 'checked':
+          case 'failed':
+
+          $sensor = $rfs->get_restaurant();
+          $img_url = "https://s3.{$s3_region}.amazonaws.com/{$sensor->s3_bucket_name}/{$rfs->photo_name}";
+
+          if (@getimagesize($img_url)) {
+
+            $rfs->update([
+              'local_storage' => 0,
+              'photo_url' => $img_url,
+            ]);
+
+            $count_ok++;
+          }
+          else {
+
+            $rfs->update([
+              'deleted' => 1,
+            ]);
+
+            $count_deleted++;
+          }
+
+            break;
+        }
+      }
+
+      var_dump(SysCore::var_dump_break());
+      var_dump('DELETED= ' . $count_deleted);
+      var_dump('SYNCED= ' . $count_ok);
+
+    }
+  }
+
   //kas
   protected function kas_time_sheet($pars = [])
   {
