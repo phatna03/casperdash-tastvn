@@ -61,10 +61,10 @@
     <form class="card-body" onsubmit="return user_pwd_confirm(event, this);" id="frm-pwd">
       <h6>Password</h6>
       <div class="row g-4">
-        <div class="col-md-3">
+        <div class="col-md-3 d-none">
           <div class="form-floating form-floating-outline">
             <input type="text" name="pwd_code" id="pwd-code" class="form-control text-uppercase text-center"
-                   required
+
             />
             <label for="pwd-code">Code Verify <b class="text-danger">*</b></label>
           </div>
@@ -87,8 +87,8 @@
             <label for="pwd-pwd2">New Password Confirmation<b class="text-danger">*</b></label>
           </div>
         </div>
-        <div class="col-md-3 acm-text-right">
-          <button type="button" class="btn btn-secondary me-1" onclick="user_code_confirm()">Get Code
+        <div class="col-md-6 acm-text-right">
+          <button type="button" class="btn btn-secondary me-1 d-none" onclick="user_code_confirm()">Get Code
           </button>
           <button type="submit" class="btn btn-primary me-1">Submit</button>
         </div>

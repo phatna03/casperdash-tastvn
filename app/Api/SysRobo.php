@@ -90,6 +90,10 @@ class SysRobo
       ->paginate($limit, ['*'], 'page', $page)
       ->first();
 
+    $file_log = 'public/logs/cron_photo_get_' . $sensor->id . '.log';
+    Storage::append($file_log, '===================================================================================');
+    Storage::append($file_log, 'AT_' . date('Y_m_d_H_i_s'));
+
     if (!$sensor || ($sensor && $sensor->s3_checking)) {
       return false;
     }
@@ -104,10 +108,6 @@ class SysRobo
     ]);
 
     try {
-
-      $file_log = 'public/logs/cron_photo_get_' . $sensor->id . '.log';
-      Storage::append($file_log, '===================================================================================');
-      Storage::append($file_log, 'AT_' . date('Y_m_d_H_i_s'));
 
       $cur_date = date('Y-m-d');
       $cur_hour = (int)date('H');

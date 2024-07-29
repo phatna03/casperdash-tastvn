@@ -546,4 +546,43 @@ class TesterController extends Controller
 
     } while (1);
   }
+
+  //kas
+  protected function kas_time_sheet()
+  {
+    $ch = curl_init();
+    $url_header = [
+      'Accept: application/json',
+      'Content-Type: application/x-www-form-urlencoded',
+//      'secret_key: ' . SysZalo::_APP_SECRET_KEY,
+    ];
+    $url_api = 'https://tastevietnam.smac.cloud/publish/api/v1/TimesheetInfo';
+
+    $url_params = 'token=95e6c4d69fd657dc0c4f0947b0d37c414ad2b6cabbfc26b43d16a40f241278f8'
+      . '&from_date=2024-07-25&to_date=2024-07-28';
+
+//    $url_params = [
+//      'token' => '95e6c4d69fd657dc0c4f0947b0d37c414ad2b6cabbfc26b43d16a40f241278f8',
+//      'from_date' => '2024-07-25',
+//      'to_date' => '2024-07-28',
+//    ];
+
+    curl_setopt($ch, CURLOPT_URL, $url_api);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, $url_header);
+
+    curl_setopt($ch, CURLOPT_POST, 1);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $url_params);
+
+    $result = curl_exec($ch);
+    $statusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+    curl_close($ch);
+
+    $datas = (array)json_decode($result);
+
+
+    return $datas;
+  }
+
 }
