@@ -219,9 +219,6 @@ class SysRobo
           }
 
           if ($rfs->status == 'new') {
-
-//            $notification = ($sensor->id == 14) ? false : true;
-
             $rfs->rfs_photo_scan([
               'created' => true,
 //              'notification' => $notification,
@@ -1437,6 +1434,7 @@ class SysRobo
 
   public static function photo_notify($pars = [])
   {
+    return false;
     $debug = isset($pars['debug']) ? (bool)$pars['debug'] : false;
 
     $rows = RestaurantFoodScan::where('deleted', 0)
@@ -1446,7 +1444,7 @@ class SysRobo
       ->where('missing_notify', 0)
       ->where('missing_ids', '<>', NULL)
       ->where('rbf_api', '<>', NULL)
-//      ->where('restaurant_id', '<', 14) //tester
+      ->orderBy('time_photo', 'desc')
       ->orderBy('id', 'asc')
       ->limit(3)
       ->get();

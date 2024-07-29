@@ -59,15 +59,15 @@ class Restaurant extends Model
 
   public function on_update_after($pars = [])
   {
-    $this->access_by_users();
+//    $this->access_by_users();
   }
 
   public function on_delete_after($pars = [])
   {
-    RestaurantAccess::where('restaurant_id', $this->id)
-      ->delete();
-
-    $this->access_by_users();
+//    RestaurantAccess::where('restaurant_id', $this->id)
+//      ->delete();
+//
+//    $this->access_by_users();
   }
 
   public function on_restore_after($pars = [])

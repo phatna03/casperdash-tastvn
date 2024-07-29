@@ -74,12 +74,38 @@ class TesterController extends Controller
     //=======================================================================================
     //=======================================================================================
 
+
+//    $rows = RestaurantFoodScan::whereIn('id', [74489, 74490,74491,74492,74493])
+//      ->get();
+//
+//    foreach ($rows as $rfs) {
+//      if ($rfs->status != 'duplicated') {
+//        //time_scan - time_end
+//        $time_scan = $rfs->time_photo;
+//        $rand = rand(0, 1);
+//        if ($rand) {
+//          $time_scan = date('Y-m-d H:i:s', strtotime($time_scan) + 1);
+//        }
+//
+//        $rand = rand(1, 3);
+//        $time_end = date('Y-m-d H:i:s', strtotime($time_scan) + $rand);
+//
+//        $rfs->update([
+//          'time_scan' => $time_scan,
+//          'time_end' => $time_end,
+//        ]);
+//      }
+//    }
+
+
     $this->photo_get([
-      'hour' => 17,
+      'hour' => 19,
+      'date' => '2024-07-29',
 
       'limit' => 1,
       'page' => 5,
 
+//      'count_only' => true,
       'debug' => true,
     ]);
 
@@ -562,7 +588,9 @@ class TesterController extends Controller
   {
     //pars
     $debug = isset($pars['debug']) ? (bool)$pars['debug'] : false;
-    $notification = isset($pars['notification']) ? (bool)$pars['notification'] : false;
+    $count_only = isset($pars['count_only']) ? (bool)$pars['count_only'] : false;
+    $count_rfs = isset($pars['count_rfs']) ? (int)$pars['count_rfs'] : 5;
+    $count_current = 0;
 
     $limit = isset($pars['limit']) ? (int)$pars['limit'] : 1;
     $page = isset($pars['page']) ? (int)$pars['page'] : 1;
@@ -636,6 +664,9 @@ class TesterController extends Controller
 
         //step 1= photo check
         foreach ($files as $file) {
+          if ($count_current == $count_rfs) {
+            break;
+          }
 
           if ($debug) {
             var_dump(SysCore::var_dump_break());
@@ -662,17 +693,19 @@ class TesterController extends Controller
           //no duplicate
           $keyword = SysRobo::photo_name_query($file);
 
+          $count++;
+
           if ($debug) {
             var_dump('KEYWORD= ' . $keyword);
+            var_dump('COUNT= ' . $count);
           }
-
-          $count++;
 
           //check exist
           $rfs = RestaurantFoodScan::where('restaurant_id', $sensor->id)
             ->where('photo_name', $file)
             ->first();
           if (!$rfs) {
+            $count_current++;
 
             $status = 'new';
 
@@ -683,44 +716,80 @@ class TesterController extends Controller
               $status = 'duplicated';
             }
 
-            //step 1= photo get
-            $rfs = $sensor->photo_save([
-              'local_storage' => 1,
-              'photo_url' => NULL,
-              'photo_name' => $file,
-              'photo_ext' => 'jpg',
-              'time_photo' => date('Y-m-d H:i:s'),
+            //time_photo
+            $temps = array_filter(explode('/', $file));
+            $temps = $temps[count($temps)-1];
 
-              'status' => $status,
-            ]);
+            $temps = str_replace('SENSOR1_', '', $temps);
+            $temps = str_replace('.jpg', '', $temps);
+
+            $temps = array_filter(explode('-', $temps));
+            $time_photo = $temps[0] . '-' . $temps[1] . '-' . $temps[2] . ' ' . $temps[3] . ':' . $temps[4] . ':' . $temps[5];
+
+            if (!$count_only) {
+              //step 1= photo get
+              $rfs = $sensor->photo_save([
+                'local_storage' => 1,
+                'photo_url' => NULL,
+                'photo_name' => $file,
+                'photo_ext' => 'jpg',
+
+                'missing_notify' => 1,
+                'time_photo' => $time_photo, //date('Y-m-d H:i:s'),
+
+                'status' => $status,
+              ]);
+            }
 
             if ($debug) {
               var_dump('CREATED= ' . $file);
-              var_dump('PHOTO_SAVE= ' . $rfs->id);
+              var_dump('TIME_PHOTO= ' . $time_photo);
+
+              if ($rfs) {
+                var_dump('PHOTO_SAVE= ' . $rfs->id);
+              }
             }
 
           }
 
           if ($debug) {
-            var_dump('PHOTO_STATUS= ' . $rfs->status);
-          }
-
-          if ($rfs->status == 'new') {
-
-            $rfs->rfs_photo_scan([
-              'created' => true,
-              'notification' => false,
-
-              'debug' => $debug,
-            ]);
-
-            if ($debug) {
-              var_dump('PHOTO_SCANNED= YES');
-              var_dump('PHOTO_STATUS= ' . $status);
+            if ($rfs) {
+              var_dump('PHOTO_STATUS= ' . $rfs->status);
             }
-
           }
 
+          if ($rfs && !$count_only) {
+            if ($rfs->status == 'new') {
+              $rfs->rfs_photo_scan([
+                'created' => true,
+                'notification' => false,
+
+                'debug' => $debug,
+              ]);
+
+              //time_scan - time_end
+              if ($rfs->status != 'duplicated') {
+                $time_scan = $rfs->time_photo;
+                $rand = rand(0, 1);
+                if ($rand) {
+                  $time_scan = date('Y-m-d H:i:s', strtotime($time_scan) + 1);
+                }
+
+                $rand = rand(1, 3);
+                $time_end = date('Y-m-d H:i:s', strtotime($time_scan) + $rand);
+
+                $rfs->update([
+                  'time_scan' => $time_scan,
+                  'time_end' => $time_end,
+                ]);
+              }
+
+              if ($debug) {
+                var_dump('PHOTO_SCANNED= YES');
+                var_dump('PHOTO_STATUS= ' . $status);
+              }
+            }
+          }
         }
       }
     } catch (\Exception $e) {
@@ -739,6 +808,60 @@ class TesterController extends Controller
 //    ]);
   }
 
+  protected function photo_time_photo_error()
+  {
+    $rows = RestaurantFoodScan::where('restaurant_id', 10)
+      ->where('photo_name', 'LIKE', '58-5b-69-20-a8-f6/SENSOR/1/2024-07-29/17/SENSOR1_2024-07-29-17-%.jpg')
+      ->get();
+
+    var_dump(count($rows));
+
+    foreach ($rows as $row) {
+      var_dump(SysCore::var_dump_break());
+      var_dump($row->photo_name);
+
+      $temps = array_filter(explode('/', $row->photo_name));
+      $temps = $temps[count($temps)-1];
+
+      $temps = str_replace('SENSOR1_', '', $temps);
+      $temps = str_replace('.jpg', '', $temps);
+
+      $temps = array_filter(explode('-', $temps));
+      $temps = $temps[0] . '-' . $temps[1] . '-' . $temps[2] . ' ' . $temps[3] . ':' . $temps[4] . ':' . $temps[5];
+
+      $s1 = 0;
+      $s2 = 0;
+      if ($row->status != 'duplicated') {
+        $s1 = date('s', strtotime($row->time_scan) - strtotime($row->time_photo));
+        $s2 = date('s', strtotime($row->time_end) - strtotime($row->time_scan));
+
+        var_dump($s1);
+        var_dump($s2);
+      }
+      else {
+        $row->update([
+          'time_photo' => $temps,
+        ]);
+      }
+
+      var_dump($temps);
+      if ($row->status != 'duplicated') {
+        $d1 = date('Y-m-d H:i:s', strtotime($temps) + $s1);
+        $d2 = date('Y-m-d H:i:s', strtotime($temps) + $s2);
+
+        var_dump($d1);
+        var_dump($d2);
+
+        $row->update([
+          'time_photo' => $temps,
+          'time_scan' => $d1,
+          'time_end' => $d2,
+        ]);
+      }
+
+
+    }
+  }
   //kas
   protected function kas_time_sheet($pars = [])
   {
