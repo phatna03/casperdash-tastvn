@@ -342,7 +342,7 @@ class SysZalo
 
     $img_url = $rfs->photo_1024();
     if (App::environment() == 'local') {
-      $img_url = "https://s3.ap-southeast-1.amazonaws.com/cargo.tastevietnam.asia/58-5b-69-19-ad-83/SENSOR/1/2024-07-08/19/SENSOR_2024-07-08-19-47-41-791_847.jpg";
+      $img_url = SysCore::local_img_url();
     }
 
     $params = [

@@ -97,8 +97,9 @@ class SysRobo
       ->first();
 
     $file_log = 'public/logs/cron_photo_get_' . $sensor->id . '.log';
-    Storage::append($file_log, '===================================================================================');
-    Storage::append($file_log, 'AT_' . date('Y_m_d_H_i_s'));
+    Storage::append($file_log, SysCore::var_dump_break());
+    Storage::append($file_log, '***************************************************************************'
+      . 'START_' . date('Y_m_d_H_i_s') . '_' . SysCore::time_to_ms());
 
     if (!$sensor || ($sensor && $sensor->s3_checking)) {
       return false;
@@ -134,7 +135,7 @@ class SysRobo
       $folder_setting = SysCore::str_trim_slash($sensor->s3_bucket_address);
       $directory = $folder_setting . '/' . $cur_date . '/' . $cur_hour . '/';
 
-      Storage::append($file_log, 'FOLDER_' . $directory);
+      Storage::append($file_log, 'FOLDER= ' . $directory);
 
       $files = Storage::disk('sensors')->files($directory);
 
@@ -157,13 +158,16 @@ class SysRobo
         //step 1= photo check
         foreach ($files as $file) {
 
+          Storage::append($file_log, '*************************************************************************'
+            . 'STEP_01_' . date('Y_m_d_H_i_s') . '_' . SysCore::time_to_ms());
+          Storage::append($file_log, 'FILE= ' . $file);
+
           if ($debug) {
             var_dump(SysCore::var_dump_break());
             var_dump('FILE= ' . $file);
           }
 
           $rfs = NULL;
-          Storage::append($file_log, 'FILE CHECK= ' . $file);
 
           $ext = array_filter(explode('.', $file));
           if (!count($ext) || $ext[count($ext) - 1] != 'jpg') {
@@ -177,7 +181,9 @@ class SysRobo
             continue;
           }
 
-          Storage::append($file_log, 'FILE VALID= OK');
+          Storage::append($file_log, '*************************************************************************'
+            . 'STEP_02_' . date('Y_m_d_H_i_s') . '_' . SysCore::time_to_ms());
+          Storage::append($file_log, 'FILE= VALID');
 
           //no duplicate
           $keyword = SysRobo::photo_name_query($file);
@@ -193,6 +199,9 @@ class SysRobo
             ->where('photo_name', $file)
             ->first();
           if (!$rfs) {
+            Storage::append($file_log, '*************************************************************************'
+              . 'STEP_03_' . date('Y_m_d_H_i_s') . '_' . SysCore::time_to_ms());
+            Storage::append($file_log, 'FILE= NEW');
 
             $status = 'new';
 
@@ -218,16 +227,25 @@ class SysRobo
               var_dump('PHOTO_SAVE= ' . $rfs->id);
             }
 
+          } else {
+            Storage::append($file_log, '*************************************************************************'
+              . 'STEP_03_' . date('Y_m_d_H_i_s') . '_' . SysCore::time_to_ms());
+            Storage::append($file_log, 'FILE= CREATED');
           }
 
           if ($debug) {
             var_dump('PHOTO_STATUS= ' . $rfs->status);
           }
 
+          Storage::append($file_log, 'FILE STATUS= ' . $rfs->status);
+
+          if (in_array($rfs->status, ['checked', 'failed'])) {
+            break;
+          }
+
           if ($rfs->status == 'new') {
             $rfs->rfs_photo_scan([
               'created' => true,
-//              'notification' => $notification,
 
               'debug' => $debug,
             ]);
@@ -236,15 +254,13 @@ class SysRobo
               var_dump('PHOTO_SCANNED= YES');
               var_dump('PHOTO_STATUS= ' . $status);
             }
-
-          } else {
-
-            if (in_array($rfs->status, ['checked', 'failed'])) {
-              break;
-            }
-            break;
           }
 
+          Storage::append($file_log, '***************************************************************************'
+            . 'FINAL_' . date('Y_m_d_H_i_s') . '_' . SysCore::time_to_ms());
+
+          //latest file
+          break;
         }
       }
     } catch (\Exception $e) {
@@ -291,7 +307,7 @@ class SysRobo
     try {
 
       $file_log = 'public/logs/cron_photo_handle_' . $sensor->id . '.log';
-      Storage::append($file_log, '===================================================================================');
+      Storage::append($file_log, SysCore::var_dump_break());
       Storage::append($file_log, 'AT_' . date('Y_m_d_H_i_s'));
 
       $rows = RestaurantFoodScan::where('deleted', 0)
@@ -388,7 +404,7 @@ class SysRobo
     if (count($sensors)) {
       foreach ($sensors as $sensor) {
         $file_log = 'public/logs/cron_photo_duplicate_' . $sensor->id . '.log';
-        Storage::append($file_log, '===================================================================================');
+        Storage::append($file_log, SysCore::var_dump_break());
         Storage::append($file_log, 'AT_' . date('Y_m_d_H_i_s'));
 
         $select = RestaurantFoodScan::query('restaurant_food_scans')
@@ -592,7 +608,7 @@ class SysRobo
     $directories = SysRobo::s3_bucket_folder();
     foreach ($directories as $restaurant => $directory) {
       $file_log = 'public/logs/cron_photo_sync_' . $restaurant . '.log';
-      Storage::append($file_log, '===================================================================================');
+      Storage::append($file_log, SysCore::var_dump_break());
       $count = 0;
 
       $localDisk = Storage::disk('sensors');
@@ -636,7 +652,7 @@ class SysRobo
     $directories = SysRobo::s3_bucket_folder();
     foreach ($directories as $restaurant => $directory) {
       $file_log = 'public/logs/cron_photo_clear_' . $restaurant . '.log';
-      Storage::append($file_log, '===================================================================================');
+      Storage::append($file_log, SysCore::var_dump_break());
       $count = 0;
 
       $localDisk = Storage::disk('sensors');
@@ -683,7 +699,7 @@ class SysRobo
     $img_url = isset($pars['check_url']) && !empty($pars['check_url']) ? $pars['check_url'] : NULL;
     //localhost
     if (App::environment() == 'local') {
-      $img_url = "https://s3.ap-southeast-1.amazonaws.com/cargo.tastevietnam.asia/58-5b-69-19-ad-83/SENSOR/1/2024-07-06/18/SENSOR_2024-07-06-18-08-53-536_693.jpg";
+      $img_url = SysCore::local_img_url();
     }
 
     $rfs = isset($pars['rfs']) && !empty($pars['rfs']) ? $pars['rfs'] : NULL;
@@ -867,16 +883,7 @@ class SysRobo
       var_dump('photo scan...');
     }
 
-    $type = isset($pars['type']) ? $pars['type'] : NULL;
-
-    $server_url = 'https://detect.roboflow.com'; //robot
-    $server_url = 'http://52.77.242.51:9001'; //ec2 clone IP public
-
-//    if (!empty($type) && $type == 'modal_testing') {
-//      $server_url = 'http://172.31.42.57:9001';
-//    }
-
-    $server_url = 'http://172.31.42.57:9001'; //ec2 IP private
+    $type = isset($pars['type']) ? $pars['type'] : NULL; //modal_testing
 
     //datas
     $datas = [
@@ -892,6 +899,16 @@ class SysRobo
       'overlap' => isset($pars['overlap']) ? $pars['overlap'] : NULL,
       'max_objects' => isset($pars['max_objects']) ? $pars['max_objects'] : NULL,
     ];
+
+    $server_url = 'https://detect.roboflow.com'; //robot
+    //ec2 clone
+    //localhost
+    if (App::environment() == 'local') {
+      $server_url = 'http://52.77.242.51:9001'; //IP public
+      $datas['img_url'] = SysCore::local_img_url();;
+    } else {
+      $server_url = 'http://172.31.42.57:9001'; //IP private
+    }
 
     if ($debug) {
       var_dump('rbf prepare...');

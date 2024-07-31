@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Storage;
 //lib
 use App\Notifications\IngredientMissing;
 use App\Notifications\IngredientMissingMail;
@@ -417,6 +418,11 @@ class RestaurantFoodScan extends Model
       $this->rfs_photo_scan_before();
     }
 
+    $file_log = 'public/logs/cron_photo_get_' . $this->restaurant_id . '.log';
+    Storage::append($file_log, '*************************************************************************'
+      . 'STEP_04_' . date('Y_m_d_H_i_s') . '_' . SysCore::time_to_ms());
+    Storage::append($file_log, 'FILE= GET SETTING');
+
     //model 1
     $api_key = SysCore::get_sys_setting('rbf_api_key');
     $dataset = SysCore::str_trim_slash(SysCore::get_sys_setting('rbf_dataset_scan'));
@@ -429,6 +435,10 @@ class RestaurantFoodScan extends Model
       $version = $restaurant->model_version;
     }
 
+    Storage::append($file_log, '*************************************************************************'
+      . 'STEP_05_' . date('Y_m_d_H_i_s') . '_' . SysCore::time_to_ms());
+    Storage::append($file_log, 'FILE= CREATE 1024');
+
     //img_1024
     $img_url = $this->photo_1024();
 
@@ -438,6 +448,10 @@ class RestaurantFoodScan extends Model
         'time_scan' => date('Y-m-d H:i:s'),
       ]);
     }
+
+    Storage::append($file_log, '*************************************************************************'
+      . 'STEP_06_' . date('Y_m_d_H_i_s') . '_' . SysCore::time_to_ms());
+    Storage::append($file_log, 'FILE= SCAN START');
 
     $datas = SysRobo::photo_scan([
       'img_url' => $img_url,
@@ -460,6 +474,10 @@ class RestaurantFoodScan extends Model
       $no_data = true;
     }
 
+    Storage::append($file_log, '*************************************************************************'
+      . 'STEP_07_' . date('Y_m_d_H_i_s') . '_' . SysCore::time_to_ms());
+    Storage::append($file_log, 'FILE= SCAN END');
+
     $this->update([
       'status' => $no_data ? 'failed' : 'scanned',
       'total_seconds' => isset($datas['result']['time']) ? $datas['result']['time'] : $this->total_seconds,
@@ -471,6 +489,10 @@ class RestaurantFoodScan extends Model
     ]);
 
     $this->rfs_photo_predict($pars);
+
+    Storage::append($file_log, '*************************************************************************'
+      . 'STEP_11_' . date('Y_m_d_H_i_s') . '_' . SysCore::time_to_ms());
+    Storage::append($file_log, 'FILE= PREDICT END');
 
     //time_end
     if (empty($this->time_end)) {
@@ -534,6 +556,11 @@ class RestaurantFoodScan extends Model
   {
     $this->rfs_photo_predict_before();
 
+    $file_log = 'public/logs/cron_photo_get_' . $this->restaurant_id . '.log';
+    Storage::append($file_log, '*************************************************************************'
+      . 'STEP_08_' . date('Y_m_d_H_i_s') . '_' . SysCore::time_to_ms());
+    Storage::append($file_log, 'FILE= PREDICT START');
+
     //model 1
     $api_result = (array)json_decode($this->rbf_api, true);
     $predictions = isset($api_result['result']) && isset($api_result['result']['predictions'])
@@ -575,6 +602,10 @@ class RestaurantFoodScan extends Model
 //      var_dump($foods);
 
       if (count($foods)) {
+        Storage::append($file_log, '*************************************************************************'
+          . 'STEP_09_' . date('Y_m_d_H_i_s') . '_' . SysCore::time_to_ms());
+        Storage::append($file_log, 'FILE= FOOD FOUND');
+
         //find category
         $food = Food::find($foods['food']);
 
@@ -602,6 +633,10 @@ class RestaurantFoodScan extends Model
 //        var_dump($ingredients_missing);
 
         if (count($ingredients_missing) < 4) {
+          Storage::append($file_log, '*************************************************************************'
+            . 'STEP_10_' . date('Y_m_d_H_i_s') . '_' . SysCore::time_to_ms());
+          Storage::append($file_log, 'FILE= INGRDEIENT MISSING ' . count($ingredients_missing));
+
           $no_food = false;
 
           $this->update([

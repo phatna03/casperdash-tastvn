@@ -14,6 +14,18 @@ class SysCore
     return '===========================================================================++++++++++++++++++++++++++++++++++++++++++++++++===========================================================================';
   }
 
+  public static function local_img_url()
+  {
+    return "https://s3.ap-southeast-1.amazonaws.com/cargo.tastevietnam.asia/58-5b-69-19-ad-83/SENSOR/1/2024-07-08/19/SENSOR_2024-07-08-19-47-41-791_847.jpg";
+  }
+
+  public static function time_to_ms()
+  {
+    $ms = array_filter(explode('.', number_format(microtime(true), 4, '.', ',')));
+
+    return count($ms) == 2 ? $ms[1] : '0000';
+  }
+
   public static function str_trim_slash($text)
   {
 //    '58-5b-69-19-ad-67/SENSOR/1';
