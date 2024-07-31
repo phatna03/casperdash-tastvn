@@ -237,7 +237,7 @@ class SysRobo
             var_dump('PHOTO_STATUS= ' . $rfs->status);
           }
 
-          Storage::append($file_log, 'FILE STATUS= ' . $rfs->status);
+          Storage::append($file_log, 'STATUS= ' . $rfs->status);
 
           if (in_array($rfs->status, ['checked', 'failed'])) {
             break;
@@ -885,6 +885,8 @@ class SysRobo
 
     $type = isset($pars['type']) ? $pars['type'] : NULL; //modal_testing
 
+    $server_url = 'https://detect.roboflow.com'; //robot
+
     //datas
     $datas = [
       'server_url' => $server_url,
@@ -900,14 +902,14 @@ class SysRobo
       'max_objects' => isset($pars['max_objects']) ? $pars['max_objects'] : NULL,
     ];
 
-    $server_url = 'https://detect.roboflow.com'; //robot
+
     //ec2 clone
     //localhost
     if (App::environment() == 'local') {
-      $server_url = 'http://52.77.242.51:9001'; //IP public
+      $datas['server_url'] = 'http://52.77.242.51:9001'; //IP public
       $datas['img_url'] = SysCore::local_img_url();;
     } else {
-      $server_url = 'http://172.31.42.57:9001'; //IP private
+      $datas['server_url'] = 'http://172.31.42.57:9001'; //IP private
     }
 
     if ($debug) {
