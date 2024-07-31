@@ -136,6 +136,8 @@ class RoboflowController extends Controller
           'max_objects' => $max_objects,
 
           'debug' => $debug,
+
+          'type' => 'modal_testing',
         ]);
       }
 

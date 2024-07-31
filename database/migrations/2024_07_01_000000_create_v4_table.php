@@ -73,6 +73,15 @@ return new class extends Migration {
         $table->integer('expiration');
       });
     }
+
+    if (!Schema::hasTable('food_category_access')) {
+      Schema::create('food_category_access', function (Blueprint $table) {
+        $table->id();
+        $table->bigInteger('user_id');
+        $table->bigInteger('food_category_id');
+        $table->timestamps();
+      });
+    }
   }
 
   /**
@@ -84,5 +93,6 @@ return new class extends Migration {
     Schema::dropIfExists('zalo_user_sends');
 
     Schema::dropIfExists('cache');
+    Schema::dropIfExists('food_category_access');
   }
 };

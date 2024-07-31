@@ -867,9 +867,16 @@ class SysRobo
       var_dump('photo scan...');
     }
 
+    $type = isset($pars['type']) ? $pars['type'] : NULL;
+
     $server_url = 'https://detect.roboflow.com'; //robot
-    $server_url = 'http://52.77.242.51:9001'; //ec2 clone
-//    $server_url = 'http://115.79.29.73:9001'; //ec2 clone
+    $server_url = 'http://52.77.242.51:9001'; //ec2 clone IP public
+
+//    if (!empty($type) && $type == 'modal_testing') {
+//      $server_url = 'http://172.31.42.57:9001';
+//    }
+
+    $server_url = 'http://172.31.42.57:9001'; //ec2 IP private
 
     //datas
     $datas = [

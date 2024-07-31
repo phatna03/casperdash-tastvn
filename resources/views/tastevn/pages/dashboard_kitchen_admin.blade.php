@@ -240,7 +240,7 @@
 
           if (check_file_status == 'new') {
 
-            var no_photo = '{{url('custom/img/logo_')}}' + response.data.datas.restaurant_id + '.png';
+            var no_photo = '{{url('custom/img/logo_')}}' + response.data.datas.restaurant_id + '.png?v=1';
             $('.wrap-selected-food').find('.food-photo').attr('src', no_photo);
             $('.wrap-selected-food').find('.wrap-ingredients').empty();
 
@@ -282,7 +282,7 @@
     function food_datas(datas) {
       var wrap = $('.wrap-selected-food');
 
-      var no_photo = '{{url('custom/img/logo_')}}' + datas.restaurant_id + '.png';
+      var no_photo = '{{url('custom/img/logo_')}}' + datas.restaurant_id + '.png?v=1';
       wrap.find('.food-photo').attr('src', no_photo);
       wrap.find('.wrap-ingredients').empty();
 

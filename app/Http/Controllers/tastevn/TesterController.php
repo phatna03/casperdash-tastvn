@@ -190,7 +190,7 @@ class TesterController extends Controller
 //    ]);
 //    $this->checked_notify_remove();
 //    $this->checked_food_category_update();
-//    $this->checked_zalo_user_get();
+    $this->checked_zalo_user_get();
 //    $this->kas_time_sheet([
 //      'date_from' => '2024-07-20',
 //      'date_to' => '2024-07-29',
@@ -238,6 +238,7 @@ class TesterController extends Controller
     $date_to = date('Y-m-d');
 
     //notifications
+    //rfs missing error
     $rows = DB::table('notifications')
       ->distinct()
       ->where('notifiable_type', 'App\Models\User')
@@ -281,20 +282,21 @@ class TesterController extends Controller
 
   protected function checked_food_category_update()
   {
-    $rows = RestaurantFoodScan::where('deleted', 0)
+    $count = RestaurantFoodScan::where('deleted', 0)
       ->where('food_id', '>', 0)
       ->where('food_category_id', 0)
+      ->where('sys_confidence', 0)
       ->orderBy('id', 'desc')
-      ->get();
+      ->count();
 
-    var_dump(count($rows));
+    var_dump($count);
 
     $rows = RestaurantFoodScan::where('deleted', 0)
       ->where('food_id', '>', 0)
       ->where('food_category_id', 0)
       ->where('sys_confidence', '<>', 102)
-      ->orderBy('id', 'desc')
-      ->limit(500)
+      ->orderBy('id', 'asc')
+      ->limit(100)
       ->get();
 
     var_dump(count($rows));
@@ -314,12 +316,12 @@ class TesterController extends Controller
       }
     }
 
-    $rows = RestaurantFoodScan::where('deleted', 0)
+    $count = RestaurantFoodScan::where('deleted', 0)
       ->where('food_id', '>', 0)
       ->where('sys_confidence', 102)
-      ->get();
+      ->count();
 
-    var_dump(count($rows));
+    var_dump($count);
   }
 
   protected function checked_photo_get($pars = [])
