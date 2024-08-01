@@ -82,6 +82,10 @@ class SysRobo
 
   public static function photo_get($pars = [])
   {
+    if ((int)date('H') < 8) {
+      return false;
+    }
+
     //pars
     $debug = isset($pars['debug']) ? (bool)$pars['debug'] : false;
     $limit = isset($pars['limit']) ? (int)$pars['limit'] : 1;
@@ -96,12 +100,18 @@ class SysRobo
       ->paginate($limit, ['*'], 'page', $page)
       ->first();
 
-    $file_log = 'public/logs/cron_photo_get_' . $sensor->id . '.log';
+    $file_log = 'public/logs/' . date('Y-m-d') . '/cron_photo_get_' . $sensor->id . '.log';
     Storage::append($file_log, SysCore::var_dump_break());
     Storage::append($file_log, '***************************************************************************'
       . 'START_' . date('Y_m_d_H_i_s') . '_' . SysCore::time_to_ms());
 
     if (!$sensor || ($sensor && $sensor->s3_checking)) {
+      //time over
+      if ($sensor && $sensor->s3_checking && time() - strtotime($sensor->updated_at) > 60 * 5) {
+        $sensor->update([
+          's3_checking' => 0,
+        ]);
+      }
       return false;
     }
 

@@ -190,7 +190,7 @@ class TesterController extends Controller
 //    ]);
 //    $this->checked_notify_remove();
 //    $this->checked_food_category_update();
-//    $this->checked_zalo_user_get();
+    $this->checked_zalo_user_get();
 //    $this->kas_time_sheet([
 //      'date_from' => '2024-07-20',
 //      'date_to' => '2024-07-29',

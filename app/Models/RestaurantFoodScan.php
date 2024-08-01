@@ -418,7 +418,7 @@ class RestaurantFoodScan extends Model
       $this->rfs_photo_scan_before();
     }
 
-    $file_log = 'public/logs/cron_photo_get_' . $this->restaurant_id . '.log';
+    $file_log = 'public/logs/' . date('Y-m-d') . '/cron_photo_get_' . $this->restaurant_id . '.log';
     Storage::append($file_log, '*************************************************************************'
       . 'STEP_04_' . date('Y_m_d_H_i_s') . '_' . SysCore::time_to_ms());
     Storage::append($file_log, 'FILE= GET SETTING');
@@ -556,7 +556,7 @@ class RestaurantFoodScan extends Model
   {
     $this->rfs_photo_predict_before();
 
-    $file_log = 'public/logs/cron_photo_get_' . $this->restaurant_id . '.log';
+    $file_log = 'public/logs/' . date('Y-m-d') . '/cron_photo_get_' . $this->restaurant_id . '.log';
     Storage::append($file_log, '*************************************************************************'
       . 'STEP_08_' . date('Y_m_d_H_i_s') . '_' . SysCore::time_to_ms());
     Storage::append($file_log, 'FILE= PREDICT START');
