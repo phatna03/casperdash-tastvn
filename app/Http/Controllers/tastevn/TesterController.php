@@ -74,7 +74,41 @@ class TesterController extends Controller
     //=======================================================================================
     //=======================================================================================
 
-
+//    $rows = ZaloUserSend::where('status', 0)
+//      ->where('type', 'photo_comment')
+//      ->whereDate('created_at', '>=', '2024-08-01')
+//      ->where('datas', '<>', '{"error":-230,"message":"User has not interacted with the OA in the past 7 days"}')
+//      ->orderBy('id', 'asc')
+//      ->get();
+//
+//    var_dump(count($rows));
+//
+//    if (count($rows)) {
+//      foreach ($rows as $row) {
+//        if ($row->datas == '{"error":-227,"message":"User is banned or has been inactive for more than 45 days"}') {
+//          continue;
+//        }
+//
+//        $user = User::find($row->user_id);
+//
+//        $pars = (array)json_decode($row->params, true);
+//        $rfs = RestaurantFoodScan::find((int)$pars['rfs']);
+//        if (!$rfs || !$user) {
+//          continue;
+//        }
+//
+//        //notify zalo
+//        $datas = SysZalo::send_rfs_note($user, 'photo_comment', $rfs, [
+//          'zalo_no_log' => 0,
+//        ]);
+//
+//        var_dump($datas);
+//
+//        $row->update([
+//          'resend' => 1,
+//        ]);
+//      }
+//    }
 
     //=======================================================================================
     //=======================================================================================

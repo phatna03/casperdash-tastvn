@@ -199,20 +199,83 @@
   <script type="text/javascript">
     $(document).ready(function () {
 
-      if (notify_realtime) {
-        clearInterval(notify_realtime);
-      }
-
       toggle_header();
 
-      // sensor_checker();
-      setInterval(function () {
-        sensor_checker();
-      }, acmcfs.timeout_kitchen);
+      @if($pageConfigs['sse'])
+        var sse_source = new EventSource("{{url('admin/sse/stream/kitchen/' . $pageConfigs['item']->id)}}");
+        sse_source.onmessage = function (evt) {
+          let sse_datas = JSON.parse(evt.data);
+          sensor_sse(sse_datas);
+        }
+
+      @else
+        if (notify_realtime) {
+          clearInterval(notify_realtime);
+        }
+
+        setInterval(function () {
+          sensor_checker();
+        }, acmcfs.timeout_kitchen);
+      @endif
 
     });
 
     var sys_running = 0;
+
+    function sensor_sse(datas) {
+      console.log(datas);
+
+      var wrap = $('.wrap_sensor_foods');
+
+      var current_file_id = parseInt(wrap.find('input[name=current_file_id]').val());
+      var current_file_status = wrap.find('input[name=current_file_status]').val();
+
+      var check_file_id = parseInt(datas.file_id);
+      var check_file_status = datas.status;
+
+      if (!check_file_id) {
+        return false;
+      }
+      if (current_file_id == check_file_id && current_file_status == check_file_status) {
+        return false;
+      }
+
+      if (check_file_id != current_file_id) {
+        wrap.find('input[name=current_file_id]').val(check_file_id);
+        wrap.find('input[name=current_file_status]').val(check_file_status);
+
+        $('.wrap_notify_result').addClass('d-none');
+
+        $('.result_ingredients_missing').addClass('d-none');
+        $('.result_main_note').addClass('d-none');
+        $('.result_photo_status .data_btns').addClass('d-none');
+
+        $('.result_photo_sensor img').attr('src', datas.file_url);
+        $('.result_photo_sensor').removeClass('d-none');
+
+        $('.result_photo_itd .data_result').empty()
+          .append('<div class="text-danger fw-bold acm-ml-px-10 acm-fs-15">' + check_file_id + '</div>');
+        $('.result_photo_itd').removeClass('d-none');
+      }
+
+      if (check_file_status == 'new' || check_file_status == 'scanned') {
+
+        var no_photo = '{{url('custom/img/logo_')}}' + datas.restaurant_id + '.png?v=1';
+        $('.wrap-selected-food').find('.food-photo').attr('src', no_photo);
+        $('.wrap-selected-food').find('.wrap-ingredients').empty();
+
+        $('.result_photo_status .data_result').empty()
+          .append('<div class="badge bg-info fw-bold acm-ml-px-10 acm-fs-13">checking...</div>');
+        $('.result_photo_status').removeClass('d-none');
+
+      }
+      else {
+        //show data
+        food_datas(datas);
+      }
+
+
+    }
 
     function food_predict_by_api(item_id) {
       var wrap = $('.wrap-selected-food');

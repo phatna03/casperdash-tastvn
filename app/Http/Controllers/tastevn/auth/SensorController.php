@@ -1029,6 +1029,8 @@ class SensorController extends Controller
 
       'item' => $row,
 
+      'sse' => false, //$row->id == 5 ? true : false,
+
       'debug' => $debug && $this->_viewer->is_super_admin(),
     ];
 
@@ -1335,5 +1337,47 @@ class SensorController extends Controller
     ];
 
     return view('tastevn.pages.dashboard_kitchen_admin', ['pageConfigs' => $pageConfigs]);
+  }
+
+  public function sse_stream_kitchen(string $id, Request $request)
+  {
+    $sensor = Restaurant::find((int)$id);
+
+    header('Content-Type: text/event-stream');
+    header('Cache-Control: no-cache');
+    header('Connection: keep-alive');
+
+    if ($sensor) {
+
+      $rfs = RestaurantFoodScan::where('restaurant_id', $sensor->id)
+        ->whereIn('status', ['new', 'scanned', 'checked', 'failed'])
+        ->where('deleted', 0)
+        ->orderBy('id', 'desc')
+        ->limit(1)
+        ->first();
+
+      //tester
+      if ($this->_viewer->is_dev()) {
+//        $rfs = RestaurantFoodScan::find(79353);
+      }
+
+      $datas = $rfs ? $this->kitchen_food_datas($rfs) : [];
+
+      $datas = array_merge($datas, [
+        'status' => $rfs ? $rfs->status : 'no_photo',
+
+        'file' => $rfs ? $rfs->photo_name : '',
+        'file_url' => $rfs ? $rfs->get_photo() : '',
+        'file_id' => $rfs ? $rfs->id : 0,
+      ]);
+
+      echo "data:" . json_encode($datas) . "\n\n";
+
+    } else {
+      echo "\n\n";
+    }
+
+    ob_flush();
+    flush();
   }
 }
