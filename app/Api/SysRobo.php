@@ -292,6 +292,13 @@ class SysRobo
               . 'STEP_06_' . date('Y_m_d_H_i_s') . '_' . SysCore::time_to_ms());
             Storage::append($file_log, 'FILE= SCAN START');
 
+            //time_scan
+            if (empty($rfs->time_scan)) {
+              $rfs->update([
+                'time_scan' => date('Y-m-d H:i:s'),
+              ]);
+            }
+
             $datas = SysRobo::photo_scan([
               'img_url' => $img_url,
 

@@ -231,17 +231,17 @@ class TesterController extends Controller
 //    ]);
 //    $this->checked_notify_remove();
 //    $this->checked_food_category_update();
-//    $this->checked_zalo_user_get();
+    $this->checked_zalo_user_get();
 //    $this->kas_time_sheet([
 //      'date_from' => '2024-07-20',
 //      'date_to' => '2024-07-29',
 //    ]);
 //    $this->checked_photo_get_old_and_missing([
-//      'hour' => 20,
-//      'date' => '2024-07-29',
+//      'hour' => 9,
+//      'date' => '2024-08-06',
 //
 //      'limit' => 1,
-//      'page' => 8,
+//      'page' => 5,
 //
 ////      'count_only' => true,
 //      'debug' => true,

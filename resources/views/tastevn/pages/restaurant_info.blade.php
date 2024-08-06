@@ -468,6 +468,10 @@
     var $ = jQuery.noConflict();
     $(document).ready(function () {
 
+      @if($pageConfigs['debug'])
+      toggle_header();
+      @endif
+
       //keyCode
       $(document).keydown(function(e) {
         // console.log(e.keyCode);

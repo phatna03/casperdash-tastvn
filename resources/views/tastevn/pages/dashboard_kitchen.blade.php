@@ -329,6 +329,8 @@
         })
         .catch(error => {
           console.log(error);
+
+          page_reload();
         })
         .then(res => {
           // sys_running = 0;
@@ -428,6 +430,8 @@
         })
         .catch(error => {
           console.log(error);
+
+          page_reload();
         })
         .then(res => {
           // sys_running = 0;
