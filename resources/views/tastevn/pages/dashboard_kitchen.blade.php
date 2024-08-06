@@ -201,6 +201,10 @@
 
       toggle_header();
 
+      if (notify_realtime) {
+        clearInterval(notify_realtime);
+      }
+
       @if($pageConfigs['sse'])
         var sse_source = new EventSource("{{url('admin/sse/stream/kitchen/' . $pageConfigs['item']->id)}}");
         sse_source.onmessage = function (evt) {
@@ -209,9 +213,6 @@
         }
 
       @else
-        if (notify_realtime) {
-          clearInterval(notify_realtime);
-        }
 
         setInterval(function () {
           sensor_checker();
@@ -223,7 +224,7 @@
     var sys_running = 0;
 
     function sensor_sse(datas) {
-      console.log(datas);
+      // console.log(datas);
 
       var wrap = $('.wrap_sensor_foods');
 

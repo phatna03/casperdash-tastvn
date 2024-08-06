@@ -5,6 +5,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 //lib
@@ -1029,9 +1030,9 @@ class SensorController extends Controller
 
       'item' => $row,
 
-      'sse' => false, //$row->id == 5 ? true : false,
+      'sse' => false, //$row->id == 9 || $row->id == 10 ? true : false,
 
-      'debug' => $debug && $this->_viewer->is_super_admin(),
+      'debug' => $debug, // && $this->_viewer->is_super_admin(),
     ];
 
     return view('tastevn.pages.dashboard_kitchen', ['pageConfigs' => $pageConfigs]);

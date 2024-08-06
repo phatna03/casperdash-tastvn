@@ -2,6 +2,7 @@
 
 namespace App\Api;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
@@ -107,7 +108,7 @@ class SysRobo
 
     if (!$sensor || ($sensor && $sensor->s3_checking)) {
       //time over
-      if ($sensor && $sensor->s3_checking && time() - strtotime($sensor->updated_at) > 60 * 5) {
+      if ($sensor && $sensor->s3_checking && time() - strtotime($sensor->updated_at) > 60 * 2) {
         $sensor->update([
           's3_checking' => 0,
         ]);
