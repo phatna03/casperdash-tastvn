@@ -66,7 +66,7 @@ class TesterController extends Controller
 
     $restaurant = RestaurantParent::find(1);
     $sensor = Restaurant::find(5);
-    $rfs = RestaurantFoodScan::find(71790);
+    $rfs = RestaurantFoodScan::find(78759);
     $date = date('Y-m-d');
     $user = User::find(5);
     $kas = KasWebhook::find(5);

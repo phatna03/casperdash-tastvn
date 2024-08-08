@@ -382,7 +382,7 @@ class SysZalo
             $message .= '+ MAIN NOTE: \n' . $text_note;
 
             if ($noter) {
-              $text_noter = '(last edited by @ ' . $noter->name . ')';
+              $text_noter = '(last edited by @' . $noter->name . ')';
 
               $message .= '\n' . $text_noter;
             }
@@ -508,6 +508,286 @@ class SysZalo
           'access_token: ' . SysZalo::access_token(),
         ];
         $url_api = SysZalo::_URL_API . '/v3.0/oa/message/cs';
+
+        curl_setopt($ch, CURLOPT_URL, $url_api);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $url_header);
+
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $url_params);
+
+        $statusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $result = curl_exec($ch);
+        $datas = (array)json_decode($result);
+
+        curl_close($ch);
+      }
+
+    } catch (\Exception $e) {
+
+      SysCore::log_sys_bug([
+        'type' => 'zalo_' . $type,
+        'line' => $e->getLine(),
+        'file' => $e->getFile(),
+        'message' => $e->getMessage(),
+        'params' => json_encode(array_merge($params, $datas)),
+      ]);
+    }
+
+    if (count($datas) && isset($datas['data'])) {
+      $obj = (array)$datas['data'];
+      if (isset($obj['message_id'])) {
+        $status = 1;
+      }
+    }
+    $params['status'] = $status;
+    $params['params'] = json_encode($params);
+    $params['datas'] = json_encode($datas);
+
+    if ($zalo_log) {
+      ZaloUserSend::create($params);
+    }
+
+    return $datas;
+  }
+
+  public static function send_message_transaction(User $user, $type, RestaurantFoodScan $rfs, $pars = [])
+  {
+    $zaloer = $user ? $user->get_zalo() : NULL;
+
+    $zalo_log = isset($pars['zalo_no_log']) ? (int)$pars['zalo_no_log'] : 1;
+
+    //tester
+//    return false;
+
+    if (!$user || !$rfs || !$zaloer || ($zaloer && empty($zaloer->zalo_user_id))) {
+
+      SysCore::log_sys_bug([
+        'type' => 'zalo_' . $type,
+        'message' => 'Invalid params...',
+        'params' => json_encode(array_merge($pars, [
+          'user_id' => $user ? $user->id : 0,
+          'zaloer_user_id' => $zaloer ? $zaloer->user_id : 0,
+          'rfs_id' => $rfs ? $rfs->id : 0,
+        ])),
+      ]);
+
+      return [];
+    }
+
+    $sensor = $rfs->get_restaurant();
+
+    $img_url = $rfs->photo_1024();
+    if (App::environment() == 'local') {
+      $img_url = SysCore::local_img_url();
+    }
+
+    $params = [
+      'user_id' => $user->id,
+      'zalo_user_id' => $zaloer->zalo_user_id,
+      'type' => $type,
+      'rfs' => $rfs->id,
+      'params' => $pars,
+    ];
+
+    $datas = [];
+    $status = 0;
+
+//    https://developers.zalo.me/docs/official-account/tin-nhan/tin-giao-dich/gui-tin-giao-dich
+//    {"error":-201,"message":"table.content.value cannot exceed 100 characters"}
+
+    try {
+
+      switch ($type) {
+        case 'photo_comment':
+
+          $cmts = $rfs->get_comments();
+          if (!count($cmts)) {
+            break;
+          }
+
+          $btn_url = url('admin/photos/?photo=' . $rfs->id);
+          if (App::environment() == 'local') {
+            $btn_url = 'https://ai.block8910.com/admin/photos?photo=' . $rfs->id;
+          }
+
+          $table_content = '';
+
+          if (!empty($rfs->note)) {
+            $note = $rfs->note;
+            $text_note = preg_replace("/[\n\r]/", "", $note);
+
+            $noter = $rfs->get_noter();
+            if ($noter) {
+              $text_noter = '(last edited by @' . $noter->name . ')';
+
+              $text_note .= '<br>' . $text_noter;
+            }
+
+            $table_content = ',{
+                                "value": "' . $text_note . '",
+                                "key": "MAIN NOTE"
+                            }'
+            ;
+          }
+
+          foreach ($cmts as $cmt) {
+            $time = date('d/m/Y H:i:s', strtotime($cmt->created_at));
+            $text_content = preg_replace("/[\n\r]/", "", $cmt->content);
+
+            $text_content = $time . '<br>' . $text_content;
+
+            $table_content .= ',{
+                                "value": "' . $text_content . '",
+                                "key": "@' . $cmt->owner->name . '"
+                            }'
+            ;
+          }
+
+          $url_params = '{
+    "recipient": {
+        "user_id": "' . $zaloer->zalo_user_id . '"
+    },
+    "message": {
+        "attachment": {
+            "type": "template",
+            "payload": {
+                "template_type": "transaction_event",
+                "language": "EN",
+                "elements": [
+                    {
+                        "image_url": "' . $img_url . '",
+                        "type": "banner"
+                    },
+                    {
+                        "type": "header",
+                        "content": "Restaurant: ' . $sensor->name . '",
+                        "align": "left"
+                    },
+                    {
+                        "type": "text",
+                        "align": "left",
+                        "content": "Photo ID: ' . $rfs->id . ' at ' . date('d/m/Y H:i:s', strtotime($rfs->time_photo)) . '"
+                    },
+                    {
+                        "type": "table",
+                        "content": [
+                            {
+                                "value": "' . $rfs->id . '",
+                                "key": "Code"
+                            }' . $table_content . '
+                        ]
+                    }
+                ],
+                "buttons": [
+                    {
+                        "title": "Go to Website",
+                        "image_icon": "",
+                        "type": "oa.open.url",
+                        "payload": {
+                            "url": "' . $btn_url . '"
+                        }
+                    }
+                ]
+            }
+        }
+    }
+}';
+
+          break;
+
+        case 'ingredient_missing':
+
+          $ingredients_missing_text = '';
+          if (!empty($rfs->missing_texts)) {
+            $temps = array_filter(explode('&nbsp', $rfs->missing_texts));
+            if (count($temps)) {
+              foreach ($temps as $text) {
+                $text = trim($text);
+                if (!empty($text)) {
+                  $ingredients_missing_text .= '- ' . $text . '<br>';
+                }
+              }
+            }
+
+          }
+
+          $btn_url = url('admin/photos/?photo=' . $rfs->id);
+          if (App::environment() == 'local') {
+            $btn_url = 'https://ai.block8910.com/admin/photos?photo=' . $rfs->id;
+          }
+
+          $url_params = '{
+    "recipient": {
+        "user_id": "' . $zaloer->zalo_user_id . '"
+    },
+    "message": {
+        "attachment": {
+            "type": "template",
+            "payload": {
+                "template_type": "transaction_event",
+                "language": "EN",
+                "elements": [
+                    {
+                        "image_url": "' . $img_url . '",
+                        "type": "banner"
+                    },
+                    {
+                        "type": "header",
+                        "content": "Restaurant: ' . $sensor->name . '",
+                        "align": "left"
+                    },
+                    {
+                        "type": "text",
+                        "align": "left",
+                        "content": "Photo ID: ' . $rfs->id . ' at ' . date('d/m/Y H:i:s', strtotime($rfs->time_photo)) . '"
+                    },
+                    {
+                        "type": "table",
+                        "content": [
+                            {
+                                "value": "' . $rfs->id . '",
+                                "key": "Code"
+                            },
+                            {
+                                "value": "' . $ingredients_missing_text . '",
+                                "key": "Please double check"
+                            }
+                        ]
+                    }
+                ],
+                "buttons": [
+                    {
+                        "title": "Go to Website",
+                        "image_icon": "",
+                        "type": "oa.open.url",
+                        "payload": {
+                            "url": "' . $btn_url . '"
+                        }
+                    }
+                ]
+            }
+        }
+    }
+}';
+
+          break;
+
+        default:
+          $url_params = '';
+      }
+
+//    var_dump($url_params);
+//    var_dump((array)json_decode($url_params, true));die;
+
+      if (!empty($url_params)) {
+        $ch = curl_init();
+        $url_header = [
+          'Accept: application/json',
+          'Content-Type: application/json',
+          'access_token: ' . SysZalo::access_token(),
+        ];
+        $url_api = SysZalo::_URL_API . '/v3.0/oa/message/transaction';
 
         curl_setopt($ch, CURLOPT_URL, $url_api);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
