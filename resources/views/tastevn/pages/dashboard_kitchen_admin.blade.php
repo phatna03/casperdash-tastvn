@@ -313,7 +313,7 @@
         var html = '';
         if (datas.ingredients_missing.length) {
           datas.ingredients_missing.forEach(function (v, k) {
-            html += '<div class="text-dark fw-bold fs-1">- <b class="text-dark acm-mr-px-5">' + v.ingredient_quantity + '</b> ' + v.name + '</div>';
+            html += '<div class="text-dark fw-bold fs-1">- <b class="text-dark acm-mr-px-5">' + v.quantity + '</b> ' + v.name + '</div>';
           });
         }
         if (html && html != '') {

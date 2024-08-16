@@ -1068,7 +1068,7 @@ class SensorController extends Controller
 
     //tester
     if ($this->_viewer->is_dev()) {
-//      $rfs = RestaurantFoodScan::find(64760);
+//      $rfs = RestaurantFoodScan::find(84965);
     }
 
     $datas = $rfs ? $this->kitchen_food_datas($rfs) : [];
