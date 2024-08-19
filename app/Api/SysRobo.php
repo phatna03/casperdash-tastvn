@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Api;
+use App\Models\FoodIngredient;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -386,10 +387,6 @@ class SysRobo
                   //find category
                   $food = Food::find($foods['food']);
 
-                  $food_category = $food->get_category([
-                    'restaurant_parent_id' => $sensor->restaurant_parent_id,
-                  ]);
-
                   //find ingredients found
                   $ingredients_found = SysRobo::ingredients_found($food, [
                     'predictions' => $predictions,
@@ -413,6 +410,10 @@ class SysRobo
                     Storage::append($file_log, 'FILE= INGRDEIENT MISSING ' . count($ingredients_missing));
 
                     $no_food = false;
+
+                    $food_category = $food->get_category([
+                      'restaurant_parent_id' => $sensor->restaurant_parent_id,
+                    ]);
 
                     $rfs->update([
                       'status' => 'checked',
@@ -1196,6 +1197,7 @@ class SysRobo
       $item = RestaurantFood::query('restaurant_foods')
         ->select('foods.id')
         ->leftJoin('foods', 'foods.id', '=', 'restaurant_foods.food_id') //serve
+        ->where('restaurant_parent_id', $restaurant_parent_id)
         ->where('foods.deleted', 0)
         ->where('restaurant_foods.deleted', 0)
         ->where('restaurant_foods.confidence', '<=', $confidence) //confidence
@@ -1212,9 +1214,10 @@ class SysRobo
 
         //check ingredient valid
         $valid_food = true;
-        $food_ingredients = $food->get_ingredients([
-          'restaurant_parent_id' => $restaurant_parent_id,
-        ]);
+        $food_ingredients = FoodIngredient::where('deleted', 0)
+          ->where('food_id', $food->id)
+          ->where('restaurant_parent_id', $restaurant_parent_id)
+          ->count();
         if (!count($food_ingredients)) {
           $valid_food = false;
         }

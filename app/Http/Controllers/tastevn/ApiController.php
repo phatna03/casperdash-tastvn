@@ -60,6 +60,8 @@ class ApiController extends Controller
         ->limit(10)
         ->get()
         ->toArray();
+
+      $status = true;
     }
 
     return response()->json([
