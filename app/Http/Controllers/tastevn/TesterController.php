@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\tastevn;
 use App\Http\Controllers\Controller;
-use App\Models\ZaloUserSend;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
@@ -27,6 +26,7 @@ use Aws\S3\S3Client;
 use App\Api\SysApp;
 use App\Api\SysAws;
 use App\Api\SysCore;
+use App\Api\SysDev;
 use App\Api\SysRobo;
 use App\Api\SysZalo;
 
@@ -50,6 +50,7 @@ use App\Models\KasWebhook;
 use App\Models\ReportPhoto;
 use App\Models\ReportFood;
 use App\Models\ZaloUser;
+use App\Models\ZaloUserSend;
 
 use Zalo\Zalo;
 use Zalo\Builder\MessageBuilder;
@@ -74,12 +75,7 @@ class TesterController extends Controller
     //=======================================================================================
     //=======================================================================================
 
-//    SysAws::s3_polly([
-//      'text_to_speak' => 'hi have a nice day',
-//      'text_rate' => 'slow',
-//
-//      'tester' => 1,
-//    ]);
+
 
     //=======================================================================================
     //=======================================================================================
@@ -236,7 +232,7 @@ class TesterController extends Controller
 //    ]);
 //    $this->checked_notify_remove();
 //    $this->checked_food_category_update();
-    $this->checked_zalo_user_get();
+//    $this->checked_zalo_user_get();
 //    $this->kas_time_sheet([
 //      'date_from' => '2024-07-20',
 //      'date_to' => '2024-07-29',

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\tastevn;
 use App\Http\Controllers\Controller;
+use App\Models\RestaurantFoodScan;
 use Illuminate\Http\Request;
 //excel
 use Maatwebsite\Excel\Facades\Excel;
@@ -16,6 +17,58 @@ use App\Models\KasWebhook;
 class ApiController extends Controller
 {
 
+  //dev
+  public function rfs_check(Request $request)
+  {
+    $values = $request->post();
+
+    $status = false;
+    $datas = [];
+
+    $ids = isset($values['ids']) && !empty($values['ids']) ? (array)$values['ids'] : [];
+    if (count($ids)) {
+
+      $datas = RestaurantFoodScan::where('deleted', 0)
+        ->whereIn('id', $ids)
+        ->select('id', 'local_storage', 'photo_url')
+        ->get()
+        ->toArray();
+
+      $status = true;
+    }
+
+    return response()->json([
+      'status' => $status,
+      'datas' => $datas,
+      'ids' => $ids,
+    ]);
+  }
+
+  public function rfs_get(Request $request)
+  {
+    $values = $request->post();
+
+    $status = false;
+    $datas = [];
+
+    $min_id = isset($values['min_id']) && !empty($values['min_id']) ? (int)$values['min_id'] : 0;
+    if ($min_id) {
+
+      $datas = RestaurantFoodScan::where('id', '>', $min_id)
+        ->whereNotIn('status', ['new', 'scanned'])
+        ->orderBy('id', 'asc')
+        ->limit(10)
+        ->get()
+        ->toArray();
+    }
+
+    return response()->json([
+      'status' => $status,
+      'datas' => $datas,
+    ]);
+  }
+
+  //hop
   public function food_ingredient(Request $request)
   {
     $values = $request->all();
@@ -213,6 +266,7 @@ class ApiController extends Controller
     ]);
   }
 
+  //kas
   public function kas_cart_info(Request $request)
   {
     $values = $request->post();

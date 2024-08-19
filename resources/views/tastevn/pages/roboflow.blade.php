@@ -207,6 +207,10 @@
       formData.append('_token', acmcfs.var_csrf);
       // formData.append('dataset', form.find('input[name=dataset]').val());
 
+      @if((int)$pageConfigs['img_1024'])
+      formData.append('img_1024', 1);
+      @endif
+
       // Read selected files
       if (form.find('#img_roboflow')[0].files.length) {
         formData.append('image[]', form.find('#img_roboflow')[0].files[0]);

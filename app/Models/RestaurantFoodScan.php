@@ -441,7 +441,7 @@ class RestaurantFoodScan extends Model
     Storage::append($file_log, 'FILE= CREATE 1024');
 
     //img_1024
-    $img_url = $this->photo_1024();
+    $img_url = $this->get_photo(); //$this->photo_1024();
 
     //time_scan
     if (empty($this->time_scan)) {

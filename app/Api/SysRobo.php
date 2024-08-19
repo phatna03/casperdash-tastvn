@@ -285,7 +285,7 @@ class SysRobo
             Storage::append($file_log, 'FILE= CREATE 1024');
 
             //img_1024
-            $img_url = $rfs->photo_1024_create();
+            $img_url = $rfs->get_photo(); //$rfs->photo_1024_create();
 
             //robot scan start
             Storage::append($file_log, '*************************************************************************'

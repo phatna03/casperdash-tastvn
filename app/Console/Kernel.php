@@ -68,43 +68,6 @@ class Kernel extends ConsoleKernel
 //      ->everySecond()
 //      ->runInBackground();
 
-    //every 1s
-//    web:photo-scan
-//    $schedule->command('web:photo-scan', [1, 1])
-//      ->withoutOverlapping()
-//      ->everySecond()
-//      ->runInBackground();
-//    $schedule->command('web:photo-scan', [1, 2])
-//      ->withoutOverlapping()
-//      ->everySecond()
-//      ->runInBackground();
-//
-//    $schedule->command('web:photo-scan', [1, 3])
-//      ->withoutOverlapping()
-//      ->everySecond()
-//      ->runInBackground();
-//    $schedule->command('web:photo-scan', [1, 4])
-//      ->withoutOverlapping()
-//      ->everySecond()
-//      ->runInBackground();
-//
-//    $schedule->command('web:photo-scan', [1, 5])
-//      ->withoutOverlapping()
-//      ->everySecond()
-//      ->runInBackground();
-//    $schedule->command('web:photo-scan', [1, 6])
-//      ->withoutOverlapping()
-//      ->everySecond()
-//      ->runInBackground();
-//    $schedule->command('web:photo-scan', [1, 7])
-//      ->withoutOverlapping()
-//      ->everySecond()
-//      ->runInBackground();
-//    $schedule->command('web:photo-scan', [1, 8])
-//      ->withoutOverlapping()
-//      ->everySecond()
-//      ->runInBackground();
-
     //every 5s
 //    web:photo-notify
     $schedule->command('web:photo-notify')
@@ -119,10 +82,10 @@ class Kernel extends ConsoleKernel
       ->withoutOverlapping()
       ->runInBackground();
 
-    //every 2h
+    //daily at 1am
 //    web:photo-sync
     $schedule->command('web:photo-sync')
-      ->everyTwoHours()
+      ->dailyAt('01:00')
       ->withoutOverlapping()
       ->runInBackground();
 

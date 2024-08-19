@@ -47,6 +47,7 @@ class RoboflowController extends Controller
     }
 
     $debug = isset($values['debug']) ? (int)$values['debug'] : 0;
+    $img_1024 = isset($values['img_1024']) ? (int)$values['img_1024'] : 0;
 
     $food = Food::where('deleted', 0)
       ->orderByDesc('id')
@@ -57,7 +58,8 @@ class RoboflowController extends Controller
       'myLayout' => 'horizontal',
       'hasCustomizer' => false,
 
-      'debug' => $debug
+      'img_1024' => $img_1024,
+      'debug' => $debug,
     ];
 
     $this->_viewer->add_log([
@@ -91,6 +93,7 @@ class RoboflowController extends Controller
     $overlap = isset($values['overlap']) ? $values['overlap'] : SysRobo::_RBF_OVERLAP;
     $max_objects = isset($values['max_objects']) ? $values['max_objects'] : SysRobo::_RBF_MAX_OBJECTS;
     $debug = isset($values['debug']) ? (bool)$values['debug'] : false;
+    $img_1024 = isset($values['img_1024']) ? (int)$values['img_1024'] : 0;
 
     $status = false;
     $datas = [];
@@ -120,8 +123,12 @@ class RoboflowController extends Controller
 
         //roboflow
         $img_url = "https://s3.ap-southeast-1.amazonaws.com/cargo.tastevietnam.asia/58-5b-69-19-ad-83/SENSOR/1/2024-07-08/19/SENSOR_2024-07-08-19-47-41-791_847.jpg";
-        if (App::environment() == 'production') {
+        if (App::environment() != 'local') {
           $img_url = url($img_path) . '/' . $photo_name;
+        }
+
+        if ($img_1024) {
+          $img_url = SysRobo::photo_1024($img_url);
         }
 
         $datas = SysRobo::photo_scan([
@@ -189,6 +196,7 @@ class RoboflowController extends Controller
     return response()->json([
       'status' => $status,
 
+      'img_1024' => $img_1024,
       'img_url' => $img_url,
       'datas' => $datas,
 
