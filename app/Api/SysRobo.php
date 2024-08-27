@@ -384,7 +384,7 @@ class SysRobo
                     . 'STEP_09_' . date('Y_m_d_H_i_s') . '_' . SysCore::time_to_ms());
                   Storage::append($file_log, 'FILE= FOOD FOUND');
 
-                  //find category
+                  //valid food
                   $food = Food::find($foods['food']);
 
                   //find ingredients found
@@ -411,6 +411,7 @@ class SysRobo
 
                     $no_food = false;
 
+                    //find category
                     $food_category = $food->get_category([
                       'restaurant_parent_id' => $sensor->restaurant_parent_id,
                     ]);
@@ -1175,6 +1176,11 @@ class SysRobo
     $foods = [];
     $restaurant_parent_id = isset($pars['restaurant_parent_id']) ? (int)$pars['restaurant_parent_id'] : 0;
 
+    if ($debug) {
+      var_dump('<br />');
+      var_dump('sensor: ' . $restaurant_parent_id);
+    }
+
     $predictions = isset($pars['predictions']) ? (array)$pars['predictions'] : [];
     if (!count($predictions)) {
 
@@ -1218,7 +1224,7 @@ class SysRobo
           ->where('food_id', $food->id)
           ->where('restaurant_parent_id', $restaurant_parent_id)
           ->count();
-        if (!count($food_ingredients)) {
+        if (!$food_ingredients) {
           $valid_food = false;
         }
 
@@ -1241,6 +1247,7 @@ class SysRobo
         }
 
         if ($debug) {
+          var_dump('ingredient count = ' . $food_ingredients);
           var_dump('ingredient valid = ' . $valid_food);
           var_dump('ingredient core = ' . $valid_core);
         }

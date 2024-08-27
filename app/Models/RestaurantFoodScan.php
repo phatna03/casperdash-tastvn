@@ -124,6 +124,12 @@ class RestaurantFoodScan extends Model
       $photo = url('sensors') . '/' . $this->photo_name;
     }
 
+    if (App::environment() == 'development') {
+      if ($this->local_storage && date('Y-m-d', strtotime($this->created_at)) == date('Y-m-d')) {
+        $photo = 'https://ai.block8910.com/sensors/' . $this->photo_name;
+      }
+    }
+
     return $photo;
   }
 

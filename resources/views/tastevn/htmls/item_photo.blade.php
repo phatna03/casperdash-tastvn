@@ -24,6 +24,10 @@ $count_comment = $item->count_comments();
     </a>
 
     <div class="card-body p-1 clearfix position-relative">
+      <div class="clearfix mb-2 mt-1 d-none">
+        <div>{{$devMode}}</div>
+        <div>{{date('Y-m-d', strtotime($item->created_at))}}</div>
+      </div>
       <div class="clearfix mb-2 mt-1">
         <div class="acm-fs-15 fw-bold text-dark">{{$item->restaurant_name}}</div>
       </div>

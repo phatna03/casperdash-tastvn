@@ -61,7 +61,7 @@ class PhotoController extends Controller
     $keyword = isset($values['keyword']) && !empty($values['keyword']) ? trim($values['keyword']) : NULL;
 
     $select = RestaurantFoodScan::query('restaurant_food_scans')
-      ->select('restaurant_food_scans.id',
+      ->select('restaurant_food_scans.id', 'restaurant_food_scans.created_at',
         'restaurant_food_scans.photo_url', 'restaurant_food_scans.photo_name', 'restaurant_food_scans.local_storage',
         'restaurant_food_scans.time_photo', 'restaurants.name as restaurant_name')
       ->leftJoin('restaurants', 'restaurant_food_scans.restaurant_id', '=', 'restaurants.id')

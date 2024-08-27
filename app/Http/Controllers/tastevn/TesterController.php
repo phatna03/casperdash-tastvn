@@ -67,10 +67,12 @@ class TesterController extends Controller
 
     $restaurant = RestaurantParent::find(1);
     $sensor = Restaurant::find(5);
-    $rfs = RestaurantFoodScan::find(78759);
+    $rfs = RestaurantFoodScan::find(90748);
     $date = date('Y-m-d');
     $user = User::find(5);
     $kas = KasWebhook::find(5);
+    $debug = true;
+    $food = Food::find(29);
 
     //=======================================================================================
     //=======================================================================================
@@ -995,6 +997,17 @@ class TesterController extends Controller
       var_dump('SYNCED= ' . $count_ok);
 
     }
+  }
+
+  //file
+  protected function file_save($file, $content)
+  {
+
+  }
+
+  protected function file_read($file)
+  {
+
   }
 
   //kas
