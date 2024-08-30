@@ -4457,24 +4457,42 @@ function kas_date_check(ele) {
   });
 }
 
-function kas_date_check_restaurant(restaurant, date) {
+function kas_date_check_restaurant(itd, date) {
+  var table = $('#table_checker');
+
+  table.find('.td_restaurant_' + itd + ' button').addClass('d-none');
 
   axios.post('/admin/kas/date/check', {
     date: date,
-    restaurant: restaurant,
+    restaurant: itd,
   })
     .then(response => {
-      var table = $('#table_checker');
-      var html = '';
 
-      if (response.data.items.length) {
-        response.data.items.forEach(function (v, k) {
+      table.find('.td_restaurant_' + itd + ' button .total_orders').text(response.data.total_orders);
+      table.find('.td_restaurant_' + itd + ' button .total_photos').text(response.data.total_photos);
 
-        });
+      if (response.data.total_orders || response.data.total_photos) {
+        table.find('.td_restaurant_' + itd + ' button').removeClass('d-none');
       }
 
-      table.find('.td_restaurant_' + restaurant).empty()
-        .append(html);
+    })
+    .catch(error => {
+      console.log(error);
+    });
+
+  return false;
+}
+
+function kas_date_check_restaurant_data(itd) {
+  var date = $('#kas-date-check').val();
+
+  axios.post('/admin/kas/date/check/restaurant', {
+    date: date,
+    restaurant: itd,
+  })
+    .then(response => {
+
+
 
     })
     .catch(error => {

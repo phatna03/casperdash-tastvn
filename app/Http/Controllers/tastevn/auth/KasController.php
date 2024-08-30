@@ -337,7 +337,7 @@ class KasController extends Controller
     //required
     $validator = Validator::make($values, [
       'date' => 'required|string',
-      'restaurant' => 'required|string',
+      'restaurant' => 'required',
     ]);
     if ($validator->fails()) {
       return response()->json($validator->errors(), 422);
@@ -383,4 +383,22 @@ class KasController extends Controller
     ]);
   }
 
+  public function date_check_restaurant(Request $request)
+  {
+    $values = $request->post();
+
+    //required
+    $validator = Validator::make($values, [
+      'date' => 'required|string',
+      'restaurant' => 'required',
+    ]);
+    if ($validator->fails()) {
+      return response()->json($validator->errors(), 422);
+    }
+
+    return response()->json([
+      'status' => true,
+
+    ]);
+  }
 }
