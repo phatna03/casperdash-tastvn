@@ -351,14 +351,6 @@ class KasController extends Controller
       ->where('restaurant_parent_id', $restaurant_parent->id)
       ->where('deleted', 0);
 
-//    $select = RestaurantFoodScan::query()
-//      ->distinct()
-//      ->selectRaw('HOUR(created_at) as hour')
-//      ->where('deleted', 0)
-//      ->whereDate('created_at', $date)
-//      ->whereIn('restaurant_id', $select_sensors)
-//      ->orderBy('hour', 'asc');
-
     $total_photos = RestaurantFoodScan::where('deleted', 0)
       ->whereDate('created_at', $date)
       ->whereIn('restaurant_id', $select_sensors)
@@ -374,12 +366,9 @@ class KasController extends Controller
     return response()->json([
       'status' => true,
       'date' => $date,
-//      'query' => SysCore::str_db_query($select),
-//      'items' => $select->get(),
 
       'total_orders' => $total_orders,
       'total_photos' => $total_photos,
-
     ]);
   }
 
@@ -396,9 +385,47 @@ class KasController extends Controller
       return response()->json($validator->errors(), 422);
     }
 
+    $temps = array_filter(explode('/', $values['date']));
+    $date = $temps[2] . '-' . $temps[1] . '-' . $temps[0];
+
+    $restaurant_parent = RestaurantParent::find((int)$values['restaurant']);
+    $select_sensors = Restaurant::select('id')
+      ->where('restaurant_parent_id', $restaurant_parent->id)
+      ->where('deleted', 0);
+
+    $select = RestaurantFoodScan::query()
+      ->distinct()
+      ->selectRaw('HOUR(created_at) as hour')
+      ->where('deleted', 0)
+      ->whereDate('created_at', $date)
+      ->whereIn('restaurant_id', $select_sensors)
+      ->orderBy('hour', 'asc');
+
     return response()->json([
       'status' => true,
 
+      'query' => SysCore::str_db_query($select),
+      'items' => $select->get(),
+    ]);
+  }
+
+  public function date_check_month(Request $request)
+  {
+    $values = $request->post();
+
+    //required
+    $validator = Validator::make($values, [
+      'month' => 'required',
+      'year' => 'required',
+    ]);
+    if ($validator->fails()) {
+      return response()->json($validator->errors(), 422);
+    }
+
+    return response()->json([
+      'status' => true,
+
+      'values' => $values,
     ]);
   }
 }

@@ -4456,7 +4456,6 @@ function kas_date_check(ele) {
     kas_date_check_restaurant(itd, date);
   });
 }
-
 function kas_date_check_restaurant(itd, date) {
   var table = $('#table_checker');
 
@@ -4482,7 +4481,6 @@ function kas_date_check_restaurant(itd, date) {
 
   return false;
 }
-
 function kas_date_check_restaurant_data(itd) {
   var date = $('#kas-date-check').val();
 
@@ -4501,3 +4499,32 @@ function kas_date_check_restaurant_data(itd) {
 
   return false;
 }
+function kas_date_check_search(evt, frm) {
+  var form = $(frm);
+  form_loading(form);
+
+  axios.post('/admin/kas/date/check/month', {
+    month: form.find('select[name=month]').val(),
+    year: form.find('select[name=year]').val(),
+  })
+    .then(response => {
+
+
+
+    })
+    .catch(error => {
+      console.log(error);
+      if (error.response.data && Object.values(error.response.data).length) {
+        Object.values(error.response.data).forEach(function (v, k) {
+          message_from_toast('error', acmcfs.message_title_error, v);
+        });
+      }
+    })
+    .then(() => {
+      //end
+      form_loading(form, false);
+    });
+
+  return false;
+}
+
