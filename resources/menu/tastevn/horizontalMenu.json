@@ -50,6 +50,12 @@
           "slug": "admin-foods"
         },
         {
+          "url": "admin/kas/foods",
+          "name": "KAS Dishes",
+          "icon": "menu-icon tf-icons mdi mdi-food",
+          "slug": "admin-kas-foods"
+        },
+        {
           "url": "admin/restaurant/foods",
           "name": "Dishes Checker",
           "icon": "menu-icon tf-icons mdi mdi-compare",

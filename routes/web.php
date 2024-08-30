@@ -193,6 +193,7 @@ use App\Http\Controllers\tastevn\auth\CommentController;
 use App\Http\Controllers\tastevn\auth\FoodController;
 use App\Http\Controllers\tastevn\auth\RoboflowController;
 use App\Http\Controllers\tastevn\auth\ReportController;
+use App\Http\Controllers\tastevn\auth\KasController;
 
 //apix
 Route::get('/export/food/ingredients', [ApiController::class, 'food_ingredient']);
@@ -316,6 +317,9 @@ Route::post('/admin/photo/view', [PhotoController::class, 'view']);
 Route::post('/admin/photo/note/get', [PhotoController::class, 'note_get']);
 //comment
 Route::post('/admin/comment/note', [CommentController::class, 'note']);
+//kas
+Route::get('/admin/kas/foods', [KasController::class, 'index']);
+Route::post('/admin/kas/food/get', [KasController::class, 'food_get']);
 //food
 Route::get('/admin/foods', [FoodController::class, 'index']);
 Route::post('/admin/food/get', [FoodController::class, 'get']);
@@ -884,6 +888,31 @@ Route::get('/datatable/foods', function (Request $request) {
   if (count($values)) {
     if (isset($values['name']) && !empty($values['name'])) {
       $select->where('name', 'LIKE', '%' . $values['name'] . '%');
+    }
+  }
+
+  return DataTables::of($select)->addIndexColumn()->toJson();
+});
+Route::get('/datatable/kas/foods', function (Request $request) {
+  $values = $request->all();
+
+  $order_default = true;
+  if (isset($values['order']) && count($values['order']) && isset($values['order'][0])) {
+    if (isset($values['order'][0]['column']) && (int)$values['order'][0]['column']) {
+      $order_default = false;
+    }
+  }
+
+  $select = App\Models\KasItem::query();
+
+  if ($order_default) {
+    $select->orderBy('updated_at', 'desc')
+      ->orderBy('id', 'desc');
+  }
+
+  if (count($values)) {
+    if (isset($values['name']) && !empty($values['name'])) {
+      $select->where('item_name', 'LIKE', '%' . $values['name'] . '%');
     }
   }
 

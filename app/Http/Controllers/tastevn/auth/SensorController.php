@@ -1215,7 +1215,7 @@ class SensorController extends Controller
 
         case 2:
 
-          if ($row->confidence < 85 || !count($ingredients_found)) {
+          if ($row->confidence < 65 || !count($ingredients_found)) {
             $food_id = 0;
             $food_name = '';
             $food_photo = '';

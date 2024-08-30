@@ -443,7 +443,7 @@ class ReportController extends Controller
     //predictions
     $apid = (array)json_decode($rfs->rbf_api, true);
     if (count($apid)) {
-      $rbf_predictions = $apid['predictions'];
+      $rbf_predictions = $apid['result']['predictions'];
     }
     //model2
     if ($rfs->rbf_model) {

@@ -4363,3 +4363,44 @@ function mobi_photo_cmt(evt, frm) {
 
   return false;
 }
+//kas
+function kas_food_sync() {
+  var popup = $('#modal_sync_confirm');
+
+  popup.modal('show');
+}
+function kas_food_sync_confirm() {
+  var popup = $('#modal_sync_confirm');
+  form_loading(popup);
+
+  axios.post('/admin/comment/note', {
+    object_id: form.find('input[name=item]').val(),
+    object_type: 'restaurant_food_scan',
+    content: form.find('textarea[name=note]').val(),
+    customer_requested: customer_requested,
+    food_multi: food_multi,
+    food_count: input_number_only(food_count),
+  })
+    .then(response => {
+
+      message_from_toast('success', acmcfs.message_title_success, acmcfs.message_description_success_add, true);
+
+      form_loading(form, false);
+      form_close(popup);
+    })
+    .catch(error => {
+      if (error.response.data && Object.values(error.response.data).length) {
+        Object.values(error.response.data).forEach(function (v, k) {
+          message_from_toast('error', acmcfs.message_title_error, v);
+        });
+      }
+    })
+    .then(() => {
+      //end
+      form_loading(popup, false);
+      form_close(popup);
+    });
+
+  return false;
+}
+
