@@ -54,7 +54,7 @@
           <div class="wrap-btns">
             @include('tastevn.htmls.form_button_loading')
             <button type="button" class="btn btn-primary btn-ok btn-submit acm-float-right" onclick="kas_food_sync_confirm()">Confirm</button>
-            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-outline-secondary btn-cancel" data-bs-dismiss="modal">Cancel</button>
           </div>
         </div>
       </div>
