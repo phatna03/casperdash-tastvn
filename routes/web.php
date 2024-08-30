@@ -319,6 +319,7 @@ Route::post('/admin/photo/note/get', [PhotoController::class, 'note_get']);
 Route::post('/admin/comment/note', [CommentController::class, 'note']);
 //kas
 Route::get('/admin/kas/foods', [KasController::class, 'index']);
+Route::post('/admin/kas/food/item', [KasController::class, 'food_item']);
 Route::post('/admin/kas/food/get', [KasController::class, 'food_get']);
 //food
 Route::get('/admin/foods', [FoodController::class, 'index']);

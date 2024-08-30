@@ -88,7 +88,7 @@ class TesterController extends Controller
 //    var_dump($datas);
 
 //    $this->kas_sync();
-//    $this->kas_food();
+    $this->kas_food();
 
 //    $apid = (array)json_decode($rfs->rbf_api, true);
 //    var_dump($apid);
@@ -1197,6 +1197,14 @@ class TesterController extends Controller
 
         if ($food1) {
           var_dump('FOOD_1= ' . $food1->id . ' - ' . $food1->name);
+
+          $row->update([
+            'web_food_id' => $food1->id,
+            'web_food_name' => $food1->name,
+
+            'food_id' => $food1->id,
+            'food_name' => $food1->name,
+          ]);
         }
         else {
           $food2 = 0;
@@ -1220,10 +1228,16 @@ class TesterController extends Controller
 
           if ($food2) {
             var_dump('FOOD_2= ' . $food2->id . ' - ' . $food2->name);
+
+            $row->update([
+              'web_food_id' => $food2->id,
+              'web_food_name' => $food2->name,
+
+              'food_id' => $food2->id,
+              'food_name' => $food2->name,
+            ]);
           }
         }
-
-
       }
     }
   }

@@ -52,7 +52,7 @@
         {
           "url": "admin/kas/foods",
           "name": "KAS Dishes",
-          "icon": "menu-icon tf-icons mdi mdi-food",
+          "icon": "menu-icon tf-icons mdi mdi-food-outline",
           "slug": "admin-kas-foods"
         },
         {

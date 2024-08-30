@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\DB;
 //lib
 use Validator;
 use App\Api\SysApp;
+use App\Api\SysCore;
 use App\Excel\ImportData;
 //model
 use App\Models\Food;
@@ -207,6 +208,96 @@ class KasController extends Controller
         ]);
       }
     }
+
+    $rows = KasItem::all();
+    if (count($rows)) {
+
+      $foods = Food::where('deleted', 0)
+        ->get();
+
+      foreach ($rows as $row) {
+
+        $food1 = 0;
+        foreach ($foods as $food) {
+          if (mb_strtolower($row->item_name) == mb_strtolower($food->name)) {
+            $food1 = $food;
+
+            break;
+          }
+        }
+
+        if ($food1) {
+          $row->update([
+            'web_food_id' => $food1->id,
+            'web_food_name' => $food1->name,
+
+            'food_id' => $food1->id,
+            'food_name' => $food1->name,
+          ]);
+        }
+        else {
+          $food2 = 0;
+          foreach ($foods as $food) {
+            $temps = array_filter(explode('-', $food->name));
+
+            if (count($temps)) {
+              foreach ($temps as $temp_text) {
+                if ($food2) {
+                  break;
+                }
+
+                if (mb_strtolower($row->item_name) == mb_strtolower($temp_text)) {
+                  $food2 = $food;
+
+                  break;
+                }
+              }
+            }
+          }
+
+          if ($food2) {
+            $row->update([
+              'web_food_id' => $food2->id,
+              'web_food_name' => $food2->name,
+
+              'food_id' => $food2->id,
+              'food_name' => $food2->name,
+            ]);
+          }
+        }
+      }
+    }
+
+    return response()->json([
+      'status' => true,
+    ]);
+  }
+
+  public function food_item(Request $request)
+  {
+    $values = $request->post();
+
+    //required
+    $validator = Validator::make($values, [
+      'item' => 'required|string',
+      'food' => 'required|string',
+    ]);
+    if ($validator->fails()) {
+      return response()->json($validator->errors(), 422);
+    }
+
+    $row = KasItem::find((int)$values['item']);
+    $food = Food::find((int)$values['food']);
+    if (!$row || !$food) {
+      return response()->json([
+        'error' => 'Invalid item'
+      ], 422);
+    }
+
+    $row->update([
+      'food_id' => $food->id,
+      'food_name' => $food->name,
+    ]);
 
     return response()->json([
       'status' => true,

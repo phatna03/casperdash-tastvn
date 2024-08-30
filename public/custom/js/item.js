@@ -4399,4 +4399,43 @@ function kas_food_sync_confirm() {
 
   return false;
 }
+function kas_food(itd) {
+  var popup = $('#modal_sync_food');
 
+  popup.find('input[name=item]').val(itd);
+  popup.find('form select').selectize()[0].selectize.setValue('');
+
+  popup.modal('show');
+}
+function kas_food_confirm(evt, frm) {
+  var popup = $('#modal_sync_food');
+  var form = $(frm);
+  form_loading(form);
+
+  axios.post('/admin/kas/food/item', {
+    item: form.find('input[name=item]').val(),
+    food: form.find('select[name=food]').val(),
+  })
+    .then(response => {
+
+      message_from_toast('success', acmcfs.message_title_success, acmcfs.message_description_success_add, true);
+
+      datatable_refresh();
+
+    })
+    .catch(error => {
+      console.log(error);
+      if (error.response.data && Object.values(error.response.data).length) {
+        Object.values(error.response.data).forEach(function (v, k) {
+          message_from_toast('error', acmcfs.message_title_error, v);
+        });
+      }
+    })
+    .then(() => {
+      //end
+      form_loading(form, false);
+      form_close(popup);
+    });
+
+  return false;
+}

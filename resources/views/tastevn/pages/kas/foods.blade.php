@@ -26,16 +26,17 @@
         <thead class="table-light">
         <tr>
           <th></th>
-          <th>Name</th>
+          <th>KAS Food</th>
+          <th>System Found</th>
+          <th>Valid Dish</th>
           <th>Latest updated</th>
-          <th></th>
         </tr>
         </thead>
       </table>
     </div>
   </div>
 
-{{--  sync confirm  --}}
+  {{--  sync confirm  --}}
   <div class="modal animate__animated animate__rollIn" id="modal_sync_confirm" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
       <div class="modal-content">
@@ -60,6 +61,40 @@
       </div>
     </div>
   </div>
+  {{--  sync food  --}}
+  <div class="modal animate__animated animate__rollIn" id="modal_sync_food" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title">Valid Food</h4>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form onsubmit="return kas_food_confirm(event, this);">
+          <div class="modal-body">
+            <div class="form-floating form-floating-outline">
+              <div class="form-control acm-wrap-selectize" id="sync-update-food">
+                <select class="ajx_selectize" name="food"
+                        data-value="food" required
+                        data-placeholder="dish name..."
+                ></select>
+              </div>
+              <label for="sync-update-food" class="text-danger">Select Dish Valid</label>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <div class="wrap-btns">
+              @include('tastevn.htmls.form_button_loading')
+              <button type="submit" class="btn btn-primary btn-ok btn-submit acm-float-right">Confirm</button>
+              <button type="button" class="btn btn-outline-secondary btn-cancel" data-bs-dismiss="modal">Cancel</button>
+            </div>
+          </div>
+
+          <input type="hidden" name="item" />
+        </form>
+      </div>
+    </div>
+  </div>
+
 @endsection
 
 @section('js_end')
@@ -83,6 +118,8 @@
         //stt
         {data: 'DT_RowIndex', name: 'DT_RowIndex' , orderable: false, searchable: false},
         {data: 'name', name: 'item_name'},
+        {data: null},
+        {data: null},
         {data: 'updated_at', name: 'updated_at'}
       ],
       columnDefs: [
@@ -98,6 +135,32 @@
         },
         {
           targets: 2,
+          render: function (data, type, full, meta) {
+            var html = '';
+
+            if (full['web_food_id']) {
+              html = '<span>' + full['web_food_name'] + '</span>';
+            }
+
+            return ('<div>' + html + '</div>');
+          }
+        },
+        {
+          targets: 3,
+          render: function (data, type, full, meta) {
+            var html = '';
+
+            html = '<button type="button" onclick="kas_food(' + full['id'] + ')" class="btn btn-sm btn-info p-1 acm-mr-px-5"><i class="mdi mdi-pencil"></i></button>';
+
+            if (full['food_id']) {
+              html += '<span>' + full['food_name'] + '</span>';
+            }
+
+            return ('<div>' + html + '</div>');
+          }
+        },
+        {
+          targets: 4,
           render: $.fn.dataTable.render.moment('YYYY-MM-DDTHH:mm:ss.SSSSZ', 'DD/MM/YY HH:mm:ss' )
         },
       ],

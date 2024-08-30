@@ -19,5 +19,8 @@ class KasItem extends Model
 
     'web_food_id',
     'web_food_name',
+
+    'food_id',
+    'food_name',
   ];
 }

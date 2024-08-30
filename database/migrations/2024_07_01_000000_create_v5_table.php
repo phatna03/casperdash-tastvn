@@ -30,6 +30,8 @@ return new class extends Migration {
         $table->string('item_name');
         $table->bigInteger('web_food_id')->default(0);
         $table->string('web_food_name')->nullable();
+        $table->bigInteger('food_id')->default(0);
+        $table->string('food_name')->nullable();
         $table->timestamps();
       });
     }

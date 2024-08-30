@@ -437,6 +437,15 @@ class FoodController extends Controller
         'keyword' => $keyword,
         'select_data' => 'food_only',
       ]);
+    } else {
+      $select = Food::select('id', 'name')
+        ->orderByRaw('TRIM(LOWER(name))');
+
+      if (!empty($keyword)) {
+        $select->where('name', 'LIKE', "%{$keyword}%");
+      }
+
+      $items = $select->get();
     }
 
     return count($items) ? $items->toArray() : [];
