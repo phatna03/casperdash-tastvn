@@ -4439,3 +4439,25 @@ function kas_food_confirm(evt, frm) {
 
   return false;
 }
+function kas_date_check(ele) {
+  var bind = $(ele);
+  var date = bind.val();
+
+  if (!date || date == '') {
+    return false;
+  }
+
+  axios.post('/admin/kas/date/check', {
+    date: date
+  })
+    .then(response => {
+
+
+
+    })
+    .catch(error => {
+      console.log(error);
+    });
+
+  return false;
+}

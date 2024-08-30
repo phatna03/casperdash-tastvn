@@ -847,6 +847,10 @@
   text-align: center;
 }
 
+.table-layout-fixed {
+  table-layout: fixed;
+}
+
 /*modal 2*/
 .layout-navbar-fixed body:not(.modal-open) .layout-navbar-full .layout-navbar,
 .layout-menu-fixed body:not(.modal-open) .layout-navbar-full .layout-navbar,

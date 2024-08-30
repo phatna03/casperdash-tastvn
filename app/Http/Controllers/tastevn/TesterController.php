@@ -88,7 +88,7 @@ class TesterController extends Controller
 //    var_dump($datas);
 
 //    $this->kas_sync();
-    $this->kas_food();
+//    $this->kas_food();
 
 //    $apid = (array)json_decode($rfs->rbf_api, true);
 //    var_dump($apid);

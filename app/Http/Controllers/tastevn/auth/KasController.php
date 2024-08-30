@@ -303,4 +303,53 @@ class KasController extends Controller
       'status' => true,
     ]);
   }
+
+  public function checker(Request $request)
+  {
+    $invalid_roles = ['user', 'moderator'];
+    if (in_array($this->_viewer->role, $invalid_roles)) {
+      return redirect('error/404');
+    }
+
+    $restaurants = RestaurantParent::where('deleted', 0)
+      ->orderBy('id', 'asc')
+      ->get();
+
+    $pageConfigs = [
+      'myLayout' => 'horizontal',
+      'hasCustomizer' => false,
+
+      'restaurants' => $restaurants,
+    ];
+
+//    $this->_viewer->add_log([
+//      'type' => 'view_listing_kas_food',
+//    ]);
+
+    return view('tastevn.pages.kas.checker', ['pageConfigs' => $pageConfigs]);
+  }
+
+  public function date_check(Request $request)
+  {
+    $values = $request->post();
+
+    //required
+    $validator = Validator::make($values, [
+      'date' => 'required|string',
+    ]);
+    if ($validator->fails()) {
+      return response()->json($validator->errors(), 422);
+    }
+
+    $temps = array_filter(explode('/', $values['date']));
+    $date = $temps[2] . '-' . $temps[1] . '-' . $temps[0];
+
+
+
+    return response()->json([
+      'status' => true,
+      'date' => $date,
+    ]);
+  }
+
 }

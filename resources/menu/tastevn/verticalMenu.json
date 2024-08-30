@@ -56,6 +56,12 @@
           "slug": "admin-kas-foods"
         },
         {
+          "url": "admin/kas/checker",
+          "name": "KAS Checker",
+          "icon": "menu-icon tf-icons mdi mdi-clock-check",
+          "slug": "admin-kas-checker"
+        },
+        {
           "url": "admin/restaurant/foods",
           "name": "Dishes Checker",
           "icon": "menu-icon tf-icons mdi mdi-compare",
