@@ -12,6 +12,7 @@ class KasRestaurant extends Model
   public $table = 'kas_restaurants';
 
   protected $fillable = [
+    'restaurant_parent_id',
     'restaurant_id',
     'restaurant_code',
     'restaurant_name',

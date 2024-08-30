@@ -15,6 +15,7 @@ use App\Models\Food;
 use App\Models\RestaurantParent;
 use App\Models\Ingredient;
 use App\Models\Restaurant;
+use App\Models\RestaurantFoodScan;
 use App\Models\KasItem;
 use App\Models\KasBill;
 use App\Models\KasBillOrder;
@@ -336,6 +337,7 @@ class KasController extends Controller
     //required
     $validator = Validator::make($values, [
       'date' => 'required|string',
+      'restaurant' => 'required|string',
     ]);
     if ($validator->fails()) {
       return response()->json($validator->errors(), 422);
@@ -344,11 +346,40 @@ class KasController extends Controller
     $temps = array_filter(explode('/', $values['date']));
     $date = $temps[2] . '-' . $temps[1] . '-' . $temps[0];
 
+    $restaurant_parent = RestaurantParent::find((int)$values['restaurant']);
+    $select_sensors = Restaurant::select('id')
+      ->where('restaurant_parent_id', $restaurant_parent->id)
+      ->where('deleted', 0);
 
+//    $select = RestaurantFoodScan::query()
+//      ->distinct()
+//      ->selectRaw('HOUR(created_at) as hour')
+//      ->where('deleted', 0)
+//      ->whereDate('created_at', $date)
+//      ->whereIn('restaurant_id', $select_sensors)
+//      ->orderBy('hour', 'asc');
+
+    $total_photos = RestaurantFoodScan::where('deleted', 0)
+      ->whereDate('created_at', $date)
+      ->whereIn('restaurant_id', $select_sensors)
+      ->whereIn('status', ['checked', 'failed'])
+      ->count();
+
+    $total_orders = KasBill::query('kas_bills')
+      ->leftJoin('kas_restaurants', 'kas_restaurants.id', '=', 'kas_bills.kas_restaurant_id')
+      ->where('kas_restaurants.restaurant_parent_id', $restaurant_parent->id)
+      ->where('kas_bills.date_create', $date)
+      ->count();
 
     return response()->json([
       'status' => true,
       'date' => $date,
+//      'query' => SysCore::str_db_query($select),
+//      'items' => $select->get(),
+
+      'total_orders' => $total_orders,
+      'total_photos' => $total_photos,
+
     ]);
   }
 

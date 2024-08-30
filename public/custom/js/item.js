@@ -4447,12 +4447,34 @@ function kas_date_check(ele) {
     return false;
   }
 
+  var table = $('#table_checker');
+
+  table.find('.td_restaurant').each(function (k, v) {
+    var bind = $(v);
+    var itd = bind.attr('data-value');
+
+    kas_date_check_restaurant(itd, date);
+  });
+}
+
+function kas_date_check_restaurant(restaurant, date) {
+
   axios.post('/admin/kas/date/check', {
-    date: date
+    date: date,
+    restaurant: restaurant,
   })
     .then(response => {
+      var table = $('#table_checker');
+      var html = '';
 
+      if (response.data.items.length) {
+        response.data.items.forEach(function (v, k) {
 
+        });
+      }
+
+      table.find('.td_restaurant_' + restaurant).empty()
+        .append(html);
 
     })
     .catch(error => {

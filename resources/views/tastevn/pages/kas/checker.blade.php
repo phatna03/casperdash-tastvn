@@ -36,7 +36,7 @@
       <div class="card">
         <div class="card-body p-2">
           <div class="card-datatable table-responsive">
-            <table class="table table-bordered table-layout-fixed">
+            <table class="table table-bordered table-layout-fixed" id="table_checker">
               <thead>
               <tr>
                 <th class="text-center">Date / Restaurants</th>
@@ -57,7 +57,7 @@
                   </div>
                 </td>
                 @foreach($restaurants as $restaurant)
-                  <td class="td_restaurant td_restaurant_{{$restaurant->id}}">
+                  <td class="td_restaurant td_restaurant_{{$restaurant->id}}" data-value="{{$restaurant->id}}">
 
                   </td>
                 @endforeach

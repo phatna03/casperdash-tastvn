@@ -14,6 +14,7 @@ return new class extends Migration {
     if (!Schema::hasTable('kas_restaurants')) {
       Schema::create('kas_restaurants', function (Blueprint $table) {
         $table->id();
+        $table->bigInteger('restaurant_parent_id')->default(0);
         $table->string('restaurant_id');
         $table->string('restaurant_code');
         $table->string('restaurant_name');
