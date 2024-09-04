@@ -281,14 +281,16 @@ class RestaurantParent extends Model
       ->count();
 
     $total_orders = KasBill::query('kas_bills')
+      ->distinct()
+      ->select('kas_bills.bill_id')
       ->leftJoin('kas_restaurants', 'kas_restaurants.id', '=', 'kas_bills.kas_restaurant_id')
       ->where('kas_restaurants.restaurant_parent_id', $this->id)
       ->where('kas_bills.date_create', $date)
-      ->count();
+      ->get();
 
     return [
       'total_photos' => $total_photos,
-      'total_orders' => $total_orders,
+      'total_orders' => count($total_orders),
     ];
   }
 

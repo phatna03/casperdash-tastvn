@@ -4484,11 +4484,14 @@ function kas_date_check_restaurant(itd, date) {
 
   return false;
 }
-function kas_date_check_restaurant_data(itd) {
+function kas_date_check_restaurant_data(itd, date_text = '') {
   var date = $('#kas-date-check').val();
+  if (!date_text || date_text == '') {
+    date_text = date;
+  }
 
   axios.post('/admin/kas/date/check/restaurant', {
-    date: date,
+    date: date_text,
     restaurant: itd,
   })
     .then(response => {
