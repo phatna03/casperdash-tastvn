@@ -347,28 +347,15 @@ class KasController extends Controller
     $date = $temps[2] . '-' . $temps[1] . '-' . $temps[0];
 
     $restaurant_parent = RestaurantParent::find((int)$values['restaurant']);
-    $select_sensors = Restaurant::select('id')
-      ->where('restaurant_parent_id', $restaurant_parent->id)
-      ->where('deleted', 0);
 
-    $total_photos = RestaurantFoodScan::where('deleted', 0)
-      ->whereDate('created_at', $date)
-      ->whereIn('restaurant_id', $select_sensors)
-      ->whereIn('status', ['checked', 'failed'])
-      ->count();
-
-    $total_orders = KasBill::query('kas_bills')
-      ->leftJoin('kas_restaurants', 'kas_restaurants.id', '=', 'kas_bills.kas_restaurant_id')
-      ->where('kas_restaurants.restaurant_parent_id', $restaurant_parent->id)
-      ->where('kas_bills.date_create', $date)
-      ->count();
+    $datas = $restaurant_parent->kas_checker_by_date($date);
 
     return response()->json([
       'status' => true,
       'date' => $date,
 
-      'total_orders' => $total_orders,
-      'total_photos' => $total_photos,
+      'total_orders' => $datas['total_orders'],
+      'total_photos' => $datas['total_photos'],
     ]);
   }
 
@@ -422,10 +409,24 @@ class KasController extends Controller
       return response()->json($validator->errors(), 422);
     }
 
+    $year = $values['year'];
+    $month = $values['month'];
+
+    $restaurants = RestaurantParent::where('deleted', 0)
+      ->orderBy('id', 'asc')
+      ->get();
+
+    $html = view('tastevn.htmls.kas_checker_month')
+      ->with('restaurants', $restaurants)
+      ->with('year', $year)
+      ->with('month', $month)
+      ->with('total_days', date('t', strtotime($year . '-' . $month . '-01')))
+      ->render();
+
     return response()->json([
       'status' => true,
 
-      'values' => $values,
+      'html' => $html,
     ]);
   }
 }

@@ -46,7 +46,7 @@
               </tr>
               </thead>
               <tbody>
-              <tr class="tr_restaurant_{{$restaurant->id}}">
+              <tr>
                 <td>
                   <div class="form-floating form-floating-outline">
                     <input type="text" id="kas-date-check" class="form-control text-center date_only"

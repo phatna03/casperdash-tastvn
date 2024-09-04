@@ -4500,6 +4500,7 @@ function kas_date_check_restaurant_data(itd) {
   return false;
 }
 function kas_date_check_search(evt, frm) {
+  var table = $('#table_checker_month');
   var form = $(frm);
   form_loading(form);
 
@@ -4509,7 +4510,7 @@ function kas_date_check_search(evt, frm) {
   })
     .then(response => {
 
-
+      table.find('tbody').empty().append(response.data.html);
 
     })
     .catch(error => {

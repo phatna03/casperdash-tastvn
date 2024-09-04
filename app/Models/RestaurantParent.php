@@ -266,4 +266,31 @@ class RestaurantParent extends Model
 
     return $row ? $row->model_version : NULL;
   }
+
+  //kas
+  public function kas_checker_by_date($date)
+  {
+    $select_sensors = Restaurant::select('id')
+      ->where('restaurant_parent_id', $this->id)
+      ->where('deleted', 0);
+
+    $total_photos = RestaurantFoodScan::where('deleted', 0)
+      ->whereDate('created_at', $date)
+      ->whereIn('restaurant_id', $select_sensors)
+      ->whereIn('status', ['checked', 'failed'])
+      ->count();
+
+    $total_orders = KasBill::query('kas_bills')
+      ->leftJoin('kas_restaurants', 'kas_restaurants.id', '=', 'kas_bills.kas_restaurant_id')
+      ->where('kas_restaurants.restaurant_parent_id', $this->id)
+      ->where('kas_bills.date_create', $date)
+      ->count();
+
+    return [
+      'total_photos' => $total_photos,
+      'total_orders' => $total_orders,
+    ];
+  }
+
+
 }
