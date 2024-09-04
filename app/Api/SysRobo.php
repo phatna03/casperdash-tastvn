@@ -1197,7 +1197,8 @@ class SysRobo
     foreach ($predictions as $prediction) {
       $prediction = (array)$prediction;
 
-      $confidence = (int)($prediction['confidence'] * 100);
+      $rbf_confidence = (int)($prediction['confidence'] * 100);
+      $rbf_width = (int)$prediction['width'];
       $class = strtolower(trim($prediction['class']));
 
       $item = RestaurantFood::query('restaurant_foods')
@@ -1206,7 +1207,7 @@ class SysRobo
         ->where('restaurant_parent_id', $restaurant_parent_id)
         ->where('foods.deleted', 0)
         ->where('restaurant_foods.deleted', 0)
-        ->where('restaurant_foods.confidence', '<=', $confidence) //confidence
+        ->where('restaurant_foods.confidence', '<=', $rbf_confidence) //confidence
         ->whereRaw('LOWER(foods.name) LIKE ?', $class)
         ->first();
 
@@ -1215,7 +1216,7 @@ class SysRobo
 
         if ($debug) {
           var_dump('food found = ' . $food->name . ' - ID= ' . $food->id);
-          var_dump('food confidence = ' . $confidence);
+          var_dump('food confidence = ' . $rbf_confidence);
         }
 
         //check ingredient valid
@@ -1255,14 +1256,16 @@ class SysRobo
         if ($valid_core && $valid_food) {
           $foods[] = [
             'food' => $food->id,
-            'confidence' => $confidence,
+            'confidence' => $rbf_confidence,
+
+            'width' => $rbf_width,
           ];
         }
 
-        if ($valid_food && $confidence >= 90) {
+        if ($valid_food && $rbf_confidence >= 90) {
           $food_temps[] = [
             'food' => $food->id,
-            'confidence' => $confidence,
+            'confidence' => $rbf_confidence,
           ];
         }
       }
@@ -1330,6 +1333,7 @@ class SysRobo
     //confidence highest
     $food_id = 0;
     $food_confidence = 0;
+    $food = null;
 
     if (count($temps)) {
 
@@ -1337,8 +1341,8 @@ class SysRobo
         $a1 = [];
         $a2 = [];
         foreach ($temps as $key => $val) {
-          $a1[$key] = $val['confidence'];
-          $a2[$key] = $val['food'];
+          $a1[$key] = $val['width'];
+          $a2[$key] = $val['confidence'];
         }
         array_multisort($a1, SORT_DESC, $a2, SORT_DESC, $temps);
       }
@@ -1347,10 +1351,16 @@ class SysRobo
 
       $food_id = $temp['food'];
       $food_confidence = $temp['confidence'];
+
+      $food = Food::find($food_id);
     }
 
     if ($debug) {
       var_dump('food 1 found= ' . $food_id . ' - confidence= ' . $food_confidence);
+
+      if ($food) {
+        var_dump('food 1 name= ' . $food->name);
+      }
     }
 
     //group burger

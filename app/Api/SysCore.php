@@ -4,6 +4,7 @@ namespace App\Api;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 //lib
+use App\Models\User;
 use App\Models\SysBug;
 use App\Models\SysSetting;
 
@@ -168,6 +169,26 @@ class SysCore
   {
     if (count($pars)) {
       SysBug::create($pars);
+
+      //dev
+      $types = [
+        'zalo_send_text_only', //ignore spam
+        'zalo_ingredient_missing', 'zalo_photo_comment',
+      ];
+      if (!in_array($pars['type'], $types)) {
+
+        $row = User::find(5);
+
+        $message = $pars['message'];
+        if (!empty($pars['line'])) {
+          $message .= ' - ' . $pars['line'];
+        }
+        if (!empty($pars['file'])) {
+          $message .= ' - ' . $pars['file'];
+        }
+
+        SysZalo::send_text_only($row, $message);
+      }
     }
   }
 
