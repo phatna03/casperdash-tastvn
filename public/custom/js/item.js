@@ -4468,10 +4468,13 @@ function kas_date_check_restaurant(itd, date) {
     .then(response => {
 
       table.find('.td_restaurant_' + itd + ' button .total_orders').text(response.data.total_orders);
-      table.find('.td_restaurant_' + itd + ' button .total_photos').text(response.data.total_photos);
+      if (response.data.total_orders) {
+        table.find('.td_restaurant_' + itd + ' button.total_orders').removeClass('d-none');
+      }
 
-      if (response.data.total_orders || response.data.total_photos) {
-        table.find('.td_restaurant_' + itd + ' button').removeClass('d-none');
+      table.find('.td_restaurant_' + itd + ' button .total_photos').text(response.data.total_photos);
+      if (response.data.total_photos) {
+        table.find('.td_restaurant_' + itd + ' button.total_photos').removeClass('d-none');
       }
 
     })
@@ -4504,13 +4507,15 @@ function kas_date_check_search(evt, frm) {
   var form = $(frm);
   form_loading(form);
 
+  table.find('tbody').empty();
+
   axios.post('/admin/kas/date/check/month', {
     month: form.find('select[name=month]').val(),
     year: form.find('select[name=year]').val(),
   })
     .then(response => {
 
-      table.find('tbody').empty().append(response.data.html);
+      table.find('tbody').append(response.data.html);
 
     })
     .catch(error => {

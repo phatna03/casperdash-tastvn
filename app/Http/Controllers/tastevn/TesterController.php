@@ -84,6 +84,18 @@ class TesterController extends Controller
     //=======================================================================================
     //=======================================================================================
 
+    $restaurants = RestaurantParent::where('deleted', 0)
+//      ->where('id', 6)
+      ->orderBy('id', 'asc')
+      ->get();
+
+    $month = 8;
+    $year = 2024;
+
+
+
+
+
 //    $datas = json_decode($kas->params, true);
 //    var_dump($datas);
 

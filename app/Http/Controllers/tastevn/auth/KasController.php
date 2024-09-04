@@ -409,6 +409,7 @@ class KasController extends Controller
       return response()->json($validator->errors(), 422);
     }
 
+    $datas = [];
     $year = $values['year'];
     $month = $values['month'];
 
@@ -416,11 +417,91 @@ class KasController extends Controller
       ->orderBy('id', 'asc')
       ->get();
 
+    foreach ($restaurants as $restaurant) {
+
+      $select_bills = KasBill::query('kas_bills')
+        ->distinct()
+        ->select('kas_bills.date_create')
+        ->selectRaw('COUNT(kas_bills.bill_id) as total_bills')
+        ->leftJoin('kas_restaurants', 'kas_restaurants.id', '=', 'kas_bills.kas_restaurant_id')
+        ->whereMonth('kas_bills.date_create', $month)
+        ->whereYear('kas_bills.date_create', $year)
+        ->where('kas_bills.status', 'paid')
+        ->where('kas_restaurants.restaurant_parent_id', $restaurant->id)
+        ->orderBy('kas_bills.date_create', 'desc')
+        ->groupBy('kas_bills.date_create')
+        ->groupBy('kas_restaurants.restaurant_parent_id')
+      ;
+      $total_bills = $select_bills->get()
+        ->toArray();
+
+      $select_sensors = Restaurant::select('id')
+        ->where('restaurant_parent_id', $restaurant->id)
+        ->where('deleted', 0);
+
+      $select_photos = RestaurantFoodScan::query('restaurant_food_scans')
+        ->where('restaurant_food_scans.deleted', 0)
+        ->whereIn('restaurant_food_scans.restaurant_id', $select_sensors)
+        ->whereIn('restaurant_food_scans.status', ['checked', 'failed'])
+        ->distinct()
+        ->selectRaw('DATE(restaurant_food_scans.created_at) as date_create')
+        ->selectRaw('COUNT(restaurant_food_scans.id) as total_photos')
+        ->whereMonth('restaurant_food_scans.created_at', $month)
+        ->whereYear('restaurant_food_scans.created_at', $year)
+        ->orderByRaw('DATE(restaurant_food_scans.created_at)')
+        ->groupByRaw('DATE(restaurant_food_scans.created_at)')
+      ;
+      $total_photos = $select_photos->get()
+        ->toArray();
+
+      $items = [];
+      $days = date('t', strtotime($year . '-' . $month . '-01'));
+      for ($days; $days > 0; $days--) {
+        $m = SysCore::str_format_hour($month);
+        $d = SysCore::str_format_hour($days);
+
+        $date = $year . '-' . $m . '-' . $d;
+        $date_text = $d . '/' . $m . '/' . $year;
+
+        $photo = 0;
+        if (count($total_photos)) {
+          foreach ($total_photos as $t1) {
+            if ($t1['date_create'] == $date) {
+              $photo = $t1['total_photos'];
+              break;
+            }
+          }
+        }
+
+        $bill = 0;
+        if (count($total_bills)) {
+          foreach ($total_bills as $t1) {
+            if ($t1['date_create'] == $date) {
+              $bill = $t1['total_bills'];
+              break;
+            }
+          }
+        }
+
+        if ($photo || $bill) {
+          $items[$date] = [
+            'date' => $date,
+            'date_text' => $date_text,
+            'total_photos' => $photo,
+            'total_bills' => $bill,
+          ];
+        }
+      }
+
+      $datas[$restaurant->id] = $items;
+    }
+
     $html = view('tastevn.htmls.kas_checker_month')
       ->with('restaurants', $restaurants)
       ->with('year', $year)
       ->with('month', $month)
       ->with('total_days', date('t', strtotime($year . '-' . $month . '-01')))
+      ->with('datas', $datas)
       ->render();
 
     return response()->json([

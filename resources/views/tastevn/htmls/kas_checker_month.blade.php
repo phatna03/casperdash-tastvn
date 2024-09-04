@@ -14,18 +14,23 @@ for($d = $total_days; $d > 0; $d--):
   </td>
   @php
   foreach($restaurants as $restaurant):
-  $datas['total_orders'] = 0;
-  $datas['total_photos'] = 0;
 
-  $dnone = 'd-none';
+  $bill = isset($datas[$restaurant->id][$date]) ? $datas[$restaurant->id][$date]['total_bills'] : 0;
+  $photo = isset($datas[$restaurant->id][$date]) ? $datas[$restaurant->id][$date]['total_photos'] : 0;
+
+  $dnone2 = !$photo ? 'd-none' : '';
+  $dnone1 = !$bill ? 'd-none' : '';
   @endphp
-    <td class="td_restaurant td_restaurant_{{$restaurant->id}}" data-value="{{$restaurant->id}}">
-      <button type="button" onclick="kas_date_check_restaurant_data({{$restaurant->id}})" class="btn btn-sm btn-secondary {{$dnone}}">
+    <td class="td_restaurant p-1 td_restaurant_{{$restaurant->id}}" data-value="{{$restaurant->id}}">
+      <button type="button" onclick="kas_date_check_restaurant_data({{$restaurant->id}})" class="btn btn-sm btn-secondary w-50 acm-float-right total_photos {{$dnone2}}">
         <div>
-          Total Orders: <b class="total_orders">{{$datas['total_orders']}}</b>
+          Total Photos: <div class="total_photos">{{$photo}}</div>
         </div>
+      </button>
+
+      <button type="button" onclick="kas_date_check_restaurant_data({{$restaurant->id}})" class="btn btn-sm btn-primary w-50 acm-float-left total_orders {{$dnone1}}">
         <div>
-          Total Photos: <b class="total_photos">{{$datas['total_photos']}}</b>
+          Total Bills: <div class="total_orders">{{$bill}}</div>
         </div>
       </button>
     </td>
