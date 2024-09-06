@@ -551,44 +551,66 @@ class KasController extends Controller
     $restaurant_parent = RestaurantParent::find((int)$values['restaurant']);
     $hour = $values['hour'];
     $date = $values['date'];
+    $type = $values['type'];
 
-    $select = KasBill::query('kas_bills')
-      ->distinct()
-      ->select('kas_bills.id', 'kas_bills.bill_id', 'kas_bills.note', 'kas_bills.status')
-      ->leftJoin('kas_restaurants', 'kas_restaurants.id', '=', 'kas_bills.kas_restaurant_id')
-      ->where('kas_restaurants.restaurant_parent_id', $restaurant_parent->id)
-      ->where('kas_bills.date_create', $date)
-      ->where('kas_bills.status', 'paid')
-      ->whereRaw('HOUR(kas_bills.time_create) = ' . (int)$hour)
-      ->orderBy('kas_bills.bill_id', 'asc');
-    $rows = $select->get();
+    if ($type == 'bill') {
 
-    $items = [];
-    if (count($rows)) {
-      foreach ($rows as $row) {
+      $select = KasBill::query('kas_bills')
+        ->distinct()
+        ->select('kas_bills.id', 'kas_bills.bill_id', 'kas_bills.note', 'kas_bills.status')
+        ->leftJoin('kas_restaurants', 'kas_restaurants.id', '=', 'kas_bills.kas_restaurant_id')
+        ->where('kas_restaurants.restaurant_parent_id', $restaurant_parent->id)
+        ->where('kas_bills.date_create', $date)
+        ->where('kas_bills.status', 'paid')
+        ->whereRaw('HOUR(kas_bills.time_create) = ' . (int)$hour)
+        ->orderBy('kas_bills.bill_id', 'asc');
+      $rows = $select->get();
 
-        $items[] = [
-          'bill_id' => $row->id,
-          'bill_kas_id' => $row->bill_id,
-          'bill_status' => $row->status,
-          'bill_note' => $row->note,
+      $items = [];
+      if (count($rows)) {
+        foreach ($rows as $row) {
 
-          'orders' => $row->get_orders_info(),
-        ];
+          $items[] = [
+            'bill_id' => $row->id,
+            'bill_kas_id' => $row->bill_id,
+            'bill_status' => $row->status,
+            'bill_note' => $row->note,
+
+            'orders' => $row->get_orders_info(),
+          ];
+        }
       }
-    }
 
-    $html = view('tastevn.htmls.kas_checker_restaurant_date_bill')
-      ->with('items', $items)
-      ->render();
+      $html = view('tastevn.htmls.kas_checker_restaurant_date_bill')
+        ->with('items', $items)
+        ->render();
+
+    } else {
+      //photo
+      $select_sensors = Restaurant::select('id')
+        ->where('restaurant_parent_id', $restaurant_parent->id)
+        ->where('deleted', 0);
+
+      $select = RestaurantFoodScan::query()
+        ->distinct()
+        ->select('id', 'local_storage', 'photo_url', 'created_at')
+        ->where('deleted', 0)
+        ->whereDate('time_photo', $date)
+        ->whereIn('restaurant_id', $select_sensors)
+        ->whereRaw('HOUR(time_photo) = ' . (int)$hour)
+        ->orderBy('id', 'asc');
+
+      $items = $select->get();
+
+      $html = view('tastevn.htmls.kas_checker_restaurant_date_photo')
+        ->with('items', $items)
+        ->render();
+    }
 
     return response()->json([
       'status' => true,
 
       'html' => $html,
-
-      'query2' => SysCore::str_db_query($select),
-      'item2s' => $select->get(),
     ]);
   }
 }

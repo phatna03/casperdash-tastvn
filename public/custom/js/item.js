@@ -4507,6 +4507,7 @@ function kas_date_check_restaurant_data(itd, date_text = '') {
 
       setTimeout(function () {
         popup.find('#wrap_hour_bill .hour_bill_hour button')[0].click();
+        popup.find('#wrap_hour_photo .hour_photo_hour button')[0].click();
       }, 333);
 
     })
@@ -4526,6 +4527,7 @@ function kas_date_check_restaurant_data_hour_bill(hour, date, restaurant) {
     hour: hour,
     date: date,
     restaurant: restaurant,
+    type: 'bill',
   })
     .then(response => {
 
@@ -4545,13 +4547,62 @@ function kas_date_check_restaurant_data_hour_bill(hour, date, restaurant) {
 
   return false;
 }
-function kas_date_check_restaurant_data_hour_photo() {
+function kas_date_check_restaurant_data_hour_photo(hour, date, restaurant) {
   var wrap = $('#wrap_hour_photo');
 
-  wrap.find('.hour_photo_item button').removeClass('btn-primary').addClass('btn-secondary');
-  wrap.find('.hour_photo_item_' + hour + ' button').addClass('btn-primary').removeClass('btn-secondary');
+  wrap.find('.hour_photo_hour button').removeClass('btn-primary').addClass('btn-secondary');
+  wrap.find('.hour_photo_hour_' + hour + ' button').addClass('btn-primary').removeClass('btn-secondary');
 
+  axios.post('/admin/kas/date/check/restaurant/hour', {
+    hour: hour,
+    date: date,
+    restaurant: restaurant,
+    type: 'photo',
+  })
+    .then(response => {
 
+      wrap.find('.hour_photo_datas').empty()
+        .append(response.data.html);
+
+      bind_datad(wrap);
+
+      setTimeout(function () {
+
+        var galleryThumbs = document.querySelector('.gallery-thumbs'),
+          galleryTop = document.querySelector('.gallery-top');
+        let galleryInstance;
+
+        if (galleryThumbs) {
+          galleryInstance = new Swiper(galleryThumbs, {
+            spaceBetween: 10,
+            slidesPerView: 4,
+            freeMode: true,
+            watchSlidesVisibility: true,
+            watchSlidesProgress: true
+          });
+        }
+
+        if (galleryTop) {
+          new Swiper(galleryTop, {
+            spaceBetween: 10,
+            navigation: {
+              nextEl: '.swiper-button-next',
+              prevEl: '.swiper-button-prev'
+            },
+            thumbs: {
+              swiper: galleryInstance
+            }
+          });
+        }
+
+      }, 333);
+
+    })
+    .catch(error => {
+      console.log(error);
+    });
+
+  return false;
 }
 function kas_date_check_restaurant_data_hour_bill_item(ele, bill) {
   var bind = $(ele);

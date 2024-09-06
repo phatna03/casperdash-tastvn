@@ -756,6 +756,21 @@
   overflow: scroll;
 }
 
+.photo_checker_main,
+.photo_checker_thumb {
+  position: absolute;
+  top: 0;
+  background-color: #fff;
+  color: #fa0000;
+  font-weight: bold;
+  padding: 2px;
+  border-radius: 1px;
+}
+
+.photo_checker_thumb {
+  font-size: 13px;
+}
+
 /* Use position: sticky to have it stick to the edge
  * and top, right, or left to choose which edge to stick to: */
 

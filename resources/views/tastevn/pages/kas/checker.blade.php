@@ -7,7 +7,8 @@
   <link rel="stylesheet" href="{{asset('assets/vendor/libs/flatpickr/flatpickr.css')}}"/>
   <link rel="stylesheet" href="{{asset('assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.css')}}"/>
 
-
+  <link rel="stylesheet" href="{{asset('assets/vendor/libs/swiper/swiper.css')}}" />
+  <link rel="stylesheet" href="{{asset('assets/vendor/css/pages/ui-carousel.css')}}" />
 @endsection
 
 @section('vendor-script')
@@ -16,7 +17,7 @@
   <script src="{{asset('assets/vendor/libs/flatpickr/flatpickr.js')}}"></script>
   <script src="{{asset('assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.js')}}"></script>
 
-
+  <script src="{{asset('assets/vendor/libs/swiper/swiper.js')}}"></script>
 @endsection
 
 @section('content')
