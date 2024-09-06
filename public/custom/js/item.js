@@ -4505,12 +4505,63 @@ function kas_date_check_restaurant_data(itd, date_text = '') {
 
       popup.modal('show');
 
+      setTimeout(function () {
+        popup.find('#wrap_hour_bill .hour_bill_hour button')[0].click();
+      }, 333);
+
     })
     .catch(error => {
       console.log(error);
     });
 
   return false;
+}
+function kas_date_check_restaurant_data_hour_bill(hour, date, restaurant) {
+  var wrap = $('#wrap_hour_bill');
+
+  wrap.find('.hour_bill_hour button').removeClass('btn-primary').addClass('btn-secondary');
+  wrap.find('.hour_bill_hour_' + hour + ' button').addClass('btn-primary').removeClass('btn-secondary');
+
+  axios.post('/admin/kas/date/check/restaurant/hour', {
+    hour: hour,
+    date: date,
+    restaurant: restaurant,
+  })
+    .then(response => {
+
+      wrap.find('.hour_bill_datas').empty()
+        .append(response.data.html);
+
+      bind_datad(wrap);
+
+      setTimeout(function () {
+        wrap.find('.hour_bill_datas .hour_bill_content').first().find('button')[0].click();
+      }, 333);
+
+    })
+    .catch(error => {
+      console.log(error);
+    });
+
+  return false;
+}
+function kas_date_check_restaurant_data_hour_photo() {
+  var wrap = $('#wrap_hour_photo');
+
+  wrap.find('.hour_photo_item button').removeClass('btn-primary').addClass('btn-secondary');
+  wrap.find('.hour_photo_item_' + hour + ' button').addClass('btn-primary').removeClass('btn-secondary');
+
+
+}
+function kas_date_check_restaurant_data_hour_bill_item(ele, bill) {
+  var bind = $(ele);
+  var parent = bind.closest('.hour_bill_datas');
+
+  parent.find('.hour_bill_content button').removeClass('btn-primary').addClass('btn-outline-primary');
+  parent.find('.hour_bill_content_' + bill + ' button').addClass('btn-primary').removeClass('btn-outline-primary');
+
+  parent.find('.hour_bill_content_data').addClass('d-none')
+  parent.find('.hour_bill_content_data_' + bill).removeClass('d-none')
 }
 function kas_date_check_search(evt, frm) {
   var table = $('#table_checker_month');

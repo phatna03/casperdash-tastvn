@@ -323,8 +323,9 @@ Route::post('/admin/kas/food/item', [KasController::class, 'food_item']);
 Route::post('/admin/kas/food/get', [KasController::class, 'food_get']);
 Route::get('/admin/kas/checker', [KasController::class, 'checker']);
 Route::post('/admin/kas/date/check', [KasController::class, 'date_check']);
-Route::post('/admin/kas/date/check/restaurant', [KasController::class, 'date_check_restaurant']);
 Route::post('/admin/kas/date/check/month', [KasController::class, 'date_check_month']);
+Route::post('/admin/kas/date/check/restaurant', [KasController::class, 'date_check_restaurant']);
+Route::post('/admin/kas/date/check/restaurant/hour', [KasController::class, 'date_check_restaurant_hour']);
 //food
 Route::get('/admin/foods', [FoodController::class, 'index']);
 Route::post('/admin/food/get', [FoodController::class, 'get']);

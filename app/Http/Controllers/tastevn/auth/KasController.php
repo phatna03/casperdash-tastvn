@@ -359,61 +359,6 @@ class KasController extends Controller
     ]);
   }
 
-  public function date_check_restaurant(Request $request)
-  {
-    $values = $request->post();
-
-    //required
-    $validator = Validator::make($values, [
-      'date' => 'required|string',
-      'restaurant' => 'required',
-    ]);
-    if ($validator->fails()) {
-      return response()->json($validator->errors(), 422);
-    }
-
-    $temps = array_filter(explode('/', $values['date']));
-    $date = $temps[2] . '-' . $temps[1] . '-' . $temps[0];
-
-    $restaurant_parent = RestaurantParent::find((int)$values['restaurant']);
-    $select_sensors = Restaurant::select('id')
-      ->where('restaurant_parent_id', $restaurant_parent->id)
-      ->where('deleted', 0);
-
-    $select2 = RestaurantFoodScan::query()
-      ->distinct()
-      ->selectRaw('HOUR(time_photo) as hour')
-      ->where('deleted', 0)
-      ->whereDate('time_photo', $date)
-      ->whereIn('restaurant_id', $select_sensors)
-      ->orderBy('hour', 'asc');
-
-    $select1 = KasBill::query('kas_bills')
-      ->distinct()
-      ->selectRaw('HOUR(time_create) as hour')
-      ->leftJoin('kas_restaurants', 'kas_restaurants.id', '=', 'kas_bills.kas_restaurant_id')
-      ->where('kas_restaurants.restaurant_parent_id', $restaurant_parent->id)
-      ->where('kas_bills.date_create', $date)
-      ->orderBy('hour', 'asc');
-
-    $html = view('tastevn.htmls.kas_checker_restaurant_date')
-      ->with('hour1s', $select1->get())
-      ->with('hour2s', $select2->get())
-      ->render();
-
-    return response()->json([
-      'status' => true,
-
-      'restaurant' => $restaurant_parent->get_info(),
-
-      'query1' => SysCore::str_db_query($select1),
-      'item1s' => $select1->get(),
-
-      'query2' => SysCore::str_db_query($select2),
-      'item2s' => $select2->get(),
-    ]);
-  }
-
   public function date_check_month(Request $request)
   {
     $values = $request->post();
@@ -528,6 +473,122 @@ class KasController extends Controller
       'status' => true,
 
       'html' => $html,
+    ]);
+  }
+
+  public function date_check_restaurant(Request $request)
+  {
+    $values = $request->post();
+
+    //required
+    $validator = Validator::make($values, [
+      'date' => 'required|string',
+      'restaurant' => 'required',
+    ]);
+    if ($validator->fails()) {
+      return response()->json($validator->errors(), 422);
+    }
+
+    $temps = array_filter(explode('/', $values['date']));
+    $date = $temps[2] . '-' . $temps[1] . '-' . $temps[0];
+
+    $restaurant_parent = RestaurantParent::find((int)$values['restaurant']);
+    $select_sensors = Restaurant::select('id')
+      ->where('restaurant_parent_id', $restaurant_parent->id)
+      ->where('deleted', 0);
+
+    $select2 = RestaurantFoodScan::query()
+      ->distinct()
+      ->selectRaw('HOUR(time_photo) as hour')
+      ->where('deleted', 0)
+      ->whereDate('time_photo', $date)
+      ->whereIn('restaurant_id', $select_sensors)
+      ->orderBy('hour', 'asc');
+
+    $select1 = KasBill::query('kas_bills')
+      ->distinct()
+      ->selectRaw('HOUR(time_create) as hour')
+      ->leftJoin('kas_restaurants', 'kas_restaurants.id', '=', 'kas_bills.kas_restaurant_id')
+      ->where('kas_restaurants.restaurant_parent_id', $restaurant_parent->id)
+      ->where('kas_bills.date_create', $date)
+      ->orderBy('hour', 'asc');
+
+    $html = view('tastevn.htmls.kas_checker_restaurant_date')
+      ->with('restaurant', $restaurant_parent)
+      ->with('date', $date)
+      ->with('hour1s', $select1->get())
+      ->with('hour2s', $select2->get())
+      ->render();
+
+    return response()->json([
+      'status' => true,
+
+      'restaurant' => $restaurant_parent->get_info(),
+      'html' => $html,
+
+      'query1' => SysCore::str_db_query($select1),
+      'item1s' => $select1->get(),
+
+      'query2' => SysCore::str_db_query($select2),
+      'item2s' => $select2->get(),
+    ]);
+  }
+
+  public function date_check_restaurant_hour(Request $request)
+  {
+    $values = $request->post();
+
+    //required
+    $validator = Validator::make($values, [
+      'date' => 'required|string',
+      'hour' => 'required',
+      'restaurant' => 'required',
+    ]);
+    if ($validator->fails()) {
+      return response()->json($validator->errors(), 422);
+    }
+
+    $restaurant_parent = RestaurantParent::find((int)$values['restaurant']);
+    $hour = $values['hour'];
+    $date = $values['date'];
+
+    $select = KasBill::query('kas_bills')
+      ->distinct()
+      ->select('kas_bills.id', 'kas_bills.bill_id', 'kas_bills.note', 'kas_bills.status')
+      ->leftJoin('kas_restaurants', 'kas_restaurants.id', '=', 'kas_bills.kas_restaurant_id')
+      ->where('kas_restaurants.restaurant_parent_id', $restaurant_parent->id)
+      ->where('kas_bills.date_create', $date)
+      ->where('kas_bills.status', 'paid')
+      ->whereRaw('HOUR(kas_bills.time_create) = ' . (int)$hour)
+      ->orderBy('kas_bills.bill_id', 'asc');
+    $rows = $select->get();
+
+    $items = [];
+    if (count($rows)) {
+      foreach ($rows as $row) {
+
+        $items[] = [
+          'bill_id' => $row->id,
+          'bill_kas_id' => $row->bill_id,
+          'bill_status' => $row->status,
+          'bill_note' => $row->note,
+
+          'orders' => $row->get_orders_info(),
+        ];
+      }
+    }
+
+    $html = view('tastevn.htmls.kas_checker_restaurant_date_bill')
+      ->with('items', $items)
+      ->render();
+
+    return response()->json([
+      'status' => true,
+
+      'html' => $html,
+
+      'query2' => SysCore::str_db_query($select),
+      'item2s' => $select->get(),
     ]);
   }
 }
