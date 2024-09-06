@@ -771,6 +771,17 @@
   font-size: 13px;
 }
 
+.photo_checker_lightbox {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background-color: #fff;
+  color: #fa0000;
+  font-weight: bold;
+  padding: 2px;
+  border-radius: 1px;
+}
+
 /* Use position: sticky to have it stick to the edge
  * and top, right, or left to choose which edge to stick to: */
 

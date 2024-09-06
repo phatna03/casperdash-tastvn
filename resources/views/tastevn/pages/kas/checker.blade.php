@@ -9,6 +9,9 @@
 
   <link rel="stylesheet" href="{{asset('assets/vendor/libs/swiper/swiper.css')}}" />
   <link rel="stylesheet" href="{{asset('assets/vendor/css/pages/ui-carousel.css')}}" />
+
+  <link rel="stylesheet" href="{{url('custom/library/lightbox/lc_lightbox.css')}}" />
+  <link rel="stylesheet" href="{{url('custom/library/lightbox/minimal.css')}}" />
 @endsection
 
 @section('vendor-script')
@@ -18,6 +21,9 @@
   <script src="{{asset('assets/vendor/libs/bootstrap-datepicker/bootstrap-datepicker.js')}}"></script>
 
   <script src="{{asset('assets/vendor/libs/swiper/swiper.js')}}"></script>
+
+  <script src="{{url('custom/library/lightbox/lc_lightbox.lite.js?v=101')}}"></script>
+  <script src="{{url('custom/library/lightbox/alloy_finger.min.js')}}"></script>
 @endsection
 
 @section('content')

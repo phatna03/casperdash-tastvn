@@ -591,14 +591,18 @@ class KasController extends Controller
         ->where('restaurant_parent_id', $restaurant_parent->id)
         ->where('deleted', 0);
 
-      $select = RestaurantFoodScan::query()
+      $select = RestaurantFoodScan::query('restaurant_food_scans')
         ->distinct()
-        ->select('id', 'local_storage', 'photo_url', 'created_at')
-        ->where('deleted', 0)
-        ->whereDate('time_photo', $date)
-        ->whereIn('restaurant_id', $select_sensors)
-        ->whereRaw('HOUR(time_photo) = ' . (int)$hour)
-        ->orderBy('id', 'asc');
+        ->select('restaurant_food_scans.id', 'restaurant_food_scans.local_storage',
+          'restaurant_food_scans.photo_name', 'restaurant_food_scans.photo_url', 'restaurant_food_scans.created_at',
+          'restaurant_food_scans.time_photo', 'restaurants.name as restaurant_name',
+        )
+        ->leftJoin('restaurants', 'restaurant_food_scans.restaurant_id', '=', 'restaurants.id')
+        ->where('restaurant_food_scans.deleted', 0)
+        ->whereDate('restaurant_food_scans.time_photo', $date)
+        ->whereIn('restaurant_food_scans.restaurant_id', $select_sensors)
+        ->whereRaw('HOUR(restaurant_food_scans.time_photo) = ' . (int)$hour)
+        ->orderBy('restaurant_food_scans.id', 'asc');
 
       $items = $select->get();
 

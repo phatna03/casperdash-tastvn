@@ -4595,6 +4595,11 @@ function kas_date_check_restaurant_data_hour_photo(hour, date, restaurant) {
           });
         }
 
+        lc_lightbox('.acm-lightbox-photo', {
+          wrap_class: 'lcl_fade_oc',
+          thumb_attr: 'data-lcl-thumb',
+        });
+
       }, 333);
 
     })
