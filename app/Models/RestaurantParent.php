@@ -267,6 +267,14 @@ class RestaurantParent extends Model
     return $row ? $row->model_version : NULL;
   }
 
+  public function get_info()
+  {
+    return [
+      'id' => $this->id,
+      'name' => $this->name,
+    ];
+  }
+
   //kas
   public function kas_checker_by_date($date)
   {
@@ -275,7 +283,7 @@ class RestaurantParent extends Model
       ->where('deleted', 0);
 
     $total_photos = RestaurantFoodScan::where('deleted', 0)
-      ->whereDate('created_at', $date)
+      ->whereDate('time_photo', $date)
       ->whereIn('restaurant_id', $select_sensors)
       ->whereIn('status', ['checked', 'failed'])
       ->count();

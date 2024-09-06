@@ -149,7 +149,19 @@
 
   </div>
 
+  <div class="modal animate__animated animate__zoomIn" id="modal_checker_restaurant_date" aria-hidden="true">
+    <div class="modal-dialog modal-xl acm-modal-xxl" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title text-danger fw-bold"></h4>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
 
+        </div>
+      </div>
+    </div>
+  </div>
 @endsection
 
 @section('js_end')
@@ -160,7 +172,7 @@
 
     $(document).ready(function() {
 
-      $('#frm_checker_month .wrap-btns button.btn-ok').click();
+      // $('#frm_checker_month .wrap-btns button.btn-ok').click();
 
       //date only
       if ($('.date_only').length) {
@@ -171,7 +183,7 @@
           format: 'dd/mm/yyyy',
           orientation: isRtl ? 'auto right' : 'auto left'
         });
-        $('.date_only').val('');
+        $('.date_only').val('27/08/2024').trigger('change');
       }
 
     });

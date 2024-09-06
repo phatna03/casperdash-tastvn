@@ -4490,13 +4490,20 @@ function kas_date_check_restaurant_data(itd, date_text = '') {
     date_text = date;
   }
 
+  var popup = $('#modal_checker_restaurant_date');
+
   axios.post('/admin/kas/date/check/restaurant', {
     date: date_text,
     restaurant: itd,
   })
     .then(response => {
 
+      var html_title = response.data.restaurant.name + '<span class="badge acm-ml-px-10 bg-primary">' + date_text + '</span>';
+      popup.find('.modal-title').empty().append(html_title);
 
+      popup.find('.modal-body').empty().append(response.data.html);
+
+      popup.modal('show');
 
     })
     .catch(error => {

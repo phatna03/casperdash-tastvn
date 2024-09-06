@@ -380,19 +380,37 @@ class KasController extends Controller
       ->where('restaurant_parent_id', $restaurant_parent->id)
       ->where('deleted', 0);
 
-    $select = RestaurantFoodScan::query()
+    $select2 = RestaurantFoodScan::query()
       ->distinct()
-      ->selectRaw('HOUR(created_at) as hour')
+      ->selectRaw('HOUR(time_photo) as hour')
       ->where('deleted', 0)
-      ->whereDate('created_at', $date)
+      ->whereDate('time_photo', $date)
       ->whereIn('restaurant_id', $select_sensors)
       ->orderBy('hour', 'asc');
+
+    $select1 = KasBill::query('kas_bills')
+      ->distinct()
+      ->selectRaw('HOUR(time_create) as hour')
+      ->leftJoin('kas_restaurants', 'kas_restaurants.id', '=', 'kas_bills.kas_restaurant_id')
+      ->where('kas_restaurants.restaurant_parent_id', $restaurant_parent->id)
+      ->where('kas_bills.date_create', $date)
+      ->orderBy('hour', 'asc');
+
+    $html = view('tastevn.htmls.kas_checker_restaurant_date')
+      ->with('hour1s', $select1->get())
+      ->with('hour2s', $select2->get())
+      ->render();
 
     return response()->json([
       'status' => true,
 
-      'query' => SysCore::str_db_query($select),
-      'items' => $select->get(),
+      'restaurant' => $restaurant_parent->get_info(),
+
+      'query1' => SysCore::str_db_query($select1),
+      'item1s' => $select1->get(),
+
+      'query2' => SysCore::str_db_query($select2),
+      'item2s' => $select2->get(),
     ]);
   }
 
@@ -444,12 +462,12 @@ class KasController extends Controller
         ->whereIn('restaurant_food_scans.restaurant_id', $select_sensors)
         ->whereIn('restaurant_food_scans.status', ['checked', 'failed'])
         ->distinct()
-        ->selectRaw('DATE(restaurant_food_scans.created_at) as date_create')
+        ->selectRaw('DATE(restaurant_food_scans.time_photo) as date_create')
         ->selectRaw('COUNT(restaurant_food_scans.id) as total_photos')
-        ->whereMonth('restaurant_food_scans.created_at', $month)
-        ->whereYear('restaurant_food_scans.created_at', $year)
-        ->orderByRaw('DATE(restaurant_food_scans.created_at)')
-        ->groupByRaw('DATE(restaurant_food_scans.created_at)')
+        ->whereMonth('restaurant_food_scans.time_photo', $month)
+        ->whereYear('restaurant_food_scans.time_photo', $year)
+        ->orderByRaw('DATE(restaurant_food_scans.time_photo)')
+        ->groupByRaw('DATE(restaurant_food_scans.time_photo)')
       ;
       $total_photos = $select_photos->get()
         ->toArray();
@@ -462,6 +480,10 @@ class KasController extends Controller
 
         $date = $year . '-' . $m . '-' . $d;
         $date_text = $d . '/' . $m . '/' . $year;
+
+        if ($date > date('Y-m-d')) {
+          continue;
+        }
 
         $photo = 0;
         if (count($total_photos)) {
@@ -483,14 +505,12 @@ class KasController extends Controller
           }
         }
 
-        if ($photo || $bill) {
-          $items[$date] = [
-            'date' => $date,
-            'date_text' => $date_text,
-            'total_photos' => $photo,
-            'total_bills' => $bill,
-          ];
-        }
+        $items[$date] = [
+          'date' => $date,
+          'date_text' => $date_text,
+          'total_photos' => $photo,
+          'total_bills' => $bill,
+        ];
       }
 
       $datas[$restaurant->id] = $items;
