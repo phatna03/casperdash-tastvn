@@ -4517,6 +4517,73 @@ function kas_date_check_restaurant_data(itd, date_text = '') {
 
   return false;
 }
+function kas_date_check_restaurant_data_photo(itd, date_text = '') {
+  var date = $('#kas-date-check').val();
+  if (!date_text || date_text == '') {
+    date_text = date;
+  }
+
+  var popup = $('#modal_checker_restaurant_date');
+
+  axios.post('/admin/kas/date/check/restaurant/photo', {
+    date: date_text,
+    restaurant: itd,
+  })
+    .then(response => {
+
+      kas_date_check_restaurant_data_photo_id(response.data.itd, response.data.total_items, response.data.items);
+
+    })
+    .catch(error => {
+      console.log(error);
+    });
+
+  return false;
+}
+function kas_date_check_restaurant_data_photo_id(id, total = 0, ids = '') {
+  var popup = $('#modal_food_scan_info');
+  popup.find('input[name=popup_view_id_itm]').val(id);
+  popup.find('input[name=popup_view_ids]').val(ids);
+
+  var hidden_btns = true;
+  if (total) {
+    hidden_btns = false;
+  }
+
+  popup.find('.acm-modal-arrow').removeClass('d-none');
+  if (hidden_btns) {
+    popup.find('.acm-modal-arrow').addClass('d-none');
+  }
+
+  popup.find('.modal-header h4').text('Loading...');
+  popup.find('.modal-body').addClass('text-center').empty()
+    .append('<div class="m-auto">' + acmcfs.html_loading + '</div>');
+
+  axios.post('/admin/sensor/food/scan/info', {
+    item: id,
+  })
+    .then(response => {
+
+      var title = response.data.sensor.name + ' <span class="badge acm-ml-px-10 bg-primary">ID: ' + response.data.rfs.id + '</span>';
+      popup.find('.modal-header h4').empty().append(title);
+
+      popup.find('.modal-body').removeClass('text-center').empty()
+        .append(response.data.html_info);
+
+      bind_datad(popup);
+      popup.modal('show');
+
+    })
+    .catch(error => {
+      if (error.response.data && Object.values(error.response.data).length) {
+        Object.values(error.response.data).forEach(function (v, k) {
+          message_from_toast('error', acmcfs.message_title_error, v);
+        });
+      }
+    });
+
+  return false;
+}
 function kas_date_check_restaurant_data_hour_bill(hour, date, restaurant) {
   var wrap = $('#wrap_hour_bill');
 

@@ -64,7 +64,7 @@
                 </td>
                 @foreach($restaurants as $restaurant)
                   <td class="td_restaurant p-1 td_restaurant_{{$restaurant->id}}" data-value="{{$restaurant->id}}">
-                    <button type="button" onclick="kas_date_check_restaurant_data({{$restaurant->id}})" class="btn btn-sm btn-secondary w-50 acm-float-right total_photos d-none">
+                    <button type="button" onclick="kas_date_check_restaurant_data_photo({{$restaurant->id}})" class="btn btn-sm btn-secondary w-50 acm-float-right total_photos d-none">
                       <div>
                         Total Photos: <div class="total_photos">0</div>
                       </div>
@@ -155,20 +155,6 @@
     </div>
 
   </div>
-
-  <div class="modal animate__animated animate__zoomIn" id="modal_checker_restaurant_date" aria-hidden="true"  data-bs-backdrop="static" data-bs-keyboard="false">
-    <div class="modal-dialog modal-xl acm-modal-xxl" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h4 class="modal-title text-danger fw-bold"></h4>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-
-        </div>
-      </div>
-    </div>
-  </div>
 @endsection
 
 @section('js_end')
@@ -179,7 +165,7 @@
 
     $(document).ready(function() {
 
-      // $('#frm_checker_month .wrap-btns button.btn-ok').click();
+      $('#frm_checker_month .wrap-btns button.btn-ok').click();
 
       //date only
       if ($('.date_only').length) {
@@ -190,8 +176,21 @@
           format: 'dd/mm/yyyy',
           orientation: isRtl ? 'auto right' : 'auto left'
         });
-        $('.date_only').val('27/08/2024').trigger('change');
+        $('.date_only').val('{{date('d/m/Y', strtotime('-1 days', time()))}}').trigger('change');
+        // $('.date_only').val('27/08/2024').trigger('change');
       }
+
+      //keyCode
+      $(document).keydown(function(e) {
+        // console.log(e.keyCode);
+        if ($('#modal_food_scan_info').hasClass('show')) {
+          if (e.keyCode == 37) {
+            sensor_food_scan_info_action();
+          } else if (e.keyCode == 39) {
+            sensor_food_scan_info_action(1);
+          }
+        }
+      });
 
     });
   </script>

@@ -501,6 +501,7 @@ class KasController extends Controller
       ->distinct()
       ->selectRaw('HOUR(time_photo) as hour')
       ->where('deleted', 0)
+      ->whereIn('status', ['checked', 'failed'])
       ->whereDate('time_photo', $date)
       ->whereIn('restaurant_id', $select_sensors)
       ->orderBy('hour', 'asc');
@@ -525,12 +526,53 @@ class KasController extends Controller
 
       'restaurant' => $restaurant_parent->get_info(),
       'html' => $html,
+    ]);
+  }
 
-      'query1' => SysCore::str_db_query($select1),
-      'item1s' => $select1->get(),
+  public function date_check_restaurant_photo(Request $request)
+  {
+    $values = $request->post();
 
-      'query2' => SysCore::str_db_query($select2),
-      'item2s' => $select2->get(),
+    //required
+    $validator = Validator::make($values, [
+      'date' => 'required|string',
+      'restaurant' => 'required',
+    ]);
+    if ($validator->fails()) {
+      return response()->json($validator->errors(), 422);
+    }
+
+    $temps = array_filter(explode('/', $values['date']));
+    $date = $temps[2] . '-' . $temps[1] . '-' . $temps[0];
+
+    $restaurant_parent = RestaurantParent::find((int)$values['restaurant']);
+    $select_sensors = Restaurant::select('id')
+      ->where('restaurant_parent_id', $restaurant_parent->id)
+      ->where('deleted', 0);
+
+    $select = RestaurantFoodScan::query()
+      ->distinct()
+      ->select('id')
+      ->where('deleted', 0)
+      ->whereIn('status', ['checked', 'failed'])
+      ->whereDate('time_photo', $date)
+      ->whereIn('restaurant_id', $select_sensors)
+      ->orderBy('id', 'asc');
+
+    $items = $select->get()->toArray();
+
+    $total_items = count($items);
+    $items = array_column($items, 'id');
+    $itd = $items[0];
+    $items = implode(';', $items);
+
+    return response()->json([
+      'status' => true,
+
+      'items' => $items,
+      'total_items' => $total_items,
+
+      'itd' => $itd,
     ]);
   }
 

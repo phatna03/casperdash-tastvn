@@ -283,4 +283,18 @@ $version = '121';
       </div>
     </div>
   </div>
+  <!-- modal kas checker restaurant date -->
+  <div class="modal fade" id="modal_checker_restaurant_date" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-xl acm-modal-xxl" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title text-danger fw-bold"></h4>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+
+        </div>
+      </div>
+    </div>
+  </div>
 @endauth

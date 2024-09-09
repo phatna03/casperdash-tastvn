@@ -442,9 +442,14 @@ class ReportController extends Controller
 
     //predictions
     $apid = (array)json_decode($rfs->rbf_api, true);
-    if (count($apid)) {
-      $rbf_predictions = $apid['result']['predictions'];
+    $rbf_predictions = isset($apid['result']) && isset($apid['result']['predictions'])
+      ? (array)$apid['result']['predictions'] : [];
+    if (!count($rbf_predictions)) {
+      //old
+      $rbf_predictions = isset($apid['predictions']) && isset($apid['predictions'])
+        ? (array)$apid['predictions'] : [];
     }
+
     //model2
     if ($rfs->rbf_model) {
       $api2 = (array)json_decode($rfs->rbf_api_2, true);
@@ -788,9 +793,14 @@ class ReportController extends Controller
 
     //predictions
     $apid = (array)json_decode($rfs->rbf_api, true);
-    if (count($apid)) {
-      $rbf_predictions = $apid['predictions'];
+    $rbf_predictions = isset($apid['result']) && isset($apid['result']['predictions'])
+      ? (array)$apid['result']['predictions'] : [];
+    if (!count($rbf_predictions)) {
+      //old
+      $rbf_predictions = isset($apid['predictions']) && isset($apid['predictions'])
+        ? (array)$apid['predictions'] : [];
     }
+
     //model2
     if ($rfs->rbf_model) {
       $api2 = (array)json_decode($rfs->rbf_api_2, true);

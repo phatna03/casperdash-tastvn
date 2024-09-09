@@ -445,7 +445,7 @@
 }
 
 .acm-modal-xxl {
-  max-width: 90%;
+  max-width: 95%;
 }
 
 .acm-modal-arrow {
@@ -744,6 +744,10 @@
 
 #lcl_txt {
   padding: 5px !important;
+  /*z-index: 999999999101;*/
+}
+#lcl_window {
+  /*z-index: 99999999910;*/
 }
 
 .wrap_notes {
