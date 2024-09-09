@@ -639,7 +639,7 @@ class RestaurantFoodScan extends Model
         ]);
 //        var_dump($ingredients_missing);
 
-        if (count($ingredients_missing) < 4) {
+        if (count($ingredients_missing) < 5) {
           Storage::append($file_log, '*************************************************************************'
             . 'STEP_10_' . date('Y_m_d_H_i_s') . '_' . SysCore::time_to_ms());
           Storage::append($file_log, 'FILE= INGRDEIENT MISSING ' . count($ingredients_missing));

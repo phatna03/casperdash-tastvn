@@ -156,7 +156,7 @@
 
   </div>
 
-  <div class="modal animate__animated animate__zoomIn" id="modal_checker_restaurant_date" aria-hidden="true">
+  <div class="modal animate__animated animate__zoomIn" id="modal_checker_restaurant_date" aria-hidden="true"  data-bs-backdrop="static" data-bs-keyboard="false">
     <div class="modal-dialog modal-xl acm-modal-xxl" role="document">
       <div class="modal-content">
         <div class="modal-header">
