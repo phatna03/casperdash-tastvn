@@ -641,6 +641,7 @@ class KasController extends Controller
         )
         ->leftJoin('restaurants', 'restaurant_food_scans.restaurant_id', '=', 'restaurants.id')
         ->where('restaurant_food_scans.deleted', 0)
+        ->whereIn('restaurant_food_scans.status', ['checked', 'failed'])
         ->whereDate('restaurant_food_scans.time_photo', $date)
         ->whereIn('restaurant_food_scans.restaurant_id', $select_sensors)
         ->whereRaw('HOUR(restaurant_food_scans.time_photo) = ' . (int)$hour)

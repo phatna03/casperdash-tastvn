@@ -284,7 +284,9 @@ $version = '121';
     </div>
   </div>
   <!-- modal kas checker restaurant date -->
-  <div class="modal fade" id="modal_checker_restaurant_date" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+  <div class="modal fade" id="modal_checker_restaurant_date" aria-hidden="true"
+{{--       data-bs-backdrop="static" data-bs-keyboard="false"--}}
+  >
     <div class="modal-dialog modal-xl acm-modal-xxl" role="document">
       <div class="modal-content">
         <div class="modal-header">

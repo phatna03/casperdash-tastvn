@@ -913,7 +913,9 @@ Route::get('/datatable/kas/foods', function (Request $request) {
   $select = App\Models\KasItem::query();
 
   if ($order_default) {
-    $select->orderBy('updated_at', 'desc')
+    $select
+      ->orderBy('food_id', 'desc')
+      ->orderBy('updated_at', 'desc')
       ->orderBy('id', 'desc');
   }
 
