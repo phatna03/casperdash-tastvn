@@ -68,6 +68,7 @@ class KasController extends Controller
     $rows = KasWebhook::where('type', 'cart_info')
       ->where('restaurant_id', 0)
       ->orderBy('id', 'asc')
+      ->limit(100)
       ->get();
 
     if (count($rows)) {
@@ -207,65 +208,6 @@ class KasController extends Controller
         $row->update([
           'restaurant_id' => 999,
         ]);
-      }
-    }
-
-    $rows = KasItem::all();
-    if (count($rows)) {
-
-      $foods = Food::where('deleted', 0)
-        ->get();
-
-      foreach ($rows as $row) {
-
-        $food1 = 0;
-        foreach ($foods as $food) {
-          if (mb_strtolower($row->item_name) == mb_strtolower($food->name)) {
-            $food1 = $food;
-
-            break;
-          }
-        }
-
-        if ($food1) {
-          $row->update([
-            'web_food_id' => $food1->id,
-            'web_food_name' => $food1->name,
-
-            'food_id' => $food1->id,
-            'food_name' => $food1->name,
-          ]);
-        }
-        else {
-          $food2 = 0;
-          foreach ($foods as $food) {
-            $temps = array_filter(explode('-', $food->name));
-
-            if (count($temps)) {
-              foreach ($temps as $temp_text) {
-                if ($food2) {
-                  break;
-                }
-
-                if (mb_strtolower($row->item_name) == mb_strtolower($temp_text)) {
-                  $food2 = $food;
-
-                  break;
-                }
-              }
-            }
-          }
-
-          if ($food2) {
-            $row->update([
-              'web_food_id' => $food2->id,
-              'web_food_name' => $food2->name,
-
-              'food_id' => $food2->id,
-              'food_name' => $food2->name,
-            ]);
-          }
-        }
       }
     }
 
@@ -599,7 +541,9 @@ class KasController extends Controller
 
       $select = KasBill::query('kas_bills')
         ->distinct()
-        ->select('kas_bills.id', 'kas_bills.bill_id', 'kas_bills.note', 'kas_bills.status')
+        ->select('kas_bills.id', 'kas_bills.bill_id', 'kas_bills.note',
+          'kas_bills.status', 'kas_bills.time_create', 'kas_bills.time_payment'
+        )
         ->leftJoin('kas_restaurants', 'kas_restaurants.id', '=', 'kas_bills.kas_restaurant_id')
         ->where('kas_restaurants.restaurant_parent_id', $restaurant_parent->id)
         ->where('kas_bills.date_create', $date)
@@ -617,6 +561,9 @@ class KasController extends Controller
             'bill_kas_id' => $row->bill_id,
             'bill_status' => $row->status,
             'bill_note' => $row->note,
+
+            'bill_time_create' => $row->time_create,
+            'bill_time_payment' => $row->time_payment,
 
             'orders' => $row->get_orders_info(),
           ];

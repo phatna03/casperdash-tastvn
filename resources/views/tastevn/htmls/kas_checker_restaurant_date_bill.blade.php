@@ -11,6 +11,13 @@
   </div>
 
   <div class="acm-clearfix hour_bill_content_data hour_bill_content_data_{{$item['bill_id']}} d-none">
+    <div class="acm-ml-px-5 text-primary fw-bold">
+      <span>+ Created At: <span class="text-dark">{{date('d/m/Y H:i:s', strtotime($item['bill_time_create']))}}</span></span>
+    </div>
+    <div class="acm-ml-px-5 text-primary fw-bold">
+      <span>+ Payment At: <span class="text-dark">{{date('d/m/Y H:i:s', strtotime($item['bill_time_payment']))}}</span></span>
+    </div>
+
     @foreach($item['orders'] as $order)
       <div class="hour_bill_content_order">
         <div class="acm-ml-px-5 text-primary fw-bold">

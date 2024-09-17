@@ -63,7 +63,11 @@ class Kernel extends ConsoleKernel
       ->everySecond()
       ->runInBackground();
 
-//    $schedule->command('web:photo-get', [1, 9])
+    $schedule->command('web:photo-get', [1, 9])
+      ->withoutOverlapping()
+      ->everySecond()
+      ->runInBackground();
+//    $schedule->command('web:photo-get', [1, 10])
 //      ->withoutOverlapping()
 //      ->everySecond()
 //      ->runInBackground();
@@ -78,6 +82,13 @@ class Kernel extends ConsoleKernel
     //every 1h
 //    web:photo-check
     $schedule->command('web:photo-check')
+      ->hourly()
+      ->withoutOverlapping()
+      ->runInBackground();
+
+    //every 1h
+//    kas:bill-check
+    $schedule->command('kas:bill-check')
       ->hourly()
       ->withoutOverlapping()
       ->runInBackground();

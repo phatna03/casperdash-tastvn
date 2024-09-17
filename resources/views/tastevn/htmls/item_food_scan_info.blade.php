@@ -226,7 +226,7 @@
                     <label class="acm-lbl-dark text-primary">+ Ingredients Missing:</label>
                   </div>
                   <div class="overflow-hidden">
-                    @if(count($ingredients_missing) && $rfs->found_by != 'usr' && $confidence_group < 3)
+                    @if(count($ingredients_missing) && $confidence_group < 3)
                       @php
                         foreach($ingredients_missing as $ing):
                         $ing_name = \App\Api\SysRobo::burger_ingredient_chicken_beef($ing['name']);

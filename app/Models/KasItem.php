@@ -22,5 +22,7 @@ class KasItem extends Model
 
     'food_id',
     'food_name',
+
+    'date_check',
   ];
 }
