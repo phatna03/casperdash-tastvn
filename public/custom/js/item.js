@@ -2210,8 +2210,6 @@ function sys_setting() {
 
   axios.post('/admin/setting/update', {
     s3_region: form.find('input[name=s3_region]').val(),
-    s3_api_key: form.find('input[name=s3_api_key]').val(),
-    s3_api_secret: form.find('input[name=s3_api_secret]').val(),
     rbf_api_key: form.find('input[name=rbf_api_key]').val(),
     rbf_dataset_scan: form.find('input[name=rbf_dataset_scan]').val(),
     rbf_dataset_ver: form.find('input[name=rbf_dataset_ver]').val(),

@@ -35,24 +35,6 @@
             <label for="s3-region">Region</label>
           </div>
         </div>
-        <div class="col-md-3">
-          <div class="form-floating form-floating-outline">
-            <input type="text" name="s3_api_key" id="s3-api-key" class="form-control text-center"
-                   value="{{isset($pageConfigs['settings']['s3_api_key']) ? $pageConfigs['settings']['s3_api_key'] : ''}}"
-                   disabled
-            />
-            <label for="s3-api-key">API Key</label>
-          </div>
-        </div>
-        <div class="col-md-3">
-          <div class="form-floating form-floating-outline">
-            <input type="text" name="s3_api_secret" id="s3-secret-key" class="form-control text-center"
-                   value="{{isset($pageConfigs['settings']['s3_api_secret']) ? $pageConfigs['settings']['s3_api_secret'] : ''}}"
-                   disabled
-            />
-            <label for="s3-secret-key">API Secret Key</label>
-          </div>
-        </div>
       </div>
       <hr class="my-4 mx-n4" />
       <h6>2. Roboflow</h6>

@@ -368,8 +368,8 @@ class SysApp
     return [
       'aws_s3' => [
         's3_region' => $this->get_setting('s3_region'),
-        's3_api_key' => $this->get_setting('s3_api_key'),
-        's3_api_secret' => $this->get_setting('s3_api_secret'),
+//        's3_api_key' => $this->get_setting('s3_api_key'),
+//        's3_api_secret' => $this->get_setting('s3_api_secret'),
       ],
       'roboflow' => [
         'rbf_api_key' => $this->get_setting('rbf_api_key'),
