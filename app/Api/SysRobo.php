@@ -79,6 +79,12 @@ class SysRobo
         'bucket' => 's3_bucket_deli',
         'folder' => '/58-5b-69-21-f7-c5/',
       ],
+      //MGO 160 NTH
+      'raumuong' => [
+        'restaurant' => 'deli',
+        'bucket' => 's3_bucket_deli',
+        'folder' => '/58-5b-69-21-f7-cd/',
+      ],
     ];
   }
 

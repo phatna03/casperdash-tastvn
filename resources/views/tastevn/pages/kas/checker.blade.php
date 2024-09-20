@@ -64,13 +64,15 @@
                 </td>
                 @foreach($restaurants as $restaurant)
                   <td class="td_restaurant p-1 td_restaurant_{{$restaurant->id}}" data-value="{{$restaurant->id}}">
-                    <button type="button" onclick="kas_date_check_restaurant_data_photo({{$restaurant->id}})" class="btn btn-sm btn-secondary w-50 acm-float-right total_photos d-none">
+                    <button type="button" class="btn btn-sm btn-secondary p-1 w-50 acm-float-right total_photos d-none"
+                            onclick="kas_date_check_restaurant_data_photo({{$restaurant->id}})" >
                       <div>
                         Total Photos: <div class="total_photos">0</div>
                       </div>
                     </button>
 
-                    <button type="button" onclick="kas_date_check_restaurant_data({{$restaurant->id}})" class="btn btn-sm btn-primary w-50 acm-float-left total_orders d-none">
+                    <button type="button" class="btn btn-sm btn-primary p-1 w-50 acm-float-left total_orders d-none"
+                            onclick="kas_date_check_restaurant_data({{$restaurant->id}})" >
                       <div>
                         Total Bills: <div class="total_orders">0</div>
                       </div>

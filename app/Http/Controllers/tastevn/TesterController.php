@@ -59,6 +59,7 @@ use App\Models\ReportPhoto;
 use App\Models\ReportFood;
 use App\Models\ZaloUser;
 use App\Models\ZaloUserSend;
+use App\Models\TastevnItem;
 
 use Zalo\Zalo;
 use Zalo\Builder\MessageBuilder;
@@ -85,13 +86,15 @@ class TesterController extends Controller
     //=======================================================================================
     //=======================================================================================
 
-//    $datas = json_decode($kas->params, true);
-//    var_dump($datas);
+    $rows = KasItem::where('item_code', 'NOT LIKE', '%CUSTOMIZE%')
+      ->get();
 
-//    SysKas::bill_food_sync();
+    var_dump(count($rows));
 
-//    $apid = (array)json_decode($rfs->rbf_api, true);
-//    var_dump($apid);
+    foreach ($rows as $row) {
+      SysCore::var_dump_break();
+      var_dump($row->item_code . ' - ' . $row->item_name);
+    }
 
     //=======================================================================================
     //=======================================================================================
@@ -248,7 +251,7 @@ class TesterController extends Controller
 //    ]);
 //    $this->checked_notify_remove();
 //    $this->checked_food_category_update();
-    $this->checked_zalo_user_get();
+//    $this->checked_zalo_user_get();
 //    $this->kas_time_sheet([
 //      'date_from' => '2024-09-09',
 //      'date_to' => '2024-09-09',
@@ -282,10 +285,75 @@ class TesterController extends Controller
   {
     $values = $request->post();
 
+    $datas = (new ImportData())->toArray($request->file('excel'));
+    if (!count($datas) || !count($datas[0])) {
+      return response()->json([
+        'error' => 'Invalid data'
+      ], 404);
+    }
 
+    $restaurant_parent_id = 6;
+//    echo '<pre>';var_dump($datas);die;
+    $count = 0;
+
+    $foods = Food::where('deleted', 0)
+      ->get();
+
+    DB::beginTransaction();
+    try {
+
+      foreach ($datas[0] as $k => $data) {
+
+        $col1 = trim($data[0]);
+        $col2 = trim($data[1]);
+
+        if (empty($col1) || empty($col2)) {
+          break;
+        }
+
+        $row = TastevnItem::where('restaurant_parent_id', $restaurant_parent_id)
+          ->where('item_code', $col1)
+          ->first();
+        if ($row) {
+          continue;
+        }
+
+        $food1 = 0;
+        foreach ($foods as $food) {
+          if (mb_strtolower($col2) == mb_strtolower($food->name)) {
+            $food1 = $food;
+
+            break;
+          }
+        }
+
+        $row = TastevnItem::create([
+          'restaurant_parent_id' => $restaurant_parent_id,
+          'item_code' => $col1,
+          'item_name' => $col2,
+
+          'food_id' => $food1 ? $food1->id : NULL,
+          'food_name' => $food1 ? $food1->name : NULL,
+        ]);
+
+        $count++;
+      }
+
+      DB::commit();
+
+    } catch (\Exception $e) {
+      DB::rollback();
+
+      return response()->json([
+        'status' => false,
+        'count' => $count,
+        'error' => $e->getMessage()
+      ], 422);
+    }
 
     return response()->json([
       'status' => true,
+      'count' => $count,
     ]);
   }
 

@@ -22,13 +22,15 @@ for($d = $total_days; $d > 0; $d--):
   $dnone1 = !$bill ? 'd-none' : '';
   @endphp
     <td class="td_restaurant p-1 td_restaurant_{{$restaurant->id}}" data-value="{{$restaurant->id}}">
-      <button type="button" onclick="kas_date_check_restaurant_data_photo({{$restaurant->id}}, '{{$datas[$restaurant->id][$date]['date_text']}}')" class="btn btn-sm btn-secondary w-50 acm-float-right total_photos {{$dnone2}}">
+      <button type="button" class="btn btn-sm btn-secondary p-1 w-50 acm-float-right total_photos {{$dnone2}}"
+              onclick="kas_date_check_restaurant_data_photo({{$restaurant->id}}, '{{$datas[$restaurant->id][$date]['date_text']}}')">
         <div>
           Total Photos: <div class="total_photos">{{$photo}}</div>
         </div>
       </button>
 
-      <button type="button" onclick="kas_date_check_restaurant_data({{$restaurant->id}}, '{{$datas[$restaurant->id][$date]['date_text']}}')" class="btn btn-sm btn-primary w-50 acm-float-left total_orders {{$dnone1}}">
+      <button type="button" class="btn btn-sm btn-primary p-1 w-50 acm-float-left total_orders {{$dnone1}}"
+              onclick="kas_date_check_restaurant_data({{$restaurant->id}}, '{{$datas[$restaurant->id][$date]['date_text']}}')" >
         <div>
           Total Bills: <div class="total_orders">{{$bill}}</div>
         </div>
