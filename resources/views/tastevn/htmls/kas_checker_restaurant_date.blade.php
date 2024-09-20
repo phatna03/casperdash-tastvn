@@ -13,7 +13,9 @@
       @foreach($stats as $stat)
         <tr>
           <td>
-            <div class="text-dark">{{$stat['food_name']}}</div>
+            <div class="text-dark">
+              <div>{{$stat['item_name'] != $stat['food_name'] ? $stat['item_code'] . ' - ' . $stat['item_name'] : $stat['item_code'] . ' - ' . $stat['food_name']}}</div>
+            </div>
           </td>
           <td>
             <div class="text-dark text-center fnumber">{{$stat['total_quantity_kas']}}</div>

@@ -3,7 +3,7 @@
   <div class="acm-clearfix">
     <button type="button" onclick="kas_date_check_restaurant_data_hour_bill_item(this, '{{$item['bill_id']}}')"
             class="btn btn-sm btn-outline-primary acm-fs-16">
-      <span>Bill {{$item['bill_kas_id']}} - (<b>{{count($item['orders'])}}</b> orders)</span>
+      <span>Bill {{$item['bill_kas_id']}} - (<b>{{count($item['orders'])}}</b> orders) - status = {{$item['bill_status']}}</span>
       @if(!empty($item['bill_note']))
         <span class="acm-ml-px-5">- {{$item['bill_note']}}</span>
       @endif

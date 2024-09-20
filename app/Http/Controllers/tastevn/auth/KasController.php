@@ -626,7 +626,7 @@ class KasController extends Controller
         ->leftJoin('kas_restaurants', 'kas_restaurants.id', '=', 'kas_bills.kas_restaurant_id')
         ->where('kas_restaurants.restaurant_parent_id', $restaurant_parent->id)
         ->where('kas_bills.date_create', $date)
-        ->where('kas_bills.status', 'paid')
+//        ->where('kas_bills.status', 'paid')
         ->whereRaw('HOUR(kas_bills.time_create) = ' . (int)$hour)
         ->orderBy('kas_bills.bill_id', 'asc');
       $rows = $select->get();
