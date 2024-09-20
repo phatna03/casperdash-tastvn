@@ -331,7 +331,7 @@ class KasController extends Controller
         ->leftJoin('kas_restaurants', 'kas_restaurants.id', '=', 'kas_bills.kas_restaurant_id')
         ->whereMonth('kas_bills.date_create', $month)
         ->whereYear('kas_bills.date_create', $year)
-        ->where('kas_bills.status', 'paid')
+//        ->where('kas_bills.status', 'paid')
         ->where('kas_restaurants.restaurant_parent_id', $restaurant->id)
         ->orderBy('kas_bills.date_create', 'desc')
         ->groupBy('kas_bills.date_create')
