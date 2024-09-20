@@ -1,4 +1,33 @@
 <div class="row">
+  @if (count($stats))
+  <div class="col-lg-12 mb-1 acm-clearfix">
+    <table class="table table-bordered table-sm">
+      <thead>
+      <tr>
+        <td class="text-dark bg-secondary-subtle fw-bold">Dish name</td>
+        <td class="text-dark bg-secondary-subtle fw-bold">Total quantity from KAS</td>
+        <td class="text-dark bg-secondary-subtle fw-bold">Total quantity from Sensor</td>
+      </tr>
+      </thead>
+      <tbody>
+      @foreach($stats as $stat)
+        <tr>
+          <td>
+            <div class="text-dark">{{$stat['food_name']}}</div>
+          </td>
+          <td>
+            <div class="text-dark text-center fnumber">{{$stat['total_quantity_kas']}}</div>
+          </td>
+          <td>
+            <div class="text-dark text-center fnumber">{{isset($stat['total_quantity_web']) && (int)$stat['total_quantity_web'] ? (int)$stat['total_quantity_web'] : ''}}</div>
+          </td>
+        </tr>
+      @endforeach
+      </tbody>
+    </table>
+  </div>
+  @endif
+
   <div class="col-lg-6 mb-1 acm-clearfix" id="wrap_hour_bill">
     <div class="acm-float-left acm-mr-px-5 acm-text-right">
       <div class="mb-1">

@@ -435,10 +435,87 @@ class KasController extends Controller
     $date = $temps[2] . '-' . $temps[1] . '-' . $temps[0];
 
     $restaurant_parent = RestaurantParent::find((int)$values['restaurant']);
+    $kas_restaurant = KasRestaurant::where('restaurant_parent_id', (int)$values['restaurant'])
+      ->first();
+
     $select_sensors = Restaurant::select('id')
       ->where('restaurant_parent_id', $restaurant_parent->id)
       ->where('deleted', 0);
 
+    //stat
+    $select = KasBillOrderItem::query('kas_bill_order_items')
+      ->select('kas_items.item_code', 'kas_items.item_name', 'kas_items.food_id', 'kas_items.food_name')
+      ->selectRaw('COUNT(kas_bill_order_items.id) as total_quantity_kas')
+      ->leftJoin('kas_items', 'kas_bill_order_items.kas_item_id', '=', 'kas_items.id')
+      ->leftJoin('kas_bill_orders', 'kas_bill_order_items.kas_bill_order_id', '=', 'kas_bill_orders.id')
+      ->leftJoin('kas_bills', 'kas_bill_orders.kas_bill_id', '=', 'kas_bills.id')
+      ->where('kas_bill_order_items.status', '<>', 'deleted')
+      ->where('kas_bills.kas_restaurant_id', $kas_restaurant->id)
+      ->where('kas_bills.date_create', $date)
+      ->where('kas_bills.status', 'paid')
+      ->where('kas_items.food_id', '>', 0)
+      ->groupBy('kas_items.item_code', 'kas_items.item_name', 'kas_items.food_id', 'kas_items.food_name')
+      ->orderByRaw('total_quantity_kas desc')
+      ->orderByRaw('TRIM(LOWER(kas_items.food_name))')
+      ->orderBy('kas_items.food_id', 'desc');
+    $rows = $select->get()->toArray();
+
+    $temps = $rows;
+    $table1 = $rows;
+    $table2 = [];
+    if (count($rows)) {
+      $food_ids = array_column($rows, 'food_id');
+
+      $select = RestaurantFoodScan::query('restaurant_food_scans')
+        ->select('restaurant_food_scans.food_id', 'foods.name')
+        ->selectRaw('COUNT(restaurant_food_scans.id) as total_quantity_web')
+        ->leftJoin('restaurants', 'restaurant_food_scans.restaurant_id', '=', 'restaurants.id')
+        ->leftJoin('foods', 'restaurant_food_scans.food_id', '=', 'foods.id')
+        ->where('restaurant_food_scans.deleted', 0)
+        ->whereIn('restaurant_food_scans.status', ['checked', 'failed'])
+        ->whereDate('restaurant_food_scans.time_photo', $date)
+        ->whereIn('restaurant_food_scans.restaurant_id', $select_sensors)
+        ->where('restaurant_food_scans.food_id', '>', 0)
+        ->whereIn('restaurant_food_scans.food_id', $food_ids)
+        ->groupBy('restaurant_food_scans.food_id', 'foods.name')
+        ->orderByRaw('total_quantity_web desc')
+        ->orderByRaw('TRIM(LOWER(foods.name))')
+        ->orderBy('restaurant_food_scans.food_id', 'desc');
+      $photos = $select->get()->toArray();
+
+      if (count($photos)) {
+        $temps = [];
+
+        foreach ($photos as $photo) {
+          foreach ($rows as $row) {
+
+            if ($row['food_id'] == $photo['food_id']) {
+
+              $temps[] = [
+                'item_code' => $row['item_code'],
+                'item_name' => $row['item_name'],
+                'food_id' => $row['food_id'],
+                'food_name' => $row['food_name'],
+                'total_quantity_kas' => $row['total_quantity_kas'],
+                'total_quantity_web' => $photo['total_quantity_web'],
+              ];
+            } else {
+
+              $temps[] = [
+                'item_code' => $row['item_code'],
+                'item_name' => $row['item_name'],
+                'food_id' => $row['food_id'],
+                'food_name' => $row['food_name'],
+                'total_quantity_kas' => $row['total_quantity_kas'],
+                'total_quantity_web' => 0,
+              ];
+            }
+          }
+        }
+      }
+    }
+
+    //photo
     $select2 = RestaurantFoodScan::query()
       ->distinct()
       ->selectRaw('HOUR(time_photo) as hour')
@@ -448,6 +525,7 @@ class KasController extends Controller
       ->whereIn('restaurant_id', $select_sensors)
       ->orderBy('hour', 'asc');
 
+    //bill
     $select1 = KasBill::query('kas_bills')
       ->distinct()
       ->selectRaw('HOUR(time_create) as hour')
@@ -459,6 +537,7 @@ class KasController extends Controller
     $html = view('tastevn.htmls.kas_checker_restaurant_date')
       ->with('restaurant', $restaurant_parent)
       ->with('date', $date)
+      ->with('stats', $temps)
       ->with('hour1s', $select1->get())
       ->with('hour2s', $select2->get())
       ->render();
