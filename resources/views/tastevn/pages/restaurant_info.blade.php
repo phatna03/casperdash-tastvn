@@ -305,6 +305,33 @@
                   <label for="scan-search-users">Commentators</label>
                 </div>
               </div>
+
+              <div class="col-md-6 mb-2 dev_photo_add d-none">
+                <div class="form-floating form-floating-outline">
+                  <input type="text" class="form-control text-center border-danger border-2" name="photo_url"
+                         id="scan-search-photo" autocomplete="off"/>
+                  <label for="scan-search-photo">Photo URL</label>
+                </div>
+              </div>
+              <div class="col-md-2 mb-2 dev_photo_add d-none">
+                <div class="form-floating form-floating-outline">
+                  <input type="text" class="form-control text-center border-danger border-2" name="dataset"
+                         id="scan-search-dataset" autocomplete="off"/>
+                  <label for="scan-search-dataset">Dataset</label>
+                </div>
+              </div>
+              <div class="col-md-2 mb-2 dev_photo_add d-none">
+                <div class="form-floating form-floating-outline">
+                  <input type="text" class="form-control text-center border-danger border-2" name="version"
+                         id="scan-search-version" autocomplete="off"/>
+                  <label for="scan-search-version">Version</label>
+                </div>
+              </div>
+              <div class="col-md-2 mb-2 dev_photo_add d-none">
+                <button type="button" class="btn btn-danger" onclick="photo_check()">
+                  <i class="mdi mdi-check acm-mr-px-5"></i> Check photo
+                </button>
+              </div>
             </div>
           </form>
         </div>
@@ -862,11 +889,10 @@
       buttons: [
         @if($pageConfigs['debug'])
         {
-          text: '<i class="mdi mdi-robot-confused me-0 me-sm-1"></i><span class="d-none d-sm-inline-block">Re-train Roboflow</span>',
-          className: 'add-new btn btn-danger waves-effect waves-light acm-mr-px-10',
+          text: '<i class="mdi mdi-plus me-0 me-sm-1"></i><span class="d-none d-sm-inline-block">Add photo</span>',
+          className: 'add-new btn btn-primary waves-effect waves-light acm-mr-px-10',
           attr: {
-            'data-bs-toggle': 'modal',
-            'data-bs-target': '#modal_roboflow_retraining',
+            'onclick': 'photo_add()',
           }
         },
         @endif
@@ -978,6 +1004,36 @@
       }
 
       return html;
+    }
+
+    function photo_add() {
+      $('.dev_photo_add').toggleClass('d-none');
+    }
+
+    function photo_check() {
+      var form = $('#datatable-listing-scan form');
+
+      axios.post('/tester/photo/check', {
+        sensor: {{$pageConfigs['item']->id}},
+        photo: form.find('input[name=photo_url]').val(),
+        dataset: form.find('input[name=dataset]').val(),
+        version: form.find('input[name=version]').val(),
+      })
+        .then(response => {
+
+          datatable_listing_scan_refresh();
+
+        })
+        .catch(error => {
+          console.log(error);
+          if (error.response.data && Object.values(error.response.data).length) {
+            Object.values(error.response.data).forEach(function (v, k) {
+              message_from_toast('error', acmcfs.message_title_error, v);
+            });
+          }
+        });
+
+      return false;
     }
   </script>
 @endsection

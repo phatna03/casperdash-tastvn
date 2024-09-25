@@ -74,6 +74,8 @@ class TesterController extends Controller
 
     $sys_app = new SysApp();
 
+    $values = $request->all();
+
     $restaurant = RestaurantParent::find(1);
     $sensor = Restaurant::find(5);
     $rfs = RestaurantFoodScan::find(99668);
@@ -86,94 +88,13 @@ class TesterController extends Controller
     //=======================================================================================
     //=======================================================================================
 
-    $date = '2024-09-18';
-    $kas_restaurant = KasRestaurant::find(4);
-    $restaurant_parent = RestaurantParent::find(5);
-
-    $select_sensors = Restaurant::select('id')
-      ->where('restaurant_parent_id', $restaurant_parent->id)
-      ->where('deleted', 0);
-
-//stat
-    $select = KasBillOrderItem::query('kas_bill_order_items')
-      ->select('kas_items.item_code', 'kas_items.item_name', 'kas_items.food_id', 'kas_items.food_name')
-      ->selectRaw('COUNT(kas_bill_order_items.id) as total_quantity_kas')
-      ->leftJoin('kas_items', 'kas_bill_order_items.kas_item_id', '=', 'kas_items.id')
-      ->leftJoin('kas_bill_orders', 'kas_bill_order_items.kas_bill_order_id', '=', 'kas_bill_orders.id')
-      ->leftJoin('kas_bills', 'kas_bill_orders.kas_bill_id', '=', 'kas_bills.id')
-      ->where('kas_bill_order_items.status', '<>', 'deleted')
-      ->where('kas_bills.kas_restaurant_id', $kas_restaurant->id)
-      ->where('kas_bills.date_create', $date)
-      ->where('kas_bills.status', 'paid')
-      ->where('kas_items.food_id', '>', 0)
-      ->groupBy('kas_items.item_code', 'kas_items.item_name', 'kas_items.food_id', 'kas_items.food_name')
-      ->orderByRaw('total_quantity_kas desc')
-      ->orderByRaw('TRIM(LOWER(kas_items.food_name))')
-      ->orderBy('kas_items.food_id', 'desc');
-    $rows = $select->get()->toArray();
-
-    var_dump($rows);
-
-    $temps = $rows;
-    $table1 = $rows;
-    $table2 = [];
-    if (count($rows)) {
-      $food_ids = array_column($rows, 'food_id');
-
-      $select = RestaurantFoodScan::query('restaurant_food_scans')
-        ->select('restaurant_food_scans.food_id', 'foods.name')
-        ->selectRaw('COUNT(restaurant_food_scans.id) as total_quantity_web')
-        ->leftJoin('restaurants', 'restaurant_food_scans.restaurant_id', '=', 'restaurants.id')
-        ->leftJoin('foods', 'restaurant_food_scans.food_id', '=', 'foods.id')
-        ->where('restaurant_food_scans.deleted', 0)
-        ->whereIn('restaurant_food_scans.status', ['checked', 'failed'])
-        ->whereDate('restaurant_food_scans.time_photo', $date)
-        ->whereIn('restaurant_food_scans.restaurant_id', $select_sensors)
-        ->where('restaurant_food_scans.food_id', '>', 0)
-        ->whereIn('restaurant_food_scans.food_id', $food_ids)
-        ->groupBy('restaurant_food_scans.food_id', 'foods.name')
-        ->orderByRaw('total_quantity_web desc')
-        ->orderByRaw('TRIM(LOWER(foods.name))')
-        ->orderBy('restaurant_food_scans.food_id', 'desc');
-      $photos = $select->get()->toArray();
-
-      var_dump(SysCore::var_dump_break());
-      var_dump($photos);
-
-      if (count($photos)) {
-        $temps = [];
-
-        foreach ($photos as $photo) {
-          foreach ($rows as $row) {
-
-            if ($row['food_id'] == $photo['food_id']) {
-
-              $temps[] = [
-                'item_code' => $row['item_code'],
-                'item_name' => $row['item_name'],
-                'food_id' => $row['food_id'],
-                'food_name' => $row['food_name'],
-                'total_quantity_kas' => $row['total_quantity_kas'],
-                'total_quantity_web' => $photo['total_quantity_web'],
-              ];
-            } else {
-
-              $temps[] = [
-                'item_code' => $row['item_code'],
-                'item_name' => $row['item_name'],
-                'food_id' => $row['food_id'],
-                'food_name' => $row['food_name'],
-                'total_quantity_kas' => $row['total_quantity_kas'],
-                'total_quantity_web' => 0,
-              ];
-            }
-          }
-        }
-      }
-    }
-
-    var_dump(SysCore::var_dump_break());
-    var_dump($temps);
+//    $page = isset($values['page']) ? (int)$values['page'] : 1;
+//    SysRobo::photo_get_old([
+//      'limit' => 1,
+//      'page' => $page,
+//
+//      'hour' => 10,
+//    ]);
 
     //=======================================================================================
     //=======================================================================================
@@ -433,6 +354,107 @@ class TesterController extends Controller
     return response()->json([
       'status' => true,
       'count' => $count,
+    ]);
+  }
+
+  public function tester_photo_check(Request $request)
+  {
+    $values = $request->post();
+
+    $validator = Validator::make($values, [
+      'sensor' => 'required',
+      'photo' => 'required|string',
+    ]);
+    if ($validator->fails()) {
+      return response()->json($validator->errors(), 422);
+    }
+
+    $sensor = Restaurant::find((int)$values['sensor']);
+
+    //save img from url
+    $file_name = 'SENSOR_' . date('Y-m-d-H-i-s') . '-' . time() . '.jpg';
+    $file_path = public_path('sensors/photos') . '/' . $sensor->id . '/' . date('Y-m-d') . '/' . (int)date('H') . '/';
+    $file_path = SysCore::os_slash_file($file_path);
+    if (!file_exists($file_path)) {
+      mkdir($file_path, 0777, true);
+    }
+
+    Image::make($values['photo'])
+      ->save($file_path . $file_name, 100);
+
+    //file
+    $file = 'photos/' . $sensor->id . '/' . date('Y-m-d') . '/' . (int)date('H') . '/' . $file_name;
+
+    $rfs = RestaurantFoodScan::create([
+      'restaurant_id' => $sensor->id,
+
+      'local_storage' => 1,
+      'photo_name' => $file,
+      'photo_ext' => 'jpg',
+      'time_photo' => date('Y-m-d H:i:s'),
+
+      'status' => 'new',
+
+      'time_scan' => date('Y-m-d H:i:s'),
+    ]);
+
+    //model
+    $api_key = 'uYUCzsUbWxWRrO15iar5';
+    $dataset = isset($values['dataset']) && !empty($values['dataset']) ? $values['dataset']
+      : SysCore::str_trim_slash(SysCore::get_sys_setting('rbf_dataset_scan'));
+    $version = isset($values['version']) && !empty($values['version']) ? $values['version']
+      : SysCore::get_sys_setting('rbf_dataset_ver');
+
+    $img_url = $rfs->get_photo();
+
+    $datas = SysRobo::photo_scan([
+      'img_url' => $img_url,
+
+      'api_key' => $api_key,
+      'dataset' => $dataset,
+      'version' => $version,
+
+      'confidence' => SysRobo::_RBF_CONFIDENCE,
+      'overlap' => SysRobo::_RBF_OVERLAP,
+      'max_objects' => SysRobo::_RBF_MAX_OBJECTS,
+
+      'debug' => true,
+      'server_url' => 'https://detect.roboflow.com',
+    ]);
+
+    $no_data = false;
+    if (!count($datas) || !$datas['status']
+      || ($datas['status'] && (!isset($datas['result']['predictions'])) || !count($datas['result']['predictions']))) {
+      $no_data = true;
+    }
+
+    $rfs->update([
+      'status' => $no_data ? 'failed' : 'scanned',
+      'total_seconds' => isset($datas['result']['time']) ? $datas['result']['time'] : 0,
+      'rbf_api' => json_encode($datas),
+      'rbf_version' => json_encode([
+        'dataset' => $dataset,
+        'version' => $version,
+      ]),
+    ]);
+
+    if (!$no_data) {
+      $rfs->rfs_photo_predict([
+        'notification' => false,
+      ]);
+    }
+
+    //time_end
+    if (empty($rfs->time_end)) {
+      $rfs->update([
+        'time_end' => date('Y-m-d H:i:s'),
+      ]);
+    }
+
+    return response()->json([
+      'status' => true,
+
+      'datas' => $datas,
     ]);
   }
 

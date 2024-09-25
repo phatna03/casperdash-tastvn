@@ -481,6 +481,375 @@ class SysRobo
     ]);
   }
 
+  public static function photo_get_old($pars = [])
+  {
+    //pars
+    $debug = isset($pars['debug']) ? (bool)$pars['debug'] : false;
+    $limit = isset($pars['limit']) ? (int)$pars['limit'] : 1;
+    $page = isset($pars['page']) ? (int)$pars['page'] : 1;
+
+    //run
+    $sensor = Restaurant::where('deleted', 0)
+      ->where('restaurant_parent_id', '>', 0)
+      ->where('s3_bucket_name', '<>', NULL)
+      ->where('s3_bucket_address', '<>', NULL)
+      ->orderBy('id', 'asc')
+      ->paginate($limit, ['*'], 'page', $page)
+      ->first();
+
+    $file_log = 'public/logs/' . date('Y-m-d') . '/' . date('H') . '/cron_photo_get_old_' . $sensor->id . '.log';
+    Storage::append($file_log, SysCore::var_dump_break());
+    Storage::append($file_log, '***************************************************************************'
+      . 'START_' . date('Y_m_d_H_i_s') . '_' . SysCore::time_to_ms());
+
+    if (!$sensor) {
+      return false;
+    }
+
+    if ($debug) {
+      var_dump(SysCore::var_dump_break());
+      var_dump('SENSOR= ' . $sensor->name . ' - ID= ' . $sensor->id);
+    }
+
+    $cur_date = date('Y-m-d');
+    $cur_hour = (int)date('H');
+
+    if (isset($pars['date']) && !empty($pars['date'])) {
+      $cur_date = $pars['date'];
+    }
+    if (isset($pars['hour'])) {
+      $cur_hour = (int)$pars['hour'] ? (int)$pars['hour'] : $pars['hour'];
+    }
+
+    try {
+
+      $folder_setting = SysCore::str_trim_slash($sensor->s3_bucket_address);
+      $directory = $folder_setting . '/' . $cur_date . '/' . $cur_hour . '/';
+
+      Storage::append($file_log, 'FOLDER= ' . $directory);
+
+      $files = Storage::disk('sensors')->files($directory);
+
+      if ($debug) {
+        var_dump('FILE_LOG= ' . $file_log);
+        var_dump('DATE= ' . $cur_date);
+        var_dump('HOUR= ' . $cur_hour);
+        var_dump('SETTING= ' . $folder_setting);
+        var_dump('FOLDER= ' . $directory);
+        var_dump('TOTAL_FILES= ' . count($files));
+      }
+
+      if (count($files)) {
+        //desc
+        $files = array_reverse($files);
+        $count = 0;
+
+        Storage::append($file_log, 'TOTAL FILES= ' . count($files));
+
+        //step 1= photo check
+        foreach ($files as $file) {
+
+          Storage::append($file_log, '*************************************************************************'
+            . 'STEP_01_' . date('Y_m_d_H_i_s') . '_' . SysCore::time_to_ms());
+          Storage::append($file_log, 'FILE= ' . $file);
+
+          if ($debug) {
+            var_dump(SysCore::var_dump_break());
+            var_dump('FILE= ' . $file);
+          }
+
+          $rfs = NULL;
+
+          $ext = array_filter(explode('.', $file));
+          if (!count($ext) || $ext[count($ext) - 1] != 'jpg') {
+            continue;
+          }
+
+          //no 1024
+          $temps = array_filter(explode('/', $file));
+          $photo_name = $temps[count($temps) - 1];
+          if (substr($photo_name, 0, 5) == '1024_') {
+            continue;
+          }
+
+          Storage::append($file_log, '*************************************************************************'
+            . 'STEP_02_' . date('Y_m_d_H_i_s') . '_' . SysCore::time_to_ms());
+          Storage::append($file_log, 'FILE= VALID');
+
+          //no duplicate
+          $keyword = SysRobo::photo_name_query($file);
+
+          if ($debug) {
+            var_dump('KEYWORD= ' . $keyword);
+          }
+
+          $count++;
+
+          //check exist
+          $rfs = RestaurantFoodScan::where('restaurant_id', $sensor->id)
+            ->where('photo_name', $file)
+            ->first();
+          if (!$rfs) {
+            Storage::append($file_log, '*************************************************************************'
+              . 'STEP_03_' . date('Y_m_d_H_i_s') . '_' . SysCore::time_to_ms());
+            Storage::append($file_log, 'FILE= NEW');
+
+            $status = 'new';
+
+            $rows = RestaurantFoodScan::where('photo_name', 'LIKE', $keyword)
+              ->where('restaurant_id', $sensor->id)
+              ->get();
+            if (count($rows)) {
+              $status = 'duplicated';
+            }
+
+            //1
+            $rfs = RestaurantFoodScan::create([
+              'restaurant_id' => $sensor->id,
+
+              'local_storage' => 1,
+              'photo_name' => $file,
+              'photo_ext' => 'jpg',
+              'time_photo' => date('Y-m-d H:i:s'),
+
+              'status' => $status,
+            ]);
+
+            if ($debug) {
+              var_dump('PHOTO_SAVE= ' . $rfs->id);
+            }
+
+          } else {
+
+            Storage::append($file_log, '*************************************************************************'
+              . 'STEP_03_' . date('Y_m_d_H_i_s') . '_' . SysCore::time_to_ms());
+            Storage::append($file_log, 'FILE= CREATED');
+          }
+
+          if ($debug) {
+            var_dump('PHOTO_STATUS= ' . $rfs->status);
+          }
+
+          Storage::append($file_log, 'STATUS= ' . $rfs->status);
+
+          if (in_array($rfs->status, ['checked', 'failed'])) {
+            break;
+          }
+
+          if ($rfs->status == 'new') {
+            if ($debug) {
+              var_dump('PHOTO_SCANNED= YES');
+              var_dump('PHOTO_STATUS= ' . $status);
+            }
+
+            //robot setting
+            Storage::append($file_log, '*************************************************************************'
+              . 'STEP_04_' . date('Y_m_d_H_i_s') . '_' . SysCore::time_to_ms());
+            Storage::append($file_log, 'FILE= GET SETTING');
+
+            //model 1
+            $api_key = 'uYUCzsUbWxWRrO15iar5';
+            $dataset = 'missing-dish-ingredients';
+            $version = SysCore::get_sys_setting('rbf_dataset_ver');
+
+            //model 2
+            $restaurant = $sensor->get_parent();
+            if ($restaurant->model_scan && !empty($restaurant->model_name) && !empty($restaurant->model_version)) {
+              $dataset = SysCore::str_trim_slash($restaurant->model_name);
+              $version = $restaurant->model_version;
+            }
+
+            //file 1024 create
+            Storage::append($file_log, '*************************************************************************'
+              . 'STEP_05_' . date('Y_m_d_H_i_s') . '_' . SysCore::time_to_ms());
+            Storage::append($file_log, 'FILE= CREATE 1024');
+
+            //img_1024
+            $img_url = $rfs->get_photo(); //$rfs->photo_1024_create();
+
+            //robot scan start
+            Storage::append($file_log, '*************************************************************************'
+              . 'STEP_06_' . date('Y_m_d_H_i_s') . '_' . SysCore::time_to_ms());
+            Storage::append($file_log, 'FILE= SCAN START');
+
+            //time_scan
+            if (empty($rfs->time_scan)) {
+              $rfs->update([
+                'time_scan' => date('Y-m-d H:i:s'),
+              ]);
+            }
+
+            $datas = SysRobo::photo_scan([
+              'img_url' => $img_url,
+
+              'api_key' => $api_key,
+              'dataset' => $dataset,
+              'version' => $version,
+
+              'confidence' => SysRobo::_RBF_CONFIDENCE,
+              'overlap' => SysRobo::_RBF_OVERLAP,
+              'max_objects' => SysRobo::_RBF_MAX_OBJECTS,
+
+              'debug' => $debug,
+            ]);
+
+            $no_data = false;
+            if (!count($datas) || !$datas['status']
+              || ($datas['status'] && (!isset($datas['result']['predictions'])) || !count($datas['result']['predictions']))) {
+              $no_data = true;
+            }
+
+            //robot scan end
+            Storage::append($file_log, '*************************************************************************'
+              . 'STEP_07_' . date('Y_m_d_H_i_s') . '_' . SysCore::time_to_ms());
+            Storage::append($file_log, 'FILE= SCAN END');
+
+            $rfs->update([
+              'status' => $no_data ? 'failed' : 'scanned',
+              'total_seconds' => isset($datas['result']['time']) ? $datas['result']['time'] : 0,
+              'rbf_api' => json_encode($datas),
+              'rbf_version' => json_encode([
+                'dataset' => $dataset,
+                'version' => $version,
+              ]),
+            ]);
+
+//            $rfs->rfs_photo_predict($pars);
+
+            if (!$no_data) {
+              //system predict start
+              Storage::append($file_log, '*************************************************************************'
+                . 'STEP_08_' . date('Y_m_d_H_i_s') . '_' . SysCore::time_to_ms());
+              Storage::append($file_log, 'FILE= PREDICT START');
+
+              //model 1
+              $api_result = (array)$datas; //json_decode($rfs->rbf_api, true);
+              $predictions = isset($api_result['result']) && isset($api_result['result']['predictions'])
+                ? (array)$api_result['result']['predictions'] : [];
+              if (!count($predictions)) {
+                //old
+                $predictions = isset($api_result['predictions']) && isset($api_result['predictions'])
+                  ? (array)$api_result['predictions'] : [];
+              }
+
+              $notification = false; //isset($pars['notification']) ? (bool)$pars['notification'] : true;
+
+              if (!$notification) {
+                $rfs->update([
+                  'missing_notify' => 1,
+                ]);
+              }
+
+              //find foods
+              $foods = SysRobo::foods_find([
+                'predictions' => $predictions,
+                'restaurant_parent_id' => $sensor->restaurant_parent_id,
+
+                'debug' => $debug,
+              ]);
+
+              $no_food = true;
+
+              if (count($foods)) {
+                //find food 1
+                $foods = SysRobo::foods_valid($foods, [
+                  'predictions' => $predictions,
+
+                  'debug' => $debug,
+                ]);
+
+                if (count($foods)) {
+                  Storage::append($file_log, '*************************************************************************'
+                    . 'STEP_09_' . date('Y_m_d_H_i_s') . '_' . SysCore::time_to_ms());
+                  Storage::append($file_log, 'FILE= FOOD FOUND');
+
+                  //valid food
+                  $food = Food::find($foods['food']);
+
+                  //find ingredients found
+                  $ingredients_found = SysRobo::ingredients_found($food, [
+                    'predictions' => $predictions,
+                    'restaurant_parent_id' => $sensor->restaurant_parent_id,
+
+                    'debug' => $debug
+                  ]);
+
+                  //find ingredients missing
+                  $ingredients_missing = SysRobo::ingredients_missing($food, [
+                    'predictions' => $predictions,
+                    'restaurant_parent_id' => $sensor->restaurant_parent_id,
+                    'ingredients_found' => $ingredients_found,
+
+                    'debug' => $debug
+                  ]);
+
+                  if (count($ingredients_missing) < 5) {
+                    Storage::append($file_log, '*************************************************************************'
+                      . 'STEP_10_' . date('Y_m_d_H_i_s') . '_' . SysCore::time_to_ms());
+                    Storage::append($file_log, 'FILE= INGRDEIENT MISSING ' . count($ingredients_missing));
+
+                    $no_food = false;
+
+                    //find category
+                    $food_category = $food->get_category([
+                      'restaurant_parent_id' => $sensor->restaurant_parent_id,
+                    ]);
+
+                    $rfs->update([
+                      'status' => 'checked',
+
+                      'food_id' => $food->id,
+                      'food_category_id' => $food_category ? $food_category->id : 0,
+                      'confidence' => $foods['confidence'],
+                      'rbf_confidence' => $foods['confidence'],
+                      'found_by' => 'rbf',
+                      'rbf_predict' => $food->id,
+                    ]);
+
+                    $rfs->rfs_ingredients_missing($food, $ingredients_missing, $notification);
+                  }
+                }
+              }
+
+              if ($no_food) {
+                $rfs->update([
+                  'status' => 'failed',
+                ]);
+              }
+
+              Storage::append($file_log, '*************************************************************************'
+                . 'STEP_11_' . date('Y_m_d_H_i_s') . '_' . SysCore::time_to_ms());
+              Storage::append($file_log, 'FILE= PREDICT END');
+            }
+
+            //time_end
+            if (empty($rfs->time_end)) {
+              $rfs->update([
+                'time_end' => date('Y-m-d H:i:s'),
+              ]);
+            }
+          }
+
+          Storage::append($file_log, '***************************************************************************'
+            . 'FINAL_' . date('Y_m_d_H_i_s') . '_' . SysCore::time_to_ms());
+
+          //latest file
+          break;
+        }
+      }
+
+    } catch (\Exception $e) {
+
+      SysCore::log_sys_bug([
+        'type' => 'photo_get_old',
+        'line' => $e->getLine(),
+        'file' => $e->getFile(),
+        'message' => $e->getMessage(),
+        'params' => json_encode($e),
+      ]);
+    }
+  }
+
   public static function photo_handle($pars = [])
   {
     //pars
@@ -1109,7 +1478,14 @@ class SysRobo
     //localhost
     if (App::environment() == 'local') {
       $datas['server_url'] = 'http://52.77.242.51:9001'; //IP public
-      $datas['img_url'] = SysCore::local_img_url();;
+      $datas['img_url'] = SysCore::local_img_url();
+
+      if ($debug) {
+        if (isset($pars['server_url']) && !empty($pars['server_url'])) {
+          $datas['server_url'] = $pars['server_url'];
+        }
+      }
+
     } else {
       $datas['server_url'] = 'http://172.31.42.57:9001'; //IP private
     }

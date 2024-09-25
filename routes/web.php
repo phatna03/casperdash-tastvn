@@ -207,6 +207,7 @@ Route::post('/auth/logout', [LoginController::class, 'logout'])->name('logout');
 //tester
 Route::get('/tester', [TesterController::class, 'index']);
 Route::post('/tester/post', [TesterController::class, 'tester_post']);
+Route::post('/tester/photo/check', [TesterController::class, 'tester_photo_check']);
 //guide
 Route::get('/guide/printer', [GuideController::class, 'printer']);
 Route::get('/guide/speaker', [GuideController::class, 'speaker']);
