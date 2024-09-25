@@ -1476,9 +1476,12 @@ class SysRobo
 
     //ec2 clone
     //localhost
-    if (App::environment() == 'local') {
+    if (App::environment() != 'production') {
       $datas['server_url'] = 'http://52.77.242.51:9001'; //IP public
-      $datas['img_url'] = SysCore::local_img_url();
+
+      if (App::environment() == 'local') {
+        $datas['img_url'] = SysCore::local_img_url();
+      }
 
       if ($debug) {
         if (isset($pars['server_url']) && !empty($pars['server_url'])) {
