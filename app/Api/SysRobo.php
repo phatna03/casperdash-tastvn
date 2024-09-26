@@ -24,10 +24,15 @@ class SysRobo
   public const _RBF_OVERLAP = 60;
   public const _RBF_MAX_OBJECTS = 70;
 
+  //mainet current
   public const _SYS_BURGER_GROUP_1 = [32, 33, 71, 72];
   public const _SYS_BURGER_GROUP_2 = [34];
   public const _SYS_BURGER_GROUP_VEGAN = [32];
   public const _SYS_BURGER_INGREDIENTS = [45, 114];
+
+  //testnet
+  public const _BURGER_MINI = ['v2 mini burger'];
+  public const _BURGER_CLASSIC = ['v2 classic burger', 'v2 vegan burger'];
 
   public static function s3_bucket_folder()
   {
@@ -1750,6 +1755,7 @@ class SysRobo
     }
 
     //group burger
+    //burger mainet
     $burger1s = SysRobo::_SYS_BURGER_GROUP_1;
     $burger2s = SysRobo::_SYS_BURGER_GROUP_2;
 
@@ -1800,6 +1806,97 @@ class SysRobo
 
           if ($debug) {
             var_dump('food 1 change= ' . $food_id . ' - confidence=' . $food_confidence);
+          }
+        }
+      }
+    }
+
+    //burger testnet
+    if (App::environment() != 'production' && $food_id && $debug) {
+      $total_bread = 0;
+      $total_grilled = 0;
+      $burger1ed = false;
+      $burger2ed = false;
+
+      $burger1s = SysRobo::_BURGER_CLASSIC;
+      $burger2s = SysRobo::_BURGER_MINI;
+
+      foreach ($predictions as $prediction) {
+        $prediction = (array)$prediction;
+
+        $class = trim(strtolower($prediction['class']));
+
+        if (in_array($class, $burger1s)) {
+          $burger1ed = true;
+        }
+        if (in_array($class, $burger2s)) {
+          $burger2ed = true;
+        }
+
+        if ($class == 'burger bread') {
+          $total_bread++;
+        }
+
+        if ($class == 'grilled beef' || $class == 'grilled chicken') {
+          $total_grilled++;
+        }
+      }
+
+      if ($burger2ed && $total_bread > 1) {
+        //mini burger
+        $food_burger = Food::where('name', 'v2 mini burger')
+          ->first();
+        $food_id = $food_burger->id;
+
+        foreach ($temps as $temp) {
+          if ($temp['food'] == $food_id) {
+            $food_confidence = $temp['confidence'];
+            break;
+          }
+        }
+
+        if ($debug) {
+          var_dump('food 1 change= v2 mini burger - confidence= ' . $food_confidence);
+        }
+
+      } else {
+        if ($burger1ed && $total_bread) {
+          if ($total_grilled) {
+            //classic
+            $food_burger = Food::where('name', 'v2 classic burger')
+              ->first();
+            $food_id = $food_burger->id;
+
+            foreach ($temps as $temp) {
+              if ($temp['food'] == $food_id) {
+                $food_confidence = $temp['confidence'];
+                break;
+              }
+            }
+
+            if ($debug) {
+              var_dump('food 1 change= v2 classic burger - confidence= ' . $food_confidence);
+              var_dump($temps);
+            }
+
+          } else {
+            //vegan
+            $food_burger = Food::where('name', 'v2 vegan burger')
+              ->first();
+            $food_id = $food_burger->id;
+
+            foreach ($temps as $temp) {
+              if ($temp['food'] == $food_id) {
+                $food_confidence = $temp['confidence'];
+                break;
+              }
+            }
+
+            if ($debug) {
+              var_dump('food 1 change= v2 vegan burger - confidence= ' . $food_confidence);
+              var_dump($temps);
+            }
+
           }
         }
       }
@@ -1906,6 +2003,7 @@ class SysRobo
     }
 
     //group burger
+    //burger mainet
     $burger1s = SysRobo::_SYS_BURGER_GROUP_1;
     $burger2s = SysRobo::_SYS_BURGER_GROUP_2;
     $burger3s = SysRobo::_SYS_BURGER_GROUP_VEGAN;
@@ -1994,6 +2092,26 @@ class SysRobo
         }
 
         $ingredients = $temps;
+      }
+
+      //burger testnet
+      if (App::environment() != 'production' && $food && $debug) {
+        $temps = [];
+
+        $burger1s = SysRobo::_BURGER_CLASSIC;
+        $burger2s = SysRobo::_BURGER_MINI;
+
+        if (in_array($food->name, $burger2s)) {
+
+
+
+          $ingredients = $temps;
+
+        } elseif (in_array($food->name, $burger1s)) {
+
+          $ingredients = $temps;
+
+        }
       }
     }
 

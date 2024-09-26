@@ -78,12 +78,17 @@ class TesterController extends Controller
 
     $restaurant = RestaurantParent::find(1);
     $sensor = Restaurant::find(5);
-    $rfs = RestaurantFoodScan::find(99668);
+    $rfs = RestaurantFoodScan::find(112036);
     $date = date('Y-m-d');
     $user = User::find(4);
     $kas = KasWebhook::find(539);
     $debug = true;
     $food = Food::find(29);
+
+    //=======================================================================================
+    //=======================================================================================
+
+
 
     //=======================================================================================
     //=======================================================================================
@@ -185,12 +190,11 @@ class TesterController extends Controller
 //    ]);
 //    var_dump($datas);
 
-//    $rfs->rfs_photo_scan_before();
-//    $rfs->rfs_photo_predict([
-//      'notification' => false,
-//
-//      'debug' => true,
-//    ]);
+    $rfs->rfs_photo_predict([
+      'notification' => false,
+
+      'debug' => true,
+    ]);
 
 //live
 //    $cur_date = date('Y-m-d');

@@ -34,7 +34,7 @@
   <input type="hidden" name="current_restaurant_parent_id" value="{{$pageConfigs['item']->restaurant_parent_id}}"/>
   <input type="hidden" name="debug" value="{{$pageConfigs['debug']}}"/>
 
-  <div class="row g-4 mb-4">
+  <div class="row g-4 mb-4 @if($pageConfigs['debug']) d-none @endif">
     <div class="col-lg-12 wrap-stats" id="wrap-stats-total">
       <div class="card h-100">
         <div class="card-header">
