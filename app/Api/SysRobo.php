@@ -1478,6 +1478,7 @@ class SysRobo
     //localhost
     if (App::environment() != 'production') {
       $datas['server_url'] = 'http://52.77.242.51:9001'; //IP public
+      $datas['server_url'] = 'https://detect.roboflow.com';
 
       if (App::environment() == 'local') {
         $datas['img_url'] = SysCore::local_img_url();

@@ -309,28 +309,37 @@
               <div class="col-md-6 mb-2 dev_photo_add d-none">
                 <div class="form-floating form-floating-outline">
                   <input type="text" class="form-control text-center border-danger border-2" name="photo_url"
-                         id="scan-search-photo" autocomplete="off"/>
+                         id="scan-search-photo" autocomplete="off"
+                    value="https://s3.ap-southeast-1.amazonaws.com/cargo.tastevietnam.asia/58-5b-69-19-ad-83/SENSOR/1/2024-09-13/19/SENSOR_2024-09-13-19-06-17-622_568.jpg"
+                  />
                   <label for="scan-search-photo">Photo URL</label>
                 </div>
               </div>
               <div class="col-md-2 mb-2 dev_photo_add d-none">
                 <div class="form-floating form-floating-outline">
                   <input type="text" class="form-control text-center border-danger border-2" name="dataset"
-                         id="scan-search-dataset" autocomplete="off"/>
+                         id="scan-search-dataset" autocomplete="off"
+                    value="burger-jhnsa"
+                  />
                   <label for="scan-search-dataset">Dataset</label>
                 </div>
               </div>
               <div class="col-md-2 mb-2 dev_photo_add d-none">
                 <div class="form-floating form-floating-outline">
                   <input type="text" class="form-control text-center border-danger border-2" name="version"
-                         id="scan-search-version" autocomplete="off"/>
+                         id="scan-search-version" autocomplete="off"
+                    value="2"
+                  />
                   <label for="scan-search-version">Version</label>
                 </div>
               </div>
-              <div class="col-md-2 mb-2 dev_photo_add d-none">
-                <button type="button" class="btn btn-danger" onclick="photo_check()">
-                  <i class="mdi mdi-check acm-mr-px-5"></i> Check photo
-                </button>
+              <div class="col-md-2 mb-2 dev_photo_add d-none form_check_photo">
+                <div class="wrap-btns">
+                  @include('tastevn.htmls.form_button_loading')
+                  <button type="button" class="btn btn-danger btn-ok btn-submit" onclick="photo_check()">
+                    <i class="mdi mdi-check acm-mr-px-5"></i> Check photo
+                  </button>
+                </div>
               </div>
             </div>
           </form>
@@ -1028,6 +1037,8 @@
 
     function photo_check() {
       var form = $('#datatable-listing-scan form');
+      var form_fake = $('.form_check_photo');
+      form_loading(form_fake);
 
       axios.post('/tester/photo/check', {
         sensor: {{$pageConfigs['item']->id}},
@@ -1047,7 +1058,11 @@
               message_from_toast('error', acmcfs.message_title_error, v);
             });
           }
-        });
+        }).then(response => {
+
+        form_loading(form_fake, false);
+
+      });
 
       return false;
     }
