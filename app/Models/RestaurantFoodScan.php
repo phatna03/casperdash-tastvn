@@ -130,6 +130,8 @@ class RestaurantFoodScan extends Model
         if ($this->local_storage && date('Y-m-d', strtotime($this->created_at)) == date('Y-m-d')) {
           $photo = 'https://ai.block8910.com/sensors/' . $this->photo_name;
         }
+      } else {
+        $photo = url('sensors') . '/' . $this->photo_name;
       }
     }
 

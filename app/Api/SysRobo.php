@@ -2105,11 +2105,11 @@ class SysRobo
 
 
 
-          $ingredients = $temps;
+//          $ingredients = $temps;
 
         } elseif (in_array($food->name, $burger1s)) {
 
-          $ingredients = $temps;
+//          $ingredients = $temps;
 
         }
       }
