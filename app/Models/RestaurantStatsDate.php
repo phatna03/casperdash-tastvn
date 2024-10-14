@@ -16,9 +16,7 @@ class RestaurantStatsDate extends Model
     'date',
     'total_files',
     'total_photos',
-    'photo_used',
-    'photo_dup',
-    'photo_test',
+    'test_photos',
     'total_bills',
     'total_foods',
   ];

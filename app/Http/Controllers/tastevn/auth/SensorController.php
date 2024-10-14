@@ -405,6 +405,11 @@ class SensorController extends Controller
         ]);
 
         break;
+
+      case 3:
+        $rfs->update([
+          'status' => 'tested',
+        ]);
     }
 
     return response()->json([

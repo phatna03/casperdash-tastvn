@@ -913,6 +913,12 @@ class KasController extends Controller
       }
     }
 
+    $test_photos = RestaurantFoodScan::where('deleted', 0)
+      ->whereDate('time_photo', $date)
+      ->whereIn('restaurant_id', $select_sensors)
+      ->whereIn('status', ['tested'])
+      ->count();
+
     $row = RestaurantStatsDate::where('restaurant_parent_id', $restaurant_parent->id)
       ->where('date', $date)
       ->first();
@@ -928,6 +934,8 @@ class KasController extends Controller
       'total_photos' => $stats['total_photos'],
       'total_bills' => $stats['total_orders'],
       'total_foods' => $total_foods,
+
+      'test_photos' => $test_photos,
     ]);
 
     if ($debug) {

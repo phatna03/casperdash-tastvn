@@ -803,6 +803,19 @@
                 }
               }
 
+              @if($viewer->is_dev())
+              var debug = $('input[name=debug]').val();
+                if (parseInt(debug)) {
+                  if (full['status'] == 'tested') {
+                    html += '<div class="badge bg-danger">Test Image</div>';
+                  } else {
+                    html += '<div><button type="button" class="btn btn-outline-secondary p-1" onclick="sensor_food_scan_api(this, 3)">tested?</button></div>';
+                  }
+                }
+
+                return ('<div>' + html + '</div>');
+              @endif
+
               return ('<div class="cursor-pointer" onclick="sensor_food_scan_info(' + full['id'] + ')">' + html + '</div>');
             }
           }
