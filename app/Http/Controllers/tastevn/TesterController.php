@@ -59,7 +59,6 @@ use App\Models\ReportPhoto;
 use App\Models\ReportFood;
 use App\Models\ZaloUser;
 use App\Models\ZaloUserSend;
-use App\Models\TastevnItem;
 
 use Zalo\Zalo;
 use Zalo\Builder\MessageBuilder;
@@ -92,40 +91,42 @@ class TesterController extends Controller
 
     //=======================================================================================
     //=======================================================================================
+
+    $ch = curl_init();
+    $headers = [
+      'Accept: application/json',
+      'Content-Type: application/json'
+    ];
+
+    $URL = "https://detect.roboflow.com/infer/workflows/tastvn/custom-workflow";
+
+    $postData = [
+      'api_key' => 'uYUCzsUbWxWRrO15iar5',
+      'inputs' => [
+        'image' => [
+          'type' => 'url',
+          'value' => 'https://ai.block8910.com/sensors/58-5b-69-19-ad-83/SENSOR/1/2024-10-14/12/SENSOR_2024-10-14-12-01-44-720_304.jpg',
+        ]
+      ]
+    ];
+
+    curl_setopt($ch, CURLOPT_URL, $URL);
+    curl_setopt($ch, CURLOPT_POST, 1);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($postData));
+    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+    $result = curl_exec($ch);
+    $statusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+    curl_close($ch);
+
+    $data = (array)json_decode($result);
+    var_dump($data);die;
+
     //=======================================================================================
     //=======================================================================================
 
-    $date = '2024-10-01';
-    $hour = '18';
 
-    $s3_bucket = $sensor->s3_bucket_name;
-    $s3_address = SysCore::str_trim_slash($sensor->s3_bucket_address);
-
-    $s3_api = new S3Client([
-      'version' => 'latest',
-      'region' => $s3_region,
-      'credentials' => array(
-        'key' => $s3_api_key,
-        'secret' => $s3_api_secret
-      )
-    ]);
-
-    $s3_objects = $s3_api->ListObjects([
-      'Bucket' => $s3_bucket,
-      'Delimiter' => '/',
-      'Prefix' => "{$s3_address}/{$date}/{$hour}/",
-    ]);
-
-    var_dump('TOTAL= ' . count($s3_objects['Contents']));
-    var_dump(SysCore::var_dump_break());
-
-//    var_dump($s3_objects);
-
-    if ($s3_objects && isset($s3_objects['Contents']) && count($s3_objects['Contents'])) {
-      foreach ($s3_objects['Contents'] as $row) {
-        var_dump($row);
-      }
-    }
 
     //=======================================================================================
     //=======================================================================================
@@ -326,71 +327,8 @@ class TesterController extends Controller
   {
     $values = $request->post();
 
-    $datas = (new ImportData())->toArray($request->file('excel'));
-    if (!count($datas) || !count($datas[0])) {
-      return response()->json([
-        'error' => 'Invalid data'
-      ], 404);
-    }
-
-    $restaurant_parent_id = 6;
-//    echo '<pre>';var_dump($datas);die;
     $count = 0;
 
-    $foods = Food::where('deleted', 0)
-      ->get();
-
-    DB::beginTransaction();
-    try {
-
-      foreach ($datas[0] as $k => $data) {
-
-        $col1 = trim($data[0]);
-        $col2 = trim($data[1]);
-
-        if (empty($col1) || empty($col2)) {
-          break;
-        }
-
-        $row = TastevnItem::where('restaurant_parent_id', $restaurant_parent_id)
-          ->where('item_code', $col1)
-          ->first();
-        if ($row) {
-          continue;
-        }
-
-        $food1 = 0;
-        foreach ($foods as $food) {
-          if (mb_strtolower($col2) == mb_strtolower($food->name)) {
-            $food1 = $food;
-
-            break;
-          }
-        }
-
-        $row = TastevnItem::create([
-          'restaurant_parent_id' => $restaurant_parent_id,
-          'item_code' => $col1,
-          'item_name' => $col2,
-
-          'food_id' => $food1 ? $food1->id : NULL,
-          'food_name' => $food1 ? $food1->name : NULL,
-        ]);
-
-        $count++;
-      }
-
-      DB::commit();
-
-    } catch (\Exception $e) {
-      DB::rollback();
-
-      return response()->json([
-        'status' => false,
-        'count' => $count,
-        'error' => $e->getMessage()
-      ], 422);
-    }
 
     return response()->json([
       'status' => true,

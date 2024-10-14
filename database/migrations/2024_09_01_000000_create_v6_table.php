@@ -11,14 +11,16 @@ return new class extends Migration {
   public function up(): void
   {
 
-    if (!Schema::hasTable('tastevn_items')) {
-      Schema::create('tastevn_items', function (Blueprint $table) {
+    if (!Schema::hasTable('restaurant_stats_dates')) {
+      Schema::create('restaurant_stats_dates', function (Blueprint $table) {
         $table->id();
-        $table->bigInteger('restaurant_parent_id')->default(0);
-        $table->string('item_code');
-        $table->text('item_name');
-        $table->bigInteger('food_id')->nullable();
-        $table->string('food_name')->nullable();
+        $table->bigInteger('restaurant_parent_id');
+        $table->date('date');
+        $table->bigInteger('total_files')->default(0);
+        $table->bigInteger('total_photos')->default(0);
+        $table->bigInteger('test_photos')->default(0);
+        $table->bigInteger('total_bills')->default(0);
+        $table->bigInteger('total_foods')->default(0);
         $table->timestamps();
       });
     }

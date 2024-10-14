@@ -26,6 +26,7 @@ use App\Models\KasRestaurant;
 use App\Models\KasStaff;
 use App\Models\KasTable;
 use App\Models\KasWebhook;
+use App\Models\RestaurantStatsDate;
 
 class KasController extends Controller
 {
@@ -333,7 +334,7 @@ class KasController extends Controller
         ->leftJoin('kas_restaurants', 'kas_restaurants.id', '=', 'kas_bills.kas_restaurant_id')
         ->whereMonth('kas_bills.date_create', $month)
         ->whereYear('kas_bills.date_create', $year)
-//        ->where('kas_bills.status', 'paid')
+        ->where('kas_bills.status', 'paid')
         ->where('kas_restaurants.restaurant_parent_id', $restaurant->id)
         ->orderBy('kas_bills.date_create', 'desc')
         ->groupBy('kas_bills.date_create')
@@ -887,13 +888,60 @@ class KasController extends Controller
       var_dump('TOTAL_FILES= ' . $total_files);
     }
 
+    $stats = $restaurant_parent->kas_checker_by_date($date);
 
-    $items[] = [
-      'date' => $date,
+    $total_foods = 0;
+    $select = KasBillOrderItem::query('kas_bill_order_items')
+      ->select('kas_items.item_code', 'kas_items.item_name', 'kas_items.food_id', 'kas_items.food_name')
+      ->selectRaw('COUNT(kas_bill_order_items.id) as total_quantity_kas')
+      ->leftJoin('kas_items', 'kas_bill_order_items.kas_item_id', '=', 'kas_items.id')
+      ->leftJoin('kas_bill_orders', 'kas_bill_order_items.kas_bill_order_id', '=', 'kas_bill_orders.id')
+      ->leftJoin('kas_bills', 'kas_bill_orders.kas_bill_id', '=', 'kas_bills.id')
+      ->where('kas_bill_order_items.status', '<>', 'deleted')
+      ->where('kas_bills.kas_restaurant_id', $kas_restaurant->id)
+      ->where('kas_bills.date_create', $date)
+      ->where('kas_bills.status', 'paid')
+      ->where('kas_items.food_id', '>', 0)
+      ->groupBy('kas_items.item_code', 'kas_items.item_name', 'kas_items.food_id', 'kas_items.food_name')
+      ->orderByRaw('total_quantity_kas desc')
+      ->orderByRaw('TRIM(LOWER(kas_items.food_name))')
+      ->orderBy('kas_items.food_id', 'desc');
+    $foods = $select->get()->toArray();
+    if (count($foods)) {
+      foreach ($foods as $food) {
+        $total_foods += $food['total_quantity_kas'];
+      }
+    }
+
+    $row = RestaurantStatsDate::where('restaurant_parent_id', $restaurant_parent->id)
+      ->where('date', $date)
+      ->first();
+    if (!$row) {
+      $row = RestaurantStatsDate::create([
+        'restaurant_parent_id' => $restaurant_parent->id,
+        'date' => $date,
+      ]);
+    }
+
+    $row->update([
       'total_files' => $total_files,
-    ];
+      'total_photos' => $stats['total_photos'],
+      'total_bills' => $stats['total_orders'],
+      'total_foods' => $total_foods,
+    ]);
 
-    var_dump($items);
+    if ($debug) {
+      $items[] = [
+        'date' => $date,
+        'total_files' => $total_files,
+        'total_photos' => $stats['total_photos'],
+        'total_bills' => $stats['total_orders'],
+        'total_foods' => $total_foods,
+      ];
+
+      var_dump($items);
+    }
+
 //    }
 
     die('abc...');
