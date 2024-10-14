@@ -20,6 +20,7 @@ use Maatwebsite\Excel\Facades\Excel;
 use App\Excel\ImportData;
 use App\Excel\ExportData;
 use App\Excel\ExportDataRfs;
+use App\Excel\ExportRestaurantStatsDate;
 
 use Validator;
 use Aws\S3\S3Client;
@@ -59,6 +60,7 @@ use App\Models\ReportPhoto;
 use App\Models\ReportFood;
 use App\Models\ZaloUser;
 use App\Models\ZaloUserSend;
+use App\Models\RestaurantStatsDate;
 
 use Zalo\Zalo;
 use Zalo\Builder\MessageBuilder;
@@ -88,6 +90,31 @@ class TesterController extends Controller
     $s3_region = SysCore::get_sys_setting('s3_region');
     $s3_api_key = SysCore::get_sys_setting('s3_api_key');
     $s3_api_secret = SysCore::get_sys_setting('s3_api_secret');
+
+    //=======================================================================================
+    //=======================================================================================
+
+    $rows = RestaurantStatsDate::all();
+    foreach ($rows as $row) {
+      $restaurant_parent = RestaurantParent::find($row->restaurant_parent_id);
+      $date = $row->date;
+
+      $select_sensors = Restaurant::select('id')
+        ->where('restaurant_parent_id', $restaurant_parent->id)
+        ->where('deleted', 0);
+
+      $test_photos = RestaurantFoodScan::where('deleted', 0)
+        ->whereDate('time_photo', $date)
+        ->whereIn('restaurant_id', $select_sensors)
+        ->whereIn('status', ['tested'])
+        ->count();
+
+      $row->update([
+        'test_photos' => $test_photos,
+      ]);
+    }
+
+    die('okkkkkkkk');
 
     //=======================================================================================
     //=======================================================================================
@@ -122,11 +149,6 @@ class TesterController extends Controller
 
     $data = (array)json_decode($result);
     var_dump($data);die;
-
-    //=======================================================================================
-    //=======================================================================================
-
-
 
     //=======================================================================================
     //=======================================================================================
@@ -1216,6 +1238,28 @@ class TesterController extends Controller
     var_dump($datas);
 
     return $datas;
+  }
+
+  //excecl
+  public function excel_restaurant_stats_date(Request $request)
+  {
+    $values = $request->all();
+    $restaurant = isset($values['restaurant']) ? (int)$values['restaurant'] : 5;
+
+    $restaurant_parent = RestaurantParent::find($restaurant);
+    if (!$restaurant_parent) {
+      die('Invalid restaurant...');
+    }
+
+    $items = RestaurantStatsDate::where('restaurant_parent_id', $restaurant_parent->id)
+      ->orderBy('date', 'desc')
+      ->get()
+      ->toArray();
+
+    $file = new ExportRestaurantStatsDate();
+    $file->set_items($items);
+
+    return Excel::download($file, 'report_stats_date_' . $restaurant_parent->id . '_'. $restaurant_parent->name . '.xlsx');
   }
 
 }

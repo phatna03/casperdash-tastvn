@@ -913,6 +913,10 @@ class KasController extends Controller
       }
     }
 
+    $select_sensors = Restaurant::select('id')
+      ->where('restaurant_parent_id', $restaurant_parent->id)
+      ->where('deleted', 0);
+
     $test_photos = RestaurantFoodScan::where('deleted', 0)
       ->whereDate('time_photo', $date)
       ->whereIn('restaurant_id', $select_sensors)
