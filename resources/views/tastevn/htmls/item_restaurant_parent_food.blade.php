@@ -36,7 +36,7 @@
       <div class="text-dark fw-bold fs-4 mb-2">{{$food->name}}</div>
 
       <div class="acm-clearfix mb-2">
-        @if($viewer->is_moderator())
+        @if($viewer->is_admin())
           <button type="button" class="btn btn-sm btn-info p-1 d-inline-block" onclick="restaurant_food_update_prepare(this, 'category_name')">
             <i class="mdi mdi-pencil"></i>
           </button>
@@ -83,7 +83,7 @@
             <i class="mdi mdi-sync"></i>
           </button>
         @endif
-        @if($viewer->is_moderator())
+        @if($viewer->is_admin())
           <button type="button" class="btn btn-sm btn-info p-1 d-inline-block" onclick="restaurant_food_robot_prepare(this)">
             <i class="mdi mdi-pencil"></i>
           </button>

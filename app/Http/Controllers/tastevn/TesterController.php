@@ -76,29 +76,66 @@ class TesterController extends Controller
 
     $values = $request->all();
 
-    $restaurant = RestaurantParent::find(1);
+    $restaurant = RestaurantParent::find(6);
     $sensor = Restaurant::find(5);
-    $rfs = RestaurantFoodScan::find(112036);
+    $rfs = RestaurantFoodScan::find(113618);
     $date = date('Y-m-d');
     $user = User::find(4);
     $kas = KasWebhook::find(539);
     $debug = true;
     $food = Food::find(29);
+    $kas_restaurant = KasRestaurant::find(3);
+
+    $s3_region = SysCore::get_sys_setting('s3_region');
+    $s3_api_key = SysCore::get_sys_setting('s3_api_key');
+    $s3_api_secret = SysCore::get_sys_setting('s3_api_secret');
 
     //=======================================================================================
     //=======================================================================================
+    //=======================================================================================
+    //=======================================================================================
 
+    $date = '2024-10-01';
+    $hour = '18';
 
+    $s3_bucket = $sensor->s3_bucket_name;
+    $s3_address = SysCore::str_trim_slash($sensor->s3_bucket_address);
+
+    $s3_api = new S3Client([
+      'version' => 'latest',
+      'region' => $s3_region,
+      'credentials' => array(
+        'key' => $s3_api_key,
+        'secret' => $s3_api_secret
+      )
+    ]);
+
+    $s3_objects = $s3_api->ListObjects([
+      'Bucket' => $s3_bucket,
+      'Delimiter' => '/',
+      'Prefix' => "{$s3_address}/{$date}/{$hour}/",
+    ]);
+
+    var_dump('TOTAL= ' . count($s3_objects['Contents']));
+    var_dump(SysCore::var_dump_break());
+
+//    var_dump($s3_objects);
+
+    if ($s3_objects && isset($s3_objects['Contents']) && count($s3_objects['Contents'])) {
+      foreach ($s3_objects['Contents'] as $row) {
+        var_dump($row);
+      }
+    }
 
     //=======================================================================================
     //=======================================================================================
 
 //    $page = isset($values['page']) ? (int)$values['page'] : 1;
-//    SysRobo::photo_get_old([
+//    SysRobo::photo_get([
 //      'limit' => 1,
 //      'page' => $page,
 //
-//      'hour' => 10,
+////      'hour' => 15,
 //    ]);
 
     //=======================================================================================
@@ -190,11 +227,11 @@ class TesterController extends Controller
 //    ]);
 //    var_dump($datas);
 
-    $rfs->rfs_photo_predict([
-      'notification' => false,
-
-      'debug' => true,
-    ]);
+//    $rfs->rfs_photo_predict([
+//      'notification' => false,
+//
+//      'debug' => true,
+//    ]);
 
 //live
 //    $cur_date = date('Y-m-d');

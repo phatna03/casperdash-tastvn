@@ -20,14 +20,8 @@
       "slug": "admin-photos"
     },
     {
-      "name": "Modal Testing",
-      "icon": "menu-icon tf-icons mdi mdi-robot no_user",
-      "url": "admin/roboflow",
-      "slug": "admin-roboflow"
-    },
-    {
       "name": "Review Report",
-      "icon": "menu-icon tf-icons mdi mdi-message-draw no_user",
+      "icon": "menu-icon tf-icons mdi mdi-message-draw no_user no_moderator",
       "url": "admin/reports",
       "slug": "admin-reports"
     },
@@ -37,7 +31,18 @@
       "url": "admin/restaurants",
       "slug": "admin-restaurants"
     },
-
+    {
+      "url": "admin/kas/checker",
+      "name": "KAS Checker",
+      "icon": "menu-icon tf-icons mdi mdi-clock-check no_user",
+      "slug": "admin-kas-checker"
+    },
+    {
+      "name": "Modal Testing",
+      "icon": "menu-icon tf-icons mdi mdi-robot no_user",
+      "url": "admin/roboflow",
+      "slug": "admin-roboflow"
+    },
     {
       "name": "Settings",
       "icon": "menu-icon tf-icons mdi mdi-cogs no_user no_moderator",

@@ -24,10 +24,16 @@ class SysRobo
   public const _RBF_OVERLAP = 60;
   public const _RBF_MAX_OBJECTS = 70;
 
+  //mainet current
   public const _SYS_BURGER_GROUP_1 = [32, 33, 71, 72];
   public const _SYS_BURGER_GROUP_2 = [34];
   public const _SYS_BURGER_GROUP_VEGAN = [32];
   public const _SYS_BURGER_INGREDIENTS = [45, 114];
+
+  //testnet
+  public const _BURGER_MINI = ['v2 mini burger'];
+  public const _BURGER_CLASSIC = ['v2 classic burger', 'v2 vegan burger'];
+  public const _BURGER_INGREDIENTS = ['grilled beef', 'grilled chicken'];
 
   public static function s3_bucket_folder()
   {
@@ -107,14 +113,6 @@ class SysRobo
       ->orderBy('id', 'asc')
       ->paginate($limit, ['*'], 'page', $page)
       ->first();
-
-    $file_log = 'public/logs/' . date('Y-m-d') . '/' . date('H') . '/cron_photo_get_run.log';
-    Storage::append($file_log, '***************************************************************************'
-      . 'START_' . date('Y_m_d_H_i_s') . '_LIMIT_' .$limit . '_PAGE_' . $page . '_MS_' . SysCore::time_to_ms());
-
-    if (!$sensor) {
-      return false;
-    }
 
     $file_log = 'public/logs/' . date('Y-m-d') . '/' . date('H') . '/cron_photo_get_' . $sensor->id . '.log';
     Storage::append($file_log, SysCore::var_dump_break());
@@ -1484,9 +1482,20 @@ class SysRobo
 
     //ec2 clone
     //localhost
-    if (App::environment() == 'local') {
+    if (App::environment() != 'production') {
       $datas['server_url'] = 'http://52.77.242.51:9001'; //IP public
-      $datas['img_url'] = SysCore::local_img_url();;
+      $datas['server_url'] = 'https://detect.roboflow.com';
+
+      if (App::environment() == 'local') {
+        $datas['img_url'] = SysCore::local_img_url();
+      }
+
+      if ($debug) {
+        if (isset($pars['server_url']) && !empty($pars['server_url'])) {
+          $datas['server_url'] = $pars['server_url'];
+        }
+      }
+
     } else {
       $datas['server_url'] = 'http://172.31.42.57:9001'; //IP private
     }
@@ -1660,11 +1669,78 @@ class SysRobo
       var_dump($food_temps);
     }
 
+    //food not core
     if (!count($foods) && count($food_temps) == 1) {
 //      $foods = $food_temps;
     }
 
+    //sys predict
+    if (!count($foods)) {
+      $foods[] = SysRobo::check_food_burger($predictions);
+    }
+
     return $foods;
+  }
+
+  public static function check_food_burger($predictions)
+  {
+    $total_bread = 0;
+    $total_grilled = 0;
+    $burger1ed = false;
+    $burger2ed = false;
+
+    $burger1s = SysRobo::_BURGER_CLASSIC;
+    $burger2s = SysRobo::_BURGER_MINI;
+
+    foreach ($predictions as $prediction) {
+      $prediction = (array)$prediction;
+
+      $class = trim(strtolower($prediction['class']));
+
+      if (in_array($class, $burger1s)) {
+        $burger1ed = true;
+      }
+      if (in_array($class, $burger2s)) {
+        $burger2ed = true;
+      }
+
+      if ($class == 'burger bread') {
+        $total_bread++;
+      }
+
+      if ($class == 'grilled beef' || $class == 'grilled chicken') {
+        $total_grilled++;
+      }
+    }
+
+    $food_id = 0;
+    $food_confidence = 50;
+
+    if ($total_bread > 1) {
+      //mini burger
+      $food_burger = Food::where('name', 'v2 mini burger')
+        ->first();
+      $food_id = $food_burger->id;
+
+    } else if ($total_bread > 0) {
+      if ($total_grilled > 0) {
+        //classic burger
+        $food_burger = Food::where('name', 'v2 classic burger')
+          ->first();
+        $food_id = $food_burger->id;
+      } else {
+        //vegan
+        $food_burger = Food::where('name', 'v2 vegan burger')
+          ->first();
+        $food_id = $food_burger->id;
+      }
+    }
+
+    return [
+      'food' => $food_id,
+      'confidence' => $food_confidence,
+      'width' => 1,
+    ];
   }
 
   public static function ingredients_core_valid($pars = [])
@@ -1747,6 +1823,7 @@ class SysRobo
     }
 
     //group burger
+    //burger mainet
     $burger1s = SysRobo::_SYS_BURGER_GROUP_1;
     $burger2s = SysRobo::_SYS_BURGER_GROUP_2;
 
@@ -1797,6 +1874,111 @@ class SysRobo
 
           if ($debug) {
             var_dump('food 1 change= ' . $food_id . ' - confidence=' . $food_confidence);
+          }
+        }
+      }
+    }
+
+    //burger testnet
+    if (App::environment() != 'production' && $food_id) {
+      $total_bread = 0;
+      $total_grilled = 0;
+      $burger1ed = false;
+      $burger2ed = false;
+
+      $burger1s = SysRobo::_BURGER_CLASSIC;
+      $burger2s = SysRobo::_BURGER_MINI;
+
+      foreach ($predictions as $prediction) {
+        $prediction = (array)$prediction;
+
+        $class = trim(strtolower($prediction['class']));
+
+        if (in_array($class, $burger1s)) {
+          $burger1ed = true;
+        }
+        if (in_array($class, $burger2s)) {
+          $burger2ed = true;
+        }
+
+        if ($class == 'burger bread') {
+          $total_bread++;
+        }
+
+        if ($class == 'grilled beef' || $class == 'grilled chicken') {
+          $total_grilled++;
+        }
+      }
+
+      if ($burger2ed && $total_bread > 1) {
+        //mini burger
+        $food_burger = Food::where('name', 'v2 mini burger')
+          ->first();
+        $food_id = $food_burger->id;
+
+        foreach ($temps as $temp) {
+          if ($temp['food'] == $food_id) {
+            $food_confidence = $temp['confidence'];
+            break;
+          }
+        }
+
+        if ($debug) {
+          var_dump('food 1 change= v2 mini burger - confidence= ' . $food_confidence);
+        }
+
+      } else {
+
+        if ($total_bread > 1) {
+          //mini burger
+          $food_burger = Food::where('name', 'v2 mini burger')
+            ->first();
+          $food_id = $food_burger->id;
+          $food_confidence = 100;
+
+          if ($debug) {
+            var_dump('food 1 force change= v2 mini burger - confidence= ' . $food_confidence);
+          }
+
+        } else {
+          if ($burger1ed && $total_bread) {
+            if ($total_grilled) {
+              //classic
+              $food_burger = Food::where('name', 'v2 classic burger')
+                ->first();
+              $food_id = $food_burger->id;
+
+              foreach ($temps as $temp) {
+                if ($temp['food'] == $food_id) {
+                  $food_confidence = $temp['confidence'];
+                  break;
+                }
+              }
+
+              if ($debug) {
+                var_dump('food 1 change= v2 classic burger - confidence= ' . $food_confidence);
+                var_dump($temps);
+              }
+
+            } else {
+              //vegan
+              $food_burger = Food::where('name', 'v2 vegan burger')
+                ->first();
+              $food_id = $food_burger->id;
+
+              foreach ($temps as $temp) {
+                if ($temp['food'] == $food_id) {
+                  $food_confidence = $temp['confidence'];
+                  break;
+                }
+              }
+
+              if ($debug) {
+                var_dump('food 1 change= v2 vegan burger - confidence= ' . $food_confidence);
+                var_dump($temps);
+              }
+
+            }
           }
         }
       }
@@ -1902,7 +2084,15 @@ class SysRobo
       }
     }
 
+//    $ingredients = SysRobo::burger_ingredients_missing($food, $food);
+
+    return $ingredients;
+  }
+
+  public static function burger_ingredients_missing($food, $ingredients_found)
+  {
     //group burger
+    //burger mainet
     $burger1s = SysRobo::_SYS_BURGER_GROUP_1;
     $burger2s = SysRobo::_SYS_BURGER_GROUP_2;
     $burger3s = SysRobo::_SYS_BURGER_GROUP_VEGAN;
@@ -1991,6 +2181,111 @@ class SysRobo
         }
 
         $ingredients = $temps;
+      }
+    }
+
+    //burger testnet
+    if (App::environment() != 'production' && $food) {
+      $burger1s = SysRobo::_BURGER_CLASSIC;
+      $burger2s = SysRobo::_BURGER_MINI;
+      $burger_ingredients = SysRobo::_BURGER_INGREDIENTS;
+
+      if (in_array(strtolower($food->name), $burger2s)) {
+
+        $ingredients = [];
+        if (count($food_ingredients) && count($ingredients_found)) {
+          foreach ($food_ingredients as $food_ingredient) {
+            $found = false;
+
+            foreach ($ingredients_found as $ing_found) {
+              if ($ing_found['id'] == $food_ingredient->id) {
+                $found = true;
+
+                if ($ing_found['quantity'] < $food_ingredient->ingredient_quantity) {
+                  if (!in_array($ing_found['id'], $ids)) {
+                    $ing_found['quantity'] = $food_ingredient->ingredient_quantity - $ing_found['quantity'];
+
+                    $ing = Ingredient::find($ing_found['id']);
+                    $ingredients[] = [
+                      'id' => $ing->id,
+                      'quantity' => $ing_found['quantity'],
+                      'name' => $ing->name,
+                      'name_vi' => $ing->name_vi,
+                      'type' => $ing->ingredient_type,
+                    ];
+
+                    $ids[] = $ing_found['id'];
+                  }
+                }
+              }
+            }
+
+            if (!$found) {
+              $ingredients[] = [
+                'id' => $food_ingredient->id,
+                'quantity' => $food_ingredient->ingredient_quantity,
+                'name' => $food_ingredient->name,
+                'name_vi' => $food_ingredient->name_vi,
+                'type' => $food_ingredient->ingredient_type,
+              ];
+            }
+          }
+
+        }
+
+        if ($debug) {
+          var_dump('burger 222');
+          var_dump($ingredients);
+        }
+
+      } elseif (in_array(strtolower($food->name), $burger1s)) {
+
+        $ingredients = [];
+        if (count($food_ingredients) && count($ingredients_found)) {
+          foreach ($food_ingredients as $food_ingredient) {
+            $found = false;
+
+            foreach ($ingredients_found as $ing_found) {
+              if ($ing_found['id'] == $food_ingredient->id) {
+                $found = true;
+
+                if ($ing_found['quantity'] < $food_ingredient->ingredient_quantity) {
+                  if (!in_array($ing_found['id'], $ids)) {
+                    $ing_found['quantity'] = $food_ingredient->ingredient_quantity - $ing_found['quantity'];
+
+                    $ing = Ingredient::find($ing_found['id']);
+                    $ingredients[] = [
+                      'id' => $ing->id,
+                      'quantity' => $ing_found['quantity'],
+                      'name' => $ing->name,
+                      'name_vi' => $ing->name_vi,
+                      'type' => $ing->ingredient_type,
+                    ];
+
+                    $ids[] = $ing_found['id'];
+                  }
+                }
+              }
+            }
+
+            if (!$found) {
+              $ingredients[] = [
+                'id' => $food_ingredient->id,
+                'quantity' => $food_ingredient->ingredient_quantity,
+                'name' => $food_ingredient->name,
+                'name_vi' => $food_ingredient->name_vi,
+                'type' => $food_ingredient->ingredient_type,
+              ];
+            }
+          }
+
+        }
+
+        if ($debug) {
+          var_dump('burger 111');
+          var_dump($ingredients);
+        }
+
       }
     }
 

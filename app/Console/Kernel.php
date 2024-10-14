@@ -50,6 +50,7 @@ class Kernel extends ConsoleKernel
       ->withoutOverlapping()
       ->everySecond()
       ->runInBackground();
+
     $schedule->command('web:photo-get', [1, 6])
       ->withoutOverlapping()
       ->everySecond()
@@ -67,10 +68,18 @@ class Kernel extends ConsoleKernel
       ->withoutOverlapping()
       ->everySecond()
       ->runInBackground();
+
 //    $schedule->command('web:photo-get', [1, 10])
 //      ->withoutOverlapping()
 //      ->everySecond()
 //      ->runInBackground();
+
+//    for ($i=1; $i<=9; $i++) {
+//      $schedule->command('web:photo-get', [1, $i])
+//        ->withoutOverlapping()
+//        ->everySecond()
+//        ->runInBackground();
+//    }
 
     //every 5s
 //    web:photo-notify

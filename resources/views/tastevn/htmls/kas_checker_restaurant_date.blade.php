@@ -1,16 +1,35 @@
+@php
+$total_kas_dishes = 0;
+$total_web_dishes = 0;
+@endphp
+
 <div class="row">
   @if (count($stats))
-  <div class="col-lg-12 mb-1 acm-clearfix">
+  <div class="col-lg-12 mb-1 acm-clearfix acm-height-200-max acm-overflow-y-auto">
     <table class="table table-bordered table-sm">
       <thead>
       <tr>
         <td class="text-dark bg-secondary-subtle fw-bold">Dish name</td>
-        <td class="text-dark bg-secondary-subtle fw-bold">Total quantity from KAS</td>
-        <td class="text-dark bg-secondary-subtle fw-bold">Total quantity from Sensor</td>
+        <td class="text-dark bg-secondary-subtle fw-bold">Total quantity from KAS POS <b class="d-none text-bg-danger p-2"  id="total_dishes_kas"></b></td>
+        <td class="text-dark bg-secondary-subtle fw-bold">Total quantity from Sensor <b class="d-none text-bg-danger p-2"  id="total_dishes_web"></b></td>
       </tr>
       </thead>
       <tbody>
-      @foreach($stats as $stat)
+      @php
+      $arr = [];
+      foreach($stats as $stat):
+      if (in_array($stat['item_code'], $arr)) {
+          continue;
+      }
+
+      $arr[] = $stat['item_code'];
+      $total_kas_dishes += $stat['total_quantity_kas'];
+
+      if (isset($stat['total_quantity_web']) && (int)$stat['total_quantity_web']) {
+        $total_web_dishes += $stat['total_quantity_web'];
+      }
+
+      @endphp
         <tr>
           <td>
             <div class="text-dark">
@@ -25,6 +44,17 @@
           </td>
         </tr>
       @endforeach
+      <tr>
+        <td class="acm-text-right">
+          <b>Tổng cộng: </b>
+        </td>
+        <td>
+          <div class="text-danger text-center fnumber fw-bold">{{$total_kas_dishes}}</div>
+        </td>
+        <td>
+          <div class="text-danger text-center fnumber fw-bold">{{$total_web_dishes}}</div>
+        </td>
+      </tr>
       </tbody>
     </table>
   </div>
@@ -68,3 +98,13 @@
     </div>
   </div>
 </div>
+
+<script type="text/javascript">
+  @if($total_kas_dishes)
+  $('#total_dishes_kas').text({{$total_kas_dishes}}).removeClass('d-none');
+  @endif
+
+  @if($total_web_dishes)
+  $('#total_dishes_web').text({{$total_web_dishes}}).removeClass('d-none');
+  @endif
+</script>

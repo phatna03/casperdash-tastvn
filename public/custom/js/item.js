@@ -4497,6 +4497,10 @@ function kas_date_check_restaurant_data(itd, date_text = '') {
     .then(response => {
 
       var html_title = response.data.restaurant.name + '<span class="badge acm-ml-px-10 bg-primary">' + date_text + '</span>';
+      if (response.data.stats) {
+        html_title += '<span class="badge bg-secondary acm-ml-px-10">Total bills:</span> <b class="text-danger bg-white p-2">' + response.data.stats.total_orders + '</b>'
+          + '<span class="badge bg-secondary acm-ml-px-10">Total photos:</span> <b class="text-danger bg-white p-2">' + response.data.stats.total_photos + '</b>';
+      }
       popup.find('.modal-title').empty().append(html_title);
 
       popup.find('.modal-body').empty().append(response.data.html);

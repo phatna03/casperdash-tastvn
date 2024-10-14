@@ -328,6 +328,7 @@ Route::post('/admin/kas/date/check/month', [KasController::class, 'date_check_mo
 Route::post('/admin/kas/date/check/restaurant', [KasController::class, 'date_check_restaurant']);
 Route::post('/admin/kas/date/check/restaurant/photo', [KasController::class, 'date_check_restaurant_photo']);
 Route::post('/admin/kas/date/check/restaurant/hour', [KasController::class, 'date_check_restaurant_hour']);
+Route::get('/admin/kas/report/month', [KasController::class, 'report_month']);
 //food
 Route::get('/admin/foods', [FoodController::class, 'index']);
 Route::post('/admin/food/get', [FoodController::class, 'get']);

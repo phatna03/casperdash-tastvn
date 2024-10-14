@@ -5,11 +5,13 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 //lib
 use Validator;
 use App\Api\SysApp;
 use App\Api\SysCore;
 use App\Excel\ImportData;
+use Aws\S3\S3Client;
 //model
 use App\Models\Food;
 use App\Models\RestaurantParent;
@@ -249,7 +251,7 @@ class KasController extends Controller
 
   public function checker(Request $request)
   {
-    $invalid_roles = ['user', 'moderator'];
+    $invalid_roles = ['user'];
     if (in_array($this->_viewer->role, $invalid_roles)) {
       return redirect('error/404');
     }
@@ -335,8 +337,7 @@ class KasController extends Controller
         ->where('kas_restaurants.restaurant_parent_id', $restaurant->id)
         ->orderBy('kas_bills.date_create', 'desc')
         ->groupBy('kas_bills.date_create')
-        ->groupBy('kas_restaurants.restaurant_parent_id')
-      ;
+        ->groupBy('kas_restaurants.restaurant_parent_id');
       $total_bills = $select_bills->get()
         ->toArray();
 
@@ -347,15 +348,14 @@ class KasController extends Controller
       $select_photos = RestaurantFoodScan::query('restaurant_food_scans')
         ->where('restaurant_food_scans.deleted', 0)
         ->whereIn('restaurant_food_scans.restaurant_id', $select_sensors)
-        ->whereIn('restaurant_food_scans.status', ['checked', 'failed'])
+        ->whereIn('restaurant_food_scans.status', ['checked', 'failed', 'edited'])
         ->distinct()
         ->selectRaw('DATE(restaurant_food_scans.time_photo) as date_create')
         ->selectRaw('COUNT(restaurant_food_scans.id) as total_photos')
         ->whereMonth('restaurant_food_scans.time_photo', $month)
         ->whereYear('restaurant_food_scans.time_photo', $year)
         ->orderByRaw('DATE(restaurant_food_scans.time_photo)')
-        ->groupByRaw('DATE(restaurant_food_scans.time_photo)')
-      ;
+        ->groupByRaw('DATE(restaurant_food_scans.time_photo)');
       $total_photos = $select_photos->get()
         ->toArray();
 
@@ -472,7 +472,7 @@ class KasController extends Controller
         ->leftJoin('restaurants', 'restaurant_food_scans.restaurant_id', '=', 'restaurants.id')
         ->leftJoin('foods', 'restaurant_food_scans.food_id', '=', 'foods.id')
         ->where('restaurant_food_scans.deleted', 0)
-        ->whereIn('restaurant_food_scans.status', ['checked', 'failed'])
+        ->whereIn('restaurant_food_scans.status', ['checked', 'failed', 'edited'])
         ->whereDate('restaurant_food_scans.time_photo', $date)
         ->whereIn('restaurant_food_scans.restaurant_id', $select_sensors)
         ->where('restaurant_food_scans.food_id', '>', 0)
@@ -520,7 +520,7 @@ class KasController extends Controller
       ->distinct()
       ->selectRaw('HOUR(time_photo) as hour')
       ->where('deleted', 0)
-      ->whereIn('status', ['checked', 'failed'])
+      ->whereIn('status', ['checked', 'failed', 'edited'])
       ->whereDate('time_photo', $date)
       ->whereIn('restaurant_id', $select_sensors)
       ->orderBy('hour', 'asc');
@@ -546,6 +546,8 @@ class KasController extends Controller
       'status' => true,
 
       'restaurant' => $restaurant_parent->get_info(),
+      'stats' => $restaurant_parent->kas_checker_by_date($date),
+
       'html' => $html,
     ]);
   }
@@ -575,7 +577,7 @@ class KasController extends Controller
       ->distinct()
       ->select('id')
       ->where('deleted', 0)
-      ->whereIn('status', ['checked', 'failed'])
+      ->whereIn('status', ['checked', 'failed', 'edited'])
       ->whereDate('time_photo', $date)
       ->whereIn('restaurant_id', $select_sensors)
       ->orderBy('id', 'asc');
@@ -667,7 +669,7 @@ class KasController extends Controller
         )
         ->leftJoin('restaurants', 'restaurant_food_scans.restaurant_id', '=', 'restaurants.id')
         ->where('restaurant_food_scans.deleted', 0)
-        ->whereIn('restaurant_food_scans.status', ['checked', 'failed'])
+        ->whereIn('restaurant_food_scans.status', ['checked', 'failed', 'edited'])
         ->whereDate('restaurant_food_scans.time_photo', $date)
         ->whereIn('restaurant_food_scans.restaurant_id', $select_sensors)
         ->whereRaw('HOUR(restaurant_food_scans.time_photo) = ' . (int)$hour)
@@ -686,4 +688,215 @@ class KasController extends Controller
       'html' => $html,
     ]);
   }
+
+  public function report_month(Request $request)
+  {
+    $values = $request->all();
+
+    $month = isset($values['month']) ? (int)$values['month'] : date('m');
+    $year = isset($values['year']) ? (int)$values['year'] : date('Y');
+    $restaurant = isset($values['restaurant']) ? (int)$values['restaurant'] : 5;
+    $date = isset($values['date']) ? $values['date'] : date('Y-m-d');
+    $debug = isset($values['debug']) ? (int)$values['debug'] : 0;
+
+    $kas_restaurant = KasRestaurant::where('restaurant_parent_id', $restaurant)
+      ->first();
+    if (!$kas_restaurant) {
+      die('Invalid restaurant');
+    }
+
+    $restaurant_parent = RestaurantParent::find($restaurant);
+
+    if ($debug) {
+      echo '<pre>';
+      var_dump(SysCore::var_dump_break());
+      var_dump('RESTAURANT= ' . $kas_restaurant->restaurant_name . ' - ' . $year . ' - ' . $month);
+    }
+
+    $sensors = Restaurant::where('restaurant_parent_id', $restaurant_parent->id)
+      ->where('deleted', 0)
+      ->get();
+
+    if ($debug) {
+      var_dump('TOTAL SENSORS= ' . count($sensors));
+    }
+
+    //s3
+    $s3_region = SysCore::get_sys_setting('s3_region');
+    $s3_api_key = SysCore::get_sys_setting('s3_api_key');
+    $s3_api_secret = SysCore::get_sys_setting('s3_api_secret');
+
+    $items = [];
+
+//    for ($day = 31; $day >= 10; $day--) {
+//      $date = $year . '-' . SysCore::str_format_hour($month) . '-' . SysCore::str_format_hour($day);
+
+    if ($date > date('Y-m-d')) {
+//      continue;
+      die('Invalid date');
+    }
+
+    if ($debug) {
+      var_dump(SysCore::var_dump_break());
+      var_dump(SysCore::var_dump_break());
+      var_dump(SysCore::var_dump_break());
+      var_dump($date);
+    }
+
+    $total_files = 0;
+
+    foreach ($sensors as $sensor) {
+      $folder_setting = SysCore::str_trim_slash($sensor->s3_bucket_address);
+      $directory = $folder_setting . '/' . $date;
+
+      if ($debug) {
+        var_dump('++++++++++++++++++++++++++++++++++++++++++++++++');
+        var_dump('SENSOR= ' . $sensor->name);
+        var_dump('CHECK= WEB');
+        var_dump('DIRECTORY= ' . $directory);
+      }
+
+      $sensor_files = 0;
+
+      //web
+      for ($hour = 1; $hour <= 24; $hour++) {
+        $files = Storage::disk('sensors')->files($directory . '/' . $hour);
+        if (!count($files)) {
+          continue;
+        }
+
+        if ($debug) {
+          var_dump('HOUR= ' . $hour);
+        }
+
+        $count = 0;
+
+        foreach ($files as $file) {
+          $ext = array_filter(explode('.', $file));
+          if (!count($ext) || $ext[count($ext) - 1] != 'jpg') {
+            continue;
+          }
+
+          //no 1024
+          $temps = array_filter(explode('/', $file));
+          $photo_name = $temps[count($temps) - 1];
+          if (substr($photo_name, 0, 5) == '1024_') {
+            continue;
+          }
+
+          $count++;
+        }
+
+        if ($debug) {
+          var_dump('FILES= ' . $count);
+        }
+
+        $sensor_files += $count;
+      }
+
+      if ($sensor_files) {
+        if ($debug) {
+          var_dump('SENSOR_FILES= ' . $sensor_files);
+        }
+
+        $total_files += $sensor_files;
+
+      } else {
+
+        $sensor_files = 0;
+
+        $s3_bucket = $sensor->s3_bucket_name;
+        $s3_address = SysCore::str_trim_slash($sensor->s3_bucket_address);
+
+        if ($debug) {
+          var_dump('CHECK= S3');
+          var_dump('BUCKET= ' . $s3_bucket);
+          var_dump('BUCKET ADDRESS= ' . $s3_address);
+        }
+
+        //s3
+        for ($hour = 1; $hour <= 24; $hour++) {
+          try {
+
+            $s3_api = new S3Client([
+              'version' => 'latest',
+              'region' => $s3_region,
+              'credentials' => array(
+                'key' => $s3_api_key,
+                'secret' => $s3_api_secret
+              )
+            ]);
+
+            $s3_objects = $s3_api->ListObjects([
+              'Bucket' => $s3_bucket,
+              'Delimiter' => '/',
+              'Prefix' => "{$s3_address}/{$date}/{$hour}/",
+            ]);
+
+            if ($s3_objects && isset($s3_objects['Contents']) && count($s3_objects['Contents'])) {
+
+              if ($debug) {
+                var_dump('S3 COUNT FILES CHECK= ' . count($s3_objects['Contents']));
+                var_dump('HOUR= ' . $hour);
+              }
+
+              $count = 0;
+
+              //check
+              foreach ($s3_objects['Contents'] as $content) {
+                $file = $content['Key'];
+
+                $ext = array_filter(explode('.', $file));
+                if (!count($ext) || $ext[count($ext) - 1] != 'jpg') {
+                  continue;
+                }
+
+                //no 1024
+                $temps = array_filter(explode('/', $file));
+                $photo_name = $temps[count($temps) - 1];
+                if (substr($photo_name, 0, 5) == '1024_') {
+                  continue;
+                }
+
+                $count++;
+              }
+
+              if ($debug) {
+                var_dump('FILES S3= ' . $count);
+              }
+
+              $sensor_files += $count;
+            }
+
+          } catch (\Exception $e) {
+          }
+        }
+
+        if ($sensor_files) {
+          if ($debug) {
+            var_dump('SENSOR_FILES_S3= ' . $sensor_files);
+          }
+
+          $total_files += $sensor_files;
+        }
+
+      }
+    }
+
+    if ($debug) {
+      var_dump('TOTAL_FILES= ' . $total_files);
+    }
+
+
+    $items[] = [
+      'date' => $date,
+      'total_files' => $total_files,
+    ];
+
+    var_dump($items);
+//    }
+
+    die('abc...');
+  }
+
 }
