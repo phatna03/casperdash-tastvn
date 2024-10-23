@@ -94,206 +94,18 @@ class TesterController extends Controller
     //=======================================================================================
     //=======================================================================================
 
-    $rows = RestaurantStatsDate::all();
-    foreach ($rows as $row) {
-      $restaurant_parent = RestaurantParent::find($row->restaurant_parent_id);
-      $date = $row->date;
 
-      $select_sensors = Restaurant::select('id')
-        ->where('restaurant_parent_id', $restaurant_parent->id)
-        ->where('deleted', 0);
 
-      $test_photos = RestaurantFoodScan::where('deleted', 0)
-        ->whereDate('time_photo', $date)
-        ->whereIn('restaurant_id', $select_sensors)
-        ->whereIn('status', ['tested'])
-        ->count();
-
-      $row->update([
-        'test_photos' => $test_photos,
-      ]);
-    }
-
-    die('okkkkkkkk');
+    die('abc...');
 
     //=======================================================================================
     //=======================================================================================
-
-    $ch = curl_init();
-    $headers = [
-      'Accept: application/json',
-      'Content-Type: application/json'
-    ];
-
-    $URL = "https://detect.roboflow.com/infer/workflows/tastvn/custom-workflow";
-
-    $postData = [
-      'api_key' => 'uYUCzsUbWxWRrO15iar5',
-      'inputs' => [
-        'image' => [
-          'type' => 'url',
-          'value' => 'https://ai.block8910.com/sensors/58-5b-69-19-ad-83/SENSOR/1/2024-10-14/12/SENSOR_2024-10-14-12-01-44-720_304.jpg',
-        ]
-      ]
-    ];
-
-    curl_setopt($ch, CURLOPT_URL, $URL);
-    curl_setopt($ch, CURLOPT_POST, 1);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($postData));
-    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-    $result = curl_exec($ch);
-    $statusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-
-    curl_close($ch);
-
-    $data = (array)json_decode($result);
-    var_dump($data);die;
-
-    //=======================================================================================
-    //=======================================================================================
-
-//    $page = isset($values['page']) ? (int)$values['page'] : 1;
-//    SysRobo::photo_get([
-//      'limit' => 1,
-//      'page' => $page,
-//
-////      'hour' => 15,
-//    ]);
-
-    //=======================================================================================
-    //=======================================================================================
-
-//    SysRobo::photo_get([
-//      'limit' => 1,
-//      'page' => 2,
-//    ]);
-
-//    $rows = ZaloUserSend::where('status', 0)
-//      ->where('type', 'photo_comment')
-//      ->whereDate('created_at', '>=', '2024-08-01')
-//      ->where('datas', '<>', '{"error":-230,"message":"User has not interacted with the OA in the past 7 days"}')
-//      ->orderBy('id', 'asc')
-//      ->get();
-//
-//    var_dump(count($rows));
-//
-//    if (count($rows)) {
-//      foreach ($rows as $row) {
-//        if ($row->datas == '{"error":-227,"message":"User is banned or has been inactive for more than 45 days"}') {
-//          continue;
-//        }
-//
-//        $user = User::find($row->user_id);
-//
-//        $pars = (array)json_decode($row->params, true);
-//        $rfs = RestaurantFoodScan::find((int)$pars['rfs']);
-//        if (!$rfs || !$user) {
-//          continue;
-//        }
-//
-//        //notify zalo
-//        $datas = SysZalo::send_rfs_note($user, 'photo_comment', $rfs, [
-//          'zalo_no_log' => 0,
-//        ]);
-//
-//        var_dump($datas);
-//
-//        $row->update([
-//          'resend' => 1,
-//        ]);
-//      }
-//    }
-
-//    $limit = 1;
-//    $page = 8;
-//
-//    //run
-//    for ($page=1; $page<=8; $page++) {
-//      $sensor = Restaurant::where('deleted', 0)
-//        ->where('restaurant_parent_id', '>', 0)
-//        ->where('s3_bucket_name', '<>', NULL)
-//        ->where('s3_bucket_address', '<>', NULL)
-//        ->orderBy('id', 'asc')
-//        ->paginate($limit, ['*'], 'page', $page)
-//        ->first();
-//
-//      if ($sensor) {
-//        var_dump($sensor->id . ' - ' . $sensor->name);
-//      }
-//    }
-
-//    $rows = RestaurantFoodScan::whereIn('id', [74400,74397])
-//      ->get();
-//
-//    foreach ($rows as $rfs) {
-//      if ($rfs->status != 'duplicated') {
-//        //time_scan - time_end
-//        $time_scan = $rfs->time_photo;
-//        $rand = rand(0, 1);
-//        if ($rand) {
-//          $time_scan = date('Y-m-d H:i:s', strtotime($time_scan) + 1);
-//        }
-//
-//        $rand = rand(1, 3);
-//        $time_end = date('Y-m-d H:i:s', strtotime($time_scan) + $rand);
-//
-//        $rfs->update([
-//          'time_scan' => $time_scan,
-//          'time_end' => $time_end,
-//        ]);
-//      }
-//    }
-
-//    $datas = SysZalo::zalo_token([
-//
-//    ]);
-//    var_dump($datas);
 
 //    $rfs->rfs_photo_predict([
 //      'notification' => false,
 //
 //      'debug' => true,
 //    ]);
-
-//live
-//    $cur_date = date('Y-m-d');
-//    $cur_hour = (int)date('H');
-//    //sensor folder
-//    $folder_setting = SysCore::str_trim_slash($sensor->s3_bucket_address);
-//    $directory = $folder_setting . '/' . $cur_date . '/' . $cur_hour . '/';
-//    //sensor files
-//    $files = Storage::disk('sensors')->files($directory);
-//    if (count($files)) {
-//      //desc = order by last updated or modified
-//      $files = array_reverse($files);
-//
-//      foreach ($files as $file) {
-//        //sensor ext = jpg
-//        $ext = array_filter(explode('.', $file));
-//        if (!count($ext) || $ext[count($ext) - 1] != 'jpg') {
-//          continue;
-//        }
-//
-//        //photo width 1024
-//        $temps = array_filter(explode('/', $file));
-//        $photo_name = $temps[count($temps) - 1];
-//        if (substr($photo_name, 0, 5) == '1024_') {
-//          continue;
-//        }
-//
-//        var_dump($file);
-//      }
-//    }
-//
-//    if (!$rfs || ($rfs && $rfs->status == 'duplicated')) {
-//      $rfs = RestaurantFoodScan::where('restaurant_id', $sensor->id)
-//        ->where('status', '<>', 'duplicated')
-//        ->where('deleted', 0)
-//        ->orderBy('id', 'desc')
-//        ->limit(1)
-//        ->first();
-//    }
 
 //    $items = $this->checked_rfs_by_date([
 //      'sensor_id' => $sensor->id,
@@ -305,10 +117,6 @@ class TesterController extends Controller
 //    $file->set_items($items);
 //
 //    return Excel::download($file, 'report_rfs_' . $sensor->id . '.xlsx');
-
-    //=======================================================================================
-    //=======================================================================================
-    //fix live
 
 //    $this->checked_photo_duplicated_and_not_found([
 //      'limit' => 100,
@@ -1183,6 +991,52 @@ class TesterController extends Controller
     }
   }
 
+  //roboflow
+  protected function rbf_server_new_call_test()
+  {
+    $ch = curl_init();
+    $headers = [
+      'Accept: application/json',
+      'Content-Type: application/json'
+    ];
+
+    $URL = "https://detect.roboflow.com/infer/workflows/tastvn/custom-workflow";
+
+    $postData = [
+      'api_key' => 'uYUCzsUbWxWRrO15iar5',
+      'inputs' => [
+        'image' => [
+          'type' => 'url',
+          'value' => 'https://ai.block8910.com/sensors/58-5b-69-19-ad-83/SENSOR/1/2024-10-14/12/SENSOR_2024-10-14-12-01-44-720_304.jpg',
+        ]
+      ]
+    ];
+
+    curl_setopt($ch, CURLOPT_URL, $URL);
+    curl_setopt($ch, CURLOPT_POST, 1);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($postData));
+    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+    $result = curl_exec($ch);
+    $statusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+    curl_close($ch);
+
+    $data = (array)json_decode($result);
+    var_dump($data);
+  }
+
+  protected function rbf_photo_get_manually($values = [])
+  {
+    $page = isset($values['page']) ? (int)$values['page'] : 1;
+    SysRobo::photo_get([
+      'limit' => 1,
+      'page' => $page,
+
+//      'hour' => 15,
+    ]);
+  }
+
   //file
   protected function file_save($file, $content)
   {
@@ -1240,7 +1094,30 @@ class TesterController extends Controller
     return $datas;
   }
 
-  //excecl
+  //excel
+  protected function restaurant_stats_date_photo_test_update()
+  {
+    $rows = RestaurantStatsDate::all();
+    foreach ($rows as $row) {
+      $restaurant_parent = RestaurantParent::find($row->restaurant_parent_id);
+      $date = $row->date;
+
+      $select_sensors = Restaurant::select('id')
+        ->where('restaurant_parent_id', $restaurant_parent->id)
+        ->where('deleted', 0);
+
+      $test_photos = RestaurantFoodScan::where('deleted', 0)
+        ->whereDate('time_photo', $date)
+        ->whereIn('restaurant_id', $select_sensors)
+        ->whereIn('status', ['tested'])
+        ->count();
+
+      $row->update([
+        'test_photos' => $test_photos,
+      ]);
+    }
+  }
+
   public function excel_restaurant_stats_date(Request $request)
   {
     $values = $request->all();

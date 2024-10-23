@@ -202,6 +202,7 @@ class NotificationController extends Controller
               . ', [Need to re-check]'
             ;
 
+            //aws check
             $this->_sys_app->aws_s3_polly([
               'text_to_speak' => $text_to_speak,
               'text_rate' => 'slow',

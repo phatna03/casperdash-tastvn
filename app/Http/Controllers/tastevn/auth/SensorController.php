@@ -551,7 +551,7 @@ class SensorController extends Controller
       ->where('missing_ids', '=', $values['missing_ids']);
 
     if (!empty($time_scan)) {
-      $times = SysCore::arr_date_range($time_scan);
+      $times = SysCore::arr_datetime_range($time_scan);
       if (!empty($times['time_from'])) {
         $select->where('time_scan', '>=', $times['time_from']);
       }
@@ -560,7 +560,7 @@ class SensorController extends Controller
       }
     }
     if (!empty($time_upload)) {
-      $times = SysCore::arr_date_range($time_upload);
+      $times = SysCore::arr_datetime_range($time_upload);
       if (!empty($times['time_from'])) {
         $select->where('time_photo', '>=', $times['time_from']);
       }
@@ -1132,6 +1132,7 @@ class SensorController extends Controller
         . ', [Need to re-check]'
       ;
 
+      //aws check
       SysAws::s3_polly([
         'text_to_speak' => $text_to_speak,
         'text_rate' => 'slow',
@@ -1285,6 +1286,7 @@ class SensorController extends Controller
           . ', [Need to re-check]'
         ;
 
+        //aws check
         SysAws::s3_polly([
           'text_to_speak' => $text_to_speak,
           'text_rate' => 'slow',

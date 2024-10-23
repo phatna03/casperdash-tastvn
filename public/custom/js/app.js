@@ -351,8 +351,11 @@ function bind_picker() {
       locale: {
         format: 'DD/MM/YYYY',
       },
+
+      startDate: moment().subtract(1, 'days').startOf('day').format('DD/MM/YYYY'),
+      endDate: moment().endOf('day').format('DD/MM/YYYY'),
     });
-    $('.date_picker').val('');
+    // $('.date_picker').val('');
   }
 
   //time range

@@ -58,7 +58,32 @@ class SysCore
     })->toArray());
   }
 
-  public static function arr_date_range($times = NULL)
+  public static function arr_date_range($dates = NULL)
+  {
+    $date_from = NULL;
+    $date_to = NULL;
+
+    $dates = array_filter(explode('-', $dates));
+
+    if (count($dates) && !empty($dates[0])) {
+      $arr = array_filter(explode('/', trim($dates[0])));
+
+      $date_from = $arr[2] . '-' . $arr[1] . '-' . $arr[0];
+    }
+
+    if (count($dates) && !empty($dates[1])) {
+      $arr = array_filter(explode('/', trim($dates[1])));
+
+      $date_to = $arr[2] . '-' . $arr[1] . '-' . $arr[0];
+    }
+
+    return [
+      'date_from' => $date_from,
+      'date_to' => $date_to,
+    ];
+  }
+
+  public static function arr_datetime_range($times = NULL)
   {
     $time_from = NULL;
     $time_to = NULL;

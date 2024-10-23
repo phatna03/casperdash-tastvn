@@ -85,6 +85,12 @@
           "slug": "admin-logs"
         },
         {
+          "url": "admin/devs",
+          "name": "Developer",
+          "icon": "menu-icon tf-icons mdi mdi-bug no_user no_admin no_superadmin no_moderator no_chef",
+          "slug": "admin-devs"
+        },
+        {
           "url": "admin/settings",
           "name": "Configurations",
           "icon": "menu-icon mdi mdi-cog",

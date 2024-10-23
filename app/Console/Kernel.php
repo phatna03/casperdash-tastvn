@@ -104,17 +104,17 @@ class Kernel extends ConsoleKernel
 
     //daily at 1am
 //    web:photo-sync
-    $schedule->command('web:photo-sync')
-      ->dailyAt('01:00')
-      ->withoutOverlapping()
-      ->runInBackground();
+//    $schedule->command('web:photo-sync')
+//      ->dailyAt('01:00')
+//      ->withoutOverlapping()
+//      ->runInBackground();
 
     //daily at 5am
 //    web:photo-clear
-    $schedule->command('web:photo-clear')
-      ->dailyAt('05:00')
-      ->withoutOverlapping()
-      ->runInBackground();
+//    $schedule->command('web:photo-clear')
+//      ->dailyAt('05:00')
+//      ->withoutOverlapping()
+//      ->runInBackground();
 
     //daily at 6am
 //    zalo:token-access

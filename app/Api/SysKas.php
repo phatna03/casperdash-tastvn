@@ -18,151 +18,171 @@ class SysKas
 {
   public static function bill_check($pars = [])
   {
+    $file_log = 'public/logs/' . date('Y-m-d') . '/kas_bill_check_' . date('H') . '.log';
+    Storage::append($file_log, SysCore::var_dump_break());
+
     $rows = KasWebhook::where('type', 'cart_info')
       ->where('restaurant_id', 0)
       ->orderBy('id', 'asc')
       ->limit(100)
       ->get();
 
-    if (count($rows)) {
-      foreach ($rows as $row) {
-        $datas = json_decode($row->params, true);
+    Storage::append($file_log, 'TOTAL_ROWS= ' . count($rows));
 
-        if (count($datas)) {
+    try {
 
-          if (!isset($datas['bill_id'])) {
-            continue;
-          }
+      if (count($rows)) {
+        foreach ($rows as $row) {
+          $datas = json_decode($row->params, true);
 
-          $kas_restaurant = KasRestaurant::where('restaurant_id', $datas['restaurant_id'])
-            ->first();
-          if (!$kas_restaurant) {
-            $kas_restaurant = KasRestaurant::create([
-              'restaurant_id' => $datas['restaurant_id'],
-              'restaurant_code' => $datas['restaurant_code'],
-              'restaurant_name' => $datas['restaurant_name'],
-            ]);
-          }
+          if (count($datas)) {
 
-          $kas_table = KasTable::where('kas_restaurant_id', $kas_restaurant->id)
-            ->where('area_id', $datas['area_id'])
-            ->where('table_id', $datas['table_id'])
-            ->first();
-          if (!$kas_table) {
-            $kas_table = KasTable::create([
-              'kas_restaurant_id' => $kas_restaurant->id,
-              'area_id' => $datas['area_id'],
-              'area_name' => $datas['area_name'],
-              'table_id' => $datas['table_id'],
-              'table_name' => $datas['table_name'],
-            ]);
-          }
-
-          $kas_staff = KasStaff::where('employee_id', $datas['employee_id'])
-            ->first();
-          if (!$kas_staff) {
-            $kas_staff = KasStaff::create([
-              'employee_id' => $datas['employee_id'],
-              'employee_code' => $datas['employee_code'],
-              'employee_name' => $datas['employee_name'],
-            ]);
-          }
-
-          //bill
-          $date_create = date('Y-m-d', strtotime($datas['time_create']));
-
-          $kas_bill = KasBill::where('kas_restaurant_id', $kas_restaurant->id)
-            ->where('kas_table_id', $kas_table->id)
-            ->where('bill_id', $datas['bill_id'])
-            ->where('date_create', $date_create)
-            ->first();
-          if (!$kas_bill) {
-            $kas_bill = KasBill::create([
-              'kas_restaurant_id' => $kas_restaurant->id,
-              'kas_table_id' => $kas_table->id,
-
-              'bill_id' => $datas['bill_id'],
-              'date_create' => $date_create,
-
-              'kas_staff_id' => $kas_staff->id,
-              'time_create' => $datas['time_create'],
-
-              'note' => $datas['note'],
-            ]);
-          } else {
-
-            $kas_bill->update([
-              'time_payment' => $datas['time_payment'],
-              'status' => $datas['status'],
-              'note' => $datas['note'],
-            ]);
-          }
-
-          //order
-          $kas_bill_order = KasBillOrder::where('kas_bill_id', $kas_bill->id)
-            ->where('order_id', $datas['order_id'])
-            ->first();
-          if (!$kas_bill_order) {
-            $kas_bill_order = KasBillOrder::create([
-              'kas_bill_id' => $kas_bill->id,
-
-              'order_id' => $datas['order_id'],
-              'note' => $datas['note'],
-            ]);
-          } else {
-
-            $kas_bill_order->update([
-              'time_payment' => $datas['time_payment'],
-              'status' => $datas['status'],
-              'note' => $datas['note'],
-            ]);
-          }
-
-          //order item
-          if (count($datas['items'])) {
-            foreach ($datas['items'] as $itm) {
-              //item
-              $kas_item = KasItem::where('item_id', $itm['item_id'])
-                ->first();
-              if (!$kas_item) {
-                $kas_item = KasItem::create([
-                  'item_id' => $itm['item_id'],
-                  'item_code' => $itm['item_code'],
-                  'item_name' => $itm['item_name'],
-                ]);
-              }
-
-              //add to order
-              $kas_bill_order_item = KasBillOrderItem::where('kas_bill_order_id', $kas_bill_order->id)
-                ->where('kas_item_id', $kas_item->id)
-                ->first();
-              if (!$kas_bill_order_item) {
-                $kas_bill_order_item = KasBillOrderItem::create([
-                  'kas_bill_order_id' => $kas_bill_order->id,
-                  'kas_item_id' => $kas_item->id,
-
-                  'quantity' => $itm['quantity'],
-                  'status' => $itm['status'],
-                  'note' => $itm['note']
-                ]);
-              } else {
-
-                $kas_bill_order_item->update([
-                  'quantity' => $itm['quantity'],
-                  'status' => $itm['status'],
-                  'note' => $itm['note'],
-                ]);
-              }
-
+            if (!isset($datas['bill_id'])) {
+              continue;
             }
+
+            $kas_restaurant = KasRestaurant::where('restaurant_id', $datas['restaurant_id'])
+              ->first();
+            if (!$kas_restaurant) {
+              $kas_restaurant = KasRestaurant::create([
+                'restaurant_id' => $datas['restaurant_id'],
+                'restaurant_code' => $datas['restaurant_code'],
+                'restaurant_name' => $datas['restaurant_name'],
+              ]);
+            }
+
+            $kas_table = KasTable::where('kas_restaurant_id', $kas_restaurant->id)
+              ->where('area_id', $datas['area_id'])
+              ->where('table_id', $datas['table_id'])
+              ->first();
+            if (!$kas_table) {
+              $kas_table = KasTable::create([
+                'kas_restaurant_id' => $kas_restaurant->id,
+                'area_id' => $datas['area_id'],
+                'area_name' => $datas['area_name'],
+                'table_id' => $datas['table_id'],
+                'table_name' => $datas['table_name'],
+              ]);
+            }
+
+            $kas_staff = KasStaff::where('employee_id', $datas['employee_id'])
+              ->first();
+            if (!$kas_staff) {
+              $kas_staff = KasStaff::create([
+                'employee_id' => $datas['employee_id'],
+                'employee_code' => $datas['employee_code'],
+                'employee_name' => $datas['employee_name'],
+              ]);
+            }
+
+            //bill
+            $date_create = date('Y-m-d', strtotime($datas['time_create']));
+
+            $kas_bill = KasBill::where('kas_restaurant_id', $kas_restaurant->id)
+              ->where('kas_table_id', $kas_table->id)
+              ->where('bill_id', $datas['bill_id'])
+              ->where('date_create', $date_create)
+              ->first();
+            if (!$kas_bill) {
+              $kas_bill = KasBill::create([
+                'kas_restaurant_id' => $kas_restaurant->id,
+                'kas_table_id' => $kas_table->id,
+
+                'bill_id' => $datas['bill_id'],
+                'date_create' => $date_create,
+
+                'kas_staff_id' => $kas_staff->id,
+                'time_create' => $datas['time_create'],
+
+                'note' => $datas['note'],
+              ]);
+            } else {
+
+              $kas_bill->update([
+                'time_payment' => $datas['time_payment'],
+                'status' => $datas['status'],
+                'note' => $datas['note'],
+              ]);
+            }
+
+            //order
+            $kas_bill_order = KasBillOrder::where('kas_bill_id', $kas_bill->id)
+              ->where('order_id', $datas['order_id'])
+              ->first();
+            if (!$kas_bill_order) {
+              $kas_bill_order = KasBillOrder::create([
+                'kas_bill_id' => $kas_bill->id,
+
+                'order_id' => $datas['order_id'],
+                'note' => $datas['note'],
+              ]);
+            } else {
+
+              $kas_bill_order->update([
+                'time_payment' => $datas['time_payment'],
+                'status' => $datas['status'],
+                'note' => $datas['note'],
+              ]);
+            }
+
+            //order item
+            if (count($datas['items'])) {
+              foreach ($datas['items'] as $itm) {
+                //item
+                $kas_item = KasItem::where('item_id', $itm['item_id'])
+                  ->first();
+                if (!$kas_item) {
+                  $kas_item = KasItem::create([
+                    'item_id' => $itm['item_id'],
+                    'item_code' => $itm['item_code'],
+                    'item_name' => $itm['item_name'],
+                  ]);
+                }
+
+                //add to order
+                $kas_bill_order_item = KasBillOrderItem::where('kas_bill_order_id', $kas_bill_order->id)
+                  ->where('kas_item_id', $kas_item->id)
+                  ->first();
+                if (!$kas_bill_order_item) {
+                  $kas_bill_order_item = KasBillOrderItem::create([
+                    'kas_bill_order_id' => $kas_bill_order->id,
+                    'kas_item_id' => $kas_item->id,
+
+                    'quantity' => $itm['quantity'],
+                    'status' => $itm['status'],
+                    'note' => $itm['note']
+                  ]);
+                } else {
+
+                  $kas_bill_order_item->update([
+                    'quantity' => $itm['quantity'],
+                    'status' => $itm['status'],
+                    'note' => $itm['note'],
+                  ]);
+                }
+
+              }
+            }
+
           }
 
+          $row->update([
+            'restaurant_id' => 100,
+          ]);
         }
-
-        $row->update([
-          'restaurant_id' => 100,
-        ]);
       }
+
+      Storage::append($file_log, 'CHECK_SUCCESS');
+
+    } catch (\Exception $e) {
+
+      SysCore::log_sys_bug([
+        'type' => 'kas_bill_check',
+        'line' => $e->getLine(),
+        'file' => $e->getFile(),
+        'message' => $e->getMessage(),
+        'params' => json_encode($e),
+      ]);
     }
   }
 

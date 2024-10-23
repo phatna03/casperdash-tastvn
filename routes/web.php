@@ -179,6 +179,7 @@ use App\Http\Controllers\tastevn\GuideController;
 use App\Http\Controllers\tastevn\PrinterController;
 use App\Http\Controllers\tastevn\ErrorController;
 use App\Http\Controllers\tastevn\TesterController;
+use App\Http\Controllers\tastevn\DevController;
 use App\Http\Controllers\tastevn\auth\RestaurantController;
 use App\Http\Controllers\tastevn\auth\SensorController;
 use App\Http\Controllers\tastevn\auth\NotificationController;
@@ -209,6 +210,12 @@ Route::get('/tester', [TesterController::class, 'index']);
 Route::post('/tester/post', [TesterController::class, 'tester_post']);
 Route::post('/tester/photo/check', [TesterController::class, 'tester_photo_check']);
 Route::get('/tester/stats/date', [TesterController::class, 'excel_restaurant_stats_date']);
+//dev
+Route::get('/admin/devs', [DevController::class, 'index']);
+Route::post('/admin/dev/photo/check', [DevController::class, 'photo_check']);
+Route::post('/admin/dev/photo/check/hour/get', [DevController::class, 'photo_check_hour_get']);
+Route::post('/admin/dev/photo/check/hour/sync', [DevController::class, 'photo_check_hour_sync']);
+
 //guide
 Route::get('/guide/printer', [GuideController::class, 'printer']);
 Route::get('/guide/speaker', [GuideController::class, 'speaker']);
