@@ -1496,6 +1496,9 @@ class SysRobo
       var_dump($datas);
     }
 
+    $datas['server_url'] = 'http://171.244.46.137:9001';
+//    $datas['server_url'] = 'http://52.77.242.51:9001';
+
     //rbf
     $status = true;
     $error = [];

@@ -1061,24 +1061,32 @@ class SensorController extends Controller
       ], 422);
     }
 
-//    $rfs = NULL;
-//    $type = isset($values['type']) ? $values['type'] : NULL;
+    $file_log = 'public/logs/' . date('Y-m-d') . '/' . date('H')
+      . '/api_checker_sensor_' . $sensor->id . '.log';
+    Storage::append($file_log, SysCore::var_dump_break());
+    Storage::append($file_log, date('d/m/Y') . '_time_' . date('H:i:s') . '_ms_' . SysCore::time_to_ms() . ' => QUERY START');
 
-    $rfs = RestaurantFoodScan::where('restaurant_id', $sensor->id)
+    $select = RestaurantFoodScan::where('restaurant_id', $sensor->id)
       ->whereIn('status', ['new', 'scanned', 'checked', 'failed'])
       ->where('deleted', 0)
       ->orderBy('id', 'desc')
-      ->limit(1)
-      ->first();
+      ->limit(1);
 
-    //tester
-    if ($this->_viewer->is_dev()) {
-//      $rfs = RestaurantFoodScan::find(84965);
-    }
+    Storage::append($file_log, 'QUERY= ' . SysCore::str_db_query($select));
+
+    $rfs = $select->first();
+
+    Storage::append($file_log, date('d/m/Y') . '_time_' . date('H:i:s') . '_ms_' . SysCore::time_to_ms() . ' => QUERY END');
+    Storage::append($file_log, date('d/m/Y') . '_time_' . date('H:i:s') . '_ms_' . SysCore::time_to_ms() . ' => DATA GET START');
 
     $datas = $rfs ? $this->kitchen_food_datas($rfs) : [];
+
+    Storage::append($file_log, date('d/m/Y') . '_time_' . date('H:i:s') . '_ms_' . SysCore::time_to_ms() . ' => DATA GET END');
+
     return response()->json([
       'status' => $rfs ? $rfs->status : 'no_photo',
+
+      'file_log' => $file_log,
 
       'datas' => $datas,
 

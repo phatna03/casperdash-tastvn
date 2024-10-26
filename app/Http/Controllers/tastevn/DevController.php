@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 //lib
+use File;
 use App\Api\SysCore;
 use App\Api\SysRobo;
 use App\Models\Restaurant;
@@ -506,5 +507,111 @@ class DevController extends Controller
 
       'status' => $status,
     ], 200);
+  }
+
+  public function photo_upload_random(Request $request)
+  {
+    $sensors = Restaurant::where('deleted', 0)
+      ->where('restaurant_parent_id', '>', 0)
+      ->where('s3_bucket_name', '<>', NULL)
+      ->where('s3_bucket_address', '<>', NULL)
+      ->orderBy('id', 'asc')
+      ->get();
+
+    $pageConfigs = [
+      'myLayout' => 'horizontal',
+      'hasCustomizer' => false,
+
+      'sensors' => $sensors,
+    ];
+
+    return view('tastevn.pages.dev.photo_upload_random', ['pageConfigs' => $pageConfigs]);
+  }
+
+  public function photo_upload_random_sensor(Request $request)
+  {
+    $values = $request->post();
+
+    $sensor = isset($values['sensor']) ? (int)$values['sensor'] : 0;
+
+    $status = false;
+    $error = [];
+
+    if (!$sensor) {
+
+      try {
+
+        $sensors = Restaurant::where('deleted', 0)
+          ->where('restaurant_parent_id', '>', 0)
+          ->where('s3_bucket_name', '<>', NULL)
+          ->where('s3_bucket_address', '<>', NULL)
+          ->orderBy('id', 'asc')
+          ->get();
+
+        foreach ($sensors as $sensor) {
+          $count = rand(0, 9);
+          $folder_photo = 'photos/random/food_photo_' . $count . '.jpg';
+
+          $this->sensor_photo_upload($sensor, $folder_photo);
+        }
+
+        $status = true;
+
+      } catch (\Exception $e) {
+        $error[] = $e->getMessage();
+      }
+
+    } else {
+
+      try {
+
+        $sensor = Restaurant::find($sensor);
+
+        $count = rand(0, 9);
+//      $photo_url = url('photos/random') . '/food_photo_' . $count . '.jpg';
+        $folder_photo = 'photos/random/food_photo_' . $count . '.jpg';
+
+        $this->sensor_photo_upload($sensor, $folder_photo);
+
+        $status = true;
+
+      } catch (\Exception $e) {
+        $error[] = $e->getMessage();
+      }
+
+    }
+
+    return response()->json([
+      'status' => $status,
+      'error' => $error,
+    ]);
+  }
+
+  protected function sensor_photo_upload(Restaurant $sensor, $folder_photo)
+  {
+    $folder_upload = SysCore::os_slash_file($sensor->s3_bucket_address);
+    $folder_upload = $folder_upload . '/' . date('Y-m-d') . '/' . (int)date('H') . '/';
+
+    //folder create
+    //mkdir
+    $path = public_path('sensors') . '/' . $folder_upload;
+
+    if (!file_exists($path)) {
+      mkdir($path, 0777, true);
+    }
+
+    //window
+//    $file_path = SysCore::os_slash_file($path);
+//    if (!file_exists($file_path)) {
+//      mkdir($file_path, 0777, true);
+//    }
+
+    $img_name = 'SENSOR_' . date('Y-m-d-H-i-s') . '-' . SysCore::time_to_ms() . '_' . time() . '.jpg';
+    //'SENSOR_2024-10-25-21-20-07-963_274.jpg';
+
+    File::copy(public_path('') . '/' . $folder_photo,
+      public_path('sensors') . '/' . $folder_upload . $img_name);
+
+
   }
 }

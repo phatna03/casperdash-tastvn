@@ -69,10 +69,10 @@ class Kernel extends ConsoleKernel
       ->everySecond()
       ->runInBackground();
 
-//    $schedule->command('web:photo-get', [1, 10])
-//      ->withoutOverlapping()
-//      ->everySecond()
-//      ->runInBackground();
+    $schedule->command('web:photo-get', [1, 10])
+      ->withoutOverlapping()
+      ->everySecond()
+      ->runInBackground();
 
 //    for ($i=1; $i<=9; $i++) {
 //      $schedule->command('web:photo-get', [1, $i])
@@ -83,24 +83,24 @@ class Kernel extends ConsoleKernel
 
     //every 5s
 //    web:photo-notify
-    $schedule->command('web:photo-notify')
-      ->withoutOverlapping()
-      ->everyFiveSeconds()
-      ->runInBackground();
+//    $schedule->command('web:photo-notify')
+//      ->withoutOverlapping()
+//      ->everyFiveSeconds()
+//      ->runInBackground();
 
     //every 1h
 //    web:photo-check
-    $schedule->command('web:photo-check')
-      ->hourly()
-      ->withoutOverlapping()
-      ->runInBackground();
+//    $schedule->command('web:photo-check')
+//      ->hourly()
+//      ->withoutOverlapping()
+//      ->runInBackground();
 
     //every 1h
 //    kas:bill-check
-    $schedule->command('kas:bill-check')
-      ->hourly()
-      ->withoutOverlapping()
-      ->runInBackground();
+//    $schedule->command('kas:bill-check')
+//      ->hourly()
+//      ->withoutOverlapping()
+//      ->runInBackground();
 
     //daily at 1am
 //    web:photo-sync
@@ -118,10 +118,10 @@ class Kernel extends ConsoleKernel
 
     //daily at 6am
 //    zalo:token-access
-    $schedule->command('zalo:token-access')
-      ->dailyAt('06:00')
-      ->withoutOverlapping()
-      ->runInBackground();
+//    $schedule->command('zalo:token-access')
+//      ->dailyAt('06:00')
+//      ->withoutOverlapping()
+//      ->runInBackground();
   }
 
   /**
