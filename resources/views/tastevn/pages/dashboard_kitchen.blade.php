@@ -216,9 +216,7 @@
 
         setInterval(function () {
           sensor_checker();
-        // }, 100);
         }, acmcfs.timeout_kitchen);
-      // acmcfs.timeout_kitchen
       @endif
 
     });
@@ -332,7 +330,7 @@
         .catch(error => {
           console.log(error);
 
-          // page_reload();
+          page_reload();
         })
         .then(res => {
           // sys_running = 0;
@@ -433,7 +431,7 @@
         .catch(error => {
           console.log(error);
 
-          // page_reload();
+          page_reload();
         })
         .then(res => {
           // sys_running = 0;

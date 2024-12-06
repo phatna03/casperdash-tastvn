@@ -124,16 +124,11 @@ class RestaurantFoodScan extends Model
       $photo = url('sensors') . '/' . $this->photo_name;
     }
 
-//    development
-//    if (App::environment() != 'production') {
-//      if (!str_starts_with($this->photo_name, 'photos/')) {
-//        if ($this->local_storage && date('Y-m-d', strtotime($this->created_at)) == date('Y-m-d')) {
-//          $photo = 'https://ai.block8910.com/sensors/' . $this->photo_name;
-//        }
-//      } else {
-//        $photo = url('sensors') . '/' . $this->photo_name;
-//      }
-//    }
+    if (App::environment() == 'development') {
+      if ($this->local_storage && date('Y-m-d', strtotime($this->created_at)) == date('Y-m-d')) {
+        $photo = 'https://ai.block8910.com/sensors/' . $this->photo_name;
+      }
+    }
 
     return $photo;
   }

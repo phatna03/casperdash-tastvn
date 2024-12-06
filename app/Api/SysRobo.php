@@ -1,13 +1,13 @@
 <?php
 
 namespace App\Api;
-use App\Models\FoodIngredient;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 //lib
+use Carbon\Carbon;
 use App\Api\SysCore;
 use App\Notifications\IngredientMissing;
 use App\Models\SysNotification;
@@ -17,6 +17,7 @@ use App\Models\RestaurantFoodScan;
 use App\Models\Food;
 use App\Models\Ingredient;
 use App\Models\RestaurantFood;
+use App\Models\FoodIngredient;
 
 class SysRobo
 {
@@ -220,9 +221,13 @@ class SysRobo
 
           $count++;
 
+          $hour_within = 1;
+
           //check exist
           $rfs = RestaurantFoodScan::where('restaurant_id', $sensor->id)
             ->where('photo_name', $file)
+            ->whereDate('time_photo', date('Y-m-d'))
+            ->where('time_photo', '>', Carbon::now()->subHour($hour_within))
             ->first();
           if (!$rfs) {
             Storage::append($file_log, '*************************************************************************'
@@ -1489,15 +1494,14 @@ class SysRobo
       $datas['img_url'] = SysCore::local_img_url();;
     } else {
       $datas['server_url'] = 'http://172.31.42.57:9001'; //IP private
+
+//      $datas['server_url'] = 'http://171.244.46.137:9001';
     }
 
     if ($debug) {
       var_dump('rbf prepare...');
       var_dump($datas);
     }
-
-    $datas['server_url'] = 'http://171.244.46.137:9001';
-//    $datas['server_url'] = 'http://52.77.242.51:9001';
 
     //rbf
     $status = true;

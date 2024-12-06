@@ -1,13 +1,9 @@
 <?php
 
 namespace App\Console\Commands;
-
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Storage;
-
-use App\Api\SysApp;
-use App\Api\SysRobo;
-use App\Models\RestaurantFoodScan;
+//lib
+use App\Api\LocalPhoto;
 
 class PhotoClear extends Command
 {
@@ -17,7 +13,7 @@ class PhotoClear extends Command
   public function handle()
   {
 
-    SysRobo::photo_clear([
+    LocalPhoto::photo_clear([
 
     ]);
   }

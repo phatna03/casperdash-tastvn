@@ -24,7 +24,7 @@ class SysKas
     $rows = KasWebhook::where('type', 'cart_info')
       ->where('restaurant_id', 0)
       ->orderBy('id', 'asc')
-      ->limit(100)
+      ->limit(200)
       ->get();
 
     Storage::append($file_log, 'TOTAL_ROWS= ' . count($rows));

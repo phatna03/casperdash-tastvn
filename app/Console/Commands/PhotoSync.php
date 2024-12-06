@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 use Illuminate\Console\Command;
 //lib
-use App\Api\SysRobo;
+use App\Api\CronAws;
 
 class PhotoSync extends Command
 {
@@ -13,7 +13,7 @@ class PhotoSync extends Command
   public function handle()
   {
 
-    SysRobo::photo_sync([
+    CronAws::photo_sync([
 
     ]);
   }

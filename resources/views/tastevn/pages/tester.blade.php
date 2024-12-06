@@ -2,8 +2,9 @@
 
 @section('title', 'TESTER')
 
+
 @section('content')
-<form class="form-control mt-4" onsubmit="return tester_import(event, this);">
+<form class="form-control" onsubmit="return tester_import(event, this);">
   <div class="row">
     <div class="col-6">
       <input name="file" type="file"
@@ -22,11 +23,6 @@
 
 @section('js_end')
   <script type="text/javascript">
-    $(document).ready(function() {
-      // toggle_header();
-    });
-
-
     function tester_import(evt, frm) {
       evt.preventDefault();
       var form = $(frm);

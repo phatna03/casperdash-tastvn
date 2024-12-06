@@ -93,7 +93,7 @@ class IngredientMissingMail extends Notification implements ShouldQueue
 
   protected function getHtmlPhoto($row)
   {
-    return '<div style="max-width: 300px; position: relative; text-align: center; margin: 0 auto; border: 1px solid #efefef; border-radius: 3px;"><img src="' . $row->get_photo() . '" style="width: 100%;" /></div>';
+    return '<div style="max-width: 300px; position: relative; text-align: center; margin: 0 auto; border: 1px solid #efefef; border-radius: 3px;"><img src="' . $row->photo_url . '" style="width: 100%;" /></div>';
   }
 
   protected function getUrlRedirect($row)

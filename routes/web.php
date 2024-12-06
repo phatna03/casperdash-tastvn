@@ -216,9 +216,6 @@ Route::post('/admin/dev/photo/check', [DevController::class, 'photo_check']);
 Route::post('/admin/dev/photo/check/hour/get', [DevController::class, 'photo_check_hour_get']);
 Route::post('/admin/dev/photo/check/hour/sync', [DevController::class, 'photo_check_hour_sync']);
 
-Route::get('/admin/dev/photo/upload/random', [DevController::class, 'photo_upload_random']);
-Route::post('/admin/dev/photo/upload/random/sensor', [DevController::class, 'photo_upload_random_sensor']);
-
 //guide
 Route::get('/guide/printer', [GuideController::class, 'printer']);
 Route::get('/guide/speaker', [GuideController::class, 'speaker']);

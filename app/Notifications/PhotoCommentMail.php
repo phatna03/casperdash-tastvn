@@ -10,7 +10,7 @@ use Illuminate\Notifications\Notification;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Facades\Storage;
 
-use App\Api\SysApp;
+use App\Api\SysCore;
 use App\Models\RestaurantFoodScan;
 use App\Models\Comment;
 use App\Models\User;
@@ -47,7 +47,7 @@ class PhotoCommentMail extends Notification implements ShouldQueue
    */
   public function toMail($notifiable)
   {
-    $sys_app = new SysApp();
+    $api_core = new SysCore();
 
     $user = $notifiable;
     $row = RestaurantFoodScan::findOrFail($this->vars['restaurant_food_scan_id']);
@@ -55,14 +55,14 @@ class PhotoCommentMail extends Notification implements ShouldQueue
     $owner = User::findOrFail($this->vars['owner_id']);
     $type = $this->vars['typed']; //photo_comment_add - photo_comment_edit
 
-    $this::_DEBUG ? Storage::append($this::_DEBUG_LOG_FILE_MAIL, 'TODO_AT_' . date('d_M_Y_H_i_s')) : $sys_app->log_failed();
-    $this::_DEBUG ? Storage::append($this::_DEBUG_LOG_FILE_MAIL, 'TYPE_' . $type) : $sys_app->log_failed();
+    $this::_DEBUG ? Storage::append($this::_DEBUG_LOG_FILE_MAIL, 'TODO_AT_' . date('d_M_Y_H_i_s')) : $api_core->log_failed();
+    $this::_DEBUG ? Storage::append($this::_DEBUG_LOG_FILE_MAIL, 'TYPE_' . $type) : $api_core->log_failed();
 
 //    if (!(int)$user->get_setting('photo_comment_alert_email')) {
 //      return false;
 //    }
 
-    $this::_DEBUG ? Storage::append($this::_DEBUG_LOG_FILE_MAIL, 'SUBJECT_' . config('tastevn.email_subject_photo_comment')) : $sys_app->log_failed();
+    $this::_DEBUG ? Storage::append($this::_DEBUG_LOG_FILE_MAIL, 'SUBJECT_' . config('tastevn.email_subject_photo_comment')) : $api_core->log_failed();
 
     $subject = config('tastevn.email_subject_photo_comment') . ': ' . $row->get_restaurant()->name;
     $greeting = 'Hello ' . $user->name . '!';
@@ -72,7 +72,7 @@ class PhotoCommentMail extends Notification implements ShouldQueue
       $text1 = 'The system indicates that [' . $owner->name . '] has updated their note';
     }
 
-    $this::_DEBUG ? Storage::append($this::_DEBUG_LOG_FILE_MAIL, 'TEXT1_' . $text1) : $sys_app->log_failed();
+    $this::_DEBUG ? Storage::append($this::_DEBUG_LOG_FILE_MAIL, 'TEXT1_' . $text1) : $api_core->log_failed();
 
     return (new MailMessage)
       ->subject($subject)
@@ -121,7 +121,7 @@ class PhotoCommentMail extends Notification implements ShouldQueue
 
   protected function getHtmlPhoto($row)
   {
-    return '<div style="max-width: 300px; position: relative; text-align: center; margin: 0 auto; border: 1px solid #efefef; border-radius: 3px;"><img src="' . $row->get_photo() . '" style="width: 100%;" /></div>';
+    return '<div style="max-width: 300px; position: relative; text-align: center; margin: 0 auto; border: 1px solid #efefef; border-radius: 3px;"><img src="' . $row->photo_url . '" style="width: 100%;" /></div>';
   }
 
   protected function getUrlRedirect($row)

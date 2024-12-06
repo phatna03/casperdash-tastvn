@@ -74,6 +74,16 @@ class Kernel extends ConsoleKernel
       ->everySecond()
       ->runInBackground();
 
+    $schedule->command('web:photo-get', [1, 11])
+      ->withoutOverlapping()
+      ->everySecond()
+      ->runInBackground();
+
+    $schedule->command('web:photo-get', [1, 12])
+      ->withoutOverlapping()
+      ->everySecond()
+      ->runInBackground();
+
 //    for ($i=1; $i<=9; $i++) {
 //      $schedule->command('web:photo-get', [1, $i])
 //        ->withoutOverlapping()
@@ -83,45 +93,45 @@ class Kernel extends ConsoleKernel
 
     //every 5s
 //    web:photo-notify
-//    $schedule->command('web:photo-notify')
-//      ->withoutOverlapping()
-//      ->everyFiveSeconds()
-//      ->runInBackground();
+    $schedule->command('web:photo-notify')
+      ->withoutOverlapping()
+      ->everyFiveSeconds()
+      ->runInBackground();
 
-    //every 1h
+    //every 30m
 //    web:photo-check
-//    $schedule->command('web:photo-check')
-//      ->hourly()
-//      ->withoutOverlapping()
-//      ->runInBackground();
+    $schedule->command('web:photo-check')
+      ->everyThirtyMinutes()
+      ->withoutOverlapping()
+      ->runInBackground();
 
-    //every 1h
+    //every 10m
 //    kas:bill-check
-//    $schedule->command('kas:bill-check')
-//      ->hourly()
-//      ->withoutOverlapping()
-//      ->runInBackground();
+    $schedule->command('kas:bill-check')
+      ->everyTenMinutes()
+      ->withoutOverlapping()
+      ->runInBackground();
 
-    //daily at 1am
+    //every 15m
 //    web:photo-sync
-//    $schedule->command('web:photo-sync')
-//      ->dailyAt('01:00')
-//      ->withoutOverlapping()
-//      ->runInBackground();
+    $schedule->command('web:photo-sync')
+      ->everyFifteenMinutes()
+      ->withoutOverlapping()
+      ->runInBackground();
 
     //daily at 5am
 //    web:photo-clear
-//    $schedule->command('web:photo-clear')
-//      ->dailyAt('05:00')
-//      ->withoutOverlapping()
-//      ->runInBackground();
+    $schedule->command('web:photo-clear')
+      ->dailyAt('05:00')
+      ->withoutOverlapping()
+      ->runInBackground();
 
     //daily at 6am
 //    zalo:token-access
-//    $schedule->command('zalo:token-access')
-//      ->dailyAt('06:00')
-//      ->withoutOverlapping()
-//      ->runInBackground();
+    $schedule->command('zalo:token-access')
+      ->dailyAt('06:00')
+      ->withoutOverlapping()
+      ->runInBackground();
   }
 
   /**
